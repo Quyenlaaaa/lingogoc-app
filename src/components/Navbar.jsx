@@ -14,7 +14,8 @@ import {
   Moon, 
   Sun,
   Brain,
-  CheckCircle
+  Swords,
+  Headphones
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -33,6 +34,9 @@ export default function Navbar({
     { id: 'ipa', label: 'Xóa Mù IPA', icon: Layers, badge: 'Chặng 1' },
     { id: 'vocab', label: '3000 Từ Vựng', icon: BookOpen, badge: 'Chặng 2' },
     { id: 'srs', label: 'Ôn Tập SRS', icon: Brain, badge: dueSrsCount > 0 ? `${dueSrsCount} từ` : 'SM-2', badgeColor: dueSrsCount > 0 ? '#ef4444' : '#10b981' },
+    { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
+    { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
+    { id: 'audiopod', label: 'Nghe Thụ Động', icon: Headphones, badge: 'Mới', badgeColor: '#8b5cf6' },
     { id: 'reflex', label: 'Mẫu Câu 3s', icon: Repeat, badge: 'Chặng 3' },
     { id: 'speaking', label: 'Luyện Nói AI', icon: Mic, badge: 'Chặng 4' },
     { id: 'progress', label: 'Tiến Độ', icon: UserCheck, badge: null }

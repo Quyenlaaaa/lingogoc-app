@@ -9,6 +9,10 @@ import AiSpeakingView from './components/AiSpeakingView';
 import ProgressView from './components/ProgressView';
 import DiagnosticTestView from './components/DiagnosticTestView';
 import SmartReviewView from './components/SmartReviewView';
+import BattleView from './components/BattleView';
+import LeaderboardView from './components/LeaderboardView';
+import AudioPodView from './components/AudioPodView';
+import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
 import { vocabData } from './data/vocabData';
@@ -93,6 +97,9 @@ export default function App() {
 
   return (
     <div className={`app-root ${theme}-theme`}>
+      {/* PWA Install Notification Prompt */}
+      <PwaInstallPrompt />
+
       {/* Top Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -145,6 +152,27 @@ export default function App() {
           {activeTab === 'srs' && (
             <SmartReviewView
               onBackToVocab={() => setActiveTab('vocab')}
+            />
+          )}
+
+          {activeTab === 'battle' && (
+            <BattleView
+              userData={userData}
+              onUpdateUserData={handleUpdateUserData}
+              onGoToLeaderboard={() => setActiveTab('leaderboard')}
+            />
+          )}
+
+          {activeTab === 'leaderboard' && (
+            <LeaderboardView
+              userData={userData}
+              onGoToBattle={() => setActiveTab('battle')}
+            />
+          )}
+
+          {activeTab === 'audiopod' && (
+            <AudioPodView
+              voiceSpeed={voiceSpeed}
             />
           )}
 
