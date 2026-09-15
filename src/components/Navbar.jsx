@@ -1,4 +1,4 @@
-// Navbar.jsx - Header navigation with stats, speed control, and navigation tabs
+// Navbar.jsx - Header navigation with stats, speed control, VIP badge, and navigation tabs
 import React from 'react';
 import { 
   Flame, 
@@ -15,7 +15,10 @@ import {
   Sun,
   Brain,
   Swords,
-  Headphones
+  Headphones,
+  Award,
+  Crown,
+  Settings
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -26,7 +29,9 @@ export default function Navbar({
   voiceSpeed,
   theme,
   onToggleTheme,
-  dueSrsCount = 0
+  dueSrsCount = 0,
+  onOpenVipModal,
+  onOpenSettingsModal
 }) {
   const tabs = [
     { id: 'roadmap', label: 'Lộ Trình', icon: Compass, badge: null },
@@ -37,6 +42,7 @@ export default function Navbar({
     { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
     { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
     { id: 'audiopod', label: 'Nghe Thụ Động', icon: Headphones, badge: 'Mới', badgeColor: '#8b5cf6' },
+    { id: 'certificate', label: 'Chứng Chỉ', icon: Award, badge: 'A2', badgeColor: '#10b981' },
     { id: 'reflex', label: 'Mẫu Câu 3s', icon: Repeat, badge: 'Chặng 3' },
     { id: 'speaking', label: 'Luyện Nói AI', icon: Mic, badge: 'Chặng 4' },
     { id: 'progress', label: 'Tiến Độ', icon: UserCheck, badge: null }
@@ -68,6 +74,50 @@ export default function Navbar({
 
         {/* Stats & Gamification Bar */}
         <div className="gamification-bar">
+          {/* VIP Badge or Upgrade Button */}
+          {userData?.isVip ? (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(234, 179, 8, 0.25))',
+                border: '1px solid #f59e0b',
+                color: '#f59e0b',
+                fontWeight: 800,
+                fontSize: '0.8rem'
+              }}
+              title="Tài khoản VIP Pro trọn đời"
+            >
+              <Crown size={15} />
+              <span>VIP PRO</span>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenVipModal}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                border: 'none',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
+              }}
+              title="Nâng cấp lên VIP Pro mở khóa 3000 từ và AI không giới hạn"
+            >
+              <Crown size={15} />
+              <span>Nâng VIP</span>
+            </button>
+          )}
+
           <div className="stat-pill streak-pill" title="Chuỗi ngày học liên tục để tạo thói quen">
             <Flame className="pill-icon flame-icon" size={18} />
             <span className="stat-val">{userData?.streak || 1}</span>
@@ -104,6 +154,18 @@ export default function Navbar({
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
+
+          {/* Settings Button */}
+          {onOpenSettingsModal && (
+            <button
+              onClick={onOpenSettingsModal}
+              className="theme-toggle-btn"
+              title="Cài đặt tài khoản & sao lưu dữ liệu"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <Settings size={18} />
+            </button>
+          )}
         </div>
       </div>
 

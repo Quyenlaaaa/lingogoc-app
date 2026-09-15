@@ -12,6 +12,9 @@ import SmartReviewView from './components/SmartReviewView';
 import BattleView from './components/BattleView';
 import LeaderboardView from './components/LeaderboardView';
 import AudioPodView from './components/AudioPodView';
+import CertificateView from './components/CertificateView';
+import VipUpgradeModal from './components/VipUpgradeModal';
+import SettingsModal from './components/SettingsModal';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
@@ -23,6 +26,10 @@ export default function App() {
   const [voiceSpeed, setVoiceSpeed] = useState(0.85);
   const [theme, setTheme] = useState('dark');
   const [dueSrsCount, setDueSrsCount] = useState(0);
+
+  // Modals
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // Load initial settings and SRS due count
   useEffect(() => {
@@ -110,6 +117,8 @@ export default function App() {
         theme={theme}
         onToggleTheme={handleToggleTheme}
         dueSrsCount={dueSrsCount}
+        onOpenVipModal={() => setIsVipModalOpen(true)}
+        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
       />
 
       {/* Main View Screen Container */}
@@ -176,6 +185,12 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'certificate' && (
+            <CertificateView
+              userData={userData}
+            />
+          )}
+
           {activeTab === 'reflex' && (
             <ReflexView 
               userData={userData} 
@@ -213,6 +228,23 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* VIP Upgrade Modal with VietQR */}
+      <VipUpgradeModal
+        isOpen={isVipModalOpen}
+        onClose={() => setIsVipModalOpen(false)}
+        userData={userData}
+        onUpdateUserData={handleUpdateUserData}
+      />
+
+      {/* User Settings & Data Backup Modal */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        userData={userData}
+        onUpdateUserData={handleUpdateUserData}
+        onOpenVipModal={() => setIsVipModalOpen(true)}
+      />
     </div>
   );
 }
