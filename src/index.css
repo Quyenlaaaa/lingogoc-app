@@ -2804,3 +2804,484 @@ a {
 .footer-quote {
   font-style: italic;
 }
+
+/* ==========================================================================
+   14. COMPREHENSIVE RESPONSIVE BREAKPOINTS & MOBILE OPTIMIZATIONS
+   ========================================================================== */
+
+/* Ensure no unintentional horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* --- Breakpoint: Laptops & Tablets (Max 1024px) --- */
+@media (max-width: 1024px) {
+  .stages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reflex-workspace-layout {
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+  }
+
+  .ipa-workspace-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .vocab-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+/* --- Breakpoint: Tablets & Mobile Landscape (Max 768px) --- */
+@media (max-width: 768px) {
+  .app-main-content {
+    padding: 16px 12px 36px;
+  }
+
+  /* Navbar adjustments */
+  .navbar-container {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .brand-logo {
+    gap: 8px;
+  }
+
+  .brand-icon {
+    font-size: 24px;
+  }
+
+  .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .brand-subtitle {
+    display: none; /* Hide subtitle on tablets/mobiles to save space */
+  }
+
+  .gamification-bar {
+    gap: 6px;
+  }
+
+  .stat-pill {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+  }
+
+  .stat-lbl {
+    display: none; /* Hide 'ngày', 'XP' labels, just show emoji/icon + number */
+  }
+
+  .speed-toggle-btn {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+  }
+
+  .theme-toggle-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0 12px 6px;
+  }
+
+  .nav-tab-btn {
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+
+  .tab-badge {
+    display: none; /* Hide tab badge on mobile for cleaner look */
+  }
+
+  /* Module Header Card */
+  .module-header-card {
+    padding: 18px 16px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+  }
+
+  .module-title {
+    font-size: 1.35rem;
+  }
+
+  .module-desc {
+    font-size: 0.88rem;
+  }
+
+  /* Roadmap Hero */
+  .roadmap-hero-card {
+    padding: 24px 18px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-size: 1.55rem;
+  }
+
+  .hero-desc {
+    font-size: 0.92rem;
+    margin-bottom: 18px;
+  }
+
+  .hero-features-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hero-feat-item {
+    width: 100%;
+    font-size: 0.82rem;
+    padding: 7px 12px;
+  }
+
+  /* Stages Grid: Single column on mobile */
+  .stages-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* IPA View */
+  .ipa-workspace-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ipa-filters-bar {
+    gap: 6px;
+  }
+
+  .filter-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .ipa-sound-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+
+  .sound-cell {
+    padding: 10px 6px;
+  }
+
+  .sound-symbol {
+    font-size: 1.1rem;
+  }
+
+  .ipa-detail-card {
+    padding: 18px 16px;
+  }
+
+  .example-row-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .ex-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Vocab View */
+  .vocab-header-flex {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .study-mode-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mode-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 8px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+
+  .search-filter-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .flashcard-arena {
+    max-width: 100%;
+  }
+
+  .flashcard-scene {
+    height: clamp(340px, 55vh, 420px);
+  }
+
+  .flashcard-face {
+    padding: 20px 16px;
+  }
+
+  .card-word-text {
+    font-size: clamp(2rem, 8vw, 2.7rem);
+  }
+
+  .card-ipa-text {
+    font-size: 1.1rem;
+  }
+
+  .card-bottom-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .card-audio-btn, .card-mic-btn {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .card-meaning-block .meaning-highlight {
+    font-size: 1.25rem;
+  }
+
+  .card-back-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-btn-bookmark, .card-btn-mastered {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 12px;
+  }
+
+  .flashcard-nav-controls {
+    margin-top: 16px;
+    gap: 8px;
+  }
+
+  .fc-nav-btn {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .fc-flip-btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Vocab List Mode */
+  .vocab-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Quiz Arena */
+  .quiz-card {
+    padding: 20px 16px;
+  }
+
+  .target-word-heading {
+    font-size: 2.2rem;
+  }
+
+  .quiz-options-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .quiz-opt-btn {
+    padding: 12px 14px;
+    font-size: 0.88rem;
+  }
+
+  /* Reflex View */
+  .reflex-workspace-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .patterns-scroll-container {
+    max-height: 220px;
+  }
+
+  .reflex-practice-card {
+    padding: 20px 16px;
+  }
+
+  .practice-formula {
+    font-size: 1.3rem;
+  }
+
+  .sentence-display-box {
+    padding: 16px;
+  }
+
+  .sentence-en-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .sentence-en-text {
+    font-size: 1.15rem;
+  }
+
+  .sentence-audio-btn {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+  }
+
+  .big-record-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 0.92rem;
+  }
+
+  /* AI Speaking View */
+  .speaking-header-flex {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .aux-controls-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .aux-pill-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .scenarios-picker-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .chat-messages-container {
+    height: 380px;
+    padding: 16px 12px;
+  }
+
+  .chat-bubble-wrapper {
+    max-width: 95%;
+  }
+
+  .hints-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hint-card-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .hint-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .speaking-input-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mic-primary-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
+
+  .text-fallback-wrapper {
+    width: 100%;
+  }
+
+  /* Progress View */
+  .progress-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .kpi-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .kpi-icon-box {
+    width: 42px;
+    height: 42px;
+  }
+
+  .kpi-value {
+    font-size: 1.25rem;
+  }
+
+  .badges-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-danger-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .reset-progress-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Footer */
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+}
+
+/* --- Breakpoint: Small Mobile Phones (Max 480px) --- */
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: 1.05rem;
+  }
+
+  .gamification-bar .level-pill {
+    display: none; /* Hide level pill on tiny screens to preserve space */
+  }
+
+  .stat-pill {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+  }
+
+  .nav-tab-btn .tab-title {
+    font-size: 0.76rem;
+  }
+
+  .nav-tab-btn {
+    padding: 6px 8px;
+  }
+
+  .hero-title {
+    font-size: 1.35rem;
+  }
+
+  .card-word-text {
+    font-size: 2rem;
+  }
+
+  .progress-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
