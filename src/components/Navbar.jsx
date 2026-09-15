@@ -18,7 +18,8 @@ import {
   Headphones,
   Award,
   Crown,
-  Settings
+  Settings,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -41,7 +42,8 @@ export default function Navbar({
     { id: 'srs', label: 'Ôn Tập SRS', icon: Brain, badge: dueSrsCount > 0 ? `${dueSrsCount} từ` : 'SM-2', badgeColor: dueSrsCount > 0 ? '#ef4444' : '#10b981' },
     { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
     { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
-    { id: 'audiopod', label: 'Nghe Thụ Động', icon: Headphones, badge: 'Mới', badgeColor: '#8b5cf6' },
+    { id: 'dictation', label: 'Nghe Chép', icon: Headphones, badge: 'Nối Âm', badgeColor: '#818cf8' },
+    { id: 'traps', label: 'Bẫy Lỗi Sai', icon: AlertTriangle, badge: 'Cặp Từ', badgeColor: '#ef4444' },
     { id: 'certificate', label: 'Chứng Chỉ', icon: Award, badge: 'A2', badgeColor: '#10b981' },
     { id: 'reflex', label: 'Mẫu Câu 3s', icon: Repeat, badge: 'Chặng 3' },
     { id: 'speaking', label: 'Luyện Nói AI', icon: Mic, badge: 'Chặng 4' },

@@ -13,6 +13,8 @@ import BattleView from './components/BattleView';
 import LeaderboardView from './components/LeaderboardView';
 import AudioPodView from './components/AudioPodView';
 import CertificateView from './components/CertificateView';
+import DictationView from './components/DictationView';
+import TrapsView from './components/TrapsView';
 import VipUpgradeModal from './components/VipUpgradeModal';
 import SettingsModal from './components/SettingsModal';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
@@ -188,6 +190,20 @@ export default function App() {
           {activeTab === 'certificate' && (
             <CertificateView
               userData={userData}
+            />
+          )}
+
+          {activeTab === 'dictation' && (
+            <DictationView 
+              userData={userData} 
+              onUpdateUserData={handleUpdateUserData} 
+            />
+          )}
+
+          {activeTab === 'traps' && (
+            <TrapsView 
+              userData={userData} 
+              onUpdateUserData={handleUpdateUserData} 
             />
           )}
 
