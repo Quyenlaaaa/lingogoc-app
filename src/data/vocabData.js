@@ -33025,4 +33025,5 @@ export const vocabList = [
   }
 ];
 
+export const vocabData = vocabList;
 export default vocabList;

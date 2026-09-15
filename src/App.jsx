@@ -7,20 +7,27 @@ import VocabView from './components/VocabView';
 import ReflexView from './components/ReflexView';
 import AiSpeakingView from './components/AiSpeakingView';
 import ProgressView from './components/ProgressView';
+import DiagnosticTestView from './components/DiagnosticTestView';
+import SmartReviewView from './components/SmartReviewView';
 import { loadUserData, saveUserData } from './utils/storage';
+import { getSrsStats } from './utils/srsEngine';
+import { vocabData } from './data/vocabData';
 
 export default function App() {
   const [userData, setUserData] = useState(() => loadUserData());
   const [activeTab, setActiveTab] = useState('roadmap');
   const [voiceSpeed, setVoiceSpeed] = useState(0.85);
   const [theme, setTheme] = useState('dark');
+  const [dueSrsCount, setDueSrsCount] = useState(0);
 
-  // Load initial settings
+  // Load initial settings and SRS due count
   useEffect(() => {
     if (userData?.settings) {
       if (userData.settings.theme) setTheme(userData.settings.theme);
       if (userData.settings.voiceSpeed) setVoiceSpeed(userData.settings.voiceSpeed);
     }
+    const stats = getSrsStats(vocabData);
+    setDueSrsCount(stats.dueCount || 15);
   }, []);
 
   // Update theme class on body
@@ -32,6 +39,8 @@ export default function App() {
   const handleUpdateUserData = (newData) => {
     setUserData(newData);
     saveUserData(newData);
+    const stats = getSrsStats(vocabData);
+    setDueSrsCount(stats.dueCount || 0);
   };
 
   // Toggle Voice Speed between 0.75x (slow for beginners) and 1.0x (normal)
@@ -62,6 +71,26 @@ export default function App() {
     handleUpdateUserData(updated);
   };
 
+  // Handle stage selection from Diagnostic Test
+  const handleSelectStage = (stageNum) => {
+    switch (stageNum) {
+      case 1:
+        setActiveTab('ipa');
+        break;
+      case 2:
+        setActiveTab('vocab');
+        break;
+      case 3:
+        setActiveTab('reflex');
+        break;
+      case 4:
+        setActiveTab('speaking');
+        break;
+      default:
+        setActiveTab('roadmap');
+    }
+  };
+
   return (
     <div className={`app-root ${theme}-theme`}>
       {/* Top Navigation Bar */}
@@ -73,6 +102,7 @@ export default function App() {
         voiceSpeed={voiceSpeed}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        dueSrsCount={dueSrsCount}
       />
 
       {/* Main View Screen Container */}
@@ -82,6 +112,16 @@ export default function App() {
             <RoadmapView 
               setActiveTab={setActiveTab} 
               userData={userData} 
+            />
+          )}
+
+          {activeTab === 'diagnostic' && (
+            <DiagnosticTestView
+              onSelectStage={handleSelectStage}
+              onCompleteTest={(res) => {
+                const stats = getSrsStats(vocabData);
+                setDueSrsCount(stats.dueCount);
+              }}
             />
           )}
 
@@ -97,7 +137,14 @@ export default function App() {
             <VocabView 
               userData={userData} 
               onUpdateUserData={handleUpdateUserData} 
-              voiceSpeed={voiceSpeed} 
+              voiceSpeed={voiceSpeed}
+              onOpenSrs={() => setActiveTab('srs')}
+            />
+          )}
+
+          {activeTab === 'srs' && (
+            <SmartReviewView
+              onBackToVocab={() => setActiveTab('vocab')}
             />
           )}
 

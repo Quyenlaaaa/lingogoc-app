@@ -17,14 +17,15 @@ import {
   Layers, 
   HelpCircle, 
   Play, 
-  RefreshCw 
+  RefreshCw,
+  Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { vocabList, topics, levels } from '../data/vocabData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 
-export default function VocabView({ userData, onUpdateUserData, voiceSpeed }) {
+export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOpenSrs }) {
   // Navigation & Filter States
   const [studyMode, setStudyMode] = useState('flashcard'); // 'flashcard', 'list', 'quiz', 'mic'
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,6 +275,22 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed }) {
               <HelpCircle size={16} />
               <span>Trắc Nghiệm Phản Xạ</span>
             </button>
+            {onOpenSrs && (
+              <button 
+                className="mode-btn srs-highlight-btn"
+                onClick={onOpenSrs}
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2))', 
+                  borderColor: '#10b981', 
+                  color: '#10b981', 
+                  fontWeight: 700 
+                }}
+                title="Ôn tập lặp lại ngắt quãng theo thuật toán SM-2"
+              >
+                <Brain size={16} />
+                <span>Ôn Tập SRS</span>
+              </button>
+            )}
           </div>
         </div>
 

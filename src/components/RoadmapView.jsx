@@ -1,5 +1,5 @@
 // RoadmapView.jsx - Visual 4-Stage Learning Path for Beginners
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Layers, 
   BookOpen, 
@@ -10,10 +10,23 @@ import {
   Sparkles, 
   ShieldCheck, 
   Zap, 
-  Volume2 
+  Volume2,
+  Award,
+  Brain
 } from 'lucide-react';
 
 export default function RoadmapView({ setActiveTab, userData }) {
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('lingogoc_diagnostic_result');
+      if (saved) {
+        setDiagnosticResult(JSON.parse(saved));
+      }
+    } catch (e) {}
+  }, []);
+
   const masteredCount = userData?.masteredWords?.length || 0;
   const ipaCount = userData?.completedIpa?.length || 0;
   const reflexCount = userData?.completedReflex?.length || 0;
@@ -96,6 +109,65 @@ export default function RoadmapView({ setActiveTab, userData }) {
 
   return (
     <div className="roadmap-view animate-fade-in">
+      {/* Diagnostic Placement Test Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(56, 189, 248, 0.15))',
+        border: '1.5px solid rgba(99, 102, 241, 0.3)',
+        borderRadius: '20px',
+        padding: '24px 28px',
+        marginBottom: '28px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '20px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 320px' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: 'rgba(99, 102, 241, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#818cf8',
+            flexShrink: 0
+          }}>
+            <Sparkles size={28} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#38bdf8', letterSpacing: '0.5px' }}>
+                Tính năng mới • Giai đoạn 2
+              </span>
+              {diagnosticResult && (
+                <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                  Đã làm test: {diagnosticResult.level}
+                </span>
+              )}
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+              Bài Kiểm Tra Năng Lực Đầu Vào (10 Phút)
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+              {diagnosticResult 
+                ? `Bạn đang ở cấp độ ${diagnosticResult.title}. Bấm để xem lại chi tiết hoặc làm lại bài test!`
+                : 'Chưa biết mình bị hổng kiến thức ở đâu? Hãy làm bài test nhanh để AI cá nhân hóa lộ trình học cho bạn!'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setActiveTab('diagnostic')}
+          className="btn btn-primary"
+          style={{ padding: '14px 26px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}
+        >
+          <span>{diagnosticResult ? 'Xem Báo Cáo / Làm Lại' : 'Bắt Đầu Test Đầu Vào'}</span>
+          <ArrowRight size={18} />
+        </button>
+      </div>
+
       {/* Hero Welcome Banner */}
       <div className="roadmap-hero-card">
         <div className="hero-badge">

@@ -12,7 +12,9 @@ import {
   Repeat, 
   UserCheck, 
   Moon, 
-  Sun 
+  Sun,
+  Brain,
+  CheckCircle
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -22,15 +24,18 @@ export default function Navbar({
   onToggleSpeed, 
   voiceSpeed,
   theme,
-  onToggleTheme 
+  onToggleTheme,
+  dueSrsCount = 0
 }) {
   const tabs = [
-    { id: 'roadmap', label: 'Lộ Trình', icon: Compass, badge: '4 Chặng' },
+    { id: 'roadmap', label: 'Lộ Trình', icon: Compass, badge: null },
+    { id: 'diagnostic', label: 'Test Đầu Vào', icon: Sparkles, badge: 'Khuyên Dùng', badgeColor: '#38bdf8' },
     { id: 'ipa', label: 'Xóa Mù IPA', icon: Layers, badge: 'Chặng 1' },
     { id: 'vocab', label: '3000 Từ Vựng', icon: BookOpen, badge: 'Chặng 2' },
-    { id: 'reflex', label: 'Mẫu Câu Phản Xạ', icon: Repeat, badge: 'Chặng 3' },
+    { id: 'srs', label: 'Ôn Tập SRS', icon: Brain, badge: dueSrsCount > 0 ? `${dueSrsCount} từ` : 'SM-2', badgeColor: dueSrsCount > 0 ? '#ef4444' : '#10b981' },
+    { id: 'reflex', label: 'Mẫu Câu 3s', icon: Repeat, badge: 'Chặng 3' },
     { id: 'speaking', label: 'Luyện Nói AI', icon: Mic, badge: 'Chặng 4' },
-    { id: 'progress', label: 'Tiến Độ & Thành Tựu', icon: UserCheck, badge: null }
+    { id: 'progress', label: 'Tiến Độ', icon: UserCheck, badge: null }
   ];
 
   // Calculate Level name based on XP
@@ -113,7 +118,14 @@ export default function Navbar({
               >
                 <IconComponent size={18} className="tab-icon" />
                 <span className="tab-title">{tab.label}</span>
-                {tab.badge && <span className="tab-badge">{tab.badge}</span>}
+                {tab.badge && (
+                  <span 
+                    className="tab-badge" 
+                    style={tab.badgeColor ? { background: tab.badgeColor, color: '#fff' } : {}}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}

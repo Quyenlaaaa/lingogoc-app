@@ -13,13 +13,19 @@ import {
   CheckCircle2, 
   Award, 
   MessageSquare, 
-  Bot 
+  Bot,
+  Key,
+  Settings,
+  X,
+  Zap,
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { aiScenarios } from '../data/scenariosData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import AudioWave from './AudioWave';
+import { getGeminiApiKey, saveGeminiApiKey, sendChatMessageToGemini } from '../utils/geminiService';
 
 export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed }) {
   const [selectedScenario, setSelectedScenario] = useState(aiScenarios[0]);
@@ -28,11 +34,19 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const [userInputText, setUserInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
+  const [isAiThinking, setIsAiThinking] = useState(false);
   const [recognitionObj, setRecognitionObj] = useState(null);
   const [showVietnameseSubs, setShowVietnameseSubs] = useState(true);
   const [showSmartHints, setShowSmartHints] = useState(true);
   const [latestEval, setLatestEval] = useState(null);
+  const [latestCorrection, setLatestCorrection] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
+
+  // Gemini API Key State
+  const [apiKey, setApiKey] = useState(getGeminiApiKey());
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [inputKey, setInputKey] = useState(apiKey);
+  const [dynamicGeminiHints, setDynamicGeminiHints] = useState(null);
 
   const chatEndRef = useRef(null);
 
@@ -42,6 +56,8 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setCurrentStep(0);
     setUserInputText('');
     setLatestEval(null);
+    setLatestCorrection(null);
+    setDynamicGeminiHints(null);
     setIsFinished(false);
 
     const initialMessage = {
@@ -65,7 +81,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages, isAiSpeaking]);
+  }, [chatMessages, isAiSpeaking, isAiThinking]);
 
   const speakMessage = (text) => {
     setIsAiSpeaking(true);
@@ -76,8 +92,14 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     });
   };
 
+  const handleSaveApiKey = () => {
+    saveGeminiApiKey(inputKey);
+    setApiKey(inputKey.trim());
+    setShowKeyModal(false);
+  };
+
   // Process User Turn (either from Mic or typed)
-  const handleUserSend = (spokenText, targetHint = null) => {
+  const handleUserSend = async (spokenText, targetHint = null) => {
     const textToSend = spokenText || userInputText;
     if (!textToSend.trim()) return;
 
@@ -87,7 +109,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       evaluation = evaluatePronunciation(targetHint.en, textToSend);
       setLatestEval(evaluation);
     } else {
-      // General feedback
       evaluation = {
         score: 85,
         status: 'good',
@@ -107,12 +128,49 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setChatMessages(updatedMessages);
     setUserInputText('');
 
-    // Determine AI Next Reply
+    // If Gemini API Key is provided, use Gemini 1.5 Flash LLM
+    if (apiKey) {
+      setIsAiThinking(true);
+      try {
+        const geminiRes = await sendChatMessageToGemini(textToSend, updatedMessages, selectedScenario.title);
+        setIsAiThinking(false);
+
+        if (geminiRes.correction) {
+          setLatestCorrection(geminiRes.correction);
+        } else {
+          setLatestCorrection(null);
+        }
+
+        if (geminiRes.hints) {
+          setDynamicGeminiHints(geminiRes.hints);
+        }
+
+        const aiReplyMsg = {
+          sender: 'ai',
+          text: geminiRes.replyEn,
+          textVi: geminiRes.replyVi,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setChatMessages([...updatedMessages, aiReplyMsg]);
+        speakMessage(geminiRes.replyEn);
+
+        // Add XP
+        onUpdateUserData({
+          ...userData,
+          xp: (userData?.xp || 0) + 15
+        });
+        return;
+      } catch (err) {
+        console.warn('Gemini API call failed, falling back to local simulation:', err);
+        setIsAiThinking(false);
+        // Fallback to local rule-based below
+      }
+    }
+
+    // Local offline flow fallback
     setTimeout(() => {
       const flowList = selectedScenario.conversationFlow;
-      let nextStep = currentStep;
-
-      // Find matching reply or move to next step
       let matchedFlow = flowList[currentStep];
       if (!matchedFlow && flowList.length > 0) {
         matchedFlow = flowList[flowList.length - 1];
@@ -133,7 +191,9 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
         } else {
           // Completed conversation scenario!
           setIsFinished(true);
-          confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
+          try {
+            confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
+          } catch (e) {}
           
           const completedSet = new Set(userData?.completedScenarios || []);
           completedSet.add(selectedScenario.id);
@@ -184,11 +244,12 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setIsRecording(false);
   };
 
-  // Get current active hints
-  const currentHints = 
+  // Get current active hints (dynamic from Gemini or static from scenario)
+  const currentHints = dynamicGeminiHints || (
     currentStep === 0 
       ? selectedScenario.starterHints 
-      : selectedScenario.conversationFlow[currentStep - 1]?.hints || selectedScenario.starterHints;
+      : selectedScenario.conversationFlow[currentStep - 1]?.hints || selectedScenario.starterHints
+  );
 
   return (
     <div className="ai-speaking-view animate-fade-in">
@@ -204,8 +265,20 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
             </p>
           </div>
 
-          {/* Subtitles & Hints Toggles */}
-          <div className="aux-controls-group">
+          {/* Subtitles, Hints & Gemini Key Toggles */}
+          <div className="aux-controls-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <button 
+              className={`aux-pill-btn ${apiKey ? 'active' : ''}`}
+              onClick={() => setShowKeyModal(true)}
+              title="Cài đặt kết nối Google Gemini AI"
+              style={{ background: apiKey ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)', borderColor: apiKey ? '#10b981' : 'var(--border-color)' }}
+            >
+              <Zap size={16} color={apiKey ? '#10b981' : 'var(--text-secondary)'} />
+              <span style={{ color: apiKey ? '#10b981' : 'var(--text-secondary)' }}>
+                {apiKey ? 'Gemini AI: Bật' : 'Kết nối Gemini API'}
+              </span>
+            </button>
+
             <button 
               className={`aux-pill-btn ${showVietnameseSubs ? 'active' : ''}`}
               onClick={() => setShowVietnameseSubs(!showVietnameseSubs)}
@@ -218,80 +291,110 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
             <button 
               className={`aux-pill-btn ${showSmartHints ? 'active' : ''}`}
               onClick={() => setShowSmartHints(!showSmartHints)}
-              title="Bật/tắt gợi ý mẫu câu trả lời thông minh"
+              title="Bật/tắt gợi ý câu trả lời"
             >
               <Lightbulb size={16} />
-              <span>Gợi ý câu</span>
-            </button>
-
-            <button 
-              className="aux-pill-btn reset-btn"
-              onClick={() => startScenario(selectedScenario)}
-              title="Bắt đầu lại kịch bản này"
-            >
-              <RotateCcw size={16} />
-              <span>Làm lại</span>
+              <span>{showSmartHints ? 'Hiện gợi ý' : 'Ẩn gợi ý'}</span>
             </button>
           </div>
         </div>
 
         {/* Scenarios Selector Tabs */}
-        <div className="scenarios-picker-row">
-          {aiScenarios.map((sc) => (
-            <button
-              key={sc.id}
-              className={`scenario-card-btn ${selectedScenario.id === sc.id ? 'active' : ''}`}
-              onClick={() => startScenario(sc)}
-            >
-              <span className="sc-avatar">{sc.avatar}</span>
-              <div className="sc-text-col">
-                <div className="sc-title">{sc.title}</div>
-                <div className="sc-partner">Cùng {sc.partnerName} ({sc.difficulty})</div>
-              </div>
-            </button>
-          ))}
+        <div className="scenarios-carousel">
+          {aiScenarios.map((sc) => {
+            const isSelected = selectedScenario.id === sc.id;
+            return (
+              <button
+                key={sc.id}
+                className={`scenario-pill-item ${isSelected ? 'active' : ''}`}
+                onClick={() => startScenario(sc)}
+              >
+                <span className="sc-icon">{sc.avatar}</span>
+                <div className="sc-text-wrap">
+                  <div className="sc-title">{sc.title}</div>
+                  <div className="sc-partner">Bạn đồng hành: {sc.partnerName}</div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main Chat Conversation Arena */}
+      {/* Main Chat Arena */}
       <div className="speaking-chat-arena">
-        {/* Chat Messages Container */}
+        <div className="chat-arena-header">
+          <div className="arena-partner-info">
+            <span className="partner-avatar">{selectedScenario.avatar}</span>
+            <div>
+              <div className="partner-name-row">
+                <strong>{selectedScenario.partnerName}</strong>
+                <span className="live-status-dot"></span>
+                <span className="status-text">{isAiThinking ? 'Đang suy nghĩ...' : isAiSpeaking ? 'Đang nói...' : 'Đang lắng nghe'}</span>
+              </div>
+              <div className="partner-desc">{selectedScenario.description}</div>
+            </div>
+          </div>
+
+          <button 
+            className="reset-chat-btn" 
+            onClick={() => startScenario(selectedScenario)}
+            title="Bắt đầu lại cuộc đối thoại"
+          >
+            <RotateCcw size={16} />
+            <span>Bắt đầu lại</span>
+          </button>
+        </div>
+
+        {/* Audio Wave Visualizer while AI speaks or User records */}
+        <div className="speaking-waves-container">
+          <AudioWave isActive={isAiSpeaking || isRecording || isAiThinking} />
+        </div>
+
+        {/* Messages Stream */}
         <div className="chat-messages-container">
           {chatMessages.map((msg, index) => {
             const isAi = msg.sender === 'ai';
             return (
-              <div key={index} className={`chat-bubble-wrapper ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
-                {isAi && <div className="chat-avatar-circle">{selectedScenario.avatar}</div>}
-                
-                <div className="chat-bubble-content">
-                  <div className="bubble-header-info">
-                    <span className="bubble-sender-name">{isAi ? selectedScenario.partnerName : 'Bạn'}</span>
+              <div 
+                key={index} 
+                className={`chat-bubble-wrapper ${isAi ? 'from-ai' : 'from-user'}`}
+              >
+                <div className="bubble-avatar">
+                  {isAi ? selectedScenario.avatar : '👤'}
+                </div>
+
+                <div className="bubble-content">
+                  <div className="bubble-header-row">
+                    <span className="bubble-sender">{isAi ? selectedScenario.partnerName : 'Bạn'}</span>
                     <span className="bubble-time">{msg.timestamp}</span>
                   </div>
 
-                  <div className="bubble-text-row">
-                    <span className="bubble-text-en">{msg.text}</span>
-                    {isAi && (
-                      <button 
-                        className="bubble-audio-btn" 
-                        onClick={() => speakMessage(msg.text)}
-                        title="Nghe lại câu này"
-                      >
-                        <Volume2 size={16} />
-                      </button>
-                    )}
-                  </div>
+                  <div className="bubble-text-en">{msg.text}</div>
 
-                  {/* Vietnamese Translation Subtitle */}
-                  {isAi && showVietnameseSubs && msg.textVi && (
-                    <div className="bubble-text-vi">{msg.textVi}</div>
+                  {/* Audio replay button for AI messages */}
+                  {isAi && (
+                    <button 
+                      className="replay-tts-btn" 
+                      onClick={() => speakMessage(msg.text)}
+                      title="Nghe lại câu này"
+                    >
+                      <Volume2 size={15} />
+                      <span>Nghe lại</span>
+                    </button>
                   )}
 
-                  {/* Pronunciation score badge if user msg */}
+                  {/* Vietnamese Subtitle for AI */}
+                  {isAi && showVietnameseSubs && msg.textVi && (
+                    <div className="bubble-sub-vi">
+                      🇻🇳 {msg.textVi}
+                    </div>
+                  )}
+
+                  {/* Score badge for User message */}
                   {!isAi && msg.score && (
-                    <div className="bubble-score-badge">
-                      <Award size={14} />
-                      <span>Điểm phát âm: {msg.score}%</span>
+                    <div className="user-score-pill">
+                      <CheckCircle2 size={13} color="#10b981" />
+                      <span>Độ chính xác phát âm: {msg.score}%</span>
                     </div>
                   )}
                 </div>
@@ -299,52 +402,84 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
             );
           })}
 
-          {/* Audio Wave indicator when AI speaks */}
-          {isAiSpeaking && (
-            <div className="ai-speaking-indicator">
-              <AudioWave isActive={true} color="#8b5cf6" label={`${selectedScenario.partnerName} đang nói...`} />
-            </div>
-          )}
-
-          {/* Conversation Finished Card */}
-          {isFinished && (
-            <div className="congrats-finish-card">
-              <div className="congrats-emoji">🎉🏆</div>
-              <h3 className="congrats-title">Xuất Sắc! Bạn Đã Hoàn Thành Cuộc Hội Thoại!</h3>
-              <p className="congrats-desc">
-                Bạn đã vượt qua nỗi sợ và giao tiếp trọn vẹn kịch bản 
-                <strong> "{selectedScenario.title}"</strong>. +50 XP đã được cộng vào tài khoản!
-              </p>
-              <button 
-                className="congrats-replay-btn"
-                onClick={() => startScenario(selectedScenario)}
-              >
-                <RotateCcw size={16} />
-                <span>Luyện lại một lần nữa để nói mượt hơn</span>
-              </button>
+          {isAiThinking && (
+            <div className="chat-bubble-wrapper from-ai">
+              <div className="bubble-avatar">{selectedScenario.avatar}</div>
+              <div className="bubble-content" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 18px' }}>
+                <Sparkles size={16} color="#818cf8" className="animate-spin" />
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Lily đang soạn câu trả lời phù hợp...</span>
+              </div>
             </div>
           )}
 
           <div ref={chatEndRef} />
         </div>
 
-        {/* Latest Pronunciation Feedback Panel */}
-        {latestEval && (
-          <div className={`eval-inline-banner status-${latestEval.status}`}>
-            <div className="eval-inline-header">
-              <Sparkles size={18} />
-              <span>Chấm điểm phát âm: <strong>{latestEval.score}%</strong></span>
+        {/* AI Grammar Correction Banner if provided */}
+        {latestCorrection && (
+          <div style={{
+            margin: '0 20px 16px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            background: 'rgba(99, 102, 241, 0.1)',
+            border: '1px solid rgba(99, 102, 241, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <Sparkles size={20} color="#818cf8" />
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', flex: 1 }}>
+              <strong style={{ color: '#818cf8' }}>Gợi ý từ AI: </strong> {latestCorrection}
             </div>
-            <div className="eval-inline-feedback">{latestEval.feedback}</div>
           </div>
         )}
 
-        {/* Smart Hints Bar for Beginners (Bí ý tưởng) */}
-        {showSmartHints && currentHints && currentHints.length > 0 && !isFinished && (
-          <div className="smart-hints-container">
-            <div className="hints-header-label">
-              <Lightbulb size={16} className="hint-bulb" />
-              <span>Gợi ý câu trả lời tiếp theo (Bấm để chọn và luyện đọc):</span>
+        {/* Latest Evaluation Feedback Banner */}
+        {latestEval && (
+          <div className="eval-feedback-card">
+            <div className="eval-score-gauge">
+              <span className="score-num">{latestEval.score}%</span>
+              <span className="score-label">Điểm phát âm</span>
+            </div>
+            <div className="eval-text-details">
+              <div className="eval-title">Đánh giá phát âm câu vừa nói:</div>
+              <div className="eval-msg">{latestEval.feedback}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Scenario Finished Congratulations */}
+        {isFinished && (
+          <div className="scenario-completed-banner animate-fade-in">
+            <div className="completed-icon-badge">
+              <Award size={48} color="#f59e0b" />
+            </div>
+            <h3>Xuất Sắc! Hoàn Thành Hội Thoại!</h3>
+            <p>
+              Bạn đã hoàn thành trọn vẹn kịch bản <strong>"{selectedScenario.title}"</strong>. 
+              Bạn vừa nhận thêm <strong>+50 XP</strong> vào hồ sơ học tập!
+            </p>
+            <button 
+              className="btn btn-primary next-scenario-btn"
+              onClick={() => {
+                const currentIndex = aiScenarios.findIndex(s => s.id === selectedScenario.id);
+                const nextIndex = (currentIndex + 1) % aiScenarios.length;
+                startScenario(aiScenarios[nextIndex]);
+              }}
+            >
+              Thử Thách Kịch Bản Tiếp Theo
+            </button>
+          </div>
+        )}
+
+        {/* Smart Hints Box (Gợi ý câu trả lời song ngữ) */}
+        {!isFinished && showSmartHints && currentHints && currentHints.length > 0 && (
+          <div className="smart-hints-drawer">
+            <div className="hints-header-row">
+              <div className="hints-title-wrap">
+                <Lightbulb size={18} color="#f59e0b" />
+                <span>Bí ý tưởng? Gợi ý các câu trả lời tự nhiên (Bấm mic đọc thử):</span>
+              </div>
             </div>
 
             <div className="hints-buttons-grid">
@@ -352,8 +487,8 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
                 <div key={idx} className="hint-card-item">
                   <div className="hint-texts">
                     <div className="hint-en">{hint.en}</div>
-                    <div className="hint-ipa">{hint.ipa}</div>
-                    <div className="hint-vi">{hint.vi}</div>
+                    {hint.ipa && <div className="hint-ipa">{hint.ipa}</div>}
+                    {hint.vi && <div className="hint-vi">{hint.vi}</div>}
                   </div>
 
                   <div className="hint-actions">
@@ -414,7 +549,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
               <button 
                 className="chat-send-btn" 
                 onClick={() => handleUserSend()}
-                disabled={!userInputText.trim()}
+                disabled={!userInputText.trim() || isAiThinking}
               >
                 <Send size={18} />
               </button>
@@ -422,6 +557,114 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
           </div>
         )}
       </div>
+
+      {/* Modal Cài Đặt Gemini API Key */}
+      {showKeyModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="card glass-card animate-fade-in" style={{
+            maxWidth: '520px',
+            width: '100%',
+            padding: '28px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '20px',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowKeyModal(false)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <Key size={24} color="#10b981" />
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                Kết Nối Google Gemini 1.5 Flash API
+              </h3>
+            </div>
+
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '16px' }}>
+              Nhập API Key miễn phí từ Google AI Studio để mở khóa khả năng trò chuyện tự do không giới hạn với gia sư AI Lily, sửa lỗi ngữ pháp chi tiết bằng tiếng Việt.
+            </p>
+
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              padding: '12px',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+              marginBottom: '16px',
+              fontSize: '0.85rem',
+              color: 'var(--text-muted)'
+            }}>
+              💡 <em>Lưu ý: Không bắt buộc. Nếu để trống, LingoGoc AI vẫn hoạt động 100% mượt mà với kịch bản có sẵn offline.</em>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                Google Gemini API Key:
+              </label>
+              <input
+                type="password"
+                value={inputKey}
+                onChange={(e) => setInputKey(e.target.value)}
+                placeholder="AIzaSy..."
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1.5px solid var(--border-color)',
+                  background: 'rgba(0,0,0,0.2)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.95rem',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              {apiKey && (
+                <button
+                  onClick={() => {
+                    setInputKey('');
+                    saveGeminiApiKey('');
+                    setApiKey('');
+                    setShowKeyModal(false);
+                  }}
+                  className="btn btn-outline"
+                  style={{ padding: '10px 18px', color: '#ef4444', borderColor: '#ef4444' }}
+                >
+                  Xóa Key
+                </button>
+              )}
+              <button
+                onClick={handleSaveApiKey}
+                className="btn btn-primary"
+                style={{ padding: '10px 24px', fontWeight: 700 }}
+              >
+                Lưu & Kích Hoạt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

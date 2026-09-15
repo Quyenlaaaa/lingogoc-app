@@ -111,4 +111,29 @@ class SpeechHelper {
 }
 
 export const speechHelper = new SpeechHelper();
+
+export function speakText(text, rate = 0.85) {
+  speechHelper.speak(text, { rate });
+}
+
+export function startSpeechRecognition(onResult, onError, onEnd) {
+  const rec = speechHelper.createRecognition(
+    (result) => {
+      if (result.isFinal && onResult) {
+        onResult(result.final);
+      }
+    },
+    onError,
+    onEnd
+  );
+  if (rec) {
+    try {
+      rec.start();
+    } catch (e) {
+      console.warn('Recognition already started', e);
+    }
+  }
+  return rec;
+}
+
 export default speechHelper;
