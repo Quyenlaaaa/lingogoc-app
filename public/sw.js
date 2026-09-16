@@ -1,5 +1,5 @@
 // sw.js - Service Worker for LingoGoc AI PWA Offline Mode
-const CACHE_NAME = 'lingogoc-pwa-v9';
+const CACHE_NAME = 'lingogoc-pwa-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

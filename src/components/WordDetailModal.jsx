@@ -10,26 +10,27 @@ import {
 } from 'lucide-react';
 import { fetchRealWordData, playNativeAudio } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
-import { enrichWordWithLLM } from '../utils/geminiService';
+import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
 import { speakText } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
-export default function WordDetailModal({ word, isOpen, onClose }) {
+export default function WordDetailModal({ word, initialEnrichment, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
   const [cambridgeData, setCambridgeData] = useState(null);
   const [cambridgeError, setCambridgeError] = useState('');
-  const [aiEnrichData, setAiEnrichData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [aiEnrichData, setAiEnrichData] = useState(initialEnrichment || null);
+  const [loading, setLoading] = useState(!initialEnrichment);
 
   useEffect(() => {
     if (!isOpen || !word) return;
 
     let isMounted = true;
-    setLoading(true);
+    const readyAiData = initialEnrichment || getCachedWordEnrichment(word.word);
+    setLoading(!readyAiData);
     setRealDictData(null);
     setCambridgeData(null);
     setCambridgeError('');
-    setAiEnrichData(null);
+    setAiEnrichData(readyAiData);
 
     const loadDetails = async () => {
       try {
@@ -44,17 +45,19 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
         setCambridgeData(officialData);
         if (cambridgeResult.status === 'rejected') setCambridgeError(cambridgeResult.reason?.message || 'Không thể tải Cambridge API.');
 
-        const aiData = await enrichWordWithLLM(
-          word.word,
-          word.meaning,
-          word.topic,
-          [
-            ...(officialData?.definitions || []).map((text) => ({ partOfSpeech: '', text, source: 'Cambridge' })),
-            ...(dictData?.definitions || []),
-          ],
-        );
-        if (!isMounted) return;
-        setAiEnrichData(aiData);
+        if (!readyAiData?.contextExamples?.length) {
+          const aiData = await enrichWordWithLLM(
+            word.word,
+            word.meaning,
+            word.topic,
+            [
+              ...(officialData?.definitions || []).map((text) => ({ partOfSpeech: '', text, source: 'Cambridge' })),
+              ...(dictData?.definitions || []),
+            ],
+          );
+          if (!isMounted) return;
+          setAiEnrichData(aiData);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -63,7 +66,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     loadDetails();
 
     return () => { isMounted = false; };
-  }, [isOpen, word]);
+  }, [initialEnrichment, isOpen, word]);
 
   if (!isOpen || !word) return null;
 

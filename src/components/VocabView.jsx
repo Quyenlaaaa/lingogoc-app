@@ -292,6 +292,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     setListAiData((current) => ({ ...current, [key]: result }));
   };
 
+  const openWordDetail = (item, enrichment) => {
+    const availableEnrichment = enrichment || getCachedWordEnrichment(item.word);
+    setDetailWord({ ...item, _aiEnrichment: availableEnrichment || null });
+  };
+
   // Toggle Mastered Status
   const handleToggleMastered = (wordId) => {
     const updated = new Set(masteredSet);
@@ -598,7 +603,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                     className="card-audio-btn"
                     style={{ background: 'rgba(56, 189, 248, 0.15)', borderColor: '#38bdf8', color: '#38bdf8', fontWeight: 700 }}
                     title="Đối chiếu nghĩa, cách dùng và ví dụ theo ngữ cảnh"
-                    onClick={() => setDetailWord(currentCard)}
+                    onClick={() => openWordDetail(currentCard, activeEnrichment)}
                   >
                     <Sparkles size={18} />
                     <span>Nghĩa & ví dụ</span>
@@ -621,7 +626,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                     ? <div className="example-saved-badge">Đã lưu trên máy chủ · không mất khi xóa dữ liệu trình duyệt</div>
                     : activeEnrichment?.savedAt && <div className="example-saved-badge">Đã lưu trên thiết bị · mở lại không tốn lượt AI</div>}
                   {!activeEnrichment && isLowQualityMeaning(currentCard.meaning) && (
-                    <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); setDetailWord(currentCard); }}>
+                    <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); openWordDetail(currentCard, activeEnrichment); }}>
                       Nghĩa này chưa đủ tin cậy · Mở phần đối chiếu
                     </button>
                   )}
@@ -642,7 +647,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   )) : (
                     <button
                       className="example-quality-placeholder"
-                      onClick={flashcardAiData?.unavailableReason ? retryFlashcardExamples : () => setDetailWord(currentCard)}
+                      onClick={flashcardAiData?.unavailableReason ? retryFlashcardExamples : () => openWordDetail(currentCard, activeEnrichment)}
                     >
                       <BookOpen size={17} />
                       <span>
@@ -798,7 +803,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                             )}
                           </div>
                         )}
-                        <button type="button" className="item-more-examples" onClick={() => setDetailWord(w)}>
+                        <button type="button" className="item-more-examples" onClick={() => openWordDetail(w, aiState || cachedAiData)}>
                           Xem ví dụ đa ngữ cảnh
                         </button>
                       </div>
@@ -944,7 +949,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
               <div className="quiz-answer-explanation" role="status">
                 <strong>{quizSelectedAnswer === quizQuestion.target.id ? 'Chính xác.' : 'Chưa đúng.'}</strong>
                 <span><b>{quizQuestion.target.word}</b> — {quizQuestion.target.meaning}</span>
-                <button onClick={() => setDetailWord(quizQuestion.target)}>Xem cách dùng và ví dụ</button>
+                <button onClick={() => openWordDetail(quizQuestion.target)}>Xem cách dùng và ví dụ</button>
               </div>
             )}
 
@@ -967,10 +972,16 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           userData={userData}
           onUpdateUserData={onUpdateUserData}
           onSpeak={handleSpeak}
-          onOpenDetail={setDetailWord}
+          onOpenDetail={openWordDetail}
         />
       )}
-      <WordDetailModal word={detailWord} isOpen={Boolean(detailWord)} onClose={() => setDetailWord(null)} />
+      <WordDetailModal
+        key={detailWord?.word || 'closed-word-detail'}
+        word={detailWord}
+        initialEnrichment={detailWord?._aiEnrichment}
+        isOpen={Boolean(detailWord)}
+        onClose={() => setDetailWord(null)}
+      />
     </div>
   );
 }
