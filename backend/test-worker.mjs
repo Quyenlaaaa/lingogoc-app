@@ -62,4 +62,13 @@ assert.equal(JSON.stringify(payload).includes(env.XTROUTER_API_KEY), false);
 assert.equal(providerRequest.url, 'https://api.xkiro.com/v1/chat/completions');
 assert.equal(providerRequest.options.headers.Authorization, `Bearer ${env.XTROUTER_API_KEY}`);
 assert.equal(providerRequest.body.model, 'x-ai/grok-build-0.1');
+
+const cambridgeResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/cambridge?word=accept', {
+    headers: { Origin: 'http://localhost:5173' },
+  }),
+  env,
+  context,
+);
+assert.equal(cambridgeResponse.status, 204);
 console.log('Worker vocabulary contract: OK');

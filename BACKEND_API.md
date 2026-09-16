@@ -36,6 +36,8 @@ Response có thể bọc trong `{ "data": ... }` hoặc trả trực tiếp:
 
 ## `GET /api/vocabulary/cambridge?word=accept`
 
+Đây là tích hợp tùy chọn. Nếu backend chưa có nhà cung cấp Cambridge được cấp phép, endpoint trả `204 No Content`; frontend sẽ tiếp tục dùng Free Dictionary và AI mà không hiển thị lỗi.
+
 Response:
 
 ```json

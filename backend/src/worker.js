@@ -212,6 +212,11 @@ export default {
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);
       }
+      if (url.pathname === '/api/vocabulary/cambridge' && request.method === 'GET') {
+        // Optional licensed integration. Returning 204 lets the frontend use
+        // Free Dictionary + AI enrichment without presenting a false error.
+        return new Response(null, { status: 204, headers: corsHeaders(origin) });
+      }
       if (url.pathname === '/api/speaking/chat' && request.method === 'POST') {
         return await speakingChat(request, env, origin);
       }

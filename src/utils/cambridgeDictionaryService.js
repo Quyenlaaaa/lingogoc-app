@@ -20,12 +20,16 @@ export async function fetchCambridgeWordData(word, signal) {
     getBackendUrl(`/api/vocabulary/cambridge?word=${encodeURIComponent(cleanWord)}`),
     { headers: { Accept: 'application/json' }, signal },
   );
+  // Cambridge is an optional integration. The backend returns 204 when no
+  // licensed Cambridge provider has been configured.
+  if (response.status === 204) return null;
   if (!response.ok) {
     throw new Error(await readBackendError(response, 'Không thể tải dữ liệu Cambridge.'));
   }
 
   const payload = await response.json();
-  const result = payload?.data || payload;
+  if (payload?.available === false) return null;
+  const result = payload?.data ?? payload;
   if (!result || typeof result !== 'object') return null;
 
   try {
