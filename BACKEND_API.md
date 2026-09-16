@@ -1,6 +1,8 @@
 # LingoGoc backend contract
 
-Frontend chỉ biết `VITE_API_BASE_URL`. Mọi khóa Gemini, Groq, OpenRouter hoặc Cambridge phải nằm trong secret của backend và không được trả về client.
+Frontend chỉ biết `VITE_API_BASE_URL`. Mọi khóa xkiro, Groq, OpenRouter hoặc Cambridge phải nằm trong secret của backend và không được trả về client. Worker mẫu đang dùng `XTROUTER_API_KEY`, endpoint `https://api.xkiro.com/v1` và model `x-ai/grok-build-0.1`.
+
+Một backend Cloudflare Worker mẫu đã có tại `backend/`. Xem `backend/README.md` để chạy local và deploy. Khi backend được cấu hình, Danh sách 3000 tự tải ví dụ AI với tối đa 2 request đồng thời; Thẻ nhớ 3D tải theo thẻ đang mở. Kết quả hợp lệ được lưu trong localStorage để tiết kiệm quota.
 
 ## `POST /api/vocabulary/enrich`
 
@@ -22,7 +24,10 @@ Response có thể bọc trong `{ "data": ... }` hoặc trả trực tiếp:
   "primaryMeaningVi": "chấp nhận",
   "meaningNote": "...",
   "senses": [{ "pos": "verb", "meaningVi": "...", "usage": "..." }],
-  "contextExamples": [{ "context": "Công việc", "en": "I accepted the offer.", "vi": "Tôi đã nhận lời đề nghị." }],
+  "contextExamples": [
+    { "context": "Công việc", "en": "I accepted the offer.", "vi": "Tôi đã nhận lời đề nghị." },
+    { "context": "Hội thoại", "en": "Please accept my apology.", "vi": "Xin hãy chấp nhận lời xin lỗi của tôi." }
+  ],
   "collocations": [{ "phrase": "accept an offer", "meaning": "chấp nhận một lời đề nghị" }],
   "mnemonicTip": "...",
   "wordFamily": "..."

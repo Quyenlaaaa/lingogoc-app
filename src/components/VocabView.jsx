@@ -21,7 +21,8 @@ import {
 import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
-import { getCachedWordEnrichment } from '../utils/geminiService';
+import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
+import { hasBackendApi } from '../utils/backendApi';
 import { fetchRealWordData } from '../utils/realDictionaryService';
 import {
   buildClozePrompt,
@@ -59,9 +60,13 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   // List Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [listDictionaryData, setListDictionaryData] = useState({});
+  const [listAiData, setListAiData] = useState({});
   const [flashcardDictionaryData, setFlashcardDictionaryData] = useState(null);
+  const [flashcardAiData, setFlashcardAiData] = useState(null);
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const requestedDictionaryWords = useRef(new Set());
+  const requestedAiWords = useRef(new Set());
+  const listDictionaryDataRef = useRef({});
   const itemsPerPage = 24;
 
   // Quiz States
@@ -147,10 +152,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           result = null;
         }
         if (!cancelled) {
-          setListDictionaryData((current) => ({
-            ...current,
-            [item.word.toLowerCase()]: result,
-          }));
+          setListDictionaryData((current) => {
+            const next = { ...current, [item.word.toLowerCase()]: result };
+            listDictionaryDataRef.current = next;
+            return next;
+          });
         }
       }
     };
@@ -158,6 +164,49 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     const workers = Array.from({ length: Math.min(4, queue.length) }, () => loadNext());
     Promise.allSettled(workers);
     return () => { cancelled = true; };
+  }, [studyMode, visibleListWords]);
+
+  // Generate bilingual examples through the private backend. Concurrency is kept
+  // deliberately low and successful results are cached by geminiService.
+  useEffect(() => {
+    if (studyMode !== 'list' || !hasBackendApi()) return undefined;
+
+    const queue = visibleListWords.filter((item) => {
+      const key = item.word.toLowerCase();
+      return !requestedAiWords.current.has(key) && !getCachedWordEnrichment(item.word);
+    });
+    if (!queue.length) return undefined;
+    queue.forEach((item) => requestedAiWords.current.add(item.word.toLowerCase()));
+
+    let cancelled = false;
+    let cursor = 0;
+    const controllers = new Set();
+    const loadNext = async () => {
+      while (!cancelled && cursor < queue.length) {
+        const item = queue[cursor];
+        cursor += 1;
+        const controller = new AbortController();
+        controllers.add(controller);
+        const dictionaryData = listDictionaryDataRef.current[item.word.toLowerCase()];
+        const result = await enrichWordWithLLM(
+          item.word,
+          item.meaning,
+          item.topic,
+          dictionaryData?.definitions || [],
+          controller.signal,
+        ).catch(() => null);
+        controllers.delete(controller);
+        if (!cancelled && result) {
+          setListAiData((current) => ({ ...current, [item.word.toLowerCase()]: result }));
+        }
+      }
+    };
+
+    Promise.allSettled(Array.from({ length: Math.min(2, queue.length) }, () => loadNext()));
+    return () => {
+      cancelled = true;
+      controllers.forEach((controller) => controller.abort());
+    };
   }, [studyMode, visibleListWords]);
 
   // Reset pagination / card index when filters change
@@ -173,27 +222,39 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   useEffect(() => {
     if (studyMode !== 'flashcard' || !currentCard) return undefined;
     let cancelled = false;
+    const controller = new AbortController();
     setFlashcardDictionaryData(null);
+    setFlashcardAiData(getCachedWordEnrichment(currentCard.word));
     setIsLoadingFlashcardExamples(true);
-    fetchRealWordData(currentCard.word)
-      .then((result) => {
-        if (!cancelled) setFlashcardDictionaryData(result);
-      })
-      .catch(() => {
-        if (!cancelled) setFlashcardDictionaryData(null);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoadingFlashcardExamples(false);
-      });
-    return () => { cancelled = true; };
+    const loadExamples = async () => {
+      const dictionaryResult = await fetchRealWordData(currentCard.word).catch(() => null);
+      if (cancelled) return;
+      setFlashcardDictionaryData(dictionaryResult);
+
+      const aiResult = await enrichWordWithLLM(
+        currentCard.word,
+        currentCard.meaning,
+        currentCard.topic,
+        dictionaryResult?.definitions || [],
+        controller.signal,
+      ).catch(() => null);
+      if (!cancelled && aiResult) setFlashcardAiData(aiResult);
+      if (!cancelled) setIsLoadingFlashcardExamples(false);
+    };
+    loadExamples();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [currentCard, studyMode]);
 
   const flashcardDictionaryExamples = (flashcardDictionaryData?.examples || [])
     .filter((example) => !isLowQualityExample(example))
     .map((example) => ({ en: example, vi: '', context: 'Từ điển' }));
+  const activeEnrichment = flashcardAiData || currentEnrichment;
   const currentExamples = currentCard
     ? [
-        ...(currentEnrichment?.contextExamples || []).map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' })),
+        ...(activeEnrichment?.contextExamples || []).map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' })),
         ...flashcardDictionaryExamples,
         ...getTrustedExamples(currentCard).map((example) => ({ ...example, context: example.context || 'Bộ dữ liệu' })),
       ]
@@ -526,9 +587,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                 <div className="card-meaning-block">
                   <div className="meaning-label">Nghĩa tiếng Việt:</div>
-                  <div className="meaning-highlight">{currentEnrichment?.primaryMeaningVi || currentCard.meaning}</div>
-                  {currentEnrichment?.primaryMeaningVi && <div className="meaning-verified-badge">Đã đối chiếu theo định nghĩa từ điển</div>}
-                  {!currentEnrichment && isLowQualityMeaning(currentCard.meaning) && (
+                  <div className="meaning-highlight">{activeEnrichment?.primaryMeaningVi || currentCard.meaning}</div>
+                  {activeEnrichment?.primaryMeaningVi && <div className="meaning-verified-badge">Đã đối chiếu theo định nghĩa từ điển</div>}
+                  {!activeEnrichment && isLowQualityMeaning(currentCard.meaning) && (
                     <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); setDetailWord(currentCard); }}>
                       Nghĩa này chưa đủ tin cậy · Mở phần đối chiếu
                     </button>
@@ -638,7 +699,12 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 const dictionaryExamples = (listDictionaryData[w.word.toLowerCase()]?.examples || [])
                   .filter((example) => !isLowQualityExample(example))
                   .map((example) => ({ en: example, vi: '', context: 'Từ điển' }));
-                const aiExamples = (getCachedWordEnrichment(w.word)?.contextExamples || [])
+                const cachedAiData = getCachedWordEnrichment(w.word);
+                const aiStateExists = Object.prototype.hasOwnProperty.call(listAiData, w.word.toLowerCase())
+                  || Boolean(cachedAiData);
+                const aiExamples = (listAiData[w.word.toLowerCase()]?.contextExamples
+                  || cachedAiData?.contextExamples
+                  || [])
                   .filter((example) => !isLowQualityExample(example.en))
                   .map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' }));
                 const listExamples = [...aiExamples, ...dictionaryExamples, ...getTrustedExamples(w)]
@@ -678,9 +744,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                         ))}
                         {!listExamples.length && (
                           <div className="item-example-loading">
-                            {dictionaryStateExists
-                              ? 'Chưa có ví dụ đã kiểm chứng. Mở chi tiết để tạo ví dụ theo 5 ngữ cảnh.'
-                              : 'Đang tìm ví dụ tự nhiên từ từ điển…'}
+                            {dictionaryStateExists && (aiStateExists || !hasBackendApi())
+                              ? 'Chưa có ví dụ đã kiểm chứng.'
+                              : hasBackendApi()
+                                ? 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
+                                : 'Đang tìm ví dụ tự nhiên từ từ điển…'}
                           </div>
                         )}
                         <button type="button" className="item-more-examples" onClick={() => setDetailWord(w)}>

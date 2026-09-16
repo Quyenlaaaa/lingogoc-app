@@ -60,16 +60,19 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const autoListenTimerRef = useRef(null);
   const startMicRef = useRef(null);
   const chatEndRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const connected = hasBackendApi();
 
-  const stopAudio = useCallback(() => {
+  const stopAudio = useCallback((updateState = true) => {
     if (autoListenTimerRef.current) {
       clearTimeout(autoListenTimerRef.current);
       autoListenTimerRef.current = null;
     }
-    speechHelper.stop();
+    speechHelper.stopSpeaking();
     if (audioRef.current) {
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
       audioRef.current.pause();
       audioRef.current = null;
     }
@@ -77,7 +80,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       URL.revokeObjectURL(audioUrlRef.current);
       audioUrlRef.current = '';
     }
-    setIsSpeaking(false);
+    if (updateState && isMountedRef.current) setIsSpeaking(false);
   }, []);
 
   const speak = useCallback(async (text, options = {}) => {
@@ -90,6 +93,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
         URL.revokeObjectURL(audioUrlRef.current);
         audioUrlRef.current = '';
       }
+      if (!isMountedRef.current) return;
       setIsSpeaking(false);
       if (options.resumeListening && config.autoListen) {
         autoListenTimerRef.current = setTimeout(() => startMicRef.current?.(), 450);
@@ -99,6 +103,10 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     if (config.useCloudVoice && connected) {
       try {
         const url = await requestCloudSpeech({ config, text });
+        if (!isMountedRef.current) {
+          URL.revokeObjectURL(url);
+          return;
+        }
         audioUrlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
@@ -111,6 +119,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       }
     }
 
+    if (!isMountedRef.current) return;
     speechHelper.speak(text, {
       rate: voiceSpeed,
       onEnd: finishSpeech,
@@ -120,7 +129,15 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
   const startScenario = useCallback((nextScenario) => {
     requestControllerRef.current?.abort();
-    recognitionRef.current?.stop();
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      try {
+        recognition.abort();
+      } catch {
+        // Recognition may already be inactive when switching scenarios.
+      }
+    }
     stopAudio();
     setScenario(nextScenario);
     setMessages([{
@@ -139,10 +156,23 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   }, [stopAudio]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       requestControllerRef.current?.abort();
-      recognitionRef.current?.stop();
-      stopAudio();
+      const recognition = recognitionRef.current;
+      recognitionRef.current = null;
+      if (recognition) {
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        try {
+          recognition.abort();
+        } catch {
+          // Recognition may already be inactive during navigation.
+        }
+      }
+      stopAudio(false);
     };
   }, [stopAudio]);
 
@@ -183,6 +213,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
     try {
       const result = await requestSpeakingReply({ config, scenario, messages: history, signal: controller.signal });
+      if (!isMountedRef.current) return;
       const aiMessage = {
         sender: 'ai',
         text: result.replyEn,
@@ -196,10 +227,10 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       onUpdateUserData?.({ ...userData, xp: (userData?.xp || 0) + 15 });
       speak(result.replyEn, { resumeListening: true });
     } catch (requestError) {
-      if (requestError.name !== 'AbortError') setError(requestError.message || 'Không thể kết nối với AI.');
+      if (isMountedRef.current && requestError.name !== 'AbortError') setError(requestError.message || 'Không thể kết nối với AI.');
     } finally {
-      setIsThinking(false);
-      requestControllerRef.current = null;
+      if (isMountedRef.current) setIsThinking(false);
+      if (requestControllerRef.current === controller) requestControllerRef.current = null;
     }
   }, [config, connected, input, isThinking, messages, onUpdateUserData, scenario, speak, stopAudio, userData]);
 
@@ -236,11 +267,26 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       () => setIsRecording(false),
     );
     recognitionRef.current = recognition;
-    recognition?.start();
+    try {
+      recognition?.start();
+    } catch {
+      recognitionRef.current = null;
+      setIsRecording(false);
+      setInterimTranscript('');
+      setError('Microphone đang bận. Hãy chờ một chút rồi thử lại.');
+    }
   };
 
   const stopMic = () => {
-    recognitionRef.current?.stop();
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch {
+        // Recognition may already have ended.
+      }
+    }
     setIsRecording(false);
     setInterimTranscript('');
   };
