@@ -35,6 +35,9 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+        env:
+          VITE_API_BASE_URL: https://lingogoc-api.lingogoc-api.workers.dev
+          VITE_SPEAKING_AUTO_LISTEN: true
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
