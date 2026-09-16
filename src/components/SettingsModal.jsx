@@ -12,7 +12,8 @@ import {
   Volume2, 
   Moon, 
   Sun,
-  ShieldAlert
+  ShieldAlert,
+  KeyRound
 } from 'lucide-react';
 import { loadUserData, saveUserData, resetUserData } from '../utils/storage';
 import {
@@ -22,6 +23,7 @@ import {
   parseVocabularyFile,
   savePrivateVocabulary,
 } from '../utils/privateVocabulary';
+import { getGeminiApiKey, saveGeminiApiKey } from '../utils/geminiService';
 
 const AVATARS = ['👤', '🦁', '🦄', '👑', '🌸', '🚀', '🐱', '⚽', '🎸', '⚡', '🦅', '💎'];
 
@@ -40,6 +42,7 @@ export default function SettingsModal({
   const fileInputRef = useRef(null);
   const vocabInputRef = useRef(null);
   const [notice, setNotice] = useState(null);
+  const [geminiKey, setGeminiKey] = useState(() => getGeminiApiKey());
   const vocabularyMeta = getVocabularyMeta(vocabulary, usesPrivateVocabulary);
 
   if (!isOpen) return null;
@@ -118,6 +121,16 @@ export default function SettingsModal({
     if (!confirm('Xóa kho từ cá nhân trên trình duyệt này và quay về dữ liệu mẫu?')) return;
     clearPrivateVocabulary();
     window.location.reload();
+  };
+
+  const handleSaveGeminiKey = () => {
+    saveGeminiApiKey(geminiKey);
+    setNotice({
+      type: 'success',
+      text: geminiKey.trim()
+        ? 'Đã lưu Gemini API key trên trình duyệt. Phần nghĩa và ví dụ có thể dùng chế độ đối chiếu AI.'
+        : 'Đã tắt Gemini AI và xóa API key khỏi trình duyệt.',
+    });
   };
 
   return (
@@ -295,6 +308,21 @@ export default function SettingsModal({
             <code>word, meaning, ipa, level, topic, example, exampleVi</code>
             <span>Chỉ bắt buộc hai cột <b>word</b> và <b>meaning</b>.</span>
           </details>
+        </section>
+
+        <section className="private-data-card ai-key-card">
+          <div className="private-data-heading">
+            <div>
+              <span className="eyebrow">Đối chiếu nghĩa và ví dụ</span>
+              <h3><KeyRound size={16} /> Gemini API key</h3>
+            </div>
+            <span className={`data-source-badge ${geminiKey ? 'private' : ''}`}>{geminiKey ? 'Đã kết nối' : 'Chưa kết nối'}</span>
+          </div>
+          <p>Key chỉ được lưu trên trình duyệt này. Khi có key, LingoGoc đối chiếu nghĩa với định nghĩa tiếng Anh và tạo 5 ví dụ song ngữ ở các ngữ cảnh khác nhau.</p>
+          <div className="api-key-row">
+            <input type="password" value={geminiKey} onChange={(event) => setGeminiKey(event.target.value)} placeholder="Nhập Gemini API key…" autoComplete="off" />
+            <button className="btn btn-primary" onClick={handleSaveGeminiKey}>Lưu key</button>
+          </div>
         </section>
 
         {/* Section 4: Progress Backup & Restore */}

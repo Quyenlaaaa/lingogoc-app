@@ -12,6 +12,13 @@ function normalizeWord(item, index) {
 
   if (!word || !meaning) return null;
 
+  const examples = Array.isArray(item.examples)
+    ? item.examples.map((example) => typeof example === 'string'
+      ? { en: cleanText(example), vi: '' }
+      : { en: cleanText(example?.en), vi: cleanText(example?.vi), context: cleanText(example?.context) })
+      .filter((example) => example.en)
+    : [];
+
   return {
     id: cleanText(item.id) || `private-${index + 1}-${word.toLowerCase()}`,
     word,
@@ -23,6 +30,7 @@ function normalizeWord(item, index) {
     topic: cleanText(item.topic || item.category) || 'Cá nhân',
     example: cleanText(item.example || item.exampleEn),
     exampleVi: cleanText(item.exampleVi || item.example_vi),
+    examples,
   };
 }
 

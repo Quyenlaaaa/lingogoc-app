@@ -2814,6 +2814,147 @@ a {
   background: rgba(244, 63, 94, 0.16);
 }
 
+/* Vocabulary quality and harder quiz feedback */
+.meaning-review-link {
+  margin-top: 8px;
+  padding: 0;
+  color: var(--amber);
+  font-size: 0.76rem;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.meaning-verified-badge {
+  margin-top: 7px;
+  color: var(--emerald);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.trusted-example + .trusted-example {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.example-quality-placeholder {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 9px;
+  color: var(--amber);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.quiz-direction {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.meaning-quiz-heading,
+.cloze-quiz-heading {
+  max-width: 720px;
+  margin: 0 auto 10px;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  line-height: 1.4;
+}
+
+.meaning-quiz-heading { font-size: clamp(1.3rem, 3vw, 2rem); }
+.cloze-quiz-heading { font-size: clamp(1.15rem, 2.5vw, 1.65rem); }
+
+.quiz-answer-explanation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-subtle);
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.quiz-answer-explanation strong { color: var(--text-primary); }
+.quiz-answer-explanation button {
+  margin-left: auto;
+  color: var(--sky);
+  font-weight: 700;
+}
+
+.meaning-source-note {
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.meaning-usage-note,
+.dictionary-senses-section {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-subtle);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.word-detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.sense-row,
+.definition-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 4px 10px;
+  padding: 9px 0;
+  border-top: 1px dashed var(--border-color);
+}
+
+.sense-row small,
+.definition-row small {
+  grid-column: 2;
+  color: var(--text-muted);
+}
+
+.example-source-label {
+  margin-bottom: 4px;
+  color: var(--emerald);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.example-source-label.ai { color: var(--purple); }
+.example-source-label.dictionary { color: var(--sky); }
+
+.no-trusted-examples {
+  padding: 14px;
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-md);
+  color: var(--amber);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .quiz-answer-explanation { align-items: flex-start; flex-direction: column; }
+  .quiz-answer-explanation button { margin-left: 0; }
+}
+
 /* Private learning data */
 .settings-notice {
   margin: -4px 0 20px;
@@ -2861,6 +3002,31 @@ a {
   margin: 0;
   color: var(--text-primary);
   font-size: 1rem;
+}
+
+.ai-key-card .private-data-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.api-key-row {
+  display: flex;
+  gap: 8px;
+}
+
+.api-key-row input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+@media (max-width: 520px) {
+  .api-key-row { flex-direction: column; }
 }
 
 .private-data-card > p {

@@ -289,15 +289,15 @@ for word, details in oxford_raw.items():
             'ipa': ipa,
             'pos': pos,
             'meaning': meaning,
-            'example': f"She used the word '{w}' in her sentence.",
-            'exampleVi': f"Cô ấy đã dùng từ '{w}' trong câu của mình.",
+            'example': '',
+            'exampleVi': '',
             'level': cefr,
             'topic': topic
         })
     else:
         # Systematic linguistic fallback
         ipa = make_ipa(w)
-        meaning = f"từ '{w}' ({pos})"
+        meaning = "[Chưa có nghĩa đã kiểm chứng]"
         topic = assign_topic(w, meaning)
         final_items.append({
             'id': current_id,
@@ -305,8 +305,8 @@ for word, details in oxford_raw.items():
             'ipa': ipa,
             'pos': pos,
             'meaning': meaning,
-            'example': f"Practice speaking '{w}' clearly.",
-            'exampleVi': f"Hãy luyện phát âm từ '{w}' thật rõ ràng.",
+            'example': '',
+            'exampleVi': '',
             'level': cefr,
             'topic': topic
         })

@@ -2,6 +2,26 @@
 // Hỗ trợ cả API key cá nhân của người dùng hoặc chế độ phản xạ cục bộ (offline fallback)
 
 const GEMINI_API_KEY_STORAGE = 'lingogoc_gemini_api_key';
+const VOCAB_ENRICHMENT_PREFIX = 'lingogoc_vocab_enrichment_v1_';
+
+export function getCachedWordEnrichment(word) {
+  if (!word || typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(`${VOCAB_ENRICHMENT_PREFIX}${word.trim().toLowerCase()}`);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheWordEnrichment(word, data) {
+  if (!word || typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`${VOCAB_ENRICHMENT_PREFIX}${word.trim().toLowerCase()}`, JSON.stringify(data));
+  } catch {
+    // Cache failure must not block dictionary lookup.
+  }
+}
 
 export function getGeminiApiKey() {
   if (typeof window === 'undefined') return '';
@@ -143,22 +163,41 @@ function parseGeminiResponse(rawText) {
 
 /**
  * Sử dụng Google Gemini LLM để bổ sung, làm giàu dữ liệu từ vựng chuyên sâu:
- * 3 câu ví dụ đời thực, cụm từ hay đi kèm (Collocations), và mẹo ghi nhớ tiếng Việt
+ * Đối chiếu nghĩa tiếng Việt và tạo ví dụ đa ngữ cảnh. Kết quả AI luôn được
+ * gắn cờ để giao diện không trình bày như dữ liệu từ điển đã kiểm chứng.
  */
-export async function enrichWordWithLLM(word, meaning = '', topic = '') {
+export async function enrichWordWithLLM(word, meaning = '', topic = '', dictionaryDefinitions = []) {
   const apiKey = getGeminiApiKey();
+  const cached = getCachedWordEnrichment(word);
+  if (cached) return { ...cached, isAiGenerated: true, fromCache: true };
 
   // Nếu có API Key, gọi trực tiếp Gemini 1.5 Flash
   if (apiKey) {
     try {
       const prompt = `
-Phân tích chuyên sâu từ vựng tiếng Anh "${word}" (nghĩa cơ bản: "${meaning}", chủ đề: "${topic}") dành cho người Việt mất gốc.
-Trả về định dạng JSON thuần túy (không dùng markdown khác ngoài json block) với các trường sau:
+Bạn là biên tập viên từ điển Anh–Việt. Hãy đối chiếu từ "${word}" (dữ liệu cũ: "${meaning}", chủ đề: "${topic}") cho người Việt học tiếng Anh.
+Định nghĩa tiếng Anh từ API từ điển để làm căn cứ: ${JSON.stringify(dictionaryDefinitions)}
+
+Yêu cầu bắt buộc:
+- Ưu tiên nghĩa thông dụng trong giao tiếp hiện đại; ghi rõ loại từ.
+- Nếu dữ liệu cũ sai hoặc chọn nhầm nghĩa ít gặp, phải sửa lại.
+- Ví dụ phải dùng "${word}" tự nhiên đúng ngữ pháp, không được nói về bản thân từ vựng (cấm kiểu "use the word...", "the word means...", "practice saying...").
+- Tạo 5 ví dụ ở các bối cảnh khác nhau: đời sống, công việc/học tập, hội thoại, du lịch/mua sắm và một nghĩa khác nếu từ đa nghĩa.
+- Bản dịch tiếng Việt phải tự nhiên, sát nghĩa câu tiếng Anh.
+- Chỉ trả JSON hợp lệ, không markdown.
+
 {
+  "primaryMeaningVi": "nghĩa tiếng Việt phổ biến, ngắn gọn và chính xác",
+  "meaningNote": "ghi chú phân biệt nghĩa/cách dùng bằng tiếng Việt",
+  "senses": [
+    { "pos": "loại từ", "meaningVi": "nghĩa", "usage": "khi nào dùng" }
+  ],
   "contextExamples": [
-    { "en": "câu ví dụ tiếng Anh 1 thực tế đời sống", "vi": "dịch tiếng Việt câu 1" },
-    { "en": "câu ví dụ tiếng Anh 2 trong giao tiếp", "vi": "dịch tiếng Việt câu 2" },
-    { "en": "câu ví dụ tiếng Anh 3 trong công việc/mua sắm", "vi": "dịch tiếng Việt câu 3" }
+    { "context": "Đời sống", "en": "câu hoàn chỉnh", "vi": "bản dịch" },
+    { "context": "Công việc/Học tập", "en": "câu hoàn chỉnh", "vi": "bản dịch" },
+    { "context": "Hội thoại", "en": "câu hoàn chỉnh", "vi": "bản dịch" },
+    { "context": "Du lịch/Mua sắm", "en": "câu hoàn chỉnh", "vi": "bản dịch" },
+    { "context": "Cách dùng khác", "en": "câu hoàn chỉnh", "vi": "bản dịch" }
   ],
   "collocations": [
     { "phrase": "cụm từ tiếng Anh hay gặp", "meaning": "nghĩa tiếng Việt" },
@@ -175,7 +214,7 @@ Trả về định dạng JSON thuần túy (không dùng markdown khác ngoài 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.6, maxOutputTokens: 800 }
+          generationConfig: { temperature: 0.35, maxOutputTokens: 1400 }
         })
       });
 
@@ -185,7 +224,9 @@ Trả về định dạng JSON thuần túy (không dùng markdown khác ngoài 
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
-          return { ...parsed, isAiGenerated: true };
+          const result = { ...parsed, isAiGenerated: true };
+          cacheWordEnrichment(word, result);
+          return result;
         }
       }
     } catch (e) {
@@ -193,28 +234,13 @@ Trả về định dạng JSON thuần túy (không dùng markdown khác ngoài 
     }
   }
 
-  // Fallback phong phú theo ngữ cảnh khi không có API key
+  // Không tạo câu mẫu giả khi không có API key. Giao diện sẽ dùng ví dụ có
+  // nguồn từ API từ điển hoặc thông báo rõ rằng chưa có dữ liệu đáng tin cậy.
   return {
     isAiGenerated: false,
-    contextExamples: [
-      {
-        en: `I always use '${word}' when talking about ${topic.toLowerCase() || 'daily life'}.`,
-        vi: `Tôi luôn dùng từ '${word}' khi nói về ${topic.toLowerCase() || 'cuộc sống hàng ngày'}.`
-      },
-      {
-        en: `Can you explain the meaning of '${word}' in this conversation?`,
-        vi: `Bạn có thể giải thích ý nghĩa của từ '${word}' trong cuộc đối thoại này không?`
-      },
-      {
-        en: `It is very common to hear '${word}' in real American English.`,
-        vi: `Rất phổ biến khi nghe thấy từ '${word}' trong tiếng Anh giao tiếp thực tế của người Mỹ.`
-      }
-    ],
-    collocations: [
-      { phrase: `use ${word} correctly`, meaning: `sử dụng ${word} một cách chuẩn xác` },
-      { phrase: `common ${word}`, meaning: `${word} thông dụng` }
-    ],
-    mnemonicTip: `💡 Mẹo nhớ: Hãy gắn từ '${word}' với một hình ảnh quen thuộc trong chủ đề ${topic || 'đời sống'} và nhẩm to 3 lần!`,
-    wordFamily: `Từ gốc: ${word}`
+    contextExamples: [],
+    collocations: [],
+    senses: [],
+    unavailableReason: 'NO_API_KEY',
   };
 }

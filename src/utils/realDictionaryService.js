@@ -1,5 +1,5 @@
 // realDictionaryService.js - Dịch vụ tích hợp dữ liệu từ điển thật 100% từ Free Dictionary API
-// Cung cấp Audio người thật bản xứ (MP3), định nghĩa quốc tế, từ đồng nghĩa và câu ví dụ thật
+// Cung cấp audio, định nghĩa tiếng Anh, từ đồng nghĩa và ví dụ từ dictionaryapi.dev.
 
 const DICT_CACHE_PREFIX = 'lingogoc_real_dict_';
 
@@ -15,7 +15,8 @@ export async function fetchRealWordData(word) {
     }
   } catch (e) {}
 
-  // 2. Gọi Free Dictionary API (Data thật từ Oxford / Cambridge / Merriam-Webster)
+  // 2. Gọi Free Dictionary API. Không gắn nhãn Oxford/Cambridge vì API không
+  // đảm bảo mọi mục từ đến từ các nhà xuất bản đó.
   try {
     const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
     if (!response.ok) {
@@ -51,10 +52,10 @@ export async function fetchRealWordData(word) {
         const partOfSpeech = m.partOfSpeech || '';
         if (m.definitions && Array.isArray(m.definitions)) {
           for (const d of m.definitions) {
-            if (d.definition && definitions.length < 3) {
+            if (d.definition && definitions.length < 5) {
               definitions.push({ partOfSpeech, text: d.definition });
             }
-            if (d.example && realExamples.length < 3) {
+            if (d.example && realExamples.length < 6) {
               realExamples.push(d.example);
             }
             if (d.synonyms && Array.isArray(d.synonyms)) {

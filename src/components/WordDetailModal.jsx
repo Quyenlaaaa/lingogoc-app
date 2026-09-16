@@ -1,4 +1,4 @@
-// WordDetailModal.jsx - Cung cấp dữ liệu từ điển thật 100% & Bổ sung chuyên sâu bởi Google Gemini LLM
+// WordDetailModal.jsx - Đối chiếu dữ liệu từ điển và bổ sung ngữ cảnh bằng Gemini.
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -6,14 +6,12 @@ import {
   Sparkles, 
   BookOpen, 
   Lightbulb, 
-  Layers, 
-  ExternalLink,
-  CheckCircle,
-  RefreshCw
+  Layers
 } from 'lucide-react';
 import { fetchRealWordData, playNativeAudio } from '../utils/realDictionaryService';
 import { enrichWordWithLLM } from '../utils/geminiService';
 import { speakText } from '../utils/speechHelper';
+import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
 export default function WordDetailModal({ word, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
@@ -28,23 +26,43 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     setRealDictData(null);
     setAiEnrichData(null);
 
-    // Fetch song song cả dữ liệu từ điển thật và AI LLM
-    Promise.all([
-      fetchRealWordData(word.word),
-      enrichWordWithLLM(word.word, word.meaning, word.topic)
-    ]).then(([dictData, aiData]) => {
-      if (!isMounted) return;
-      setRealDictData(dictData);
-      setAiEnrichData(aiData);
-      setLoading(false);
-    }).catch(() => {
-      if (isMounted) setLoading(false);
-    });
+    const loadDetails = async () => {
+      try {
+        const dictData = await fetchRealWordData(word.word);
+        if (!isMounted) return;
+        setRealDictData(dictData);
+
+        const aiData = await enrichWordWithLLM(
+          word.word,
+          word.meaning,
+          word.topic,
+          dictData?.definitions || [],
+        );
+        if (!isMounted) return;
+        setAiEnrichData(aiData);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadDetails();
 
     return () => { isMounted = false; };
   }, [isOpen, word]);
 
   if (!isOpen || !word) return null;
+
+  const storedExamples = getTrustedExamples(word);
+  const dictionaryExamples = (realDictData?.examples || [])
+    .filter((example) => !isLowQualityExample(example))
+    .map((example) => ({ en: example, vi: '', context: 'Từ điển', source: 'dictionary' }));
+  const aiExamples = (aiEnrichData?.contextExamples || [])
+    .filter((example) => !isLowQualityExample(example.en))
+    .map((example) => ({ ...example, source: 'ai' }));
+  const contextExamples = [...aiExamples, ...dictionaryExamples, ...storedExamples]
+    .filter((example, index, list) => list.findIndex((item) => item.en.toLowerCase() === example.en.toLowerCase()) === index)
+    .slice(0, 7);
+  const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
   const handlePlayNativeOrTts = () => {
     if (realDictData?.audioUrl) {
@@ -131,8 +149,15 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
             {realDictData?.phonetic || word.ipa}
           </div>
 
-          <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '14px' }}>
-            {word.meaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({word.pos || word.type})</span>
+          <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
+            {displayMeaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({word.pos || word.type})</span>
+          </div>
+          <div className="meaning-source-note">
+            {aiEnrichData?.primaryMeaningVi
+              ? 'Nghĩa tiếng Việt đã được AI đối chiếu với dữ liệu từ điển tiếng Anh'
+              : isLowQualityMeaning(word.meaning)
+                ? 'Nghĩa trong bộ dữ liệu cũ chưa đủ tin cậy — xem định nghĩa nguồn bên dưới'
+                : 'Nghĩa từ bộ dữ liệu học tập'}
           </div>
 
           {/* Audio Button */}
@@ -154,6 +179,26 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
           </div>
         ) : (
           <div>
+            {aiEnrichData?.meaningNote && (
+              <div className="meaning-usage-note"><strong>Lưu ý cách dùng:</strong> {aiEnrichData.meaningNote}</div>
+            )}
+
+            {(aiEnrichData?.senses?.length > 0 || realDictData?.definitions?.length > 0) && (
+              <div className="dictionary-senses-section">
+                <div className="word-detail-section-title"><BookOpen size={18} /> Các nghĩa và cách dùng</div>
+                {aiEnrichData?.senses?.map((sense, index) => (
+                  <div className="sense-row" key={`${sense.pos}-${index}`}>
+                    <b>{sense.pos}</b><span>{sense.meaningVi}</span><small>{sense.usage}</small>
+                  </div>
+                ))}
+                {realDictData?.definitions?.map((definition, index) => (
+                  <div className="definition-row" key={`${definition.partOfSpeech}-${index}`}>
+                    <b>{definition.partOfSpeech}</b><span>{definition.text}</span><small>Nguồn từ điển tiếng Anh</small>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* 1. Mnemonic Golden Tip Box */}
             {aiEnrichData?.mnemonicTip && (
               <div style={{
@@ -178,11 +223,11 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
             <div style={{ marginBottom: '20px' }}>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <BookOpen size={18} color="#38bdf8" />
-                <span>Ví Dụ Giao Tiếp Thực Tế (Song Ngữ Anh - Việt):</span>
+                <span>Ví dụ tự nhiên theo nhiều ngữ cảnh:</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {aiEnrichData?.contextExamples?.map((ex, idx) => (
+                {contextExamples.map((ex, idx) => (
                   <div
                     key={idx}
                     style={{
@@ -197,12 +242,13 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                     }}
                   >
                     <div>
+                      <div className={`example-source-label ${ex.source}`}>{ex.context || (ex.source === 'dictionary' ? 'Từ điển' : 'Bộ dữ liệu')}</div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>
                         "{ex.en}"
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      {ex.vi && <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         🇻🇳 {ex.vi}
-                      </div>
+                      </div>}
                     </div>
                     <button
                       onClick={() => speakText(ex.en, 0.85)}
@@ -214,6 +260,11 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                     </button>
                   </div>
                 ))}
+                {!contextExamples.length && (
+                  <div className="no-trusted-examples">
+                    Chưa có ví dụ đủ tin cậy cho từ này. Hãy thêm Gemini API key trong Cài đặt để tạo và đối chiếu 5 ngữ cảnh song ngữ.
+                  </div>
+                )}
               </div>
             </div>
 

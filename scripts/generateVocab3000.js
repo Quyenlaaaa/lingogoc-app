@@ -28,8 +28,8 @@ for (const item of comprehensiveVocabSeed) {
       ipa: item.ipa || `/${item.word}/`,
       pos: item.pos || 'n',
       meaning: item.meaning,
-      example: item.example || `This is an example of ${item.word}.`,
-      exampleVi: item.exampleVi || `Đây là một ví dụ về ${item.word}.`,
+      example: item.example || '',
+      exampleVi: item.exampleVi || '',
       level: item.level || 'A1',
       topic: item.topic || 'Đời sống'
     });

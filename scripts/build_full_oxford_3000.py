@@ -178,15 +178,15 @@ for word, details in oxford_dict.items():
             example, example_vi = vi_info['examples'][0]
     
     if not meaning:
-        # Fallback friendly meaning
-        meaning = f"từ vựng '{clean_w}'"
+        # Không đoán nghĩa. Mục thiếu dữ liệu phải được đối chiếu trước khi dùng.
+        meaning = "[Chưa có nghĩa đã kiểm chứng]"
     
     if not ipa:
         ipa = f"/{clean_w}/"
         
     if not example:
-        example = f"I use the word '{clean_w}' every day."
-        example_vi = f"Tôi sử dụng từ '{clean_w}' mỗi ngày."
+        example = ""
+        example_vi = ""
 
     topic = determine_topic(clean_w, meaning)
 

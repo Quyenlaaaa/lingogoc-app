@@ -18,12 +18,27 @@ import {
   HelpCircle, 
   Play, 
   RefreshCw,
-  Brain
+  Brain,
+  BookOpen
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
+import { getCachedWordEnrichment } from '../utils/geminiService';
+import {
+  buildClozePrompt,
+  buildQuizOptions,
+  getTrustedExamples,
+  isLowQualityMeaning,
+} from '../utils/vocabularyQuality';
 import WordDetailModal from './WordDetailModal';
+
+const QUIZ_LABELS = {
+  'en-to-vi': '🎯 Chọn nghĩa tiếng Việt',
+  'vi-to-en': '🔄 Chọn từ tiếng Anh',
+  'listen-pick': '🎧 Nghe và phân biệt từ',
+  cloze: '🧩 Điền từ theo ngữ cảnh',
+};
 
 export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOpenSrs, vocabulary = [] }) {
   const vocabList = vocabulary;
@@ -105,6 +120,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
 
   // Active Flashcard Word
   const currentCard = filteredWords[cardIndex] || filteredWords[0] || null;
+  const currentEnrichment = currentCard ? getCachedWordEnrichment(currentCard.word) : null;
+  const currentExamples = currentCard
+    ? [...(currentEnrichment?.contextExamples || []), ...getTrustedExamples(currentCard)].slice(0, 2)
+    : [];
 
   // Toggle Mastered Status
   const handleToggleMastered = (wordId) => {
@@ -151,32 +170,28 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
 
   // Generate Quiz Question
   const generateQuiz = () => {
-    if (filteredWords.length < 4) return;
-    const randomIndex = Math.floor(Math.random() * filteredWords.length);
-    const correctWord = filteredWords[randomIndex];
+    const quizPool = filteredWords.filter((word) => !isLowQualityMeaning(word.meaning));
+    if (quizPool.length < 4) return;
+    const correctWord = quizPool[Math.floor(Math.random() * quizPool.length)];
+    const clozePrompt = buildClozePrompt(correctWord);
+    const availableTypes = ['en-to-vi', 'vi-to-en', 'listen-pick'];
+    if (clozePrompt) availableTypes.push('cloze');
+    const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+    const answerField = type === 'en-to-vi' ? 'meaning' : 'word';
+    const options = buildQuizOptions(correctWord, vocabList, answerField, 4);
 
-    // Pick 3 random distractors
-    const distractors = [];
-    while (distractors.length < 3) {
-      const rand = Math.floor(Math.random() * vocabList.length);
-      const w = vocabList[rand];
-      if (w.id !== correctWord.id && !distractors.some(d => d.id === w.id)) {
-        distractors.push(w);
-      }
-    }
-
-    // Randomize options
-    const options = [...distractors, correctWord].sort(() => Math.random() - 0.5);
+    if (options.length < 4) return;
 
     setQuizQuestion({
       target: correctWord,
       options,
-      type: Math.random() > 0.5 ? 'en-to-vi' : 'listen-pick'
+      type,
+      clozePrompt,
     });
     setQuizSelectedAnswer(null);
     setQuizIsAnswered(false);
 
-    if (correctWord && options.length === 4) {
+    if (type === 'listen-pick') {
       handleSpeak(correctWord.word);
     }
   };
@@ -424,11 +439,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                   <button
                     className="card-audio-btn"
                     style={{ background: 'rgba(56, 189, 248, 0.15)', borderColor: '#38bdf8', color: '#38bdf8', fontWeight: 700 }}
-                    title="Xem phát âm bản xứ MP3 và câu ví dụ phân tích sâu bằng Gemini AI"
+                    title="Đối chiếu nghĩa, cách dùng và ví dụ theo ngữ cảnh"
                     onClick={() => setDetailWord(currentCard)}
                   >
                     <Sparkles size={18} />
-                    <span>AI & Data Thật</span>
+                    <span>Nghĩa & ví dụ</span>
                   </button>
                 </div>
               </div>
@@ -442,20 +457,32 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
 
                 <div className="card-meaning-block">
                   <div className="meaning-label">Nghĩa tiếng Việt:</div>
-                  <div className="meaning-highlight">{currentCard.meaning}</div>
+                  <div className="meaning-highlight">{currentEnrichment?.primaryMeaningVi || currentCard.meaning}</div>
+                  {currentEnrichment?.primaryMeaningVi && <div className="meaning-verified-badge">Đã đối chiếu theo định nghĩa từ điển</div>}
+                  {!currentEnrichment && isLowQualityMeaning(currentCard.meaning) && (
+                    <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); setDetailWord(currentCard); }}>
+                      Nghĩa này chưa đủ tin cậy · Mở phần đối chiếu
+                    </button>
+                  )}
                 </div>
 
                 <div className="card-example-box" onClick={(e) => e.stopPropagation()}>
-                  <div className="ex-en-row">
-                    <span className="ex-en-text">{currentCard.example}</span>
-                    <button 
-                      className="inline-audio-btn"
-                      onClick={() => handleSpeak(currentCard.example)}
-                    >
-                      <Volume2 size={16} />
+                  {currentExamples.length > 0 ? currentExamples.map((example) => (
+                    <div className="trusted-example" key={example.en}>
+                      <div className="ex-en-row">
+                        <span className="ex-en-text">{example.en}</span>
+                        <button className="inline-audio-btn" onClick={() => handleSpeak(example.en)} aria-label={`Nghe câu ${example.en}`}>
+                          <Volume2 size={16} />
+                        </button>
+                      </div>
+                      {example.vi && <div className="ex-vi-text">{example.vi}</div>}
+                    </div>
+                  )) : (
+                    <button className="example-quality-placeholder" onClick={() => setDetailWord(currentCard)}>
+                      <BookOpen size={17} />
+                      <span>Ví dụ cũ không đủ tự nhiên nên đã được ẩn. Mở ví dụ theo ngữ cảnh.</span>
                     </button>
-                  </div>
-                  <div className="ex-vi-text">{currentCard.exampleVi}</div>
+                  )}
                 </div>
 
                 <div className="card-back-footer" onClick={(e) => e.stopPropagation()}>
@@ -628,7 +655,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
           <div className="quiz-card">
             <div className="quiz-top-info">
               <span className="quiz-type-badge">
-                {quizQuestion.type === 'listen-pick' ? '🎧 Nghe & Chọn Từ Đúng' : '🎯 Chọn Nghĩa Tiếng Việt'}
+                {QUIZ_LABELS[quizQuestion.type]}
               </span>
               <span className="quiz-score-badge">Đúng: {quizScore} câu</span>
             </div>
@@ -644,6 +671,18 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                     <span>Nghe lại âm thanh</span>
                   </button>
                   <p className="listen-hint-text">Nghe kỹ âm thanh và chọn từ chính xác bên dưới:</p>
+                </div>
+              ) : quizQuestion.type === 'vi-to-en' ? (
+                <div className="en-quiz-prompt">
+                  <p className="quiz-direction">Từ tiếng Anh nào phù hợp nhất với nghĩa:</p>
+                  <h3 className="meaning-quiz-heading">{quizQuestion.target.meaning}</h3>
+                  <div className="target-ipa">Loại từ: {quizQuestion.target.pos || quizQuestion.target.type || '—'}</div>
+                </div>
+              ) : quizQuestion.type === 'cloze' ? (
+                <div className="en-quiz-prompt">
+                  <p className="quiz-direction">Chọn từ phù hợp nhất với ngữ cảnh:</p>
+                  <h3 className="cloze-quiz-heading">{quizQuestion.clozePrompt}</h3>
+                  <div className="target-ipa">{quizQuestion.target.meaning}</div>
                 </div>
               ) : (
                 <div className="en-quiz-prompt">
@@ -681,7 +720,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                   >
                     <span className="opt-letter">{['A', 'B', 'C', 'D'][idx]}</span>
                     <span className="opt-text">
-                      {quizQuestion.type === 'listen-pick' ? option.word : option.meaning}
+                      {quizQuestion.type === 'en-to-vi' ? option.meaning : option.word}
                     </span>
                     {quizIsAnswered && isCorrect && <Check size={18} className="opt-status-icon" />}
                     {quizIsAnswered && isSelected && !isCorrect && <X size={18} className="opt-status-icon" />}
@@ -689,6 +728,14 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                 );
               })}
             </div>
+
+            {quizIsAnswered && (
+              <div className="quiz-answer-explanation" role="status">
+                <strong>{quizSelectedAnswer === quizQuestion.target.id ? 'Chính xác.' : 'Chưa đúng.'}</strong>
+                <span><b>{quizQuestion.target.word}</b> — {quizQuestion.target.meaning}</span>
+                <button onClick={() => setDetailWord(quizQuestion.target)}>Xem cách dùng và ví dụ</button>
+              </div>
+            )}
 
             {/* Next Quiz Button */}
             {quizIsAnswered && (
