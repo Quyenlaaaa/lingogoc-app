@@ -373,13 +373,18 @@ a {
 }
 
 .more-nav-wrap {
-  position: relative;
+  position: sticky;
+  right: 0;
+  z-index: 110;
+  padding-left: 4px;
+  background: var(--bg-card);
+  box-shadow: -10px 0 16px var(--bg-card);
 }
 
 .more-nav-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
+  top: 116px;
+  right: max(20px, calc((100vw - 1200px) / 2 + 20px));
   z-index: 1200;
   width: 245px;
   padding: 8px;
@@ -3993,6 +3998,31 @@ html, body {
   gap: 8px;
 }
 
+.hands-free-toggle {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.hands-free-toggle.active {
+  color: #34d399;
+  border-color: rgba(16, 185, 129, .45);
+  background: rgba(16, 185, 129, .09);
+}
+
+.provider-help-text {
+  color: var(--text-secondary);
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
 .icon-toggle,
 .composer-tool {
   width: 36px;
@@ -4258,6 +4288,7 @@ html, body {
   .chat-arena-header { align-items: flex-start; gap: 10px; }
   .partner-desc { display: none; }
   .reset-chat-btn span { display: none; }
+  .hands-free-toggle span { display: none; }
   .speaking-stage-v2 { min-height: 110px; }
   .speaking-messages-v2 { min-height: 280px; max-height: 430px; }
   .model-picker-row { align-items: stretch; flex-direction: column; gap: 0; }

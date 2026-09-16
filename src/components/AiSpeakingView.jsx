@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   Mic,
   MicOff,
+  Radio,
   RotateCcw,
   Send,
   Settings,
@@ -29,6 +30,7 @@ import {
   requestCloudSpeech,
   requestSpeakingReply,
   saveSpeakingConfig,
+  SPEAKING_PROVIDERS,
 } from '../utils/speakingAiService';
 
 const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -63,12 +65,19 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const requestControllerRef = useRef(null);
   const audioRef = useRef(null);
   const audioUrlRef = useRef('');
+  const autoListenTimerRef = useRef(null);
+  const startMicRef = useRef(null);
   const chatEndRef = useRef(null);
 
   const connected = Boolean(config.apiKey && config.model);
+  const provider = SPEAKING_PROVIDERS[config.provider] || SPEAKING_PROVIDERS.custom;
   const freeModelCount = models.filter((model) => model.accessTier === 'free').length;
 
   const stopAudio = useCallback(() => {
+    if (autoListenTimerRef.current) {
+      clearTimeout(autoListenTimerRef.current);
+      autoListenTimerRef.current = null;
+    }
     speechHelper.stop();
     if (audioRef.current) {
       audioRef.current.pause();
@@ -81,19 +90,30 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setIsSpeaking(false);
   }, []);
 
-  const speak = useCallback(async (text) => {
+  const speak = useCallback(async (text, options = {}) => {
     if (!text) return;
     stopAudio();
     setIsSpeaking(true);
+    const finishSpeech = () => {
+      if (audioRef.current) audioRef.current = null;
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = '';
+      }
+      setIsSpeaking(false);
+      if (options.resumeListening && config.autoListen) {
+        autoListenTimerRef.current = setTimeout(() => startMicRef.current?.(), 450);
+      }
+    };
 
-    if (config.useCloudVoice && config.apiKey) {
+    if (config.provider === 'xkiro' && config.useCloudVoice && config.apiKey) {
       try {
         const url = await requestCloudSpeech({ config, text });
         audioUrlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
-        audio.onended = stopAudio;
-        audio.onerror = stopAudio;
+        audio.onended = finishSpeech;
+        audio.onerror = finishSpeech;
         await audio.play();
         return;
       } catch (cloudError) {
@@ -103,8 +123,8 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
     speechHelper.speak(text, {
       rate: voiceSpeed,
-      onEnd: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
+      onEnd: finishSpeech,
+      onError: finishSpeech,
     });
   }, [config, stopAudio, voiceSpeed]);
 
@@ -178,6 +198,26 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setError('');
   };
 
+  const selectProvider = (providerId) => {
+    const preset = SPEAKING_PROVIDERS[providerId] || SPEAKING_PROVIDERS.custom;
+    setModels([]);
+    setDraftConfig((current) => ({
+      ...current,
+      provider: providerId,
+      baseUrl: preset.baseUrl,
+      model: preset.model,
+      apiKey: '',
+      useCloudVoice: providerId === 'xkiro' ? current.useCloudVoice : false,
+    }));
+  };
+
+  const toggleHandsFree = () => {
+    const saved = saveSpeakingConfig({ ...config, autoListen: !config.autoListen });
+    setConfig(saved);
+    setDraftConfig(saved);
+    if (config.autoListen) stopMic();
+  };
+
   const activeHints = useMemo(() => hints?.slice(0, 3) || [], [hints]);
 
   const sendTurn = useCallback(async (rawText, targetHint = null) => {
@@ -217,7 +257,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       setEncouragement(result.encouragement);
       if (result.hints?.length) setHints(result.hints);
       onUpdateUserData?.({ ...userData, xp: (userData?.xp || 0) + 15 });
-      speak(result.replyEn);
+      speak(result.replyEn, { resumeListening: true });
     } catch (requestError) {
       if (requestError.name !== 'AbortError') setError(requestError.message || 'Không thể kết nối với AI.');
     } finally {
@@ -268,6 +308,10 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setInterimTranscript('');
   };
 
+  useEffect(() => {
+    startMicRef.current = startMic;
+  });
+
   return (
     <div className="ai-speaking-view speaking-ai-v2 animate-fade-in">
       <section className="module-header-card speaking-hero-v2">
@@ -276,15 +320,16 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
           <h2 className="module-title">Trò chuyện tiếng Anh trực tiếp với AI</h2>
           <p className="module-desc">Nói tự nhiên theo từng tình huống, nhận phản hồi đúng ngữ cảnh, bản dịch và cách diễn đạt tốt hơn sau mỗi lượt.</p>
           <div className="speaking-trust-row">
-            <span><ShieldCheck size={15} /> API key không nằm trong mã nguồn</span>
+            <span><ShieldCheck size={15} /> Không commit API key vào repo</span>
             <span><Mic size={15} /> Nhận giọng nói trên trình duyệt</span>
+            <span><Radio size={15} /> Tự nghe lại sau khi AI trả lời</span>
           </div>
         </div>
         <button className={`provider-status-card ${connected ? 'connected' : ''}`} onClick={openSettings}>
           <span className="provider-status-icon"><Bot size={22} /></span>
           <span>
-            <small>{connected ? 'Đã sẵn sàng' : 'Chưa kết nối'}</small>
-            <strong>{connected ? config.model : 'Thiết lập xKiro API'}</strong>
+            <small>{connected ? provider.label : 'Chưa kết nối'}</small>
+            <strong>{connected ? config.model : 'Thiết lập API miễn phí'}</strong>
           </span>
           <Settings size={18} />
         </button>
@@ -308,6 +353,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
             <div><div className="partner-name-row"><strong>{scenario.partnerName}</strong><span className="live-status-dot" /><span className="status-text">{isThinking ? 'Đang suy nghĩ...' : isSpeaking ? 'Đang nói...' : isRecording ? 'Đang nghe...' : 'Sẵn sàng'}</span></div><div className="partner-desc">{scenario.description}</div></div>
           </div>
           <div className="speaking-header-actions">
+            <button className={`hands-free-toggle ${config.autoListen ? 'active' : ''}`} onClick={toggleHandsFree} title="AI nói xong sẽ tự bật micro"><Radio size={16} /><span>{config.autoListen ? 'Rảnh tay: Bật' : 'Rảnh tay: Tắt'}</span></button>
             <button className={`icon-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation((value) => !value)} title="Bật/tắt bản dịch">{showTranslation ? <Eye size={17} /> : <EyeOff size={17} />}</button>
             <button className="reset-chat-btn" onClick={() => startScenario(scenario)}><RotateCcw size={16} /><span>Bắt đầu lại</span></button>
           </div>
@@ -318,7 +364,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
           <div className={`speaking-orb ${isRecording ? 'recording' : ''} ${isThinking ? 'thinking' : ''}`}>
             {isThinking ? <LoaderCircle size={34} className="animate-spin" /> : isRecording ? <Mic size={34} /> : <Bot size={34} />}
           </div>
-          <span>{interimTranscript || (isRecording ? 'Hãy nói bằng tiếng Anh...' : 'Chạm micro để bắt đầu nói')}</span>
+          <span>{interimTranscript || (isRecording ? 'Hãy nói bằng tiếng Anh...' : config.autoListen ? 'Chạm micro một lần để bắt đầu hội thoại rảnh tay' : 'Chạm micro để bắt đầu nói')}</span>
         </div>
 
         <div className="chat-messages-container speaking-messages-v2">
@@ -359,14 +405,16 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
       {showSettings && <div className="modal-overlay" onClick={() => setShowSettings(false)}>
         <div className="speaking-settings-modal" onClick={(event) => event.stopPropagation()}>
-          <div className="settings-modal-header"><div><span className="settings-eyebrow">AI PROVIDER</span><h3>Kết nối xKiro</h3></div><button onClick={() => setShowSettings(false)}><X size={20} /></button></div>
-          <div className="settings-security-note"><KeyRound size={18} /><div><strong>Key thuộc về bạn</strong><span>Chỉ lưu trong localStorage của trình duyệt này, không commit lên GitHub. Với ứng dụng public, nên dùng key riêng có giới hạn.</span></div></div>
+          <div className="settings-modal-header"><div><span className="settings-eyebrow">AI PROVIDER</span><h3>Kết nối mô hình ngôn ngữ</h3></div><button onClick={() => setShowSettings(false)}><X size={20} /></button></div>
+          <div className="settings-security-note"><KeyRound size={18} /><div><strong>Key thuộc về bạn</strong><span>Ưu tiên nhập trong trình duyệt hoặc dùng proxy. Biến VITE_* trong .env sẽ xuất hiện trong bundle khi deploy website public.</span></div></div>
+          <label className="speaking-field"><span>Nhà cung cấp</span><select value={draftConfig.provider} onChange={(event) => selectProvider(event.target.value)}>{Object.entries(SPEAKING_PROVIDERS).map(([id, item]) => <option value={id} key={id}>{item.label}</option>)}</select><small className="provider-help-text">{(SPEAKING_PROVIDERS[draftConfig.provider] || SPEAKING_PROVIDERS.custom).note}</small></label>
           <label className="speaking-field"><span>Base URL</span><input value={draftConfig.baseUrl} onChange={(event) => setDraftConfig((current) => ({ ...current, baseUrl: event.target.value }))} placeholder="https://api.xkiro.com/v1" /></label>
           <label className="speaking-field"><span>API key</span><input type="password" value={draftConfig.apiKey} onChange={(event) => setDraftConfig((current) => ({ ...current, apiKey: event.target.value }))} placeholder="Nhập API key của bạn" autoComplete="off" /></label>
-          <div className="model-picker-row"><label className="speaking-field"><span>Model hội thoại</span><select value={draftConfig.model} onChange={(event) => setDraftConfig((current) => ({ ...current, model: event.target.value }))}><option value="">Chọn model...</option>{models.map((model) => <option value={model.id} key={model.id}>{model.name} {model.accessTier === 'free' ? '• Free' : `• ${model.accessTier}`}</option>)}</select></label><button className="refresh-model-btn" onClick={() => loadModels(draftConfig)} disabled={isLoadingModels}>{isLoadingModels ? <LoaderCircle size={17} className="animate-spin" /> : <RotateCcw size={17} />} Tải model</button></div>
-          {models.length > 0 && <div className="model-result-note"><Check size={15} /> Tìm thấy {models.length} model, trong đó {freeModelCount} model được xKiro gắn nhãn miễn phí.</div>}
-          <label className="cloud-voice-toggle"><span><strong>Dùng giọng đọc xKiro</strong><small>Tắt để dùng giọng đọc miễn phí có sẵn trên trình duyệt.</small></span><input type="checkbox" checked={draftConfig.useCloudVoice} onChange={(event) => setDraftConfig((current) => ({ ...current, useCloudVoice: event.target.checked }))} /></label>
-          {draftConfig.useCloudVoice && <label className="speaking-field"><span>Voice ID (không bắt buộc)</span><input value={draftConfig.voice} onChange={(event) => setDraftConfig((current) => ({ ...current, voice: event.target.value }))} placeholder="Để trống để dùng giọng mặc định" /></label>}
+          <div className="model-picker-row"><label className="speaking-field"><span>Model hội thoại</span><input list="speaking-model-list" value={draftConfig.model} onChange={(event) => setDraftConfig((current) => ({ ...current, model: event.target.value }))} placeholder="Nhập hoặc chọn model" /><datalist id="speaking-model-list">{models.map((model) => <option value={model.id} key={model.id}>{model.name} {model.accessTier === 'free' ? '• Free' : ''}</option>)}</datalist></label><button className="refresh-model-btn" onClick={() => loadModels(draftConfig)} disabled={isLoadingModels}>{isLoadingModels ? <LoaderCircle size={17} className="animate-spin" /> : <RotateCcw size={17} />} Tải model</button></div>
+          {models.length > 0 && <div className="model-result-note"><Check size={15} /> Tìm thấy {models.length} model{freeModelCount ? `, có ${freeModelCount} model được đánh dấu miễn phí` : ''}.</div>}
+          <label className="cloud-voice-toggle"><span><strong>Hội thoại rảnh tay</strong><small>AI nói xong sẽ tự bật micro cho lượt tiếp theo.</small></span><input type="checkbox" checked={draftConfig.autoListen} onChange={(event) => setDraftConfig((current) => ({ ...current, autoListen: event.target.checked }))} /></label>
+          {draftConfig.provider === 'xkiro' && <label className="cloud-voice-toggle"><span><strong>Dùng giọng đọc xKiro</strong><small>Tắt để dùng giọng đọc miễn phí có sẵn trên trình duyệt.</small></span><input type="checkbox" checked={draftConfig.useCloudVoice} onChange={(event) => setDraftConfig((current) => ({ ...current, useCloudVoice: event.target.checked }))} /></label>}
+          {draftConfig.provider === 'xkiro' && draftConfig.useCloudVoice && <label className="speaking-field"><span>Voice ID (không bắt buộc)</span><input value={draftConfig.voice} onChange={(event) => setDraftConfig((current) => ({ ...current, voice: event.target.value }))} placeholder="Để trống để dùng giọng mặc định" /></label>}
           <div className="settings-modal-actions"><button className="btn btn-secondary" onClick={() => setShowSettings(false)}>Hủy</button><button className="btn btn-primary" onClick={persistSettings}><Check size={17} /> Lưu & kết nối</button></div>
         </div>
       </div>}
