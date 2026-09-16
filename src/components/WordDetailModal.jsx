@@ -6,15 +6,28 @@ import {
   Sparkles, 
   BookOpen, 
   Lightbulb, 
-  Layers
+  Layers,
+  KeyRound,
+  Settings,
+  ShieldCheck
 } from 'lucide-react';
 import { fetchRealWordData, playNativeAudio } from '../utils/realDictionaryService';
+import {
+  fetchCambridgeWordData,
+  loadCambridgeConfig,
+  saveCambridgeConfig,
+} from '../utils/cambridgeDictionaryService';
 import { enrichWordWithLLM } from '../utils/geminiService';
 import { speakText } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
 export default function WordDetailModal({ word, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
+  const [cambridgeData, setCambridgeData] = useState(null);
+  const [cambridgeError, setCambridgeError] = useState('');
+  const [cambridgeConfig, setCambridgeConfig] = useState(loadCambridgeConfig);
+  const [cambridgeDraft, setCambridgeDraft] = useState(loadCambridgeConfig);
+  const [showCambridgeSettings, setShowCambridgeSettings] = useState(false);
   const [aiEnrichData, setAiEnrichData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,19 +37,31 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     let isMounted = true;
     setLoading(true);
     setRealDictData(null);
+    setCambridgeData(null);
+    setCambridgeError('');
     setAiEnrichData(null);
 
     const loadDetails = async () => {
       try {
-        const dictData = await fetchRealWordData(word.word);
+        const [dictionaryResult, cambridgeResult] = await Promise.allSettled([
+          fetchRealWordData(word.word),
+          cambridgeConfig.accessKey ? fetchCambridgeWordData(word.word, cambridgeConfig) : Promise.resolve(null),
+        ]);
+        const dictData = dictionaryResult.status === 'fulfilled' ? dictionaryResult.value : null;
+        const officialData = cambridgeResult.status === 'fulfilled' ? cambridgeResult.value : null;
         if (!isMounted) return;
         setRealDictData(dictData);
+        setCambridgeData(officialData);
+        if (cambridgeResult.status === 'rejected') setCambridgeError(cambridgeResult.reason?.message || 'Không thể tải Cambridge API.');
 
         const aiData = await enrichWordWithLLM(
           word.word,
           word.meaning,
           word.topic,
-          dictData?.definitions || [],
+          [
+            ...(officialData?.definitions || []).map((text) => ({ partOfSpeech: '', text, source: 'Cambridge' })),
+            ...(dictData?.definitions || []),
+          ],
         );
         if (!isMounted) return;
         setAiEnrichData(aiData);
@@ -48,7 +73,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     loadDetails();
 
     return () => { isMounted = false; };
-  }, [isOpen, word]);
+  }, [cambridgeConfig, isOpen, word]);
 
   if (!isOpen || !word) return null;
 
@@ -56,12 +81,15 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
   const dictionaryExamples = (realDictData?.examples || [])
     .filter((example) => !isLowQualityExample(example))
     .map((example) => ({ en: example, vi: '', context: 'Từ điển', source: 'dictionary' }));
+  const cambridgeExamples = (cambridgeData?.examples || [])
+    .filter((example) => !isLowQualityExample(example))
+    .map((example) => ({ en: example, vi: '', context: 'Cambridge Dictionary API', source: 'cambridge' }));
   const aiExamples = (aiEnrichData?.contextExamples || [])
     .filter((example) => !isLowQualityExample(example.en))
     .map((example) => ({ ...example, source: 'ai' }));
-  const contextExamples = [...aiExamples, ...dictionaryExamples, ...storedExamples]
+  const contextExamples = [...cambridgeExamples, ...aiExamples, ...dictionaryExamples, ...storedExamples]
     .filter((example, index, list) => list.findIndex((item) => item.en.toLowerCase() === example.en.toLowerCase()) === index)
-    .slice(0, 7);
+    .slice(0, 10);
   const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
   const handlePlayNativeOrTts = () => {
@@ -70,6 +98,12 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     } else {
       speakText(word.word, 0.85);
     }
+  };
+
+  const handleSaveCambridge = () => {
+    const saved = saveCambridgeConfig(cambridgeDraft);
+    setCambridgeConfig(saved);
+    setShowCambridgeSettings(false);
   };
 
   return (
@@ -169,7 +203,30 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
             <Volume2 size={20} />
             <span>{realDictData?.audioUrl ? 'Nghe Giọng Bản Xứ (Người Thật)' : 'Nghe Phát Âm Chuẩn'}</span>
           </button>
+
+          <button
+            onClick={() => {
+              setCambridgeDraft(cambridgeConfig);
+              setShowCambridgeSettings((value) => !value);
+            }}
+            className="cambridge-connect-btn"
+          >
+            {cambridgeConfig.accessKey ? <ShieldCheck size={16} /> : <KeyRound size={16} />}
+            <span>{cambridgeConfig.accessKey ? 'Cambridge API đã cấu hình' : 'Kết nối Cambridge API'}</span>
+            <Settings size={14} />
+          </button>
         </div>
+
+        {showCambridgeSettings && (
+          <div className="cambridge-settings-panel">
+            <div className="cambridge-settings-title"><KeyRound size={18} /><div><strong>Cambridge Dictionary API</strong><small>Cần accessKey được Cambridge phê duyệt. Khóa chỉ lưu trên trình duyệt này và không nằm trong repo; do đây là frontend tĩnh, chỉ dùng key có giới hạn phù hợp.</small></div></div>
+            <label><span>Access key</span><input type="password" value={cambridgeDraft.accessKey} onChange={(event) => setCambridgeDraft((current) => ({ ...current, accessKey: event.target.value }))} placeholder="Cambridge accessKey" autoComplete="off" /></label>
+            <label><span>Dictionary code</span><input value={cambridgeDraft.dictionaryCode} onChange={(event) => setCambridgeDraft((current) => ({ ...current, dictionaryCode: event.target.value }))} placeholder="british" /></label>
+            <div className="cambridge-settings-actions"><a href="https://dictionary-api.cambridge.org/apply" target="_blank" rel="noreferrer">Đăng ký API key</a><button onClick={handleSaveCambridge}>Lưu và tải lại</button></div>
+          </div>
+        )}
+
+        {cambridgeError && <div className="cambridge-api-error">{cambridgeError}</div>}
 
         {/* Loading Spinner */}
         {loading ? (
@@ -183,7 +240,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
               <div className="meaning-usage-note"><strong>Lưu ý cách dùng:</strong> {aiEnrichData.meaningNote}</div>
             )}
 
-            {(aiEnrichData?.senses?.length > 0 || realDictData?.definitions?.length > 0) && (
+            {(aiEnrichData?.senses?.length > 0 || realDictData?.definitions?.length > 0 || cambridgeData?.definitions?.length > 0) && (
               <div className="dictionary-senses-section">
                 <div className="word-detail-section-title"><BookOpen size={18} /> Các nghĩa và cách dùng</div>
                 {aiEnrichData?.senses?.map((sense, index) => (
@@ -194,6 +251,11 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                 {realDictData?.definitions?.map((definition, index) => (
                   <div className="definition-row" key={`${definition.partOfSpeech}-${index}`}>
                     <b>{definition.partOfSpeech}</b><span>{definition.text}</span><small>Nguồn từ điển tiếng Anh</small>
+                  </div>
+                ))}
+                {cambridgeData?.definitions?.map((definition, index) => (
+                  <div className="definition-row cambridge-definition" key={`cambridge-${index}`}>
+                    <b>Cambridge</b><span>{definition}</span><small>Cambridge Dictionary API • {cambridgeData.dictionaryCode}</small>
                   </div>
                 ))}
               </div>
@@ -264,6 +326,9 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                   <div className="no-trusted-examples">
                     Chưa có ví dụ đủ tin cậy cho từ này. Hãy thêm Gemini API key trong Cài đặt để tạo và đối chiếu 5 ngữ cảnh song ngữ.
                   </div>
+                )}
+                {cambridgeData?.entryUrl && (
+                  <a className="cambridge-attribution" href={cambridgeData.entryUrl} target="_blank" rel="noreferrer">Xem mục từ gốc trên Cambridge Dictionary ↗</a>
                 )}
               </div>
             </div>

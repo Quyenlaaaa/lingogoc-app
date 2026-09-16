@@ -20,7 +20,8 @@ import {
   Crown,
   Settings,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Code2
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -45,6 +46,7 @@ export default function Navbar({
     { id: 'speaking', label: 'Luyện nói', icon: Mic, badge: null, primary: true },
     { id: 'progress', label: 'Tiến độ', icon: UserCheck, badge: null, primary: true },
     { id: 'diagnostic', label: 'Kiểm tra đầu vào', icon: Sparkles, badge: 'Gợi ý', badgeColor: '#38bdf8' },
+    { id: 'it-career', label: 'Tiếng Anh ngành IT', icon: Code2, badge: 'Mới', badgeColor: '#10b981' },
     { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
     { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
     { id: 'dictation', label: 'Nghe Chép', icon: Headphones, badge: 'Nối Âm', badgeColor: '#818cf8' },

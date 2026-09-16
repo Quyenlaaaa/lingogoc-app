@@ -18,6 +18,7 @@ import TrapsView from './components/TrapsView';
 import VipUpgradeModal from './components/VipUpgradeModal';
 import SettingsModal from './components/SettingsModal';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
+import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
 import { loadPrivateVocabulary } from './utils/privateVocabulary';
@@ -229,6 +230,14 @@ export default function App() {
             <TrapsView 
               userData={userData} 
               onUpdateUserData={handleUpdateUserData} 
+            />
+          )}
+
+          {activeTab === 'it-career' && (
+            <ItCareerView
+              userData={userData}
+              onUpdateUserData={handleUpdateUserData}
+              voiceSpeed={voiceSpeed}
             />
           )}
 

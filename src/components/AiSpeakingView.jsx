@@ -1,670 +1,375 @@
-// AiSpeakingView.jsx - Stage 4: AI Speaking Arena & Roleplay Partner for Beginners
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Mic, 
-  MicOff, 
-  Send, 
-  Volume2, 
-  Sparkles, 
-  RotateCcw, 
-  Lightbulb, 
-  Eye, 
-  EyeOff, 
-  CheckCircle2, 
-  Award, 
-  MessageSquare, 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AlertCircle,
   Bot,
-  Key,
+  Check,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Lightbulb,
+  LoaderCircle,
+  Mic,
+  MicOff,
+  RotateCcw,
+  Send,
   Settings,
+  ShieldCheck,
+  Sparkles,
+  Square,
+  Volume2,
   X,
-  Zap,
-  Check
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { aiScenarios } from '../data/scenariosData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import AudioWave from './AudioWave';
-import { getGeminiApiKey, saveGeminiApiKey, sendChatMessageToGemini } from '../utils/geminiService';
+import {
+  fetchSpeakingModels,
+  loadSpeakingConfig,
+  requestCloudSpeech,
+  requestSpeakingReply,
+  saveSpeakingConfig,
+} from '../utils/speakingAiService';
 
-export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed }) {
-  const [selectedScenario, setSelectedScenario] = useState(aiScenarios[0]);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [userInputText, setUserInputText] = useState('');
+const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed = 0.9 }) {
+  const [scenario, setScenario] = useState(aiScenarios[0]);
+  const [messages, setMessages] = useState(() => [{
+    sender: 'ai',
+    text: aiScenarios[0].introMessage,
+    textVi: aiScenarios[0].introMessageVi,
+    timestamp: now(),
+  }]);
+  const [input, setInput] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [isAiSpeaking, setIsAiSpeaking] = useState(false);
-  const [isAiThinking, setIsAiThinking] = useState(false);
-  const [recognitionObj, setRecognitionObj] = useState(null);
-  const [showVietnameseSubs, setShowVietnameseSubs] = useState(true);
-  const [showSmartHints, setShowSmartHints] = useState(true);
-  const [latestEval, setLatestEval] = useState(null);
-  const [latestCorrection, setLatestCorrection] = useState(null);
-  const [isFinished, setIsFinished] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(true);
+  const [showHints, setShowHints] = useState(true);
+  const [hints, setHints] = useState(aiScenarios[0].starterHints || []);
+  const [correction, setCorrection] = useState('');
+  const [encouragement, setEncouragement] = useState('');
+  const [pronunciation, setPronunciation] = useState(null);
+  const [error, setError] = useState('');
+  const [config, setConfig] = useState(loadSpeakingConfig);
+  const [draftConfig, setDraftConfig] = useState(loadSpeakingConfig);
+  const [models, setModels] = useState([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
-  // Gemini API Key State
-  const [apiKey, setApiKey] = useState(getGeminiApiKey());
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [inputKey, setInputKey] = useState(apiKey);
-  const [dynamicGeminiHints, setDynamicGeminiHints] = useState(null);
-
+  const recognitionRef = useRef(null);
+  const requestControllerRef = useRef(null);
+  const audioRef = useRef(null);
+  const audioUrlRef = useRef('');
   const chatEndRef = useRef(null);
 
-  // Initialize Scenario Chat
-  const startScenario = (scenario) => {
-    setSelectedScenario(scenario);
-    setCurrentStep(0);
-    setUserInputText('');
-    setLatestEval(null);
-    setLatestCorrection(null);
-    setDynamicGeminiHints(null);
-    setIsFinished(false);
+  const connected = Boolean(config.apiKey && config.model);
+  const freeModelCount = models.filter((model) => model.accessTier === 'free').length;
 
-    const initialMessage = {
+  const stopAudio = useCallback(() => {
+    speechHelper.stop();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = '';
+    }
+    setIsSpeaking(false);
+  }, []);
+
+  const speak = useCallback(async (text) => {
+    if (!text) return;
+    stopAudio();
+    setIsSpeaking(true);
+
+    if (config.useCloudVoice && config.apiKey) {
+      try {
+        const url = await requestCloudSpeech({ config, text });
+        audioUrlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = stopAudio;
+        audio.onerror = stopAudio;
+        await audio.play();
+        return;
+      } catch (cloudError) {
+        console.warn('Cloud TTS failed, using browser voice:', cloudError);
+      }
+    }
+
+    speechHelper.speak(text, {
+      rate: voiceSpeed,
+      onEnd: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
+  }, [config, stopAudio, voiceSpeed]);
+
+  const startScenario = useCallback((nextScenario) => {
+    requestControllerRef.current?.abort();
+    recognitionRef.current?.stop();
+    stopAudio();
+    setScenario(nextScenario);
+    setMessages([{
       sender: 'ai',
-      text: scenario.introMessage,
-      textVi: scenario.introMessageVi,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setChatMessages([initialMessage]);
-
-    // Speak initial welcome message
-    setTimeout(() => {
-      speakMessage(scenario.introMessage);
-    }, 400);
-  };
+      text: nextScenario.introMessage,
+      textVi: nextScenario.introMessageVi,
+      timestamp: now(),
+    }]);
+    setHints(nextScenario.starterHints || []);
+    setCorrection('');
+    setEncouragement('');
+    setPronunciation(null);
+    setInput('');
+    setInterimTranscript('');
+    setError('');
+  }, [stopAudio]);
 
   useEffect(() => {
-    startScenario(selectedScenario);
-  }, []);
+    return () => {
+      requestControllerRef.current?.abort();
+      recognitionRef.current?.stop();
+      stopAudio();
+    };
+  }, [stopAudio]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages, isAiSpeaking, isAiThinking]);
+  }, [messages, isThinking, interimTranscript]);
 
-  const speakMessage = (text) => {
-    setIsAiSpeaking(true);
-    speechHelper.speak(text, {
-      rate: voiceSpeed,
-      onEnd: () => setIsAiSpeaking(false),
-      onError: () => setIsAiSpeaking(false)
-    });
-  };
-
-  const handleSaveApiKey = () => {
-    saveGeminiApiKey(inputKey);
-    setApiKey(inputKey.trim());
-    setShowKeyModal(false);
-  };
-
-  // Process User Turn (either from Mic or typed)
-  const handleUserSend = async (spokenText, targetHint = null) => {
-    const textToSend = spokenText || userInputText;
-    if (!textToSend.trim()) return;
-
-    // Pronunciation Evaluation if practicing a hint
-    let evaluation = null;
-    if (targetHint) {
-      evaluation = evaluatePronunciation(targetHint.en, textToSend);
-      setLatestEval(evaluation);
-    } else {
-      evaluation = {
-        score: 85,
-        status: 'good',
-        feedback: 'Bạn đã giao tiếp tự tin và mạch lạc! Tiếp tục phát huy nhé! 🎉'
-      };
-      setLatestEval(evaluation);
+  const loadModels = useCallback(async (candidate) => {
+    setIsLoadingModels(true);
+    setError('');
+    try {
+      const result = await fetchSpeakingModels(candidate);
+      setModels(result);
+      if (!candidate.model && result.length) {
+        const firstFree = result.find((item) => item.accessTier === 'free') || result[0];
+        setDraftConfig((previous) => ({ ...previous, model: firstFree.id }));
+      }
+    } catch (loadError) {
+      setError(loadError.message || 'Không thể tải danh sách model.');
+    } finally {
+      setIsLoadingModels(false);
     }
+  }, []);
 
-    const newUserMsg = {
-      sender: 'user',
-      text: textToSend,
-      score: evaluation?.score,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+  const openSettings = useCallback(() => {
+    setDraftConfig(config);
+    setShowSettings(true);
+    if (!models.length) loadModels(config);
+  }, [config, loadModels, models.length]);
 
-    const updatedMessages = [...chatMessages, newUserMsg];
-    setChatMessages(updatedMessages);
-    setUserInputText('');
-
-    // If Gemini API Key is provided, use Gemini 1.5 Flash LLM
-    if (apiKey) {
-      setIsAiThinking(true);
-      try {
-        const geminiRes = await sendChatMessageToGemini(textToSend, updatedMessages, selectedScenario.title);
-        setIsAiThinking(false);
-
-        if (geminiRes.correction) {
-          setLatestCorrection(geminiRes.correction);
-        } else {
-          setLatestCorrection(null);
-        }
-
-        if (geminiRes.hints) {
-          setDynamicGeminiHints(geminiRes.hints);
-        }
-
-        const aiReplyMsg = {
-          sender: 'ai',
-          text: geminiRes.replyEn,
-          textVi: geminiRes.replyVi,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
-        setChatMessages([...updatedMessages, aiReplyMsg]);
-        speakMessage(geminiRes.replyEn);
-
-        // Add XP
-        onUpdateUserData({
-          ...userData,
-          xp: (userData?.xp || 0) + 15
-        });
-        return;
-      } catch (err) {
-        console.warn('Gemini API call failed, falling back to local simulation:', err);
-        setIsAiThinking(false);
-        // Fallback to local rule-based below
-      }
+  const persistSettings = () => {
+    if (!draftConfig.apiKey.trim()) {
+      setError('Hãy nhập API key của bạn. Key chỉ được lưu trên trình duyệt này.');
+      return;
     }
-
-    // Local offline flow fallback
-    setTimeout(() => {
-      const flowList = selectedScenario.conversationFlow;
-      let matchedFlow = flowList[currentStep];
-      if (!matchedFlow && flowList.length > 0) {
-        matchedFlow = flowList[flowList.length - 1];
-      }
-
-      if (matchedFlow) {
-        const aiReplyMsg = {
-          sender: 'ai',
-          text: matchedFlow.aiReply,
-          textVi: matchedFlow.aiReplyVi,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setChatMessages([...updatedMessages, aiReplyMsg]);
-        speakMessage(matchedFlow.aiReply);
-
-        if (currentStep < flowList.length - 1) {
-          setCurrentStep(prev => prev + 1);
-        } else {
-          // Completed conversation scenario!
-          setIsFinished(true);
-          try {
-            confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-          } catch (e) {}
-          
-          const completedSet = new Set(userData?.completedScenarios || []);
-          completedSet.add(selectedScenario.id);
-          onUpdateUserData({
-            ...userData,
-            completedScenarios: Array.from(completedSet),
-            xp: (userData?.xp || 0) + 50 // 50 XP for speaking roleplay
-          });
-        }
-      }
-    }, 900);
+    if (!draftConfig.model) {
+      setError('Hãy tải và chọn một model trước khi lưu.');
+      return;
+    }
+    const saved = saveSpeakingConfig(draftConfig);
+    setConfig(saved);
+    setShowSettings(false);
+    setError('');
   };
 
-  // Microphone Handling
-  const handleStartMic = (targetHint = null) => {
-    if (!speechHelper.isSpeechRecognitionSupported()) {
-      alert('Trình duyệt chưa hỗ trợ ghi âm trực tiếp. Hãy sử dụng Google Chrome hoặc Edge.');
+  const activeHints = useMemo(() => hints?.slice(0, 3) || [], [hints]);
+
+  const sendTurn = useCallback(async (rawText, targetHint = null) => {
+    const text = String(rawText || input).trim();
+    if (!text || isThinking) return;
+    if (!connected) {
+      setError('Hãy kết nối API và chọn model trước khi bắt đầu hội thoại.');
+      openSettings();
       return;
     }
 
-    setIsRecording(true);
-    setLatestEval(null);
+    stopAudio();
+    setInput('');
+    setInterimTranscript('');
+    setError('');
+    setCorrection('');
+    setEncouragement('');
+    setPronunciation(targetHint ? evaluatePronunciation(targetHint.en, text) : null);
 
-    const rec = speechHelper.createRecognition(
+    const userMessage = { sender: 'user', text, timestamp: now() };
+    const history = [...messages, userMessage];
+    setMessages(history);
+    setIsThinking(true);
+    const controller = new AbortController();
+    requestControllerRef.current = controller;
+
+    try {
+      const result = await requestSpeakingReply({ config, scenario, messages: history, signal: controller.signal });
+      const aiMessage = {
+        sender: 'ai',
+        text: result.replyEn,
+        textVi: result.replyVi,
+        timestamp: now(),
+      };
+      setMessages((previous) => [...previous, aiMessage]);
+      setCorrection(result.correction);
+      setEncouragement(result.encouragement);
+      if (result.hints?.length) setHints(result.hints);
+      onUpdateUserData?.({ ...userData, xp: (userData?.xp || 0) + 15 });
+      speak(result.replyEn);
+    } catch (requestError) {
+      if (requestError.name !== 'AbortError') setError(requestError.message || 'Không thể kết nối với AI.');
+    } finally {
+      setIsThinking(false);
+      requestControllerRef.current = null;
+    }
+  }, [config, connected, input, isThinking, messages, onUpdateUserData, openSettings, scenario, speak, stopAudio, userData]);
+
+  const stopThinking = () => {
+    requestControllerRef.current?.abort();
+    setIsThinking(false);
+  };
+
+  const startMic = (targetHint = null) => {
+    if (isRecording) return;
+    if (!speechHelper.isSpeechRecognitionSupported()) {
+      setError('Trình duyệt chưa hỗ trợ nhận giọng nói. Hãy dùng Chrome/Edge hoặc nhập câu ở ô bên dưới.');
+      return;
+    }
+    setError('');
+    setInterimTranscript('Đang nghe...');
+    setIsRecording(true);
+    const recognition = speechHelper.createRecognition(
       (result) => {
+        if (result.interim) setInterimTranscript(result.interim);
         if (result.isFinal) {
           setIsRecording(false);
-          handleUserSend(result.final, targetHint);
+          setInterimTranscript(result.final);
+          sendTurn(result.final, targetHint);
         }
       },
-      (error) => {
-        console.error(error);
+      (recognitionError) => {
         setIsRecording(false);
+        setInterimTranscript('');
+        setError(recognitionError === 'not-allowed'
+          ? 'Bạn chưa cấp quyền microphone cho trình duyệt.'
+          : 'Không nhận được giọng nói. Hãy thử lại và nói gần microphone hơn.');
       },
-      () => setIsRecording(false)
+      () => setIsRecording(false),
     );
-
-    if (rec) {
-      setRecognitionObj(rec);
-      rec.start();
-    }
+    recognitionRef.current = recognition;
+    recognition?.start();
   };
 
-  const handleStopMic = () => {
-    if (recognitionObj) {
-      recognitionObj.stop();
-    }
+  const stopMic = () => {
+    recognitionRef.current?.stop();
     setIsRecording(false);
+    setInterimTranscript('');
   };
-
-  // Get current active hints (dynamic from Gemini or static from scenario)
-  const currentHints = dynamicGeminiHints || (
-    currentStep === 0 
-      ? selectedScenario.starterHints 
-      : selectedScenario.conversationFlow[currentStep - 1]?.hints || selectedScenario.starterHints
-  );
 
   return (
-    <div className="ai-speaking-view animate-fade-in">
-      {/* Header & Scenarios Bar */}
-      <div className="module-header-card">
-        <div className="module-tag speaking-tag">Chặng 4: Phòng Luyện Nói AI Thực Chiến</div>
-        <div className="speaking-header-flex">
-          <div>
-            <h2 className="module-title">Đối Thoại Thực Chiến Không Sợ Sai</h2>
-            <p className="module-desc">
-              AI kiên nhẫn nhất thế giới, sẵn sàng lắng nghe, sửa lỗi phát âm và phản xạ 
-              cùng bạn 24/7. Có nút gợi ý câu trả lời và dịch tiếng Việt trợ lực 100%.
-            </p>
-          </div>
-
-          {/* Subtitles, Hints & Gemini Key Toggles */}
-          <div className="aux-controls-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            <button 
-              className={`aux-pill-btn ${apiKey ? 'active' : ''}`}
-              onClick={() => setShowKeyModal(true)}
-              title="Cài đặt kết nối Google Gemini AI"
-              style={{ background: apiKey ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)', borderColor: apiKey ? '#10b981' : 'var(--border-color)' }}
-            >
-              <Zap size={16} color={apiKey ? '#10b981' : 'var(--text-secondary)'} />
-              <span style={{ color: apiKey ? '#10b981' : 'var(--text-secondary)' }}>
-                {apiKey ? 'Gemini AI: Bật' : 'Kết nối Gemini API'}
-              </span>
-            </button>
-
-            <button 
-              className={`aux-pill-btn ${showVietnameseSubs ? 'active' : ''}`}
-              onClick={() => setShowVietnameseSubs(!showVietnameseSubs)}
-              title="Bật/tắt phụ đề tiếng Việt bên dưới câu của AI"
-            >
-              {showVietnameseSubs ? <Eye size={16} /> : <EyeOff size={16} />}
-              <span>{showVietnameseSubs ? 'Hiện dịch Việt' : 'Ẩn dịch Việt'}</span>
-            </button>
-
-            <button 
-              className={`aux-pill-btn ${showSmartHints ? 'active' : ''}`}
-              onClick={() => setShowSmartHints(!showSmartHints)}
-              title="Bật/tắt gợi ý câu trả lời"
-            >
-              <Lightbulb size={16} />
-              <span>{showSmartHints ? 'Hiện gợi ý' : 'Ẩn gợi ý'}</span>
-            </button>
+    <div className="ai-speaking-view speaking-ai-v2 animate-fade-in">
+      <section className="module-header-card speaking-hero-v2">
+        <div className="speaking-hero-copy">
+          <div className="module-tag speaking-tag"><Sparkles size={15} /> AI Speaking Lab</div>
+          <h2 className="module-title">Trò chuyện tiếng Anh trực tiếp với AI</h2>
+          <p className="module-desc">Nói tự nhiên theo từng tình huống, nhận phản hồi đúng ngữ cảnh, bản dịch và cách diễn đạt tốt hơn sau mỗi lượt.</p>
+          <div className="speaking-trust-row">
+            <span><ShieldCheck size={15} /> API key không nằm trong mã nguồn</span>
+            <span><Mic size={15} /> Nhận giọng nói trên trình duyệt</span>
           </div>
         </div>
+        <button className={`provider-status-card ${connected ? 'connected' : ''}`} onClick={openSettings}>
+          <span className="provider-status-icon"><Bot size={22} /></span>
+          <span>
+            <small>{connected ? 'Đã sẵn sàng' : 'Chưa kết nối'}</small>
+            <strong>{connected ? config.model : 'Thiết lập xKiro API'}</strong>
+          </span>
+          <Settings size={18} />
+        </button>
+      </section>
 
-        {/* Scenarios Selector Tabs */}
-        <div className="scenarios-carousel">
-          {aiScenarios.map((sc) => {
-            const isSelected = selectedScenario.id === sc.id;
-            return (
-              <button
-                key={sc.id}
-                className={`scenario-pill-item ${isSelected ? 'active' : ''}`}
-                onClick={() => startScenario(sc)}
-              >
-                <span className="sc-icon">{sc.avatar}</span>
-                <div className="sc-text-wrap">
-                  <div className="sc-title">{sc.title}</div>
-                  <div className="sc-partner">Bạn đồng hành: {sc.partnerName}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+      <div className="scenarios-carousel speaking-scenarios-v2">
+        {aiScenarios.map((item) => (
+          <button key={item.id} className={`scenario-pill-item ${scenario.id === item.id ? 'active' : ''}`} onClick={() => startScenario(item)}>
+            <span className="sc-icon">{item.avatar}</span>
+            <span className="sc-text-wrap"><span className="sc-title">{item.title}</span><span className="sc-partner">{item.partnerName}</span></span>
+          </button>
+        ))}
       </div>
 
-      {/* Main Chat Arena */}
-      <div className="speaking-chat-arena">
-        <div className="chat-arena-header">
+      {error && <div className="speaking-error" role="alert"><AlertCircle size={18} /><span>{error}</span><button onClick={() => setError('')}><X size={16} /></button></div>}
+
+      <section className="speaking-chat-arena speaking-arena-v2">
+        <header className="chat-arena-header">
           <div className="arena-partner-info">
-            <span className="partner-avatar">{selectedScenario.avatar}</span>
-            <div>
-              <div className="partner-name-row">
-                <strong>{selectedScenario.partnerName}</strong>
-                <span className="live-status-dot"></span>
-                <span className="status-text">{isAiThinking ? 'Đang suy nghĩ...' : isAiSpeaking ? 'Đang nói...' : 'Đang lắng nghe'}</span>
-              </div>
-              <div className="partner-desc">{selectedScenario.description}</div>
-            </div>
+            <span className="partner-avatar">{scenario.avatar}</span>
+            <div><div className="partner-name-row"><strong>{scenario.partnerName}</strong><span className="live-status-dot" /><span className="status-text">{isThinking ? 'Đang suy nghĩ...' : isSpeaking ? 'Đang nói...' : isRecording ? 'Đang nghe...' : 'Sẵn sàng'}</span></div><div className="partner-desc">{scenario.description}</div></div>
           </div>
+          <div className="speaking-header-actions">
+            <button className={`icon-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation((value) => !value)} title="Bật/tắt bản dịch">{showTranslation ? <Eye size={17} /> : <EyeOff size={17} />}</button>
+            <button className="reset-chat-btn" onClick={() => startScenario(scenario)}><RotateCcw size={16} /><span>Bắt đầu lại</span></button>
+          </div>
+        </header>
 
-          <button 
-            className="reset-chat-btn" 
-            onClick={() => startScenario(selectedScenario)}
-            title="Bắt đầu lại cuộc đối thoại"
-          >
-            <RotateCcw size={16} />
-            <span>Bắt đầu lại</span>
-          </button>
+        <div className="speaking-stage-v2">
+          <AudioWave isActive={isSpeaking || isRecording || isThinking} />
+          <div className={`speaking-orb ${isRecording ? 'recording' : ''} ${isThinking ? 'thinking' : ''}`}>
+            {isThinking ? <LoaderCircle size={34} className="animate-spin" /> : isRecording ? <Mic size={34} /> : <Bot size={34} />}
+          </div>
+          <span>{interimTranscript || (isRecording ? 'Hãy nói bằng tiếng Anh...' : 'Chạm micro để bắt đầu nói')}</span>
         </div>
 
-        {/* Audio Wave Visualizer while AI speaks or User records */}
-        <div className="speaking-waves-container">
-          <AudioWave isActive={isAiSpeaking || isRecording || isAiThinking} />
-        </div>
-
-        {/* Messages Stream */}
-        <div className="chat-messages-container">
-          {chatMessages.map((msg, index) => {
-            const isAi = msg.sender === 'ai';
+        <div className="chat-messages-container speaking-messages-v2">
+          {messages.map((message, index) => {
+            const isAi = message.sender === 'ai';
             return (
-              <div 
-                key={index} 
-                className={`chat-bubble-wrapper ${isAi ? 'from-ai' : 'from-user'}`}
-              >
-                <div className="bubble-avatar">
-                  {isAi ? selectedScenario.avatar : '👤'}
-                </div>
-
+              <article key={`${message.timestamp}-${index}`} className={`chat-bubble-wrapper ${isAi ? 'from-ai' : 'from-user'}`}>
+                <div className="bubble-avatar">{isAi ? scenario.avatar : '👤'}</div>
                 <div className="bubble-content">
-                  <div className="bubble-header-row">
-                    <span className="bubble-sender">{isAi ? selectedScenario.partnerName : 'Bạn'}</span>
-                    <span className="bubble-time">{msg.timestamp}</span>
-                  </div>
-
-                  <div className="bubble-text-en">{msg.text}</div>
-
-                  {/* Audio replay button for AI messages */}
-                  {isAi && (
-                    <button 
-                      className="replay-tts-btn" 
-                      onClick={() => speakMessage(msg.text)}
-                      title="Nghe lại câu này"
-                    >
-                      <Volume2 size={15} />
-                      <span>Nghe lại</span>
-                    </button>
-                  )}
-
-                  {/* Vietnamese Subtitle for AI */}
-                  {isAi && showVietnameseSubs && msg.textVi && (
-                    <div className="bubble-sub-vi">
-                      🇻🇳 {msg.textVi}
-                    </div>
-                  )}
-
-                  {/* Score badge for User message */}
-                  {!isAi && msg.score && (
-                    <div className="user-score-pill">
-                      <CheckCircle2 size={13} color="#10b981" />
-                      <span>Độ chính xác phát âm: {msg.score}%</span>
-                    </div>
-                  )}
+                  <div className="bubble-header-row"><span className="bubble-sender">{isAi ? scenario.partnerName : 'Bạn'}</span><span className="bubble-time">{message.timestamp}</span></div>
+                  <div className="bubble-text-en">{message.text}</div>
+                  {isAi && <button className="replay-tts-btn" onClick={() => speak(message.text)}><Volume2 size={15} /> Nghe lại</button>}
+                  {isAi && showTranslation && message.textVi && <div className="bubble-sub-vi">🇻🇳 {message.textVi}</div>}
                 </div>
-              </div>
+              </article>
             );
           })}
-
-          {isAiThinking && (
-            <div className="chat-bubble-wrapper from-ai">
-              <div className="bubble-avatar">{selectedScenario.avatar}</div>
-              <div className="bubble-content" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 18px' }}>
-                <Sparkles size={16} color="#818cf8" className="animate-spin" />
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Lily đang soạn câu trả lời phù hợp...</span>
-              </div>
-            </div>
-          )}
-
+          {isThinking && <div className="chat-bubble-wrapper from-ai"><div className="bubble-avatar">{scenario.avatar}</div><div className="bubble-content speaking-thinking"><LoaderCircle size={17} className="animate-spin" /> AI đang tạo câu trả lời...</div></div>}
           <div ref={chatEndRef} />
         </div>
 
-        {/* AI Grammar Correction Banner if provided */}
-        {latestCorrection && (
-          <div style={{
-            margin: '0 20px 16px',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: 'rgba(99, 102, 241, 0.1)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <Sparkles size={20} color="#818cf8" />
-            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', flex: 1 }}>
-              <strong style={{ color: '#818cf8' }}>Gợi ý từ AI: </strong> {latestCorrection}
-            </div>
-          </div>
-        )}
+        {(correction || encouragement) && <div className="ai-coach-card"><Sparkles size={20} /><div><strong>Phản hồi từ gia sư AI</strong>{correction && <p>{correction}</p>}{encouragement && <small>{encouragement}</small>}</div></div>}
+        {pronunciation && <div className="eval-feedback-card"><div className="eval-score-gauge"><span className="score-num">{pronunciation.score}%</span><span className="score-label">Độ khớp câu</span></div><div className="eval-text-details"><div className="eval-title">So với câu gợi ý bạn vừa luyện</div><div className="eval-msg">{pronunciation.feedback}</div></div></div>}
 
-        {/* Latest Evaluation Feedback Banner */}
-        {latestEval && (
-          <div className="eval-feedback-card">
-            <div className="eval-score-gauge">
-              <span className="score-num">{latestEval.score}%</span>
-              <span className="score-label">Điểm phát âm</span>
-            </div>
-            <div className="eval-text-details">
-              <div className="eval-title">Đánh giá phát âm câu vừa nói:</div>
-              <div className="eval-msg">{latestEval.feedback}</div>
-            </div>
-          </div>
-        )}
+        {showHints && activeHints.length > 0 && <div className="smart-hints-drawer speaking-hints-v2">
+          <div className="hints-header-row"><div className="hints-title-wrap"><Lightbulb size={18} /><span>Chưa biết nói gì? Thử một trong các câu này</span></div><button className="icon-toggle" onClick={() => setShowHints(false)}><X size={16} /></button></div>
+          <div className="hints-buttons-grid">{activeHints.map((hint, index) => <div className="hint-card-item" key={`${hint.en}-${index}`}><button className="hint-main-action" onClick={() => setInput(hint.en)}><span className="hint-en">{hint.en}</span>{hint.vi && <span className="hint-vi">{hint.vi}</span>}</button><div className="hint-actions"><button className="hint-audio-btn" onClick={() => speak(hint.en)} title="Nghe mẫu"><Volume2 size={16} /></button><button className="hint-speak-btn" onClick={() => startMic(hint)}><Mic size={16} /> Luyện câu</button></div></div>)}</div>
+        </div>}
 
-        {/* Scenario Finished Congratulations */}
-        {isFinished && (
-          <div className="scenario-completed-banner animate-fade-in">
-            <div className="completed-icon-badge">
-              <Award size={48} color="#f59e0b" />
-            </div>
-            <h3>Xuất Sắc! Hoàn Thành Hội Thoại!</h3>
-            <p>
-              Bạn đã hoàn thành trọn vẹn kịch bản <strong>"{selectedScenario.title}"</strong>. 
-              Bạn vừa nhận thêm <strong>+50 XP</strong> vào hồ sơ học tập!
-            </p>
-            <button 
-              className="btn btn-primary next-scenario-btn"
-              onClick={() => {
-                const currentIndex = aiScenarios.findIndex(s => s.id === selectedScenario.id);
-                const nextIndex = (currentIndex + 1) % aiScenarios.length;
-                startScenario(aiScenarios[nextIndex]);
-              }}
-            >
-              Thử Thách Kịch Bản Tiếp Theo
-            </button>
-          </div>
-        )}
+        <footer className="speaking-composer-v2">
+          {!showHints && <button className="composer-tool" onClick={() => setShowHints(true)} title="Hiện gợi ý"><Lightbulb size={19} /></button>}
+          <button className={`push-to-talk ${isRecording ? 'recording' : ''}`} onClick={isRecording ? stopMic : () => startMic()} disabled={isThinking} title={isRecording ? 'Dừng thu' : 'Bắt đầu nói'}>{isRecording ? <MicOff size={24} /> : <Mic size={24} />}</button>
+          <input value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) sendTurn(); }} placeholder="Hoặc nhập câu tiếng Anh..." disabled={isThinking} />
+          {isThinking ? <button className="send-speaking-btn stop" onClick={stopThinking} title="Dừng tạo câu trả lời"><Square size={18} /></button> : <button className="send-speaking-btn" onClick={() => sendTurn()} disabled={!input.trim()} title="Gửi"><Send size={19} /></button>}
+        </footer>
+        <div className="speaking-privacy-note">Nhận giọng nói phụ thuộc Chrome/Edge và có thể dùng dịch vụ nhận dạng của trình duyệt. Không có bản ghi âm nào được lưu trong ứng dụng.</div>
+      </section>
 
-        {/* Smart Hints Box (Gợi ý câu trả lời song ngữ) */}
-        {!isFinished && showSmartHints && currentHints && currentHints.length > 0 && (
-          <div className="smart-hints-drawer">
-            <div className="hints-header-row">
-              <div className="hints-title-wrap">
-                <Lightbulb size={18} color="#f59e0b" />
-                <span>Bí ý tưởng? Gợi ý các câu trả lời tự nhiên (Bấm mic đọc thử):</span>
-              </div>
-            </div>
-
-            <div className="hints-buttons-grid">
-              {currentHints.map((hint, idx) => (
-                <div key={idx} className="hint-card-item">
-                  <div className="hint-texts">
-                    <div className="hint-en">{hint.en}</div>
-                    {hint.ipa && <div className="hint-ipa">{hint.ipa}</div>}
-                    {hint.vi && <div className="hint-vi">{hint.vi}</div>}
-                  </div>
-
-                  <div className="hint-actions">
-                    <button 
-                      className="hint-audio-btn" 
-                      onClick={() => speakMessage(hint.en)}
-                      title="Nghe phát âm mẫu"
-                    >
-                      <Volume2 size={16} />
-                    </button>
-
-                    <button 
-                      className="hint-speak-btn"
-                      onClick={() => handleStartMic(hint)}
-                      title="Bật mic đọc câu này"
-                    >
-                      <Mic size={16} />
-                      <span>Đọc câu này</span>
-                    </button>
-
-                    <button 
-                      className="hint-send-btn"
-                      onClick={() => handleUserSend(hint.en, hint)}
-                      title="Gửi câu này luôn"
-                    >
-                      <Send size={15} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* User Input Bar (Mic + Text fallback) */}
-        {!isFinished && (
-          <div className="speaking-input-bar">
-            {/* Big Mic Button */}
-            <button 
-              className={`mic-primary-btn ${isRecording ? 'is-recording' : ''}`}
-              onClick={() => isRecording ? handleStopMic() : handleStartMic()}
-              title="Bấm để nói tiếng Anh qua microphone"
-            >
-              {isRecording ? <MicOff size={24} /> : <Mic size={24} />}
-              <span>{isRecording ? 'Đang nghe... (Bấm dừng)' : 'Bấm mic để nói'}</span>
-            </button>
-
-            {/* Text Input Fallback */}
-            <div className="text-fallback-wrapper">
-              <input
-                type="text"
-                className="chat-text-input"
-                placeholder="Hoặc gõ câu trả lời của bạn tại đây..."
-                value={userInputText}
-                onChange={(e) => setUserInputText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleUserSend()}
-              />
-              <button 
-                className="chat-send-btn" 
-                onClick={() => handleUserSend()}
-                disabled={!userInputText.trim() || isAiThinking}
-              >
-                <Send size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modal Cài Đặt Gemini API Key */}
-      {showKeyModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div className="card glass-card animate-fade-in" style={{
-            maxWidth: '520px',
-            width: '100%',
-            padding: '28px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '20px',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => setShowKeyModal(false)}
-              style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <Key size={24} color="#10b981" />
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                Kết Nối Google Gemini 1.5 Flash API
-              </h3>
-            </div>
-
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '16px' }}>
-              Nhập API Key miễn phí từ Google AI Studio để mở khóa khả năng trò chuyện tự do không giới hạn với gia sư AI Lily, sửa lỗi ngữ pháp chi tiết bằng tiếng Việt.
-            </p>
-
-            <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              padding: '12px',
-              borderRadius: '10px',
-              border: '1px solid var(--border-color)',
-              marginBottom: '16px',
-              fontSize: '0.85rem',
-              color: 'var(--text-muted)'
-            }}>
-              💡 <em>Lưu ý: Không bắt buộc. Nếu để trống, LingoGoc AI vẫn hoạt động 100% mượt mà với kịch bản có sẵn offline.</em>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                Google Gemini API Key:
-              </label>
-              <input
-                type="password"
-                value={inputKey}
-                onChange={(e) => setInputKey(e.target.value)}
-                placeholder="AIzaSy..."
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  borderRadius: '10px',
-                  border: '1.5px solid var(--border-color)',
-                  background: 'rgba(0,0,0,0.2)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.95rem',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              {apiKey && (
-                <button
-                  onClick={() => {
-                    setInputKey('');
-                    saveGeminiApiKey('');
-                    setApiKey('');
-                    setShowKeyModal(false);
-                  }}
-                  className="btn btn-outline"
-                  style={{ padding: '10px 18px', color: '#ef4444', borderColor: '#ef4444' }}
-                >
-                  Xóa Key
-                </button>
-              )}
-              <button
-                onClick={handleSaveApiKey}
-                className="btn btn-primary"
-                style={{ padding: '10px 24px', fontWeight: 700 }}
-              >
-                Lưu & Kích Hoạt
-              </button>
-            </div>
-          </div>
+      {showSettings && <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+        <div className="speaking-settings-modal" onClick={(event) => event.stopPropagation()}>
+          <div className="settings-modal-header"><div><span className="settings-eyebrow">AI PROVIDER</span><h3>Kết nối xKiro</h3></div><button onClick={() => setShowSettings(false)}><X size={20} /></button></div>
+          <div className="settings-security-note"><KeyRound size={18} /><div><strong>Key thuộc về bạn</strong><span>Chỉ lưu trong localStorage của trình duyệt này, không commit lên GitHub. Với ứng dụng public, nên dùng key riêng có giới hạn.</span></div></div>
+          <label className="speaking-field"><span>Base URL</span><input value={draftConfig.baseUrl} onChange={(event) => setDraftConfig((current) => ({ ...current, baseUrl: event.target.value }))} placeholder="https://api.xkiro.com/v1" /></label>
+          <label className="speaking-field"><span>API key</span><input type="password" value={draftConfig.apiKey} onChange={(event) => setDraftConfig((current) => ({ ...current, apiKey: event.target.value }))} placeholder="Nhập API key của bạn" autoComplete="off" /></label>
+          <div className="model-picker-row"><label className="speaking-field"><span>Model hội thoại</span><select value={draftConfig.model} onChange={(event) => setDraftConfig((current) => ({ ...current, model: event.target.value }))}><option value="">Chọn model...</option>{models.map((model) => <option value={model.id} key={model.id}>{model.name} {model.accessTier === 'free' ? '• Free' : `• ${model.accessTier}`}</option>)}</select></label><button className="refresh-model-btn" onClick={() => loadModels(draftConfig)} disabled={isLoadingModels}>{isLoadingModels ? <LoaderCircle size={17} className="animate-spin" /> : <RotateCcw size={17} />} Tải model</button></div>
+          {models.length > 0 && <div className="model-result-note"><Check size={15} /> Tìm thấy {models.length} model, trong đó {freeModelCount} model được xKiro gắn nhãn miễn phí.</div>}
+          <label className="cloud-voice-toggle"><span><strong>Dùng giọng đọc xKiro</strong><small>Tắt để dùng giọng đọc miễn phí có sẵn trên trình duyệt.</small></span><input type="checkbox" checked={draftConfig.useCloudVoice} onChange={(event) => setDraftConfig((current) => ({ ...current, useCloudVoice: event.target.checked }))} /></label>
+          {draftConfig.useCloudVoice && <label className="speaking-field"><span>Voice ID (không bắt buộc)</span><input value={draftConfig.voice} onChange={(event) => setDraftConfig((current) => ({ ...current, voice: event.target.value }))} placeholder="Để trống để dùng giọng mặc định" /></label>}
+          <div className="settings-modal-actions"><button className="btn btn-secondary" onClick={() => setShowSettings(false)}>Hủy</button><button className="btn btn-primary" onClick={persistSettings}><Check size={17} /> Lưu & kết nối</button></div>
         </div>
-      )}
+      </div>}
     </div>
   );
 }

@@ -11,6 +11,7 @@ const defaultData = {
   completedIpa: ['/i:/', '/s/', '/z/'],
   completedReflex: [1, 2],
   completedScenarios: [],
+  completedItTerms: [],
   settings: {
     voiceSpeed: 0.85, // 0.75 or 1.0
     theme: 'dark',
@@ -72,6 +73,7 @@ export function resetUserData() {
     completedIpa: [],
     completedReflex: [],
     completedScenarios: [],
+    completedItTerms: [],
     xp: 0,
     streak: 1,
   };

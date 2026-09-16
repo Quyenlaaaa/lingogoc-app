@@ -13,13 +13,11 @@ import {
   ArrowRight, 
   Check, 
   X, 
-  Filter, 
   Layers, 
   HelpCircle, 
-  Play, 
-  RefreshCw,
   Brain,
-  BookOpen
+  BookOpen,
+  Shuffle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
@@ -32,6 +30,7 @@ import {
   isLowQualityMeaning,
 } from '../utils/vocabularyQuality';
 import WordDetailModal from './WordDetailModal';
+import WordScrambleGame from './WordScrambleGame';
 
 const QUIZ_LABELS = {
   'en-to-vi': '🎯 Chọn nghĩa tiếng Việt',
@@ -297,6 +296,13 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
             >
               <HelpCircle size={16} />
               <span>Trắc Nghiệm Phản Xạ</span>
+            </button>
+            <button
+              className={`mode-btn ${studyMode === 'scramble' ? 'active' : ''}`}
+              onClick={() => setStudyMode('scramble')}
+            >
+              <Shuffle size={16} />
+              <span>Xếp Chữ</span>
             </button>
             {onOpenSrs && (
               <button 
@@ -748,6 +754,16 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
             )}
           </div>
         </div>
+      )}
+      {studyMode === 'scramble' && (
+        <WordScrambleGame
+          key={`${selectedTopic}-${selectedLevel}-${selectedStatus}-${searchQuery}`}
+          words={filteredWords}
+          userData={userData}
+          onUpdateUserData={onUpdateUserData}
+          onSpeak={handleSpeak}
+          onOpenDetail={setDetailWord}
+        />
       )}
       <WordDetailModal word={detailWord} isOpen={Boolean(detailWord)} onClose={() => setDetailWord(null)} />
     </div>
