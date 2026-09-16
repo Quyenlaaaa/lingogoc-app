@@ -205,9 +205,9 @@ for word, details in oxford_dict.items():
 
 print(f"Total vocabulary items generated: {len(final_list)}")
 
-# Write to src/data/vocabData.js and json
-out_js = 'C:/Users/Hp/.gemini/antigravity-ide/scratch/lingogoc-app/src/data/vocabData.js'
-out_json = 'C:/Users/Hp/.gemini/antigravity-ide/scratch/lingogoc-app/src/data/vocabData.json'
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+out_js = os.path.join(base_dir, 'src', 'data', 'vocabData.js')
+out_json = os.path.join(base_dir, 'src', 'data', 'vocabData.json')
 
 js_content = f"""// vocabData.js - 3000 Oxford Essential Words with IPA, VN meanings & examples
 // Generated for LingoGoc AI

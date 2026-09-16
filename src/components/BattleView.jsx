@@ -17,7 +17,6 @@ import {
   XCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { vocabList } from '../data/vocabData';
 import { speakText } from '../utils/speechHelper';
 import { addXP } from '../utils/storage';
 
@@ -28,7 +27,8 @@ const OPPONENTS = [
   { name: 'Minh Trí', avatar: '👨‍🏫', level: 'Cấp 1: Khởi động', baseSpeed: 3200, accuracy: 0.65 }
 ];
 
-export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboard }) {
+export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboard, vocabulary = [] }) {
+  const vocabList = vocabulary;
   const [gameState, setGameState] = useState('idle'); // 'idle', 'matching', 'playing', 'ended'
   const [opponent, setOpponent] = useState(OPPONENTS[0]);
   const [timeLeft, setTimeLeft] = useState(60);

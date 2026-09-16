@@ -20,7 +20,9 @@ import SettingsModal from './components/SettingsModal';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
-import { vocabData } from './data/vocabData';
+import { loadPrivateVocabulary } from './utils/privateVocabulary';
+
+const initialPrivateVocabulary = loadPrivateVocabulary();
 
 export default function App() {
   const [userData, setUserData] = useState(() => loadUserData());
@@ -28,20 +30,30 @@ export default function App() {
   const [voiceSpeed, setVoiceSpeed] = useState(0.85);
   const [theme, setTheme] = useState('dark');
   const [dueSrsCount, setDueSrsCount] = useState(0);
+  const [vocabulary, setVocabulary] = useState(() => initialPrivateVocabulary || []);
+  const [usesPrivateVocabulary, setUsesPrivateVocabulary] = useState(() => Boolean(initialPrivateVocabulary));
 
   // Modals
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  // Load initial settings and SRS due count
+  // Load bundled demo vocabulary only when no private dataset exists.
   useEffect(() => {
     if (userData?.settings) {
       if (userData.settings.theme) setTheme(userData.settings.theme);
       if (userData.settings.voiceSpeed) setVoiceSpeed(userData.settings.voiceSpeed);
     }
-    const stats = getSrsStats(vocabData);
-    setDueSrsCount(stats.dueCount || 15);
+
+    if (!initialPrivateVocabulary) {
+      import('./data/vocabData').then(({ vocabData }) => setVocabulary(vocabData));
+    }
   }, []);
+
+  useEffect(() => {
+    if (!vocabulary.length) return;
+    const stats = getSrsStats(vocabulary);
+    setDueSrsCount(stats.dueCount || 0);
+  }, [vocabulary]);
 
   // Update theme class on body
   useEffect(() => {
@@ -52,7 +64,14 @@ export default function App() {
   const handleUpdateUserData = (newData) => {
     setUserData(newData);
     saveUserData(newData);
-    const stats = getSrsStats(vocabData);
+    const stats = getSrsStats(vocabulary);
+    setDueSrsCount(stats.dueCount || 0);
+  };
+
+  const handleVocabularyChange = (nextVocabulary, isPrivate) => {
+    setVocabulary(nextVocabulary);
+    setUsesPrivateVocabulary(isPrivate);
+    const stats = getSrsStats(nextVocabulary);
     setDueSrsCount(stats.dueCount || 0);
   };
 
@@ -129,7 +148,9 @@ export default function App() {
           {activeTab === 'roadmap' && (
             <RoadmapView 
               setActiveTab={setActiveTab} 
-              userData={userData} 
+              userData={userData}
+              vocabularyCount={vocabulary.length}
+              usesPrivateVocabulary={usesPrivateVocabulary}
             />
           )}
 
@@ -137,7 +158,7 @@ export default function App() {
             <DiagnosticTestView
               onSelectStage={handleSelectStage}
               onCompleteTest={(res) => {
-                const stats = getSrsStats(vocabData);
+                const stats = getSrsStats(vocabulary);
                 setDueSrsCount(stats.dueCount);
               }}
             />
@@ -157,12 +178,14 @@ export default function App() {
               onUpdateUserData={handleUpdateUserData} 
               voiceSpeed={voiceSpeed}
               onOpenSrs={() => setActiveTab('srs')}
+              vocabulary={vocabulary}
             />
           )}
 
           {activeTab === 'srs' && (
             <SmartReviewView
               onBackToVocab={() => setActiveTab('vocab')}
+              vocabulary={vocabulary}
             />
           )}
 
@@ -171,6 +194,7 @@ export default function App() {
               userData={userData}
               onUpdateUserData={handleUpdateUserData}
               onGoToLeaderboard={() => setActiveTab('leaderboard')}
+              vocabulary={vocabulary}
             />
           )}
 
@@ -184,6 +208,7 @@ export default function App() {
           {activeTab === 'audiopod' && (
             <AudioPodView
               voiceSpeed={voiceSpeed}
+              vocabulary={vocabulary}
             />
           )}
 
@@ -237,10 +262,10 @@ export default function App() {
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="footer-seedling">🌱</span>
-            <strong>LingoGoc AI</strong> - Từng bước lấy lại gốc tiếng Anh vững chắc
+            <strong>LingoGoc</strong> — Mỗi ngày một bước, xây lại gốc tiếng Anh
           </div>
           <div className="footer-quote">
-            "Không quan trọng bạn đi chậm thế nào, miễn là bạn không dừng lại."
+            “Đi chậm vẫn là đang tiến về phía trước.”
           </div>
         </div>
       </footer>
@@ -260,6 +285,9 @@ export default function App() {
         userData={userData}
         onUpdateUserData={handleUpdateUserData}
         onOpenVipModal={() => setIsVipModalOpen(true)}
+        vocabulary={vocabulary}
+        usesPrivateVocabulary={usesPrivateVocabulary}
+        onVocabularyChange={handleVocabularyChange}
       />
     </div>
   );

@@ -21,17 +21,21 @@ import {
   Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { vocabList, topics, levels } from '../data/vocabData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
+import WordDetailModal from './WordDetailModal';
 
-export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOpenSrs }) {
+export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOpenSrs, vocabulary = [] }) {
+  const vocabList = vocabulary;
+  const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
+  const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
   // Navigation & Filter States
   const [studyMode, setStudyMode] = useState('flashcard'); // 'flashcard', 'list', 'quiz', 'mic'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('Tất cả');
   const [selectedLevel, setSelectedLevel] = useState('Tất cả');
   const [selectedStatus, setSelectedStatus] = useState('all'); // 'all', 'mastered', 'unmastered', 'bookmarked'
+  const [detailWord, setDetailWord] = useState(null); // Modal xem chi tiết từ điển thật & AI
   
   // Flashcard States
   const [cardIndex, setCardIndex] = useState(0);
@@ -235,6 +239,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
     setIsRecording(false);
   };
 
+  if (!vocabList.length) {
+    return <div className="empty-state-card">Chưa có từ vựng. Hãy mở Cài đặt để nhập kho dữ liệu cá nhân.</div>;
+  }
+
   return (
     <div className="vocab-view animate-fade-in">
       {/* Header Info */}
@@ -387,7 +395,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                 </div>
 
                 <div className="card-bottom-actions" onClick={(e) => e.stopPropagation()}>
-                  <button 
+                  <button
                     className="card-audio-btn"
                     title="Nghe phát âm chuẩn US"
                     onClick={() => handleSpeak(currentCard.word)}
@@ -411,6 +419,16 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                   >
                     {isRecording && activeWordForMic?.id === currentCard.id ? <MicOff size={18} /> : <Mic size={18} />}
                     <span>{isRecording && activeWordForMic?.id === currentCard.id ? 'Đang nghe...' : 'Nói thử'}</span>
+                  </button>
+
+                  <button
+                    className="card-audio-btn"
+                    style={{ background: 'rgba(56, 189, 248, 0.15)', borderColor: '#38bdf8', color: '#38bdf8', fontWeight: 700 }}
+                    title="Xem phát âm bản xứ MP3 và câu ví dụ phân tích sâu bằng Gemini AI"
+                    onClick={() => setDetailWord(currentCard)}
+                  >
+                    <Sparkles size={18} />
+                    <span>AI & Data Thật</span>
                   </button>
                 </div>
               </div>
@@ -684,6 +702,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
           </div>
         </div>
       )}
+      <WordDetailModal word={detailWord} isOpen={Boolean(detailWord)} onClose={() => setDetailWord(null)} />
     </div>
   );
 }

@@ -15,11 +15,13 @@ import {
   CheckCircle,
   Moon
 } from 'lucide-react';
-import { vocabList, topics, levels } from '../data/vocabData';
 import { speakText, speechHelper } from '../utils/speechHelper';
 import AudioWave from './AudioWave';
 
-export default function AudioPodView({ voiceSpeed = 0.85 }) {
+export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
+  const vocabList = vocabulary;
+  const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
+  const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedTopic, setSelectedTopic] = useState('Tất cả');

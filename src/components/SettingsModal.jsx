@@ -14,7 +14,14 @@ import {
   Sun,
   ShieldAlert
 } from 'lucide-react';
-import { loadUserData, saveUserData } from '../utils/storage';
+import { loadUserData, saveUserData, resetUserData } from '../utils/storage';
+import {
+  clearPrivateVocabulary,
+  downloadVocabulary,
+  getVocabularyMeta,
+  parseVocabularyFile,
+  savePrivateVocabulary,
+} from '../utils/privateVocabulary';
 
 const AVATARS = ['👤', '🦁', '🦄', '👑', '🌸', '🚀', '🐱', '⚽', '🎸', '⚡', '🦅', '💎'];
 
@@ -23,11 +30,17 @@ export default function SettingsModal({
   onClose, 
   userData, 
   onUpdateUserData, 
-  onOpenVipModal 
+  onOpenVipModal,
+  vocabulary = [],
+  usesPrivateVocabulary = false,
+  onVocabularyChange,
 }) {
   const [name, setName] = useState(userData?.name || 'Học Viên LingoGoc');
   const [selectedAvatar, setSelectedAvatar] = useState(userData?.avatar || '👤');
   const fileInputRef = useRef(null);
+  const vocabInputRef = useRef(null);
+  const [notice, setNotice] = useState(null);
+  const vocabularyMeta = getVocabularyMeta(vocabulary, usesPrivateVocabulary);
 
   if (!isOpen) return null;
 
@@ -38,7 +51,7 @@ export default function SettingsModal({
       avatar: selectedAvatar
     };
     onUpdateUserData(updated);
-    alert('Đã cập nhật thông tin cá nhân thành công!');
+    setNotice({ type: 'success', text: 'Đã lưu hồ sơ học viên.' });
   };
 
   // Xuất file JSON sao lưu
@@ -78,10 +91,33 @@ export default function SettingsModal({
   };
 
   const handleResetData = () => {
-    if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu học tập (Streak, XP, từ đã thuộc) để học lại từ đầu không?')) {
-      localStorage.clear();
-      window.location.reload();
+    if (confirm('Xóa toàn bộ tiến độ học? Kho từ vựng cá nhân của bạn vẫn được giữ lại.')) {
+      const freshData = resetUserData();
+      onUpdateUserData(freshData);
+      setNotice({ type: 'success', text: 'Đã đặt lại tiến độ. Kho từ riêng vẫn an toàn.' });
     }
+  };
+
+  const handleImportVocabulary = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const words = parseVocabularyFile(await file.text(), file.name);
+      const savedWords = savePrivateVocabulary(words);
+      onVocabularyChange?.(savedWords, true);
+      setNotice({ type: 'success', text: `Đã nhập ${savedWords.length.toLocaleString('vi-VN')} từ vào kho riêng trên thiết bị này.` });
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message || 'Không thể đọc tệp từ vựng.' });
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  const handleClearVocabulary = () => {
+    if (!confirm('Xóa kho từ cá nhân trên trình duyệt này và quay về dữ liệu mẫu?')) return;
+    clearPrivateVocabulary();
+    window.location.reload();
   };
 
   return (
@@ -129,6 +165,12 @@ export default function SettingsModal({
             Cài Đặt & Quản Lý Dữ Liệu
           </h2>
         </div>
+
+        {notice && (
+          <div className={`settings-notice ${notice.type}`} role="status">
+            {notice.text}
+          </div>
+        )}
 
         {/* Section 1: User Profile */}
         <div style={{ marginBottom: '24px' }}>
@@ -220,7 +262,42 @@ export default function SettingsModal({
           )}
         </div>
 
-        {/* Section 3: Data Backup & Restore */}
+        {/* Section 3: Private vocabulary */}
+        <section className="private-data-card">
+          <div className="private-data-heading">
+            <div>
+              <span className="eyebrow">Kho dữ liệu cá nhân</span>
+              <h3>{vocabularyMeta.count.toLocaleString('vi-VN')} từ · {vocabularyMeta.topics} chủ đề</h3>
+            </div>
+            <span className={`data-source-badge ${usesPrivateVocabulary ? 'private' : ''}`}>
+              {usesPrivateVocabulary ? 'Chỉ lưu trên máy' : 'Dữ liệu mẫu'}
+            </span>
+          </div>
+          <p>
+            Nhập tệp JSON hoặc CSV. Dữ liệu được lưu trong trình duyệt của bạn, không tải lên máy chủ và không nằm trong Git.
+          </p>
+          <div className="private-data-actions">
+            <button className="btn btn-primary" onClick={() => vocabInputRef.current?.click()}>
+              <Upload size={16} /> Nhập kho từ riêng
+            </button>
+            <button className="btn btn-outline" onClick={() => downloadVocabulary(vocabulary)} disabled={!vocabulary.length}>
+              <Download size={16} /> Xuất kho hiện tại
+            </button>
+            {usesPrivateVocabulary && (
+              <button className="btn btn-quiet-danger" onClick={handleClearVocabulary}>
+                <Trash2 size={16} /> Xóa kho riêng
+              </button>
+            )}
+          </div>
+          <input ref={vocabInputRef} type="file" accept=".json,.csv,text/csv,application/json" onChange={handleImportVocabulary} hidden />
+          <details className="data-format-help">
+            <summary>Định dạng dữ liệu hỗ trợ</summary>
+            <code>word, meaning, ipa, level, topic, example, exampleVi</code>
+            <span>Chỉ bắt buộc hai cột <b>word</b> và <b>meaning</b>.</span>
+          </details>
+        </section>
+
+        {/* Section 4: Progress Backup & Restore */}
         <div style={{
           background: 'rgba(255,255,255,0.02)',
           border: '1px solid var(--border-color)',

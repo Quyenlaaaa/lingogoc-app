@@ -1,16 +1,48 @@
-# React + Vite
+# LingoGoc
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ứng dụng tự học tiếng Anh dành cho người Việt muốn xây lại nền tảng: phát âm, từ vựng, ôn tập ngắt quãng, phản xạ và luyện nói.
 
-Currently, two official plugins are available:
+## Chạy trên máy
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Build production bằng `npm run build`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Kho dữ liệu cá nhân
 
-## Expanding the Oxlint configuration
+Mở **Cài đặt → Kho dữ liệu cá nhân** để nhập JSON hoặc CSV. Dữ liệu nhập được lưu trong trình duyệt (`localStorage`), không gửi lên server và không được ghi vào Git.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Hai trường bắt buộc là `word` và `meaning`. Các trường hỗ trợ:
+
+```text
+word, meaning, ipa, level, topic, example, exampleVi
+```
+
+Ví dụ JSON:
+
+```json
+{
+  "words": [
+    {
+      "word": "hello",
+      "meaning": "xin chào",
+      "ipa": "/həˈləʊ/",
+      "level": "A1",
+      "topic": "Giao tiếp",
+      "example": "Hello, how are you?",
+      "exampleVi": "Xin chào, bạn khỏe không?"
+    }
+  ]
+}
+```
+
+Các thư mục `private-data/`, `public/private-data/` và tệp `*.lingogoc-private.json` đã được chặn trong `.gitignore`. Không đặt dữ liệu cá nhân trong `src/data`.
+
+## Quyền riêng tư
+
+- Tiến độ và kho từ cá nhân mặc định chỉ tồn tại trên thiết bị/trình duyệt hiện tại.
+- Hãy xuất tệp sao lưu trong Cài đặt trước khi xóa dữ liệu trình duyệt.
+- API key Gemini hiện được lưu cục bộ. Không commit API key vào mã nguồn.

@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
 title LingoGoc AI - Hoc Tieng Anh Cho Nguoi Mat Goc
 color 0B
@@ -14,7 +14,7 @@ echo     (Nhan Ctrl + C hoac dong cua so khi muon dung chuong trinh)
 echo =====================================================================
 echo.
 
-cd /d "C:\Users\Hp\.gemini\antigravity-ide\scratch\lingogoc-app"
+cd /d "%~dp0"
 
 :: Tu dong mo trinh duyet web
 start "" "http://localhost:5173/"

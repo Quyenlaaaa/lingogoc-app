@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 scripts/data_cache
+
+# Personal learning datasets (never commit these)
+private-data/
+public/private-data/
+*.lingogoc-private.json

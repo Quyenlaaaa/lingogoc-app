@@ -140,3 +140,81 @@ function parseGeminiResponse(rawText) {
     hints: hints.length > 0 ? hints : null
   };
 }
+
+/**
+ * Sử dụng Google Gemini LLM để bổ sung, làm giàu dữ liệu từ vựng chuyên sâu:
+ * 3 câu ví dụ đời thực, cụm từ hay đi kèm (Collocations), và mẹo ghi nhớ tiếng Việt
+ */
+export async function enrichWordWithLLM(word, meaning = '', topic = '') {
+  const apiKey = getGeminiApiKey();
+
+  // Nếu có API Key, gọi trực tiếp Gemini 1.5 Flash
+  if (apiKey) {
+    try {
+      const prompt = `
+Phân tích chuyên sâu từ vựng tiếng Anh "${word}" (nghĩa cơ bản: "${meaning}", chủ đề: "${topic}") dành cho người Việt mất gốc.
+Trả về định dạng JSON thuần túy (không dùng markdown khác ngoài json block) với các trường sau:
+{
+  "contextExamples": [
+    { "en": "câu ví dụ tiếng Anh 1 thực tế đời sống", "vi": "dịch tiếng Việt câu 1" },
+    { "en": "câu ví dụ tiếng Anh 2 trong giao tiếp", "vi": "dịch tiếng Việt câu 2" },
+    { "en": "câu ví dụ tiếng Anh 3 trong công việc/mua sắm", "vi": "dịch tiếng Việt câu 3" }
+  ],
+  "collocations": [
+    { "phrase": "cụm từ tiếng Anh hay gặp", "meaning": "nghĩa tiếng Việt" },
+    { "phrase": "cụm từ 2", "meaning": "nghĩa tiếng Việt 2" }
+  ],
+  "mnemonicTip": "Mẹo nhớ từ bằng tiếng Việt hoặc câu chuyện vui ngắn dễ nhớ",
+  "wordFamily": "danh từ/động từ/tính từ liên quan nếu có"
+}
+`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.6, maxOutputTokens: 800 }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return { ...parsed, isAiGenerated: true };
+        }
+      }
+    } catch (e) {
+      console.warn('Gemini enrichment failed, using enhanced fallback:', e);
+    }
+  }
+
+  // Fallback phong phú theo ngữ cảnh khi không có API key
+  return {
+    isAiGenerated: false,
+    contextExamples: [
+      {
+        en: `I always use '${word}' when talking about ${topic.toLowerCase() || 'daily life'}.`,
+        vi: `Tôi luôn dùng từ '${word}' khi nói về ${topic.toLowerCase() || 'cuộc sống hàng ngày'}.`
+      },
+      {
+        en: `Can you explain the meaning of '${word}' in this conversation?`,
+        vi: `Bạn có thể giải thích ý nghĩa của từ '${word}' trong cuộc đối thoại này không?`
+      },
+      {
+        en: `It is very common to hear '${word}' in real American English.`,
+        vi: `Rất phổ biến khi nghe thấy từ '${word}' trong tiếng Anh giao tiếp thực tế của người Mỹ.`
+      }
+    ],
+    collocations: [
+      { phrase: `use ${word} correctly`, meaning: `sử dụng ${word} một cách chuẩn xác` },
+      { phrase: `common ${word}`, meaning: `${word} thông dụng` }
+    ],
+    mnemonicTip: `💡 Mẹo nhớ: Hãy gắn từ '${word}' với một hình ảnh quen thuộc trong chủ đề ${topic || 'đời sống'} và nhẩm to 3 lần!`,
+    wordFamily: `Từ gốc: ${word}`
+  };
+}

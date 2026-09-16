@@ -4,13 +4,12 @@ import {
   ArrowRight, Calendar, Brain, Award, ChevronRight, Zap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { vocabData } from '../data/vocabData';
 import { getDueWords, recordWordReview, getSrsStats } from '../utils/srsEngine';
 import { speakText, startSpeechRecognition } from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { addXP } from '../utils/storage';
 
-export default function SmartReviewView({ onBackToVocab }) {
+export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
   const [dueList, setDueList] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -26,13 +25,13 @@ export default function SmartReviewView({ onBackToVocab }) {
 
   // Load due cards and stats
   const refreshCards = () => {
-    const words = getDueWords(vocabData, 15);
+    const words = getDueWords(vocabulary, 15);
     setDueList(words);
     setCurrentIndex(0);
     setIsFlipped(false);
     setReviewedCount(0);
     setIsCompleted(words.length === 0);
-    setSrsStats(getSrsStats(vocabData));
+    setSrsStats(getSrsStats(vocabulary));
   };
 
   useEffect(() => {
@@ -97,7 +96,7 @@ export default function SmartReviewView({ onBackToVocab }) {
       setCurrentIndex(currentIndex + 1);
     } else {
       setIsCompleted(true);
-      setSrsStats(getSrsStats(vocabData));
+      setSrsStats(getSrsStats(vocabulary));
       try {
         confetti({
           particleCount: 100,

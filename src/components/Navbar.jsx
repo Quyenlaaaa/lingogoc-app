@@ -1,5 +1,5 @@
 // Navbar.jsx - Header navigation with stats, speed control, VIP badge, and navigation tabs
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Flame, 
   Sparkles, 
@@ -19,7 +19,8 @@ import {
   Award,
   Crown,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -34,21 +35,25 @@ export default function Navbar({
   onOpenVipModal,
   onOpenSettingsModal
 }) {
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const tabs = [
-    { id: 'roadmap', label: 'Lộ Trình', icon: Compass, badge: null },
-    { id: 'diagnostic', label: 'Test Đầu Vào', icon: Sparkles, badge: 'Khuyên Dùng', badgeColor: '#38bdf8' },
-    { id: 'ipa', label: 'Xóa Mù IPA', icon: Layers, badge: 'Chặng 1' },
-    { id: 'vocab', label: '3000 Từ Vựng', icon: BookOpen, badge: 'Chặng 2' },
-    { id: 'srs', label: 'Ôn Tập SRS', icon: Brain, badge: dueSrsCount > 0 ? `${dueSrsCount} từ` : 'SM-2', badgeColor: dueSrsCount > 0 ? '#ef4444' : '#10b981' },
+    { id: 'roadmap', label: 'Hôm nay', icon: Compass, badge: null, primary: true },
+    { id: 'ipa', label: 'Phát âm', icon: Layers, badge: null, primary: true },
+    { id: 'vocab', label: 'Từ vựng', icon: BookOpen, badge: null, primary: true },
+    { id: 'srs', label: 'Ôn tập', icon: Brain, badge: dueSrsCount > 0 ? `${dueSrsCount}` : null, badgeColor: '#ef4444', primary: true },
+    { id: 'reflex', label: 'Phản xạ', icon: Repeat, badge: null, primary: true },
+    { id: 'speaking', label: 'Luyện nói', icon: Mic, badge: null, primary: true },
+    { id: 'progress', label: 'Tiến độ', icon: UserCheck, badge: null, primary: true },
+    { id: 'diagnostic', label: 'Kiểm tra đầu vào', icon: Sparkles, badge: 'Gợi ý', badgeColor: '#38bdf8' },
     { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
     { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
     { id: 'dictation', label: 'Nghe Chép', icon: Headphones, badge: 'Nối Âm', badgeColor: '#818cf8' },
     { id: 'traps', label: 'Bẫy Lỗi Sai', icon: AlertTriangle, badge: 'Cặp Từ', badgeColor: '#ef4444' },
     { id: 'certificate', label: 'Chứng Chỉ', icon: Award, badge: 'A2', badgeColor: '#10b981' },
-    { id: 'reflex', label: 'Mẫu Câu 3s', icon: Repeat, badge: 'Chặng 3' },
-    { id: 'speaking', label: 'Luyện Nói AI', icon: Mic, badge: 'Chặng 4' },
-    { id: 'progress', label: 'Tiến Độ', icon: UserCheck, badge: null }
   ];
+  const primaryTabs = tabs.filter((tab) => tab.primary);
+  const moreTabs = tabs.filter((tab) => !tab.primary);
+  const isMoreActive = moreTabs.some((tab) => tab.id === activeTab);
 
   // Calculate Level name based on XP
   const getLevelInfo = (xp) => {
@@ -172,9 +177,9 @@ export default function Navbar({
       </div>
 
       {/* Navigation Tabs */}
-      <nav className="nav-tabs-wrapper">
+      <nav className="nav-tabs-wrapper" aria-label="Điều hướng chính">
         <div className="nav-tabs">
-          {tabs.map((tab) => {
+          {primaryTabs.map((tab) => {
             const IconComponent = tab.icon;
             const isActive = activeTab === tab.id;
             return (
@@ -183,6 +188,7 @@ export default function Navbar({
                 id={`tab-${tab.id}`}
                 className={`nav-tab-btn ${isActive ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <IconComponent size={18} className="tab-icon" />
                 <span className="tab-title">{tab.label}</span>
@@ -197,6 +203,30 @@ export default function Navbar({
               </button>
             );
           })}
+          <div className="more-nav-wrap">
+            <button
+              className={`nav-tab-btn ${isMoreActive ? 'active' : ''}`}
+              onClick={() => setIsMoreOpen((open) => !open)}
+              aria-expanded={isMoreOpen}
+            >
+              <ChevronDown size={17} />
+              <span className="tab-title">Khám phá</span>
+            </button>
+            {isMoreOpen && (
+              <div className="more-nav-menu">
+                {moreTabs.map((tab) => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setIsMoreOpen(false); }}>
+                      <IconComponent size={18} />
+                      <span>{tab.label}</span>
+                      {tab.badge && <small>{tab.badge}</small>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
     </header>

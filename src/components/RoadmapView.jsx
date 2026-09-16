@@ -15,7 +15,7 @@ import {
   Brain
 } from 'lucide-react';
 
-export default function RoadmapView({ setActiveTab, userData }) {
+export default function RoadmapView({ setActiveTab, userData, vocabularyCount = 0, usesPrivateVocabulary = false }) {
   const [diagnosticResult, setDiagnosticResult] = useState(null);
 
   useEffect(() => {
@@ -54,14 +54,14 @@ export default function RoadmapView({ setActiveTab, userData }) {
     {
       id: 'vocab',
       stageNumber: 2,
-      title: 'Chặng 2: 3000 Từ Vựng Sống Còn (Oxford 3000)',
+      title: 'Chặng 2: Từ Vựng Cốt Lõi Của Bạn',
       subtitle: 'Xây dựng vốn từ theo 3 cấp độ A1 -> A2 -> B1',
       desc: 'Chiếm 95% mọi cuộc hội thoại tiếng Anh hàng ngày. Học đa giác quan qua Flashcard 3D, nghe giọng bản xứ, quiz phản xạ và test mic phát âm từng từ.',
       icon: BookOpen,
       color: '#10b981',
-      progress: `${masteredCount}/3000 từ đã thuộc`,
+      progress: `${masteredCount}/${vocabularyCount || 0} từ đã thuộc`,
       status: masteredCount >= 10 ? 'Tiến độ tốt' : 'Đang học',
-      actionText: 'Khám Phá 3000 Từ Vựng',
+      actionText: 'Mở Kho Từ Vựng',
       highlights: [
         'Phân tầng A1 (căn bản), A2 (mở rộng), B1 (làm chủ)',
         '16 Chủ đề thực tế: Ăn uống, Du lịch, Mua sắm, Công sở...',
@@ -172,14 +172,14 @@ export default function RoadmapView({ setActiveTab, userData }) {
       <div className="roadmap-hero-card">
         <div className="hero-badge">
           <Sparkles size={16} />
-          <span>Phương pháp độc quyền cho người mất gốc</span>
+          <span>{usesPrivateVocabulary ? `Đang dùng kho riêng · ${vocabularyCount.toLocaleString('vi-VN')} từ` : 'Lộ trình dành cho người học lại từ gốc'}</span>
         </div>
         <h1 className="hero-title">
           Hành Trình Chinh Phục Tiếng Anh Từ Con Số 0
         </h1>
         <p className="hero-desc">
           Xóa bỏ nỗi sợ sai, xây chắc nền tảng phát âm chuẩn IPA, làm chủ 3000 từ vựng cốt lõi 
-          và tự tin đối thoại cùng gia sư ảo AI kiên nhẫn nhất.
+          và tự tin đối thoại trong những tình huống bạn thực sự cần.
         </p>
 
         {/* Learning Principles */}

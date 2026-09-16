@@ -59,6 +59,26 @@ export function saveUserData(data) {
   }
 }
 
+export function resetUserData() {
+  if (typeof window === 'undefined') return defaultData;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('lingogoc_srs_records_v1');
+  localStorage.removeItem('lingogoc_diagnostic_result');
+  const freshData = {
+    ...defaultData,
+    lastActiveDate: new Date().toISOString().split('T')[0],
+    masteredWords: [],
+    bookmarkedWords: [],
+    completedIpa: [],
+    completedReflex: [],
+    completedScenarios: [],
+    xp: 0,
+    streak: 1,
+  };
+  saveUserData(freshData);
+  return freshData;
+}
+
 export function addXP(amount) {
   const data = loadUserData();
   data.xp = (data.xp || 0) + amount;
