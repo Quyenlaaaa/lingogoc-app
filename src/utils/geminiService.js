@@ -133,20 +133,27 @@ async function cacheWordEnrichment(word, data) {
 }
 
 export async function enrichWordWithLLM(word, meaning = '', topic = '', dictionaryDefinitions = [], signal) {
+  let localFallback = null;
   const cached = getCachedWordEnrichment(word);
   if (cached) {
     // Migrate entries created by older releases into the durable two-tier cache.
     const migrated = cached.savedAt ? cached : await cacheWordEnrichment(word, cached);
-    return { ...migrated, fromCache: true };
+    if (migrated.persistedOnServer) return { ...migrated, fromCache: true };
+    localFallback = migrated;
   }
-  const persistent = await readPersistentEnrichment(word);
-  if (signal?.aborted) throw new DOMException('The request was aborted.', 'AbortError');
-  if (persistent) {
-    const restored = await cacheWordEnrichment(word, persistent);
-    return { ...restored, fromCache: true };
+
+  if (!localFallback) {
+    const persistent = await readPersistentEnrichment(word);
+    if (signal?.aborted) throw new DOMException('The request was aborted.', 'AbortError');
+    if (persistent) {
+      const restored = await cacheWordEnrichment(word, persistent);
+      if (restored.persistedOnServer) return { ...restored, fromCache: true };
+      localFallback = restored;
+    }
   }
+
   if (!hasBackendApi()) {
-    return {
+    return localFallback ? { ...localFallback, fromCache: true } : {
       isAiGenerated: false,
       contextExamples: [],
       collocations: [],
@@ -173,6 +180,9 @@ export async function enrichWordWithLLM(word, meaning = '', topic = '', dictiona
     return await cacheWordEnrichment(word, result);
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
+    if (localFallback) {
+      return { ...localFallback, fromCache: true, serverSyncPending: true };
+    }
     return {
       isAiGenerated: false,
       contextExamples: [],
