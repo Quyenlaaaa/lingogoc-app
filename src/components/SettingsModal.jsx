@@ -2,18 +2,11 @@
 import React, { useState, useRef } from 'react';
 import { 
   Settings, 
-  User, 
   Download, 
   Upload, 
   Trash2, 
   X, 
-  Check, 
-  Crown, 
-  Volume2, 
-  Moon, 
-  Sun,
-  ShieldAlert,
-  KeyRound
+  Crown
 } from 'lucide-react';
 import { loadUserData, saveUserData, resetUserData } from '../utils/storage';
 import {
@@ -23,7 +16,6 @@ import {
   parseVocabularyFile,
   savePrivateVocabulary,
 } from '../utils/privateVocabulary';
-import { getGeminiApiKey, saveGeminiApiKey } from '../utils/geminiService';
 
 const AVATARS = ['👤', '🦁', '🦄', '👑', '🌸', '🚀', '🐱', '⚽', '🎸', '⚡', '🦅', '💎'];
 
@@ -42,7 +34,6 @@ export default function SettingsModal({
   const fileInputRef = useRef(null);
   const vocabInputRef = useRef(null);
   const [notice, setNotice] = useState(null);
-  const [geminiKey, setGeminiKey] = useState(() => getGeminiApiKey());
   const vocabularyMeta = getVocabularyMeta(vocabulary, usesPrivateVocabulary);
 
   if (!isOpen) return null;
@@ -123,21 +114,11 @@ export default function SettingsModal({
     window.location.reload();
   };
 
-  const handleSaveGeminiKey = () => {
-    saveGeminiApiKey(geminiKey);
-    setNotice({
-      type: 'success',
-      text: geminiKey.trim()
-        ? 'Đã lưu Gemini API key trên trình duyệt. Phần nghĩa và ví dụ có thể dùng chế độ đối chiếu AI.'
-        : 'Đã tắt Gemini AI và xóa API key khỏi trình duyệt.',
-    });
-  };
-
   return (
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0, 0, 0, 0.75)',
+      background: 'var(--scrim)',
       backdropFilter: 'blur(6px)',
       display: 'flex',
       alignItems: 'center',
@@ -201,7 +182,7 @@ export default function SettingsModal({
                 padding: '12px 16px',
                 borderRadius: '12px',
                 border: '1.5px solid var(--border-color)',
-                background: 'rgba(0,0,0,0.2)',
+                background: 'var(--surface-soft)',
                 color: 'var(--text-primary)',
                 fontSize: '0.95rem'
               }}
@@ -310,24 +291,9 @@ export default function SettingsModal({
           </details>
         </section>
 
-        <section className="private-data-card ai-key-card">
-          <div className="private-data-heading">
-            <div>
-              <span className="eyebrow">Đối chiếu nghĩa và ví dụ</span>
-              <h3><KeyRound size={16} /> Gemini API key</h3>
-            </div>
-            <span className={`data-source-badge ${geminiKey ? 'private' : ''}`}>{geminiKey ? 'Đã kết nối' : 'Chưa kết nối'}</span>
-          </div>
-          <p>Key chỉ được lưu trên trình duyệt này. Khi có key, LingoGoc đối chiếu nghĩa với định nghĩa tiếng Anh và tạo 5 ví dụ song ngữ ở các ngữ cảnh khác nhau.</p>
-          <div className="api-key-row">
-            <input type="password" value={geminiKey} onChange={(event) => setGeminiKey(event.target.value)} placeholder="Nhập Gemini API key…" autoComplete="off" />
-            <button className="btn btn-primary" onClick={handleSaveGeminiKey}>Lưu key</button>
-          </div>
-        </section>
-
         {/* Section 4: Progress Backup & Restore */}
         <div style={{
-          background: 'rgba(255,255,255,0.02)',
+          background: 'var(--surface-soft)',
           border: '1px solid var(--border-color)',
           borderRadius: '16px',
           padding: '16px 20px',

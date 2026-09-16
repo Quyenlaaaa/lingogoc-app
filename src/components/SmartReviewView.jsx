@@ -132,15 +132,15 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
 
           {/* Stats Badges */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '36px' }}>
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8' }}>{reviewedCount}</div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Từ vừa ôn tập</div>
             </div>
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f59e0b' }}>{srsStats.learningCount}</div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Từ đang củng cố</div>
             </div>
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>{srsStats.matureCount}</div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Từ đã nhớ sâu vĩnh viễn</div>
             </div>
@@ -195,7 +195,7 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
       </div>
 
       {/* Progress Bar */}
-      <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden', marginBottom: '24px' }}>
+      <div style={{ height: '6px', background: 'var(--surface-medium)', borderRadius: '3px', overflow: 'hidden', marginBottom: '24px' }}>
         <div style={{ width: `${progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #6366f1, #10b981)', transition: 'width 0.25s ease' }} />
       </div>
 
@@ -272,7 +272,7 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
 
           {/* Pronounce Score Banner */}
           {pronounceResult && (
-            <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)' }}>
+            <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '12px', background: 'var(--surface-soft)' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Bạn nói: "{spokenText}"</span>
               <span style={{ fontWeight: 700, color: pronounceResult.score >= 70 ? '#10b981' : '#f59e0b' }}>
                 ({pronounceResult.score}%)
@@ -286,7 +286,7 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
           <div className="card-answer animate-fade-in" style={{
             padding: '20px',
             borderRadius: '14px',
-            background: 'rgba(255, 255, 255, 0.04)',
+            background: 'var(--surface-soft)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             textAlign: 'center'
           }}>

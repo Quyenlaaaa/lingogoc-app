@@ -2,10 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
   Bot,
-  Check,
   Eye,
   EyeOff,
-  KeyRound,
   Lightbulb,
   LoaderCircle,
   Mic,
@@ -13,7 +11,6 @@ import {
   Radio,
   RotateCcw,
   Send,
-  Settings,
   ShieldCheck,
   Sparkles,
   Square,
@@ -25,13 +22,12 @@ import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import AudioWave from './AudioWave';
 import {
-  fetchSpeakingModels,
   loadSpeakingConfig,
   requestCloudSpeech,
   requestSpeakingReply,
   saveSpeakingConfig,
-  SPEAKING_PROVIDERS,
 } from '../utils/speakingAiService';
+import { hasBackendApi } from '../utils/backendApi';
 
 const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -56,10 +52,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const [pronunciation, setPronunciation] = useState(null);
   const [error, setError] = useState('');
   const [config, setConfig] = useState(loadSpeakingConfig);
-  const [draftConfig, setDraftConfig] = useState(loadSpeakingConfig);
-  const [models, setModels] = useState([]);
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   const recognitionRef = useRef(null);
   const requestControllerRef = useRef(null);
@@ -69,9 +61,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const startMicRef = useRef(null);
   const chatEndRef = useRef(null);
 
-  const connected = Boolean(config.apiKey && config.model);
-  const provider = SPEAKING_PROVIDERS[config.provider] || SPEAKING_PROVIDERS.custom;
-  const freeModelCount = models.filter((model) => model.accessTier === 'free').length;
+  const connected = hasBackendApi();
 
   const stopAudio = useCallback(() => {
     if (autoListenTimerRef.current) {
@@ -106,7 +96,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       }
     };
 
-    if (config.provider === 'xkiro' && config.useCloudVoice && config.apiKey) {
+    if (config.useCloudVoice && connected) {
       try {
         const url = await requestCloudSpeech({ config, text });
         audioUrlRef.current = url;
@@ -126,7 +116,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       onEnd: finishSpeech,
       onError: finishSpeech,
     });
-  }, [config, stopAudio, voiceSpeed]);
+  }, [config, connected, stopAudio, voiceSpeed]);
 
   const startScenario = useCallback((nextScenario) => {
     requestControllerRef.current?.abort();
@@ -160,61 +150,9 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking, interimTranscript]);
 
-  const loadModels = useCallback(async (candidate) => {
-    setIsLoadingModels(true);
-    setError('');
-    try {
-      const result = await fetchSpeakingModels(candidate);
-      setModels(result);
-      if (!candidate.model && result.length) {
-        const firstFree = result.find((item) => item.accessTier === 'free') || result[0];
-        setDraftConfig((previous) => ({ ...previous, model: firstFree.id }));
-      }
-    } catch (loadError) {
-      setError(loadError.message || 'Không thể tải danh sách model.');
-    } finally {
-      setIsLoadingModels(false);
-    }
-  }, []);
-
-  const openSettings = useCallback(() => {
-    setDraftConfig(config);
-    setShowSettings(true);
-    if (!models.length) loadModels(config);
-  }, [config, loadModels, models.length]);
-
-  const persistSettings = () => {
-    if (!draftConfig.apiKey.trim()) {
-      setError('Hãy nhập API key của bạn. Key chỉ được lưu trên trình duyệt này.');
-      return;
-    }
-    if (!draftConfig.model) {
-      setError('Hãy tải và chọn một model trước khi lưu.');
-      return;
-    }
-    const saved = saveSpeakingConfig(draftConfig);
-    setConfig(saved);
-    setShowSettings(false);
-    setError('');
-  };
-
-  const selectProvider = (providerId) => {
-    const preset = SPEAKING_PROVIDERS[providerId] || SPEAKING_PROVIDERS.custom;
-    setModels([]);
-    setDraftConfig((current) => ({
-      ...current,
-      provider: providerId,
-      baseUrl: preset.baseUrl,
-      model: preset.model,
-      apiKey: '',
-      useCloudVoice: providerId === 'xkiro' ? current.useCloudVoice : false,
-    }));
-  };
-
   const toggleHandsFree = () => {
     const saved = saveSpeakingConfig({ ...config, autoListen: !config.autoListen });
     setConfig(saved);
-    setDraftConfig(saved);
     if (config.autoListen) stopMic();
   };
 
@@ -224,8 +162,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     const text = String(rawText || input).trim();
     if (!text || isThinking) return;
     if (!connected) {
-      setError('Hãy kết nối API và chọn model trước khi bắt đầu hội thoại.');
-      openSettings();
+      setError('Backend AI chưa được cấu hình. Quản trị viên cần thiết lập VITE_API_BASE_URL khi deploy frontend.');
       return;
     }
 
@@ -264,7 +201,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       setIsThinking(false);
       requestControllerRef.current = null;
     }
-  }, [config, connected, input, isThinking, messages, onUpdateUserData, openSettings, scenario, speak, stopAudio, userData]);
+  }, [config, connected, input, isThinking, messages, onUpdateUserData, scenario, speak, stopAudio, userData]);
 
   const stopThinking = () => {
     requestControllerRef.current?.abort();
@@ -320,19 +257,19 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
           <h2 className="module-title">Trò chuyện tiếng Anh trực tiếp với AI</h2>
           <p className="module-desc">Nói tự nhiên theo từng tình huống, nhận phản hồi đúng ngữ cảnh, bản dịch và cách diễn đạt tốt hơn sau mỗi lượt.</p>
           <div className="speaking-trust-row">
-            <span><ShieldCheck size={15} /> Không commit API key vào repo</span>
+            <span><ShieldCheck size={15} /> API key được bảo vệ tại backend</span>
             <span><Mic size={15} /> Nhận giọng nói trên trình duyệt</span>
             <span><Radio size={15} /> Tự nghe lại sau khi AI trả lời</span>
           </div>
         </div>
-        <button className={`provider-status-card ${connected ? 'connected' : ''}`} onClick={openSettings}>
+        <div className={`provider-status-card ${connected ? 'connected' : ''}`}>
           <span className="provider-status-icon"><Bot size={22} /></span>
           <span>
-            <small>{connected ? provider.label : 'Chưa kết nối'}</small>
-            <strong>{connected ? config.model : 'Thiết lập API miễn phí'}</strong>
+            <small>{connected ? 'Kết nối an toàn' : 'Chưa cấu hình backend'}</small>
+            <strong>{connected ? 'LingoGoc AI Backend' : 'Liên hệ quản trị viên'}</strong>
           </span>
-          <Settings size={18} />
-        </button>
+          <ShieldCheck size={18} />
+        </div>
       </section>
 
       <div className="scenarios-carousel speaking-scenarios-v2">
@@ -403,21 +340,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
         <div className="speaking-privacy-note">Nhận giọng nói phụ thuộc Chrome/Edge và có thể dùng dịch vụ nhận dạng của trình duyệt. Không có bản ghi âm nào được lưu trong ứng dụng.</div>
       </section>
 
-      {showSettings && <div className="modal-overlay" onClick={() => setShowSettings(false)}>
-        <div className="speaking-settings-modal" onClick={(event) => event.stopPropagation()}>
-          <div className="settings-modal-header"><div><span className="settings-eyebrow">AI PROVIDER</span><h3>Kết nối mô hình ngôn ngữ</h3></div><button onClick={() => setShowSettings(false)}><X size={20} /></button></div>
-          <div className="settings-security-note"><KeyRound size={18} /><div><strong>Key thuộc về bạn</strong><span>Ưu tiên nhập trong trình duyệt hoặc dùng proxy. Biến VITE_* trong .env sẽ xuất hiện trong bundle khi deploy website public.</span></div></div>
-          <label className="speaking-field"><span>Nhà cung cấp</span><select value={draftConfig.provider} onChange={(event) => selectProvider(event.target.value)}>{Object.entries(SPEAKING_PROVIDERS).map(([id, item]) => <option value={id} key={id}>{item.label}</option>)}</select><small className="provider-help-text">{(SPEAKING_PROVIDERS[draftConfig.provider] || SPEAKING_PROVIDERS.custom).note}</small></label>
-          <label className="speaking-field"><span>Base URL</span><input value={draftConfig.baseUrl} onChange={(event) => setDraftConfig((current) => ({ ...current, baseUrl: event.target.value }))} placeholder="https://api.xkiro.com/v1" /></label>
-          <label className="speaking-field"><span>API key</span><input type="password" value={draftConfig.apiKey} onChange={(event) => setDraftConfig((current) => ({ ...current, apiKey: event.target.value }))} placeholder="Nhập API key của bạn" autoComplete="off" /></label>
-          <div className="model-picker-row"><label className="speaking-field"><span>Model hội thoại</span><input list="speaking-model-list" value={draftConfig.model} onChange={(event) => setDraftConfig((current) => ({ ...current, model: event.target.value }))} placeholder="Nhập hoặc chọn model" /><datalist id="speaking-model-list">{models.map((model) => <option value={model.id} key={model.id}>{model.name} {model.accessTier === 'free' ? '• Free' : ''}</option>)}</datalist></label><button className="refresh-model-btn" onClick={() => loadModels(draftConfig)} disabled={isLoadingModels}>{isLoadingModels ? <LoaderCircle size={17} className="animate-spin" /> : <RotateCcw size={17} />} Tải model</button></div>
-          {models.length > 0 && <div className="model-result-note"><Check size={15} /> Tìm thấy {models.length} model{freeModelCount ? `, có ${freeModelCount} model được đánh dấu miễn phí` : ''}.</div>}
-          <label className="cloud-voice-toggle"><span><strong>Hội thoại rảnh tay</strong><small>AI nói xong sẽ tự bật micro cho lượt tiếp theo.</small></span><input type="checkbox" checked={draftConfig.autoListen} onChange={(event) => setDraftConfig((current) => ({ ...current, autoListen: event.target.checked }))} /></label>
-          {draftConfig.provider === 'xkiro' && <label className="cloud-voice-toggle"><span><strong>Dùng giọng đọc xKiro</strong><small>Tắt để dùng giọng đọc miễn phí có sẵn trên trình duyệt.</small></span><input type="checkbox" checked={draftConfig.useCloudVoice} onChange={(event) => setDraftConfig((current) => ({ ...current, useCloudVoice: event.target.checked }))} /></label>}
-          {draftConfig.provider === 'xkiro' && draftConfig.useCloudVoice && <label className="speaking-field"><span>Voice ID (không bắt buộc)</span><input value={draftConfig.voice} onChange={(event) => setDraftConfig((current) => ({ ...current, voice: event.target.value }))} placeholder="Để trống để dùng giọng mặc định" /></label>}
-          <div className="settings-modal-actions"><button className="btn btn-secondary" onClick={() => setShowSettings(false)}>Hủy</button><button className="btn btn-primary" onClick={persistSettings}><Check size={17} /> Lưu & kết nối</button></div>
-        </div>
-      </div>}
     </div>
   );
 }

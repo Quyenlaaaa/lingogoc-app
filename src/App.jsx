@@ -178,7 +178,6 @@ export default function App() {
               userData={userData} 
               onUpdateUserData={handleUpdateUserData} 
               voiceSpeed={voiceSpeed}
-              onOpenSrs={() => setActiveTab('srs')}
               vocabulary={vocabulary}
             />
           )}

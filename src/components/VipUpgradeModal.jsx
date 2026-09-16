@@ -80,7 +80,7 @@ export default function VipUpgradeModal({ isOpen, onClose, userData, onUpdateUse
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0, 0, 0, 0.8)',
+      background: 'var(--scrim)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
@@ -202,7 +202,7 @@ export default function VipUpgradeModal({ isOpen, onClose, userData, onUpdateUse
 
             {/* VIP Features Checklist */}
             <div style={{
-              background: 'rgba(255,255,255,0.03)',
+              background: 'var(--surface-soft)',
               padding: '18px 20px',
               borderRadius: '16px',
               border: '1px solid var(--border-color)',
@@ -287,7 +287,7 @@ export default function VipUpgradeModal({ isOpen, onClose, userData, onUpdateUse
 
             {/* Payment Details Box */}
             <div style={{
-              background: 'rgba(255,255,255,0.03)',
+              background: 'var(--surface-soft)',
               padding: '16px',
               borderRadius: '14px',
               border: '1px solid var(--border-color)',

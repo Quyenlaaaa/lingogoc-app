@@ -124,7 +124,7 @@ export default function DictationView({ userData, onUpdateUserData }) {
           </div>
 
           {/* Input Mode Switcher */}
-          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', background: 'var(--surface-soft)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
             <button
               onClick={() => setInputMode('tiles')}
               style={{
@@ -211,7 +211,7 @@ export default function DictationView({ userData, onUpdateUserData }) {
               minHeight: '72px',
               padding: '14px',
               borderRadius: '16px',
-              background: 'rgba(0, 0, 0, 0.25)',
+              background: 'var(--surface-soft)',
               border: '2px dashed var(--border-color)',
               display: 'flex',
               flexWrap: 'wrap',
@@ -262,7 +262,7 @@ export default function DictationView({ userData, onUpdateUserData }) {
                   style={{
                     padding: '10px 18px',
                     borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: 'var(--surface-soft)',
                     border: '1.5px solid var(--border-color)',
                     color: 'var(--text-primary)',
                     fontSize: '1.05rem',
@@ -288,7 +288,7 @@ export default function DictationView({ userData, onUpdateUserData }) {
                 width: '100%',
                 padding: '16px',
                 borderRadius: '14px',
-                background: 'rgba(0, 0, 0, 0.25)',
+                background: 'var(--bg-input)',
                 border: '1.5px solid var(--border-color)',
                 color: 'var(--text-primary)',
                 fontSize: '1.1rem',
@@ -325,7 +325,7 @@ export default function DictationView({ userData, onUpdateUserData }) {
 
             {/* Listening Breakdown / Linking Sound Box */}
             <div style={{
-              background: 'rgba(0, 0, 0, 0.2)',
+              background: 'var(--surface-soft)',
               padding: '12px 16px',
               borderRadius: '10px',
               fontSize: '0.85rem',

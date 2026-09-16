@@ -144,7 +144,7 @@ export default function TrapsView({ userData, onUpdateUserData }) {
                   style={{
                     padding: '14px',
                     borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.03)',
+                    background: 'var(--surface-soft)',
                     border: '1px solid var(--border-color)',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -192,7 +192,7 @@ export default function TrapsView({ userData, onUpdateUserData }) {
             <div style={{
               padding: '18px',
               borderRadius: '14px',
-              background: 'rgba(0, 0, 0, 0.25)',
+              background: 'var(--bg-input)',
               border: '1px solid var(--border-color)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '10px' }}>

@@ -6,17 +6,10 @@ import {
   Sparkles, 
   BookOpen, 
   Lightbulb, 
-  Layers,
-  KeyRound,
-  Settings,
-  ShieldCheck
+  Layers
 } from 'lucide-react';
 import { fetchRealWordData, playNativeAudio } from '../utils/realDictionaryService';
-import {
-  fetchCambridgeWordData,
-  loadCambridgeConfig,
-  saveCambridgeConfig,
-} from '../utils/cambridgeDictionaryService';
+import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { enrichWordWithLLM } from '../utils/geminiService';
 import { speakText } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
@@ -25,9 +18,6 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
   const [cambridgeData, setCambridgeData] = useState(null);
   const [cambridgeError, setCambridgeError] = useState('');
-  const [cambridgeConfig, setCambridgeConfig] = useState(loadCambridgeConfig);
-  const [cambridgeDraft, setCambridgeDraft] = useState(loadCambridgeConfig);
-  const [showCambridgeSettings, setShowCambridgeSettings] = useState(false);
   const [aiEnrichData, setAiEnrichData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +35,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
       try {
         const [dictionaryResult, cambridgeResult] = await Promise.allSettled([
           fetchRealWordData(word.word),
-          cambridgeConfig.accessKey ? fetchCambridgeWordData(word.word, cambridgeConfig) : Promise.resolve(null),
+          fetchCambridgeWordData(word.word),
         ]);
         const dictData = dictionaryResult.status === 'fulfilled' ? dictionaryResult.value : null;
         const officialData = cambridgeResult.status === 'fulfilled' ? cambridgeResult.value : null;
@@ -73,7 +63,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     loadDetails();
 
     return () => { isMounted = false; };
-  }, [cambridgeConfig, isOpen, word]);
+  }, [isOpen, word]);
 
   if (!isOpen || !word) return null;
 
@@ -100,17 +90,11 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
     }
   };
 
-  const handleSaveCambridge = () => {
-    const saved = saveCambridgeConfig(cambridgeDraft);
-    setCambridgeConfig(saved);
-    setShowCambridgeSettings(false);
-  };
-
   return (
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0, 0, 0, 0.8)',
+      background: 'var(--scrim)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
@@ -204,27 +188,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
             <span>{realDictData?.audioUrl ? 'Nghe Giọng Bản Xứ (Người Thật)' : 'Nghe Phát Âm Chuẩn'}</span>
           </button>
 
-          <button
-            onClick={() => {
-              setCambridgeDraft(cambridgeConfig);
-              setShowCambridgeSettings((value) => !value);
-            }}
-            className="cambridge-connect-btn"
-          >
-            {cambridgeConfig.accessKey ? <ShieldCheck size={16} /> : <KeyRound size={16} />}
-            <span>{cambridgeConfig.accessKey ? 'Cambridge API đã cấu hình' : 'Kết nối Cambridge API'}</span>
-            <Settings size={14} />
-          </button>
         </div>
-
-        {showCambridgeSettings && (
-          <div className="cambridge-settings-panel">
-            <div className="cambridge-settings-title"><KeyRound size={18} /><div><strong>Cambridge Dictionary API</strong><small>Cần accessKey được Cambridge phê duyệt. Khóa chỉ lưu trên trình duyệt này và không nằm trong repo; do đây là frontend tĩnh, chỉ dùng key có giới hạn phù hợp.</small></div></div>
-            <label><span>Access key</span><input type="password" value={cambridgeDraft.accessKey} onChange={(event) => setCambridgeDraft((current) => ({ ...current, accessKey: event.target.value }))} placeholder="Cambridge accessKey" autoComplete="off" /></label>
-            <label><span>Dictionary code</span><input value={cambridgeDraft.dictionaryCode} onChange={(event) => setCambridgeDraft((current) => ({ ...current, dictionaryCode: event.target.value }))} placeholder="british" /></label>
-            <div className="cambridge-settings-actions"><a href="https://dictionary-api.cambridge.org/apply" target="_blank" rel="noreferrer">Đăng ký API key</a><button onClick={handleSaveCambridge}>Lưu và tải lại</button></div>
-          </div>
-        )}
 
         {cambridgeError && <div className="cambridge-api-error">{cambridgeError}</div>}
 
@@ -232,7 +196,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
             <Sparkles size={32} color="#38bdf8" className="animate-spin" style={{ margin: '0 auto 12px' }} />
-            <div>Đang tải dữ liệu từ điển thật và phân tích bởi AI...</div>
+            <div>Đang tải dữ liệu từ điển và ví dụ đa ngữ cảnh…</div>
           </div>
         ) : (
           <div>
@@ -295,7 +259,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                     style={{
                       padding: '12px 16px',
                       borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.03)',
+                      background: 'var(--surface-soft)',
                       border: '1px solid var(--border-color)',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -324,7 +288,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                 ))}
                 {!contextExamples.length && (
                   <div className="no-trusted-examples">
-                    Chưa có ví dụ đủ tin cậy cho từ này. Hãy thêm Gemini API key trong Cài đặt để tạo và đối chiếu 5 ngữ cảnh song ngữ.
+                    Chưa có ví dụ đủ tin cậy cho từ này. Máy chủ AI chưa trả về dữ liệu đa ngữ cảnh.
                   </div>
                 )}
                 {cambridgeData?.entryUrl && (
@@ -364,7 +328,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
             {/* 4. Synonyms & Antonyms from Real Dictionary API */}
             {realDictData?.synonyms && realDictData.synonyms.length > 0 && (
               <div style={{
-                background: 'rgba(255, 255, 255, 0.02)',
+                background: 'var(--surface-soft)',
                 padding: '14px',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)',
@@ -377,7 +341,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                   {realDictData.synonyms.map((s, idx) => (
                     <span
                       key={idx}
-                      style={{ padding: '3px 10px', borderRadius: '12px', background: 'rgba(255,255,255,0.06)', color: '#38bdf8' }}
+                      style={{ padding: '3px 10px', borderRadius: '12px', background: 'var(--sky-light)', color: 'var(--sky)' }}
                     >
                       {s}
                     </span>

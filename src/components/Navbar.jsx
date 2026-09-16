@@ -1,5 +1,5 @@
 // Navbar.jsx - Header navigation with stats, speed control, VIP badge, and navigation tabs
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Flame, 
   Sparkles, 
@@ -21,7 +21,9 @@ import {
   Settings,
   AlertTriangle,
   ChevronDown,
-  Code2
+  Code2,
+  MoreHorizontal,
+  X
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -56,6 +58,31 @@ export default function Navbar({
   const primaryTabs = tabs.filter((tab) => tab.primary);
   const moreTabs = tabs.filter((tab) => !tab.primary);
   const isMoreActive = moreTabs.some((tab) => tab.id === activeTab);
+  const mobilePrimaryIds = ['roadmap', 'vocab', 'srs', 'speaking'];
+  const mobilePrimaryTabs = tabs.filter((tab) => mobilePrimaryIds.includes(tab.id));
+  const mobileExploreTabs = tabs.filter((tab) => !mobilePrimaryIds.includes(tab.id));
+  const isMobileExploreActive = mobileExploreTabs.some((tab) => tab.id === activeTab);
+
+  const selectTab = (tabId) => {
+    setActiveTab(tabId);
+    setIsMoreOpen(false);
+  };
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setIsMoreOpen(false);
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+    if (isMoreOpen && window.matchMedia('(max-width: 768px)').matches) {
+      document.body.classList.add('mobile-nav-open');
+    }
+
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      document.body.classList.remove('mobile-nav-open');
+    };
+  }, [isMoreOpen]);
 
   // Calculate Level name based on XP
   const getLevelInfo = (xp) => {
@@ -68,10 +95,11 @@ export default function Navbar({
   const levelInfo = getLevelInfo(userData?.xp || 0);
 
   return (
+    <>
     <header className="navbar-header">
       <div className="navbar-container">
         {/* Brand Logo */}
-        <div className="brand-logo" onClick={() => setActiveTab('roadmap')}>
+        <button className="brand-logo" onClick={() => selectTab('roadmap')} aria-label="Về trang Hôm nay">
           <div className="brand-icon">🌱</div>
           <div className="brand-text">
             <div className="brand-title">
@@ -79,13 +107,14 @@ export default function Navbar({
             </div>
             <div className="brand-subtitle">Tiếng Anh Cho Người Mất Gốc</div>
           </div>
-        </div>
+        </button>
 
         {/* Stats & Gamification Bar */}
         <div className="gamification-bar">
           {/* VIP Badge or Upgrade Button */}
           {userData?.isVip ? (
             <div
+              className="vip-status-pill"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -105,6 +134,7 @@ export default function Navbar({
             </div>
           ) : (
             <button
+              className="vip-upgrade-btn"
               onClick={onOpenVipModal}
               style={{
                 display: 'inline-flex',
@@ -189,7 +219,7 @@ export default function Navbar({
                 key={tab.id}
                 id={`tab-${tab.id}`}
                 className={`nav-tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => selectTab(tab.id)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <IconComponent size={18} className="tab-icon" />
@@ -210,16 +240,17 @@ export default function Navbar({
               className={`nav-tab-btn ${isMoreActive ? 'active' : ''}`}
               onClick={() => setIsMoreOpen((open) => !open)}
               aria-expanded={isMoreOpen}
+              aria-controls="desktop-explore-menu"
             >
               <ChevronDown size={17} />
               <span className="tab-title">Khám phá</span>
             </button>
             {isMoreOpen && (
-              <div className="more-nav-menu">
+              <div className="more-nav-menu" id="desktop-explore-menu">
                 {moreTabs.map((tab) => {
                   const IconComponent = tab.icon;
                   return (
-                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setIsMoreOpen(false); }}>
+                    <button key={tab.id} onClick={() => selectTab(tab.id)}>
                       <IconComponent size={18} />
                       <span>{tab.label}</span>
                       {tab.badge && <small>{tab.badge}</small>}
@@ -232,5 +263,79 @@ export default function Navbar({
         </div>
       </nav>
     </header>
+
+    <nav className="mobile-bottom-nav" aria-label="Điều hướng trên điện thoại">
+      {mobilePrimaryTabs.map((tab) => {
+        const IconComponent = tab.icon;
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            className={isActive ? 'active' : ''}
+            onClick={() => selectTab(tab.id)}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <span className="mobile-nav-icon">
+              <IconComponent size={21} />
+              {tab.badge && <small>{tab.badge}</small>}
+            </span>
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
+      <button
+        className={isMobileExploreActive || isMoreOpen ? 'active' : ''}
+        onClick={() => setIsMoreOpen(true)}
+        aria-expanded={isMoreOpen}
+        aria-controls="mobile-explore-sheet"
+      >
+        <MoreHorizontal size={21} />
+        <span>Khám phá</span>
+      </button>
+    </nav>
+
+    {isMoreOpen && (
+      <div className="mobile-explore-layer">
+        <button className="mobile-explore-backdrop" onClick={() => setIsMoreOpen(false)} aria-label="Đóng Khám phá" />
+        <section
+          className="mobile-explore-sheet"
+          id="mobile-explore-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-explore-title"
+        >
+          <div className="mobile-sheet-handle" />
+          <div className="mobile-sheet-header">
+            <div>
+              <small>TẤT CẢ TÍNH NĂNG</small>
+              <h2 id="mobile-explore-title">Khám phá LingoGoc</h2>
+            </div>
+            <button onClick={() => setIsMoreOpen(false)} aria-label="Đóng bảng Khám phá">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="mobile-explore-grid">
+            {mobileExploreTabs.map((tab) => {
+              const IconComponent = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  className={isActive ? 'active' : ''}
+                  onClick={() => selectTab(tab.id)}
+                >
+                  <span className="mobile-explore-icon"><IconComponent size={21} /></span>
+                  <span>
+                    <strong>{tab.label}</strong>
+                    <small>{tab.badge || (isActive ? 'Đang mở' : 'Mở tính năng')}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+    )}
+    </>
   );
 }

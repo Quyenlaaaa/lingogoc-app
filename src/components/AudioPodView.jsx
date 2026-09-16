@@ -166,7 +166,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
             value={selectedLevel} 
             onChange={(e) => { setSelectedLevel(e.target.value); setCurrentIndex(0); }}
             className="filter-select"
-            style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+            style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-soft)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
           >
             {levels.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
@@ -175,7 +175,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
             value={selectedTopic} 
             onChange={(e) => { setSelectedTopic(e.target.value); setCurrentIndex(0); }}
             className="filter-select"
-            style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+            style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-soft)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
           >
             {topics.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
@@ -237,7 +237,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
 
             {currentWord.example && (
               <div style={{
-                background: 'rgba(255, 255, 255, 0.04)',
+                background: 'var(--surface-soft)',
                 padding: '16px',
                 borderRadius: '14px',
                 maxWidth: '540px',
@@ -265,7 +265,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'var(--surface-medium)',
               border: 'none',
               color: 'var(--text-primary)',
               cursor: 'pointer',
@@ -304,7 +304,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'var(--surface-medium)',
               border: 'none',
               color: 'var(--text-primary)',
               cursor: 'pointer',

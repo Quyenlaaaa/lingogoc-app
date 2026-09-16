@@ -193,7 +193,7 @@ export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboa
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '36px', textAlign: 'left' }}>
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#f59e0b', marginBottom: '6px' }}>
                 <Timer size={18} />
                 <span>60 Giây Phản Xạ</span>
@@ -201,7 +201,7 @@ export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboa
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Mỗi câu trả lời đúng tăng tốc độ xử lý từ ngữ mà không cần dịch nhẩm trong đầu.</div>
             </div>
 
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#ef4444', marginBottom: '6px' }}>
                 <Flame size={18} />
                 <span>Chuỗi Combo Bốc Lửa</span>
@@ -209,7 +209,7 @@ export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboa
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Đúng liên tiếp kích hoạt Combo x2, x3, x4 giúp bạn bứt phá điểm số ngoạn mục.</div>
             </div>
 
-            <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ padding: '16px', background: 'var(--surface-soft)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
                 <Trophy size={18} />
                 <span>Cúp Vàng & Leo Hạng</span>
@@ -326,7 +326,7 @@ export default function BattleView({ userData, onUpdateUserData, onGoToLeaderboa
             justifyContent: 'space-around',
             alignItems: 'center',
             padding: '24px',
-            background: 'rgba(255,255,255,0.03)',
+            background: 'var(--surface-soft)',
             borderRadius: '16px',
             border: '1px solid var(--border-color)',
             marginBottom: '32px'

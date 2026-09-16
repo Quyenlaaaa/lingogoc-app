@@ -198,7 +198,7 @@ export default function LeaderboardView({ userData, onGoToBattle }) {
                     #{item.rank}
                   </span>
 
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
                     {item.avatar}
                   </div>
 

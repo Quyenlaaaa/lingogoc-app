@@ -1,5 +1,5 @@
 // VocabView.jsx - Stage 2: 3000 Oxford Essential Words Powerhouse
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, 
   Volume2, 
@@ -15,7 +15,6 @@ import {
   X, 
   Layers, 
   HelpCircle, 
-  Brain,
   BookOpen,
   Shuffle
 } from 'lucide-react';
@@ -23,10 +22,12 @@ import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { getCachedWordEnrichment } from '../utils/geminiService';
+import { fetchRealWordData } from '../utils/realDictionaryService';
 import {
   buildClozePrompt,
   buildQuizOptions,
   getTrustedExamples,
+  isLowQualityExample,
   isLowQualityMeaning,
 } from '../utils/vocabularyQuality';
 import WordDetailModal from './WordDetailModal';
@@ -39,7 +40,7 @@ const QUIZ_LABELS = {
   cloze: '🧩 Điền từ theo ngữ cảnh',
 };
 
-export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOpenSrs, vocabulary = [] }) {
+export default function VocabView({ userData, onUpdateUserData, voiceSpeed, vocabulary = [] }) {
   const vocabList = vocabulary;
   const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
   const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
@@ -57,6 +58,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
 
   // List Pagination
   const [currentPage, setCurrentPage] = useState(1);
+  const [listDictionaryData, setListDictionaryData] = useState({});
+  const [flashcardDictionaryData, setFlashcardDictionaryData] = useState(null);
+  const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
+  const requestedDictionaryWords = useRef(new Set());
   const itemsPerPage = 24;
 
   // Quiz States
@@ -110,6 +115,51 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
     return result;
   }, [searchQuery, selectedTopic, selectedLevel, selectedStatus, masteredSet, bookmarkedSet]);
 
+  const visibleListWords = useMemo(
+    () => filteredWords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
+    [filteredWords, currentPage],
+  );
+
+  // Nạp ví dụ từ từ điển thật cho đúng 24 thẻ đang hiển thị. Giới hạn bốn
+  // request đồng thời và lưu qua cache của realDictionaryService để tránh
+  // gọi lại API khi người học quay về trang cũ.
+  useEffect(() => {
+    if (studyMode !== 'list') return undefined;
+
+    const queue = visibleListWords.filter((item) => {
+      const key = item.word.toLowerCase();
+      return !requestedDictionaryWords.current.has(key)
+        && getTrustedExamples(item).length < 2;
+    });
+    if (!queue.length) return undefined;
+    queue.forEach((item) => requestedDictionaryWords.current.add(item.word.toLowerCase()));
+
+    let cancelled = false;
+    let cursor = 0;
+    const loadNext = async () => {
+      while (!cancelled && cursor < queue.length) {
+        const item = queue[cursor];
+        cursor += 1;
+        let result = null;
+        try {
+          result = await fetchRealWordData(item.word);
+        } catch {
+          result = null;
+        }
+        if (!cancelled) {
+          setListDictionaryData((current) => ({
+            ...current,
+            [item.word.toLowerCase()]: result,
+          }));
+        }
+      }
+    };
+
+    const workers = Array.from({ length: Math.min(4, queue.length) }, () => loadNext());
+    Promise.allSettled(workers);
+    return () => { cancelled = true; };
+  }, [studyMode, visibleListWords]);
+
   // Reset pagination / card index when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -120,8 +170,37 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
   // Active Flashcard Word
   const currentCard = filteredWords[cardIndex] || filteredWords[0] || null;
   const currentEnrichment = currentCard ? getCachedWordEnrichment(currentCard.word) : null;
+  useEffect(() => {
+    if (studyMode !== 'flashcard' || !currentCard) return undefined;
+    let cancelled = false;
+    setFlashcardDictionaryData(null);
+    setIsLoadingFlashcardExamples(true);
+    fetchRealWordData(currentCard.word)
+      .then((result) => {
+        if (!cancelled) setFlashcardDictionaryData(result);
+      })
+      .catch(() => {
+        if (!cancelled) setFlashcardDictionaryData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingFlashcardExamples(false);
+      });
+    return () => { cancelled = true; };
+  }, [currentCard, studyMode]);
+
+  const flashcardDictionaryExamples = (flashcardDictionaryData?.examples || [])
+    .filter((example) => !isLowQualityExample(example))
+    .map((example) => ({ en: example, vi: '', context: 'Từ điển' }));
   const currentExamples = currentCard
-    ? [...(currentEnrichment?.contextExamples || []), ...getTrustedExamples(currentCard)].slice(0, 2)
+    ? [
+        ...(currentEnrichment?.contextExamples || []).map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' })),
+        ...flashcardDictionaryExamples,
+        ...getTrustedExamples(currentCard).map((example) => ({ ...example, context: example.context || 'Bộ dữ liệu' })),
+      ]
+        .filter((example, index, examples) => !isLowQualityExample(example.en) && examples.findIndex(
+          (candidate) => candidate.en.toLowerCase() === example.en.toLowerCase(),
+        ) === index)
+        .slice(0, 2)
     : [];
 
   // Toggle Mastered Status
@@ -304,22 +383,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
               <Shuffle size={16} />
               <span>Xếp Chữ</span>
             </button>
-            {onOpenSrs && (
-              <button 
-                className="mode-btn srs-highlight-btn"
-                onClick={onOpenSrs}
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2))', 
-                  borderColor: '#10b981', 
-                  color: '#10b981', 
-                  fontWeight: 700 
-                }}
-                title="Ôn tập lặp lại ngắt quãng theo thuật toán SM-2"
-              >
-                <Brain size={16} />
-                <span>Ôn Tập SRS</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -475,6 +538,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                 <div className="card-example-box" onClick={(e) => e.stopPropagation()}>
                   {currentExamples.length > 0 ? currentExamples.map((example) => (
                     <div className="trusted-example" key={example.en}>
+                      <span className="trusted-example-context">{example.context || 'Ví dụ thực tế'}</span>
                       <div className="ex-en-row">
                         <span className="ex-en-text">{example.en}</span>
                         <button className="inline-audio-btn" onClick={() => handleSpeak(example.en)} aria-label={`Nghe câu ${example.en}`}>
@@ -486,7 +550,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                   )) : (
                     <button className="example-quality-placeholder" onClick={() => setDetailWord(currentCard)}>
                       <BookOpen size={17} />
-                      <span>Ví dụ cũ không đủ tự nhiên nên đã được ẩn. Mở ví dụ theo ngữ cảnh.</span>
+                      <span>{isLoadingFlashcardExamples ? 'Đang tìm ví dụ tự nhiên từ từ điển…' : 'Chưa có ví dụ đã kiểm chứng. Mở phần ví dụ đa ngữ cảnh.'}</span>
                     </button>
                   )}
                 </div>
@@ -566,11 +630,22 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
       {studyMode === 'list' && (
         <div className="vocab-list-container">
           <div className="vocab-cards-grid">
-            {filteredWords
-              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+            {visibleListWords
               .map((w) => {
                 const isMastered = masteredSet.has(w.id);
                 const isBookmarked = bookmarkedSet.has(w.id);
+                const dictionaryStateExists = Object.prototype.hasOwnProperty.call(listDictionaryData, w.word.toLowerCase());
+                const dictionaryExamples = (listDictionaryData[w.word.toLowerCase()]?.examples || [])
+                  .filter((example) => !isLowQualityExample(example))
+                  .map((example) => ({ en: example, vi: '', context: 'Từ điển' }));
+                const aiExamples = (getCachedWordEnrichment(w.word)?.contextExamples || [])
+                  .filter((example) => !isLowQualityExample(example.en))
+                  .map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' }));
+                const listExamples = [...aiExamples, ...dictionaryExamples, ...getTrustedExamples(w)]
+                  .filter((example, index, examples) => examples.findIndex(
+                    (candidate) => candidate.en.toLowerCase() === example.en.toLowerCase(),
+                  ) === index)
+                  .slice(0, 2);
 
                 return (
                   <div key={w.id} className={`vocab-item-card ${isMastered ? 'mastered' : ''}`}>
@@ -594,8 +669,23 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, onOp
                       <div className="item-ipa-text">{w.ipa}</div>
                       <div className="item-meaning-text">{w.meaning}</div>
                       <div className="item-example-box">
-                        <div className="item-ex-en">{w.example}</div>
-                        <div className="item-ex-vi">{w.exampleVi}</div>
+                        {listExamples.map((example) => (
+                          <div className="item-example-entry" key={example.en}>
+                            <span>{example.context || 'Ví dụ thực tế'}</span>
+                            <div className="item-ex-en">{example.en}</div>
+                            {example.vi && <div className="item-ex-vi">{example.vi}</div>}
+                          </div>
+                        ))}
+                        {!listExamples.length && (
+                          <div className="item-example-loading">
+                            {dictionaryStateExists
+                              ? 'Chưa có ví dụ đã kiểm chứng. Mở chi tiết để tạo ví dụ theo 5 ngữ cảnh.'
+                              : 'Đang tìm ví dụ tự nhiên từ từ điển…'}
+                          </div>
+                        )}
+                        <button type="button" className="item-more-examples" onClick={() => setDetailWord(w)}>
+                          Xem ví dụ đa ngữ cảnh
+                        </button>
                       </div>
                     </div>
 
