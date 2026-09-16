@@ -173,7 +173,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
     const queue = visibleListWords.filter((item) => {
       const key = item.word.toLowerCase();
-      return !requestedAiWords.current.has(key) && !getCachedWordEnrichment(item.word);
+      const cached = getCachedWordEnrichment(item.word);
+      // Entries created before Workers KV existed still need one server sync.
+      // enrichWordWithLLM keeps the local examples visible while performing it.
+      return !requestedAiWords.current.has(key)
+        && (!cached || !cached.persistedOnServer);
     });
     if (!queue.length) return undefined;
     queue.forEach((item) => requestedAiWords.current.add(item.word.toLowerCase()));
