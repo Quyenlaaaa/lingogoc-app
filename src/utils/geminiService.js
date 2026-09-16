@@ -1,6 +1,6 @@
 // Vocabulary enrichment is performed by the LingoGoc backend. Provider keys
 // never enter localStorage or the public browser bundle.
-import { getBackendUrl, hasBackendApi, readBackendError } from './backendApi';
+import { getBackendUrl, hasBackendApi, readBackendError, readJsonResponse } from './backendApi';
 
 const VOCAB_ENRICHMENT_PREFIX = 'lingogoc_vocab_enrichment_v3_';
 const CACHE_SCHEMA_VERSION = 1;
@@ -173,7 +173,8 @@ export async function enrichWordWithLLM(word, meaning = '', topic = '', dictiona
       throw new Error(await readBackendError(response, 'Không thể tạo ví dụ đa ngữ cảnh.'));
     }
 
-    const payload = await response.json();
+    const payload = await readJsonResponse(response, 'Máy chủ AI trả về dữ liệu trống hoặc không hợp lệ.');
+    if (!payload) throw new Error('Máy chủ AI chưa trả về dữ liệu. Hãy thử lại.');
     const data = payload?.data || payload;
     const result = normalizeEnrichment(data);
     if (!result.contextExamples.length) throw new Error('Backend AI không trả về ví dụ song ngữ hợp lệ.');

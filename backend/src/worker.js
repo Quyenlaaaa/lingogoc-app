@@ -120,7 +120,26 @@ async function callChatModel(env, messages, temperature = 0.45) {
       body: JSON.stringify({ model: env.AI_MODEL, temperature, messages }),
     });
     if (response.ok) {
-      const payload = await response.json();
+      const rawPayload = await response.text();
+      if (!rawPayload.trim()) {
+        lastError = 'AI_PROVIDER_EMPTY_RESPONSE';
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+          continue;
+        }
+        break;
+      }
+      let payload;
+      try {
+        payload = JSON.parse(rawPayload);
+      } catch {
+        lastError = 'AI_PROVIDER_INVALID_JSON';
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+          continue;
+        }
+        break;
+      }
       return payload?.choices?.[0]?.message?.content || '';
     }
 
@@ -173,13 +192,18 @@ async function enrichVocabulary(request, env, origin, context) {
   });
   const cached = await cache.match(cacheIdentity.edgeRequest);
   if (cached) {
-    const data = await cached.json();
-    if (env.VOCAB_CACHE && !data.persistedOnServer) {
-      const backfilled = { ...data, persistedOnServer: true, serverSavedAt: new Date().toISOString() };
-      await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));
-      return json({ data: { ...backfilled, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+KV' });
+    try {
+      const data = await cached.json();
+      if (env.VOCAB_CACHE && !data.persistedOnServer) {
+        const backfilled = { ...data, persistedOnServer: true, serverSavedAt: new Date().toISOString() };
+        await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));
+        return json({ data: { ...backfilled, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+KV' });
+      }
+      return json({ data: { ...data, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT' });
+    } catch {
+      // Remove an incomplete edge response and continue with durable KV/AI.
+      context.waitUntil(cache.delete(cacheIdentity.edgeRequest));
     }
-    return json({ data: { ...data, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT' });
   }
 
   if (env.VOCAB_CACHE) {

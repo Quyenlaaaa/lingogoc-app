@@ -1,6 +1,6 @@
 // Cambridge credentials live exclusively on the backend. The browser only
 // sends the requested word to LingoGoc's public backend endpoint.
-import { getBackendUrl, hasBackendApi, readBackendError } from './backendApi';
+import { getBackendUrl, hasBackendApi, readBackendError, readJsonResponse } from './backendApi';
 
 const CACHE_PREFIX = 'lingogoc_cambridge_entry_v2_';
 
@@ -27,7 +27,8 @@ export async function fetchCambridgeWordData(word, signal) {
     throw new Error(await readBackendError(response, 'Không thể tải dữ liệu Cambridge.'));
   }
 
-  const payload = await response.json();
+  const payload = await readJsonResponse(response, 'Dữ liệu từ điển trả về không hợp lệ.');
+  if (!payload) return null;
   if (payload?.available === false) return null;
   const result = payload?.data ?? payload;
   if (!result || typeof result !== 'object') return null;

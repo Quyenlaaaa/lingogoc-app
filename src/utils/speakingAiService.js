@@ -1,4 +1,4 @@
-import { getBackendUrl, hasBackendApi, readBackendError } from './backendApi';
+import { getBackendUrl, hasBackendApi, readBackendError, readJsonResponse } from './backendApi';
 
 const CONFIG_KEY = 'lingogoc_speaking_preferences_v2';
 const LEGACY_CONFIG_KEY = 'lingogoc_speaking_ai_config_v1';
@@ -82,7 +82,8 @@ export async function requestSpeakingReply({ scenario, messages, signal }) {
     }),
   });
   if (!response.ok) throw new Error(await readBackendError(response, 'AI chưa thể trả lời.'));
-  const payload = await response.json();
+  const payload = await readJsonResponse(response, 'Máy chủ hội thoại trả về dữ liệu không hợp lệ.');
+  if (!payload) throw new Error('AI chưa trả lời. Hãy thử nói lại.');
   const direct = payload?.data || payload;
   const content = direct?.replyEn ? direct : direct?.choices?.[0]?.message?.content;
   const parsed = parseAssistantContent(content);

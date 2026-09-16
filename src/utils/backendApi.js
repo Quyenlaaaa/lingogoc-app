@@ -24,9 +24,19 @@ export function getBackendUrl(path) {
   return `${configuredBaseUrl}${cleanPath}`;
 }
 
+export async function readJsonResponse(response, fallback = 'Máy chủ trả về dữ liệu không hợp lệ.') {
+  const text = await response.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(fallback);
+  }
+}
+
 export async function readBackendError(response, fallback = 'Không thể kết nối máy chủ AI.') {
   try {
-    const payload = await response.json();
+    const payload = await readJsonResponse(response, fallback);
     return payload?.error?.message || payload?.error || payload?.message || fallback;
   } catch {
     return response.status ? `${fallback} (HTTP ${response.status})` : fallback;
