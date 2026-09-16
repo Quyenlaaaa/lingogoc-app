@@ -102,7 +102,7 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
       zIndex: 2500,
       padding: '16px'
     }}>
-      <div className="card glass-card animate-fade-in" style={{
+      <div className="card glass-card animate-fade-in word-detail-modal-card" style={{
         maxWidth: '680px',
         width: '100%',
         maxHeight: '90vh',
@@ -256,18 +256,15 @@ export default function WordDetailModal({ word, isOpen, onClose }) {
                 {contextExamples.map((ex, idx) => (
                   <div
                     key={idx}
+                    className="word-detail-example-row"
                     style={{
                       padding: '12px 16px',
                       borderRadius: '12px',
                       background: 'var(--surface-soft)',
                       border: '1px solid var(--border-color)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '12px'
                     }}
                   >
-                    <div>
+                    <div className="word-detail-example-content">
                       <div className={`example-source-label ${ex.source}`}>{ex.context || (ex.source === 'dictionary' ? 'Từ điển' : 'Bộ dữ liệu')}</div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>
                         "{ex.en}"

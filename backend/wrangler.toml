@@ -5,5 +5,9 @@ compatibility_date = "2026-09-01"
 [vars]
 # xkiro exposes an OpenAI-compatible chat completions API.
 AI_BASE_URL = "https://api.xkiro.com/v1"
-AI_MODEL = "x-ai/grok-build-0.1"
+AI_MODEL = "mistralai/mistral-large-2512"
 ALLOWED_ORIGINS = "http://localhost:5173,https://quyenlaaaa.github.io"
+
+[[kv_namespaces]]
+binding = "VOCAB_CACHE"
+id = "17736059afb349f68eafd1945eb541dc"

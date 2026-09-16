@@ -3,9 +3,14 @@
 import { getBackendUrl, hasBackendApi, readBackendError } from './backendApi';
 
 const VOCAB_ENRICHMENT_PREFIX = 'lingogoc_vocab_enrichment_v3_';
+const CACHE_SCHEMA_VERSION = 1;
+const CACHE_DATABASE = 'lingogoc_learning_cache';
+const CACHE_STORE = 'vocabulary_enrichment';
 
 function cleanText(value, maxLength = 500) {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, maxLength) : '';
+  return typeof value === 'string'
+    ? value.replace(/\*\*|__|`/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLength)
+    : '';
 }
 
 function normalizeEnrichment(data) {
@@ -45,6 +50,8 @@ function normalizeEnrichment(data) {
     collocations,
     senses,
     isAiGenerated: Boolean(data?.isAiGenerated ?? true),
+    persistedOnServer: Boolean(data?.persistedOnServer),
+    serverSavedAt: cleanText(data?.serverSavedAt, 40),
   };
 }
 
@@ -52,24 +59,92 @@ export function getCachedWordEnrichment(word) {
   if (!word || typeof window === 'undefined') return null;
   try {
     const cached = localStorage.getItem(`${VOCAB_ENRICHMENT_PREFIX}${word.trim().toLowerCase()}`);
-    return cached ? JSON.parse(cached) : null;
+    if (!cached) return null;
+    const parsed = JSON.parse(cached);
+    const value = parsed?.data && parsed?.schemaVersion ? parsed.data : parsed;
+    const normalized = normalizeEnrichment(value);
+    if (!normalized.contextExamples.length) return null;
+    return { ...normalized, savedAt: parsed?.savedAt || value?.savedAt || null };
   } catch {
     return null;
   }
 }
 
-function cacheWordEnrichment(word, data) {
-  if (!word || typeof window === 'undefined') return;
+function openCacheDatabase() {
+  if (typeof window === 'undefined' || !window.indexedDB) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open(CACHE_DATABASE, 1);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(CACHE_STORE)) {
+        request.result.createObjectStore(CACHE_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => resolve(null);
+  });
+}
+
+async function readPersistentEnrichment(word) {
+  const database = await openCacheDatabase();
+  if (!database) return null;
+  return new Promise((resolve) => {
+    const transaction = database.transaction(CACHE_STORE, 'readonly');
+    const request = transaction.objectStore(CACHE_STORE).get(word.trim().toLowerCase());
+    request.onsuccess = () => {
+      const stored = request.result;
+      const normalized = normalizeEnrichment(stored?.data || stored);
+      resolve(normalized.contextExamples.length
+        ? { ...normalized, savedAt: stored?.savedAt || null }
+        : null);
+    };
+    request.onerror = () => resolve(null);
+    transaction.oncomplete = () => database.close();
+    transaction.onerror = () => database.close();
+  });
+}
+
+async function writePersistentEnrichment(word, payload) {
+  const database = await openCacheDatabase();
+  if (!database) return;
+  await new Promise((resolve) => {
+    const transaction = database.transaction(CACHE_STORE, 'readwrite');
+    transaction.objectStore(CACHE_STORE).put(payload, word.trim().toLowerCase());
+    transaction.oncomplete = resolve;
+    transaction.onerror = resolve;
+    transaction.onabort = resolve;
+  });
+  database.close();
+}
+
+async function cacheWordEnrichment(word, data) {
+  if (!word || typeof window === 'undefined') return data;
+  const payload = {
+    schemaVersion: CACHE_SCHEMA_VERSION,
+    savedAt: new Date().toISOString(),
+    data: normalizeEnrichment(data),
+  };
   try {
-    localStorage.setItem(`${VOCAB_ENRICHMENT_PREFIX}${word.trim().toLowerCase()}`, JSON.stringify(data));
+    localStorage.setItem(`${VOCAB_ENRICHMENT_PREFIX}${word.trim().toLowerCase()}`, JSON.stringify(payload));
   } catch {
-    // Cache failure must not block dictionary lookup.
+    // IndexedDB below remains available when localStorage reaches its quota.
   }
+  await writePersistentEnrichment(word, payload);
+  return { ...payload.data, savedAt: payload.savedAt };
 }
 
 export async function enrichWordWithLLM(word, meaning = '', topic = '', dictionaryDefinitions = [], signal) {
   const cached = getCachedWordEnrichment(word);
-  if (cached) return { ...cached, fromCache: true };
+  if (cached) {
+    // Migrate entries created by older releases into the durable two-tier cache.
+    const migrated = cached.savedAt ? cached : await cacheWordEnrichment(word, cached);
+    return { ...migrated, fromCache: true };
+  }
+  const persistent = await readPersistentEnrichment(word);
+  if (signal?.aborted) throw new DOMException('The request was aborted.', 'AbortError');
+  if (persistent) {
+    const restored = await cacheWordEnrichment(word, persistent);
+    return { ...restored, fromCache: true };
+  }
   if (!hasBackendApi()) {
     return {
       isAiGenerated: false,
@@ -95,8 +170,7 @@ export async function enrichWordWithLLM(word, meaning = '', topic = '', dictiona
     const data = payload?.data || payload;
     const result = normalizeEnrichment(data);
     if (!result.contextExamples.length) throw new Error('Backend AI không trả về ví dụ song ngữ hợp lệ.');
-    cacheWordEnrichment(word, result);
-    return result;
+    return await cacheWordEnrichment(word, result);
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
     return {

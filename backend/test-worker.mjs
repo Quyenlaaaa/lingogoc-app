@@ -10,8 +10,17 @@ globalThis.caches = {
 };
 
 let providerRequest = null;
+let providerCallCount = 0;
+const serverCache = new Map();
 globalThis.fetch = async (url, options) => {
+  providerCallCount += 1;
   providerRequest = { url, options, body: JSON.parse(options.body) };
+  if (providerCallCount < 3) {
+    return new Response(JSON.stringify({ error: 'temporary provider overload' }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   return new Response(JSON.stringify({
   choices: [{
     message: {
@@ -37,12 +46,28 @@ globalThis.fetch = async (url, options) => {
 
 const env = {
   XTROUTER_API_KEY: 'server-only-test-key',
-  AI_MODEL: 'x-ai/grok-build-0.1',
+  AI_MODEL: 'mistralai/mistral-large-2512',
   AI_BASE_URL: 'https://api.xkiro.com/v1',
   ALLOWED_ORIGINS: 'http://localhost:5173',
+  VOCAB_CACHE: {
+    get: async (key, type) => {
+      const value = serverCache.get(key);
+      return type === 'json' && value ? JSON.parse(value) : value || null;
+    },
+    put: async (key, value) => { serverCache.set(key, value); },
+  },
 };
 const pending = [];
 const context = { waitUntil: (promise) => pending.push(promise) };
+const healthResponse = await worker.fetch(
+  new Request('http://localhost:8787/health', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const healthPayload = await healthResponse.json();
+assert.equal(healthPayload.model, 'mistralai/mistral-large-2512');
+assert.equal(healthPayload.serverStorageConfigured, true);
+
 const request = new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
@@ -61,7 +86,20 @@ assert.ok(cachedResponse);
 assert.equal(JSON.stringify(payload).includes(env.XTROUTER_API_KEY), false);
 assert.equal(providerRequest.url, 'https://api.xkiro.com/v1/chat/completions');
 assert.equal(providerRequest.options.headers.Authorization, `Bearer ${env.XTROUTER_API_KEY}`);
-assert.equal(providerRequest.body.model, 'x-ai/grok-build-0.1');
+assert.equal(providerRequest.body.model, 'mistralai/mistral-large-2512');
+assert.equal(providerCallCount, 3);
+assert.equal(payload.data.persistedOnServer, true);
+assert.equal(serverCache.size, 1);
+
+const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'accept', meaning: 'chấp nhận', topic: 'Công việc' }),
+}), env, context);
+const kvPayload = await kvResponse.json();
+assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'KV');
+assert.equal(kvPayload.data.persistedOnServer, true);
+assert.equal(providerCallCount, 3);
 
 const cambridgeResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/cambridge?word=accept', {

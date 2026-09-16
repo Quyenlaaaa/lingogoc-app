@@ -1,4 +1,4 @@
 XTROUTER_API_KEY=
-AI_MODEL=x-ai/grok-build-0.1
+AI_MODEL=mistralai/mistral-large-2512
 AI_BASE_URL=https://api.xkiro.com/v1
 ALLOWED_ORIGINS=http://localhost:5173,https://quyenlaaaa.github.io

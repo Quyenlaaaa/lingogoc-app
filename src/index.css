@@ -1268,14 +1268,15 @@ a {
 
 .flashcard-scene {
   perspective: 1200px;
-  height: 380px;
+  min-height: 380px;
   cursor: pointer;
 }
 
 .flashcard-inner {
   position: relative;
+  display: grid;
   width: 100%;
-  height: 100%;
+  min-height: inherit;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   transform-style: preserve-3d;
 }
@@ -1285,9 +1286,11 @@ a {
 }
 
 .flashcard-face {
-  position: absolute;
+  position: relative;
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: inherit;
   width: 100%;
-  height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border-radius: var(--radius-xl);
@@ -1347,6 +1350,7 @@ a {
   letter-spacing: -0.5px;
   color: var(--text-primary);
   margin-bottom: 6px;
+  overflow-wrap: anywhere;
 }
 
 .card-ipa-text {
@@ -1424,6 +1428,7 @@ a {
   background: var(--bg-card-subtle);
   border: 1px solid var(--border-color);
   margin: auto 0;
+  min-width: 0;
 }
 
 .ex-en-row {
@@ -1435,9 +1440,11 @@ a {
 }
 
 .ex-en-text {
+  min-width: 0;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .inline-audio-btn {
@@ -1453,6 +1460,8 @@ a {
 .ex-vi-text {
   font-size: 0.85rem;
   color: var(--text-secondary);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .card-back-footer {
@@ -1545,6 +1554,7 @@ a {
   flex-direction: column;
   justify-content: space-between;
   transition: all var(--transition-fast);
+  min-width: 0;
 }
 
 .vocab-item-card:hover {
@@ -1582,6 +1592,7 @@ a {
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .item-ipa-text {
@@ -1635,16 +1646,43 @@ a {
   font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 2px;
+  overflow-wrap: anywhere;
 }
 
 .item-ex-vi {
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.word-detail-example-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.word-detail-example-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .item-example-loading {
   color: var(--text-muted);
   font-size: 0.74rem;
   line-height: 1.5;
+}
+
+.item-ai-retry {
+  display: block;
+  margin-top: 7px;
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.item-ai-retry:hover {
+  color: var(--primary-hover);
 }
 
 .item-more-examples {
@@ -2894,6 +2932,13 @@ a {
   font-weight: 750;
 }
 
+.example-saved-badge {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 650;
+}
+
 .trusted-example + .trusted-example {
   margin-top: 12px;
   padding-top: 12px;
@@ -3645,7 +3690,7 @@ html, body {
   }
 
   .flashcard-scene {
-    height: clamp(340px, 55vh, 420px);
+    min-height: 380px;
   }
 
   .flashcard-face {
@@ -3677,6 +3722,14 @@ html, body {
   .card-back-footer {
     flex-direction: column;
     gap: 8px;
+  }
+
+  .word-detail-modal-card {
+    padding: 24px 16px !important;
+  }
+
+  .word-detail-example-row {
+    align-items: flex-start;
   }
 
   .card-btn-bookmark, .card-btn-mastered {

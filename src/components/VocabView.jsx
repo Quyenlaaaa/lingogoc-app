@@ -202,7 +202,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
       }
     };
 
-    Promise.allSettled(Array.from({ length: Math.min(2, queue.length) }, () => loadNext()));
+    // Free AI tiers are sensitive to bursts; one request at a time is more
+    // reliable and successful words are then served from the persistent cache.
+    Promise.allSettled(Array.from({ length: Math.min(1, queue.length) }, () => loadNext()));
     return () => {
       cancelled = true;
       controllers.forEach((controller) => controller.abort());
@@ -263,6 +265,32 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         ) === index)
         .slice(0, 2)
     : [];
+
+  const retryFlashcardExamples = async (event) => {
+    event.stopPropagation();
+    if (!currentCard || isLoadingFlashcardExamples) return;
+    setIsLoadingFlashcardExamples(true);
+    const result = await enrichWordWithLLM(
+      currentCard.word,
+      currentCard.meaning,
+      currentCard.topic,
+      flashcardDictionaryData?.definitions || [],
+    );
+    setFlashcardAiData(result);
+    setIsLoadingFlashcardExamples(false);
+  };
+
+  const retryListExamples = async (item) => {
+    const key = item.word.toLowerCase();
+    setListAiData((current) => ({ ...current, [key]: { isLoading: true } }));
+    const result = await enrichWordWithLLM(
+      item.word,
+      item.meaning,
+      item.topic,
+      listDictionaryDataRef.current[key]?.definitions || [],
+    );
+    setListAiData((current) => ({ ...current, [key]: result }));
+  };
 
   // Toggle Mastered Status
   const handleToggleMastered = (wordId) => {
@@ -589,6 +617,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   <div className="meaning-label">Nghĩa tiếng Việt:</div>
                   <div className="meaning-highlight">{activeEnrichment?.primaryMeaningVi || currentCard.meaning}</div>
                   {activeEnrichment?.primaryMeaningVi && <div className="meaning-verified-badge">Đã đối chiếu theo định nghĩa từ điển</div>}
+                  {activeEnrichment?.persistedOnServer
+                    ? <div className="example-saved-badge">Đã lưu trên máy chủ · không mất khi xóa dữ liệu trình duyệt</div>
+                    : activeEnrichment?.savedAt && <div className="example-saved-badge">Đã lưu trên thiết bị · mở lại không tốn lượt AI</div>}
                   {!activeEnrichment && isLowQualityMeaning(currentCard.meaning) && (
                     <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); setDetailWord(currentCard); }}>
                       Nghĩa này chưa đủ tin cậy · Mở phần đối chiếu
@@ -609,9 +640,18 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                       {example.vi && <div className="ex-vi-text">{example.vi}</div>}
                     </div>
                   )) : (
-                    <button className="example-quality-placeholder" onClick={() => setDetailWord(currentCard)}>
+                    <button
+                      className="example-quality-placeholder"
+                      onClick={flashcardAiData?.unavailableReason ? retryFlashcardExamples : () => setDetailWord(currentCard)}
+                    >
                       <BookOpen size={17} />
-                      <span>{isLoadingFlashcardExamples ? 'Đang tìm ví dụ tự nhiên từ từ điển…' : 'Chưa có ví dụ đã kiểm chứng. Mở phần ví dụ đa ngữ cảnh.'}</span>
+                      <span>
+                        {isLoadingFlashcardExamples
+                          ? 'Đang tải ví dụ song ngữ…'
+                          : flashcardAiData?.unavailableReason
+                            ? 'AI đang bận · Bấm để thử lại'
+                            : 'Chưa có ví dụ đã kiểm chứng. Mở phần ví dụ đa ngữ cảnh.'}
+                      </span>
                     </button>
                   )}
                 </div>
@@ -700,9 +740,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   .filter((example) => !isLowQualityExample(example))
                   .map((example) => ({ en: example, vi: '', context: 'Từ điển' }));
                 const cachedAiData = getCachedWordEnrichment(w.word);
-                const aiStateExists = Object.prototype.hasOwnProperty.call(listAiData, w.word.toLowerCase())
-                  || Boolean(cachedAiData);
-                const aiExamples = (listAiData[w.word.toLowerCase()]?.contextExamples
+                const aiState = listAiData[w.word.toLowerCase()];
+                const aiStateExists = Boolean(aiState?.contextExamples?.length || cachedAiData);
+                const aiExamples = (aiState?.contextExamples
                   || cachedAiData?.contextExamples
                   || [])
                   .filter((example) => !isLowQualityExample(example.en))
@@ -744,11 +784,18 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                         ))}
                         {!listExamples.length && (
                           <div className="item-example-loading">
-                            {dictionaryStateExists && (aiStateExists || !hasBackendApi())
+                            {aiState?.unavailableReason
+                              ? 'AI đang bận, chưa thể tạo ví dụ.'
+                              : dictionaryStateExists && (aiStateExists || !hasBackendApi())
                               ? 'Chưa có ví dụ đã kiểm chứng.'
-                              : hasBackendApi()
+                              : aiState?.isLoading || hasBackendApi()
                                 ? 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
                                 : 'Đang tìm ví dụ tự nhiên từ từ điển…'}
+                            {aiState?.unavailableReason && (
+                              <button type="button" className="item-ai-retry" onClick={() => retryListExamples(w)}>
+                                Thử lại AI
+                              </button>
+                            )}
                           </div>
                         )}
                         <button type="button" className="item-more-examples" onClick={() => setDetailWord(w)}>

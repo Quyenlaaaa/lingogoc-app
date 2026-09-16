@@ -1,5 +1,6 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 const MAX_BODY_BYTES = 20_000;
+const VOCABULARY_PROMPT_VERSION = 2;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
@@ -28,7 +29,9 @@ function json(payload, status, origin, extraHeaders = {}) {
 }
 
 function cleanText(value, maxLength) {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, maxLength) : '';
+  return typeof value === 'string'
+    ? value.replace(/\*\*|__|`/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLength)
+    : '';
 }
 
 async function readJson(request) {
@@ -92,6 +95,8 @@ function normalizeEnrichment(data, word) {
     mnemonicTip: cleanText(data?.mnemonicTip, 500),
     wordFamily: cleanText(data?.wordFamily, 500),
     isAiGenerated: true,
+    persistedOnServer: Boolean(data?.persistedOnServer),
+    serverSavedAt: cleanText(data?.serverSavedAt, 40),
   };
 }
 
@@ -101,29 +106,44 @@ async function callChatModel(env, messages, temperature = 0.45) {
     throw new Error('AI_NOT_CONFIGURED');
   }
   const baseUrl = String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, '');
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
-      ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
-    },
-    body: JSON.stringify({ model: env.AI_MODEL, temperature, messages }),
-  });
-  if (!response.ok) {
+  const retryableStatuses = new Set([429, 500, 502, 503, 504]);
+  let lastError = 'AI_PROVIDER_UNKNOWN';
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
+        ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
+      },
+      body: JSON.stringify({ model: env.AI_MODEL, temperature, messages }),
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      return payload?.choices?.[0]?.message?.content || '';
+    }
+
     const detail = cleanText(await response.text(), 500);
-    throw new Error(`AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`);
+    lastError = `AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`;
+    if (!retryableStatuses.has(response.status) || attempt === 2) break;
+    const retryAfter = Number(response.headers.get('Retry-After'));
+    const waitMs = Number.isFinite(retryAfter)
+      ? Math.min(2500, Math.max(400, retryAfter * 1000))
+      : 500 * (attempt + 1);
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
-  const payload = await response.json();
-  return payload?.choices?.[0]?.message?.content || '';
+  throw new Error(lastError);
 }
 
-async function cacheKeyFor(data) {
+async function cacheIdentityFor(data) {
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   const hash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  return new Request(`https://lingogoc-cache.invalid/vocabulary/${hash}`, { method: 'GET' });
+  return {
+    edgeRequest: new Request(`https://lingogoc-cache.invalid/vocabulary/${hash}`, { method: 'GET' }),
+    serverKey: `vocabulary:v${VOCABULARY_PROMPT_VERSION}:${hash}`,
+  };
 }
 
 async function enrichVocabulary(request, env, origin, context) {
@@ -144,15 +164,44 @@ async function enrichVocabulary(request, env, origin, context) {
   };
 
   const cache = caches.default;
-  const key = await cacheKeyFor(input);
-  const cached = await cache.match(key);
+  // Include the model in the cache key so switching models never serves an
+  // older provider response for a newly requested word.
+  const cacheIdentity = await cacheIdentityFor({
+    version: VOCABULARY_PROMPT_VERSION,
+    model: env.AI_MODEL,
+    word,
+  });
+  const cached = await cache.match(cacheIdentity.edgeRequest);
   if (cached) {
     const data = await cached.json();
+    if (env.VOCAB_CACHE && !data.persistedOnServer) {
+      const backfilled = { ...data, persistedOnServer: true, serverSavedAt: new Date().toISOString() };
+      await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));
+      return json({ data: { ...backfilled, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+KV' });
+    }
     return json({ data: { ...data, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT' });
   }
 
+  if (env.VOCAB_CACHE) {
+    const stored = await env.VOCAB_CACHE.get(cacheIdentity.serverKey, 'json');
+    if (stored) {
+      try {
+        const persisted = normalizeEnrichment(stored, word);
+        const edgeResponse = new Response(JSON.stringify(persisted), {
+          headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=604800' },
+        });
+        context.waitUntil(cache.put(cacheIdentity.edgeRequest, edgeResponse));
+        return json({ data: { ...persisted, fromCache: true, persistedOnServer: true } }, 200, origin, {
+          'X-LingoGoc-Cache': 'KV',
+        });
+      } catch {
+        // Ignore a corrupt/old record and regenerate it below.
+      }
+    }
+  }
+
   const systemPrompt = `You are a meticulous English-Vietnamese lexicographer for CEFR A1-B2 learners.
-Return only valid JSON. Never use generic templates such as "She used the word ... in her sentence."
+Return only valid JSON with plain text values and no Markdown. Never use generic templates such as "She used the word ... in her sentence."
 Create exactly 5 natural examples in genuinely different situations: daily life, work or study, conversation, the supplied topic, and an idiomatic or common collocation context.
 Every English sentence must use the target word naturally. Every Vietnamese translation must faithfully translate that sentence and sound natural to Vietnamese speakers.
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
@@ -161,11 +210,20 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
     { role: 'system', content: systemPrompt },
     { role: 'user', content: JSON.stringify(input) },
   ]);
-  const result = normalizeEnrichment(extractJson(content), word);
+  const result = {
+    ...normalizeEnrichment(extractJson(content), word),
+    persistedOnServer: Boolean(env.VOCAB_CACHE),
+    serverSavedAt: new Date().toISOString(),
+  };
+  if (env.VOCAB_CACHE) {
+    // Await the durable write: the client only receives success after the
+    // generated examples have been safely stored on the server.
+    await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(result));
+  }
   const cacheResponse = new Response(JSON.stringify(result), {
     headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=604800' },
   });
-  context.waitUntil(cache.put(key, cacheResponse));
+  context.waitUntil(cache.put(cacheIdentity.edgeRequest, cacheResponse));
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
@@ -205,7 +263,12 @@ export default {
 
     const url = new URL(request.url);
     if (url.pathname === '/health' && request.method === 'GET') {
-      return json({ ok: true, aiConfigured: Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && env.AI_MODEL) }, 200, origin);
+      return json({
+        ok: true,
+        aiConfigured: Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && env.AI_MODEL),
+        model: env.AI_MODEL || '',
+        serverStorageConfigured: Boolean(env.VOCAB_CACHE),
+      }, 200, origin);
     }
 
     try {

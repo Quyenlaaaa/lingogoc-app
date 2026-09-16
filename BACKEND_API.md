@@ -1,8 +1,8 @@
 # LingoGoc backend contract
 
-Frontend chỉ biết `VITE_API_BASE_URL`. Mọi khóa xkiro, Groq, OpenRouter hoặc Cambridge phải nằm trong secret của backend và không được trả về client. Worker mẫu đang dùng `XTROUTER_API_KEY`, endpoint `https://api.xkiro.com/v1` và model `x-ai/grok-build-0.1`.
+Frontend chỉ biết `VITE_API_BASE_URL`. Mọi khóa xkiro, Groq, OpenRouter hoặc Cambridge phải nằm trong secret của backend và không được trả về client. Worker mẫu đang dùng `XTROUTER_API_KEY`, endpoint `https://api.xkiro.com/v1` và model `mistralai/mistral-large-2512`.
 
-Một backend Cloudflare Worker mẫu đã có tại `backend/`. Xem `backend/README.md` để chạy local và deploy. Khi backend được cấu hình, Danh sách 3000 tự tải ví dụ AI với tối đa 2 request đồng thời; Thẻ nhớ 3D tải theo thẻ đang mở. Kết quả hợp lệ được lưu trong localStorage để tiết kiệm quota.
+Một backend Cloudflare Worker mẫu đã có tại `backend/`. Xem `backend/README.md` để chạy local và deploy. Khi backend được cấu hình, Danh sách 3000 tải tuần tự từng từ để phù hợp quota miễn phí; Thẻ nhớ 3D tải theo thẻ đang mở. Kết quả hợp lệ được lưu lâu dài trên Cloudflare Workers KV, đồng thời cache trong localStorage và IndexedDB để mở lại tức thì. Nếu người dùng xóa dữ liệu trình duyệt, ứng dụng tải lại bản đã lưu trên KV mà không gọi AI. Worker tự thử lại tối đa 3 lần khi nhà cung cấp trả `429` hoặc lỗi `5xx`.
 
 ## `POST /api/vocabulary/enrich`
 
