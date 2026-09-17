@@ -14,11 +14,11 @@ let providerCallCount = 0;
 let customProviderResponse = null;
 const serverCache = new Map();
 globalThis.fetch = async (url, options) => {
-  if (String(url).startsWith('https://api.dictionaryapi.dev/')) {
-    return new Response(JSON.stringify([{
-      word: 'hello',
-      phonetics: [{ audio: 'https://audio.example.com/hello.mp3' }],
-    }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  if (String(url).startsWith('https://translate.google.com/translate_tts')) {
+    return new Response(new Uint8Array([73, 68, 51, 4]), {
+      status: 200,
+      headers: { 'Content-Type': 'audio/mpeg' },
+    });
   }
   providerCallCount += 1;
   providerRequest = { url, options, body: JSON.parse(options.body) };
@@ -148,8 +148,9 @@ const pronunciationResponse = await worker.fetch(
   env,
   context,
 );
-assert.equal(pronunciationResponse.status, 302);
-assert.equal(pronunciationResponse.headers.get('Location'), 'https://audio.example.com/hello.mp3');
+assert.equal(pronunciationResponse.status, 200);
+assert.equal(pronunciationResponse.headers.get('Content-Type'), 'audio/mpeg');
+assert.ok((await pronunciationResponse.arrayBuffer()).byteLength > 0);
 
 const cambridgeResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/cambridge?word=accept', {

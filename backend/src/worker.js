@@ -272,29 +272,44 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
-async function vocabularyPronunciation(request, origin) {
+async function vocabularyPronunciation(request, origin, context) {
   const url = new URL(request.url);
   const word = cleanText(url.searchParams.get('word'), 80).toLowerCase();
   if (!word || !/^[a-z][a-z '-]*$/i.test(word)) {
     return json({ error: 'Từ vựng không hợp lệ.' }, 400, origin);
   }
 
-  const dictionaryResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-  if (!dictionaryResponse.ok) return json({ error: 'Không tìm thấy audio phát âm cho từ này.' }, 404, origin);
-  const entries = await dictionaryResponse.json();
-  const audioUrl = entries
-    ?.flatMap((entry) => Array.isArray(entry?.phonetics) ? entry.phonetics : [])
-    .map((phonetic) => String(phonetic?.audio || '').trim())
-    .find((audio) => audio && /^https?:\/\//i.test(audio));
-  if (!audioUrl) return json({ error: 'Không tìm thấy audio phát âm cho từ này.' }, 404, origin);
+  const cache = caches.default;
+  const cacheKey = new Request(`https://lingogoc-cache.invalid/pronunciation/${encodeURIComponent(word)}`);
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    return new Response(cached.body, {
+      status: 200,
+      headers: {
+        'Content-Type': cached.headers.get('Content-Type') || 'audio/mpeg',
+        'Cache-Control': cached.headers.get('Cache-Control') || 'public, max-age=604800',
+        ...corsHeaders(origin),
+      },
+    });
+  }
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      ...corsHeaders(origin),
-      Location: audioUrl,
-      'Cache-Control': 'public, max-age=86400',
-    },
+  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(word)}`;
+  const audioResponse = await fetch(ttsUrl, {
+    headers: { 'User-Agent': 'Mozilla/5.0 LingoGoc/1.0' },
+  });
+  if (!audioResponse.ok || !audioResponse.body) {
+    return json({ error: 'Không thể tạo audio phát âm cho từ này.' }, 502, origin);
+  }
+
+  const responseHeaders = {
+    'Content-Type': audioResponse.headers.get('Content-Type') || 'audio/mpeg',
+    'Cache-Control': 'public, max-age=604800',
+  };
+  const cacheResponse = new Response(audioResponse.body, { status: 200, headers: responseHeaders });
+  context.waitUntil(cache.put(cacheKey, cacheResponse.clone()));
+  return new Response(cacheResponse.body, {
+    status: 200,
+    headers: { ...responseHeaders, ...corsHeaders(origin) },
   });
 }
 
@@ -347,7 +362,7 @@ export default {
         return await enrichVocabulary(request, env, origin, context);
       }
       if (url.pathname === '/api/vocabulary/pronunciation' && request.method === 'GET') {
-        return await vocabularyPronunciation(request, origin);
+        return await vocabularyPronunciation(request, origin, context);
       }
       if (url.pathname === '/api/vocabulary/cambridge' && request.method === 'GET') {
         // Optional licensed integration. Returning 204 lets the frontend use
