@@ -1,11 +1,13 @@
 // Vocabulary enrichment is performed by the LingoGoc backend. Provider keys
 // never enter localStorage or the public browser bundle.
-import { getBackendUrl, hasBackendApi, readBackendError, readJsonResponse } from './backendApi';
+import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi';
 
 const VOCAB_ENRICHMENT_PREFIX = 'lingogoc_vocab_enrichment_v3_';
 const CACHE_SCHEMA_VERSION = 1;
 const CACHE_DATABASE = 'lingogoc_learning_cache';
 const CACHE_STORE = 'vocabulary_enrichment';
+const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const activeEnrichmentRequests = new Map();
 
 function cleanText(value, maxLength = 500) {
   return typeof value === 'string'
@@ -132,7 +134,48 @@ async function cacheWordEnrichment(word, data) {
   return { ...payload.data, savedAt: payload.savedAt };
 }
 
-export async function enrichWordWithLLM(word, meaning = '', topic = '', dictionaryDefinitions = [], signal) {
+function waitForRetry(delayMs, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('The request was aborted.', 'AbortError'));
+      return;
+    }
+    const handleAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException('The request was aborted.', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', handleAbort);
+      resolve();
+    }, delayMs);
+    signal?.addEventListener('abort', handleAbort, { once: true });
+  });
+}
+
+async function createBackendError(response) {
+  const fallback = 'Không thể tạo ví dụ đa ngữ cảnh.';
+  let payload = null;
+  try {
+    payload = await readJsonResponse(response, fallback);
+  } catch {
+    // Status-based retry handling below still works for non-JSON responses.
+  }
+  const error = new Error(payload?.error?.message || payload?.error || payload?.message || `${fallback} (HTTP ${response.status})`);
+  error.code = payload?.code || `HTTP_${response.status}`;
+  error.retryable = typeof payload?.retryable === 'boolean'
+    ? payload.retryable
+    : RETRYABLE_HTTP_STATUSES.has(response.status);
+  return error;
+}
+
+async function performWordEnrichment(
+  word,
+  meaning = '',
+  topic = '',
+  dictionaryDefinitions = [],
+  signal,
+  options = {},
+) {
   let localFallback = null;
   const cached = getCachedWordEnrichment(word);
   if (cached) {
@@ -162,34 +205,81 @@ export async function enrichWordWithLLM(word, meaning = '', topic = '', dictiona
     };
   }
 
-  try {
-    const response = await fetch(getBackendUrl('/api/vocabulary/enrich'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      signal,
-      body: JSON.stringify({ word, meaning, topic, dictionaryDefinitions }),
-    });
-    if (!response.ok) {
-      throw new Error(await readBackendError(response, 'Không thể tạo ví dụ đa ngữ cảnh.'));
-    }
+  const retryUntilSuccess = Boolean(options.retryUntilSuccess);
+  const maxAttempts = retryUntilSuccess ? Number.POSITIVE_INFINITY : Math.max(1, options.maxAttempts || 1);
+  let attempt = 0;
 
-    const payload = await readJsonResponse(response, 'Máy chủ AI trả về dữ liệu trống hoặc không hợp lệ.');
-    if (!payload) throw new Error('Máy chủ AI chưa trả về dữ liệu. Hãy thử lại.');
-    const data = payload?.data || payload;
-    const result = normalizeEnrichment(data);
-    if (!result.contextExamples.length) throw new Error('Backend AI không trả về ví dụ song ngữ hợp lệ.');
-    return await cacheWordEnrichment(word, result);
-  } catch (error) {
-    if (error?.name === 'AbortError') throw error;
-    if (localFallback) {
-      return { ...localFallback, fromCache: true, serverSyncPending: true };
+  while (attempt < maxAttempts) {
+    attempt += 1;
+    try {
+      const response = await fetch(getBackendUrl('/api/vocabulary/enrich'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        signal,
+        body: JSON.stringify({ word, meaning, topic, dictionaryDefinitions }),
+      });
+      if (!response.ok) throw await createBackendError(response);
+
+      const payload = await readJsonResponse(response, 'Máy chủ AI trả về dữ liệu trống hoặc không hợp lệ.');
+      if (!payload) {
+        const error = new Error('Máy chủ AI chưa trả về dữ liệu.');
+        error.retryable = true;
+        throw error;
+      }
+      const result = normalizeEnrichment(payload?.data || payload);
+      if (!result.contextExamples.length) {
+        const error = new Error('Backend AI chưa trả về ví dụ song ngữ hợp lệ.');
+        error.retryable = true;
+        throw error;
+      }
+      return await cacheWordEnrichment(word, result);
+    } catch (error) {
+      if (error?.name === 'AbortError') throw error;
+
+      const isRetryable = error?.retryable !== false;
+      if (isRetryable && attempt < maxAttempts) {
+        const delayMs = Math.min(20000, 1000 * (2 ** Math.min(attempt - 1, 4)));
+        options.onRetry?.({ attempt, delayMs, message: error?.message || 'Lỗi kết nối AI' });
+        await waitForRetry(delayMs, signal);
+        continue;
+      }
+
+      if (localFallback) {
+        return { ...localFallback, fromCache: true, serverSyncPending: true };
+      }
+      return {
+        isAiGenerated: false,
+        contextExamples: [],
+        collocations: [],
+        senses: [],
+        unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
+        unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
+      };
     }
-    return {
-      isAiGenerated: false,
-      contextExamples: [],
-      collocations: [],
-      senses: [],
-      unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
-    };
   }
+}
+
+export function enrichWordWithLLM(
+  word,
+  meaning = '',
+  topic = '',
+  dictionaryDefinitions = [],
+  signal,
+  options = {},
+) {
+  const keepAlive = Boolean(options.keepAlive || options.retryUntilSuccess);
+  if (!keepAlive) {
+    return performWordEnrichment(word, meaning, topic, dictionaryDefinitions, signal, options);
+  }
+
+  const requestKey = String(word || '').trim().toLowerCase();
+  const existingRequest = activeEnrichmentRequests.get(requestKey);
+  if (existingRequest) return existingRequest;
+
+  // A keep-alive request intentionally has no component AbortSignal. It keeps
+  // running when a modal/list unmounts and persists its result for the next view.
+  const request = performWordEnrichment(word, meaning, topic, dictionaryDefinitions, undefined, options)
+    .finally(() => activeEnrichmentRequests.delete(requestKey));
+  activeEnrichmentRequests.set(requestKey, request);
+  return request;
 }

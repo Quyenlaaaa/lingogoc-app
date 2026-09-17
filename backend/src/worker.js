@@ -230,12 +230,31 @@ Create exactly 5 natural examples in genuinely different situations: daily life,
 Every English sentence must use the target word naturally. Every Vietnamese translation must faithfully translate that sentence and sound natural to Vietnamese speakers.
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
 Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","meaningVi":"...","usage":"..."}],"contextExamples":[{"context":"...","en":"...","vi":"..."}],"collocations":[{"phrase":"...","meaning":"..."}],"mnemonicTip":"...","wordFamily":"..."}`;
-  const content = await callChatModel(env, [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: JSON.stringify(input) },
-  ]);
+  let normalized = null;
+  let generationError = null;
+  for (let generationAttempt = 0; generationAttempt < 3; generationAttempt += 1) {
+    try {
+      const content = await callChatModel(env, [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: JSON.stringify(input) },
+      ]);
+      normalized = normalizeEnrichment(extractJson(content), word);
+      break;
+    } catch (error) {
+      generationError = error;
+      const code = String(error?.message || '');
+      const canRegenerate = code !== 'AI_NOT_CONFIGURED' && code !== 'PAYLOAD_TOO_LARGE';
+      if (canRegenerate && generationAttempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 750 * (generationAttempt + 1)));
+      } else {
+        break;
+      }
+    }
+  }
+  if (!normalized) throw generationError || new Error('AI_PROVIDER_UNKNOWN');
+
   const result = {
-    ...normalizeEnrichment(extractJson(content), word),
+    ...normalized,
     persistedOnServer: Boolean(env.VOCAB_CACHE),
     serverSavedAt: new Date().toISOString(),
   };
@@ -271,12 +290,12 @@ async function speakingChat(request, env, origin) {
 
 function publicError(error) {
   const code = String(error?.message || 'UNKNOWN_ERROR');
-  if (code === 'PAYLOAD_TOO_LARGE') return ['Dữ liệu gửi lên quá lớn.', 413];
-  if (code === 'AI_NOT_CONFIGURED') return ['Backend chưa được cấu hình XTROUTER_API_KEY và AI_MODEL.', 503];
-  if (code.startsWith('AI_PROVIDER_')) return ['Nhà cung cấp AI đang từ chối hoặc tạm thời không khả dụng.', 502];
-  if (code === 'INVALID_AI_JSON' || code === 'INSUFFICIENT_BILINGUAL_EXAMPLES') return ['AI trả về dữ liệu chưa đúng định dạng, vui lòng thử lại.', 502];
-  if (error instanceof SyntaxError) return ['JSON không hợp lệ.', 400];
-  return ['Máy chủ AI gặp lỗi tạm thời.', 500];
+  if (code === 'PAYLOAD_TOO_LARGE') return ['Dữ liệu gửi lên quá lớn.', 413, code, false];
+  if (code === 'AI_NOT_CONFIGURED') return ['Backend chưa được cấu hình XTROUTER_API_KEY và AI_MODEL.', 503, code, false];
+  if (code.startsWith('AI_PROVIDER_')) return ['Nhà cung cấp AI đang từ chối hoặc tạm thời không khả dụng.', 502, code, true];
+  if (code === 'INVALID_AI_JSON' || code === 'INSUFFICIENT_BILINGUAL_EXAMPLES') return ['AI trả về dữ liệu chưa đúng định dạng, hệ thống sẽ thử lại.', 502, code, true];
+  if (error instanceof SyntaxError) return ['JSON không hợp lệ.', 400, 'INVALID_REQUEST_JSON', false];
+  return ['Máy chủ AI gặp lỗi tạm thời.', 500, code, true];
 }
 
 export default {
@@ -312,8 +331,8 @@ export default {
       }
       return json({ error: 'Không tìm thấy endpoint.' }, 404, origin);
     } catch (error) {
-      const [message, status] = publicError(error);
-      return json({ error: message }, status, origin);
+      const [message, status, code, retryable] = publicError(error);
+      return json({ error: message, code, retryable }, status, origin);
     }
   },
 };

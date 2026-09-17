@@ -100,7 +100,9 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       }
     };
 
-    if (config.useCloudVoice && connected) {
+    // Cloud audio is created only after a network round-trip. Mobile browsers
+    // may reject that delayed play(), so use their native speech engine there.
+    if (config.useCloudVoice && connected && !speechHelper.isMobileDevice()) {
       try {
         const url = await requestCloudSpeech({ config, text });
         if (!isMountedRef.current) {

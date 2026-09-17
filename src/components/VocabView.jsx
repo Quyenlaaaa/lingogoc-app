@@ -66,6 +66,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const requestedDictionaryWords = useRef(new Set());
   const requestedAiWords = useRef(new Set());
+  const viewMountedRef = useRef(true);
   const listDictionaryDataRef = useRef({});
   const itemsPerPage = 24;
 
@@ -125,6 +126,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     [filteredWords, currentPage],
   );
 
+  useEffect(() => {
+    viewMountedRef.current = true;
+    return () => { viewMountedRef.current = false; };
+  }, []);
+
   // Nạp ví dụ từ từ điển thật cho đúng 24 thẻ đang hiển thị. Giới hạn bốn
   // request đồng thời và lưu qua cache của realDictionaryService để tránh
   // gọi lại API khi người học quay về trang cũ.
@@ -182,25 +188,22 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     if (!queue.length) return undefined;
     queue.forEach((item) => requestedAiWords.current.add(item.word.toLowerCase()));
 
-    let cancelled = false;
+    let isViewActive = true;
     let cursor = 0;
-    const controllers = new Set();
     const loadNext = async () => {
-      while (!cancelled && cursor < queue.length) {
+      while (cursor < queue.length) {
         const item = queue[cursor];
         cursor += 1;
-        const controller = new AbortController();
-        controllers.add(controller);
         const dictionaryData = listDictionaryDataRef.current[item.word.toLowerCase()];
         const result = await enrichWordWithLLM(
           item.word,
           item.meaning,
           item.topic,
           dictionaryData?.definitions || [],
-          controller.signal,
+          undefined,
+          { retryUntilSuccess: true, keepAlive: true },
         ).catch(() => null);
-        controllers.delete(controller);
-        if (!cancelled && result) {
+        if (isViewActive && result) {
           setListAiData((current) => ({ ...current, [item.word.toLowerCase()]: result }));
         }
       }
@@ -210,8 +213,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     // reliable and successful words are then served from the persistent cache.
     Promise.allSettled(Array.from({ length: Math.min(1, queue.length) }, () => loadNext()));
     return () => {
-      cancelled = true;
-      controllers.forEach((controller) => controller.abort());
+      isViewActive = false;
     };
   }, [studyMode, visibleListWords]);
 
@@ -228,7 +230,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   useEffect(() => {
     if (studyMode !== 'flashcard' || !currentCard) return undefined;
     let cancelled = false;
-    const controller = new AbortController();
     setFlashcardDictionaryData(null);
     setFlashcardAiData(getCachedWordEnrichment(currentCard.word));
     setIsLoadingFlashcardExamples(true);
@@ -242,7 +243,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         currentCard.meaning,
         currentCard.topic,
         dictionaryResult?.definitions || [],
-        controller.signal,
       ).catch(() => null);
       if (!cancelled && aiResult) setFlashcardAiData(aiResult);
       if (!cancelled) setIsLoadingFlashcardExamples(false);
@@ -250,7 +250,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     loadExamples();
     return () => {
       cancelled = true;
-      controller.abort();
     };
   }, [currentCard, studyMode]);
 
@@ -274,26 +273,51 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     event.stopPropagation();
     if (!currentCard || isLoadingFlashcardExamples) return;
     setIsLoadingFlashcardExamples(true);
-    const result = await enrichWordWithLLM(
-      currentCard.word,
-      currentCard.meaning,
-      currentCard.topic,
-      flashcardDictionaryData?.definitions || [],
-    );
-    setFlashcardAiData(result);
-    setIsLoadingFlashcardExamples(false);
+    try {
+      const result = await enrichWordWithLLM(
+        currentCard.word,
+        currentCard.meaning,
+        currentCard.topic,
+        flashcardDictionaryData?.definitions || [],
+        undefined,
+        { retryUntilSuccess: true, keepAlive: true },
+      );
+      if (viewMountedRef.current) setFlashcardAiData(result);
+    } catch (error) {
+      if (error?.name !== 'AbortError') console.warn('Could not retry vocabulary examples:', error);
+    } finally {
+      if (viewMountedRef.current) {
+        setIsLoadingFlashcardExamples(false);
+      }
+    }
   };
 
   const retryListExamples = async (item) => {
     const key = item.word.toLowerCase();
-    setListAiData((current) => ({ ...current, [key]: { isLoading: true } }));
-    const result = await enrichWordWithLLM(
-      item.word,
-      item.meaning,
-      item.topic,
-      listDictionaryDataRef.current[key]?.definitions || [],
-    );
-    setListAiData((current) => ({ ...current, [key]: result }));
+    setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: 0 } }));
+    try {
+      const result = await enrichWordWithLLM(
+        item.word,
+        item.meaning,
+        item.topic,
+        listDictionaryDataRef.current[key]?.definitions || [],
+        undefined,
+        {
+          retryUntilSuccess: true,
+          keepAlive: true,
+          onRetry: ({ attempt }) => {
+            if (viewMountedRef.current) {
+              setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: attempt } }));
+            }
+          },
+        },
+      );
+      if (viewMountedRef.current) {
+        setListAiData((current) => ({ ...current, [key]: result }));
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError') console.warn('Could not retry vocabulary examples:', error);
+    }
   };
 
   const openWordDetail = (item, enrichment) => {
@@ -798,7 +822,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                               : dictionaryStateExists && (aiStateExists || !hasBackendApi())
                               ? 'Chưa có ví dụ đã kiểm chứng.'
                               : aiState?.isLoading || hasBackendApi()
-                                ? 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
+                                ? aiState?.retryAttempt
+                                  ? `AI phản hồi chậm · đang tự thử lại lần ${aiState.retryAttempt}…`
+                                  : 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
                                 : 'Đang tìm ví dụ tự nhiên từ từ điển…'}
                             {aiState?.unavailableReason && (
                               <button type="button" className="item-ai-retry" onClick={() => retryListExamples(w)}>

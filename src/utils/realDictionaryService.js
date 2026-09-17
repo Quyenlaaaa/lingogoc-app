@@ -2,6 +2,17 @@
 // Cung cấp audio, định nghĩa tiếng Anh, từ đồng nghĩa và ví dụ từ dictionaryapi.dev.
 
 const DICT_CACHE_PREFIX = 'lingogoc_real_dict_';
+let nativeAudio = null;
+
+function getNativeAudio() {
+  if (typeof Audio === 'undefined') return null;
+  if (!nativeAudio) {
+    nativeAudio = new Audio();
+    nativeAudio.preload = 'auto';
+    nativeAudio.playsInline = true;
+  }
+  return nativeAudio;
+}
 
 export async function fetchRealWordData(word) {
   if (!word) return null;
@@ -97,14 +108,42 @@ export async function fetchRealWordData(word) {
 
 /**
  * Phát âm thanh người bản xứ thật từ URL MP3
+ * Trả về Promise<boolean>: true nếu phát thành công, false nếu lỗi/bị chặn trên thiết bị di động
  */
-export function playNativeAudio(audioUrl) {
-  if (!audioUrl) return false;
+export function preloadNativeAudio(audioUrl) {
+  const audio = getNativeAudio();
+  if (!audio || !audioUrl || audio.src === audioUrl) return;
+  audio.src = audioUrl;
   try {
-    const audio = new Audio(audioUrl);
-    audio.play().catch(e => console.warn('Audio play error:', e));
-    return true;
-  } catch (e) {
-    return false;
+    audio.load();
+  } catch {
+    // Preloading is optional; playNativeAudio will report an actual failure.
+  }
+}
+
+export function playNativeAudio(audioUrl) {
+  const audio = getNativeAudio();
+  if (!audio || !audioUrl) return Promise.resolve(false);
+
+  try {
+    audio.pause();
+    if (audio.src !== audioUrl) {
+      audio.src = audioUrl;
+      audio.load();
+    }
+    audio.currentTime = 0;
+
+    // Do not await before play(): mobile browsers require this call to remain
+    // in the original pointer/click event stack.
+    const playResult = audio.play();
+    return Promise.resolve(playResult)
+      .then(() => true)
+      .catch((error) => {
+        console.warn('Native audio play failed or blocked:', error);
+        return false;
+      });
+  } catch (error) {
+    console.warn('Native audio play failed or blocked:', error);
+    return Promise.resolve(false);
   }
 }

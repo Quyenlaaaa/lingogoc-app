@@ -8,10 +8,10 @@ import {
   Lightbulb, 
   Layers
 } from 'lucide-react';
-import { fetchRealWordData, playNativeAudio } from '../utils/realDictionaryService';
+import { fetchRealWordData, playNativeAudio, preloadNativeAudio } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
-import { speakText } from '../utils/speechHelper';
+import { speakText, speechHelper } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
 export default function WordDetailModal({ word, initialEnrichment, isOpen, onClose }) {
@@ -54,9 +54,19 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
               ...(officialData?.definitions || []).map((text) => ({ partOfSpeech: '', text, source: 'Cambridge' })),
               ...(dictData?.definitions || []),
             ],
+            undefined,
+            { retryUntilSuccess: true, keepAlive: true },
           );
           if (!isMounted) return;
           setAiEnrichData(aiData);
+        }
+      } catch (error) {
+        if (error?.name !== 'AbortError' && isMounted) {
+          setAiEnrichData({
+            isAiGenerated: false,
+            contextExamples: [],
+            unavailableReason: error?.message || 'Không thể tạo ví dụ đa ngữ cảnh.',
+          });
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -65,8 +75,16 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
 
     loadDetails();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [initialEnrichment, isOpen, word]);
+
+  useEffect(() => {
+    if (realDictData?.audioUrl && !speechHelper.isMobileDevice()) {
+      preloadNativeAudio(realDictData.audioUrl);
+    }
+  }, [realDictData?.audioUrl]);
 
   if (!isOpen || !word) return null;
 
@@ -86,8 +104,16 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
   const handlePlayNativeOrTts = () => {
+    // Native speech starts synchronously inside the tap on mobile. Fetching or
+    // awaiting an MP3 first can consume Safari/Chrome's user-activation token.
+    if (speechHelper.isMobileDevice() && speakText(word.word, 0.85)) {
+      return;
+    }
+
     if (realDictData?.audioUrl) {
-      playNativeAudio(realDictData.audioUrl);
+      playNativeAudio(realDictData.audioUrl).then((played) => {
+        if (!played) speakText(word.word, 0.85);
+      });
     } else {
       speakText(word.word, 0.85);
     }
