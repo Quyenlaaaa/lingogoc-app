@@ -45,8 +45,10 @@ assert.equal(helper.activeUtterance, null, 'finished utterances must be released
 let audioInstances = 0;
 class MockAudio {
   static rejectNext = false;
+  static lastInstance = null;
   constructor() {
     audioInstances += 1;
+    MockAudio.lastInstance = this;
     this.src = '';
     this.currentTime = 0;
   }
@@ -66,6 +68,8 @@ const dictionary = await import(`../src/utils/realDictionaryService.js?test=${Da
 dictionary.preloadNativeAudio('https://example.com/hello.mp3');
 assert.equal(await dictionary.playNativeAudio('https://example.com/hello.mp3'), true);
 assert.equal(audioInstances, 1, 'native pronunciation must reuse one audio element');
+assert.equal(await dictionary.playNativeAudio('https://example.com/hello.mp3', 0.75), true);
+assert.equal(MockAudio.lastInstance.playbackRate, 0.75, 'native audio must respect slow playback rate');
 
 MockAudio.rejectNext = true;
 const originalWarn = console.warn;

@@ -76,7 +76,7 @@ function normalizeEnrichment(data, word) {
       })
       .slice(0, 5)
     : [];
-  if (examples.length < 3) throw new Error('INSUFFICIENT_BILINGUAL_EXAMPLES');
+  if (examples.length !== 5) throw new Error('INSUFFICIENT_BILINGUAL_EXAMPLES');
 
   return {
     word,
@@ -193,7 +193,9 @@ async function enrichVocabulary(request, env, origin, context) {
   const cached = await cache.match(cacheIdentity.edgeRequest);
   if (cached) {
     try {
-      const data = await cached.json();
+      // Old edge entries with fewer than five distinct contexts are invalidated
+      // and regenerated instead of being returned as a successful cache hit.
+      const data = normalizeEnrichment(await cached.json(), word);
       if (env.VOCAB_CACHE && !data.persistedOnServer) {
         const backfilled = { ...data, persistedOnServer: true, serverSavedAt: new Date().toISOString() };
         await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));

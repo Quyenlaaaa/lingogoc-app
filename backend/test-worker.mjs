@@ -104,18 +104,19 @@ assert.equal(kvPayload.data.persistedOnServer, true);
 assert.equal(providerCallCount, 3);
 
 let regenerationCalls = 0;
+const patientExamples = [
+  { context: 'Đời sống', en: 'Please be patient while I check your order.', vi: 'Vui lòng kiên nhẫn trong lúc tôi kiểm tra đơn hàng.' },
+  { context: 'Công việc', en: 'A patient manager listens before making a decision.', vi: 'Một quản lý kiên nhẫn sẽ lắng nghe trước khi quyết định.' },
+  { context: 'Học tập', en: 'Be patient with yourself when learning English.', vi: 'Hãy kiên nhẫn với chính mình khi học tiếng Anh.' },
+  { context: 'Hội thoại', en: 'Can you be patient for just a few more minutes?', vi: 'Bạn có thể kiên nhẫn thêm vài phút nữa không?' },
+  { context: 'Cụm từ', en: 'The doctor was patient with every worried parent.', vi: 'Bác sĩ kiên nhẫn với từng phụ huynh đang lo lắng.' },
+];
 customProviderResponse = async () => {
   regenerationCalls += 1;
-  const content = regenerationCalls === 1
-    ? JSON.stringify({ contextExamples: [] })
-    : JSON.stringify({
-      primaryMeaningVi: 'kiên nhẫn',
-      contextExamples: [
-        { context: 'Đời sống', en: 'Please be patient while I check your order.', vi: 'Vui lòng kiên nhẫn trong lúc tôi kiểm tra đơn hàng.' },
-        { context: 'Công việc', en: 'A patient manager listens before making a decision.', vi: 'Một quản lý kiên nhẫn sẽ lắng nghe trước khi quyết định.' },
-        { context: 'Học tập', en: 'Be patient with yourself when learning English.', vi: 'Hãy kiên nhẫn với chính mình khi học tiếng Anh.' },
-      ],
-    });
+  const content = JSON.stringify({
+    primaryMeaningVi: 'kiên nhẫn',
+    contextExamples: regenerationCalls === 1 ? patientExamples.slice(0, 4) : patientExamples,
+  });
   return new Response(JSON.stringify({ choices: [{ message: { content } }] }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
@@ -129,7 +130,7 @@ const regeneratedResponse = await worker.fetch(new Request('http://localhost:878
 }), env, context);
 const regeneratedPayload = await regeneratedResponse.json();
 assert.equal(regeneratedResponse.status, 200);
-assert.equal(regeneratedPayload.data.contextExamples.length, 3);
+assert.equal(regeneratedPayload.data.contextExamples.length, 5);
 assert.equal(regenerationCalls, 2, 'invalid AI content must be regenerated automatically');
 customProviderResponse = null;
 

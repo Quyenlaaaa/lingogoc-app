@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { fetchRealWordData, playNativeAudio, preloadNativeAudio } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
-import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
+import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
 import { speakText, speechHelper } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
@@ -45,7 +45,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
         setCambridgeData(officialData);
         if (cambridgeResult.status === 'rejected') setCambridgeError(cambridgeResult.reason?.message || 'Không thể tải Cambridge API.');
 
-        if (!readyAiData?.contextExamples?.length) {
+        if (!hasCompleteWordEnrichment(readyAiData)) {
           const aiData = await enrichWordWithLLM(
             word.word,
             word.meaning,
@@ -81,7 +81,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   }, [initialEnrichment, isOpen, word]);
 
   useEffect(() => {
-    if (realDictData?.audioUrl && !speechHelper.isMobileDevice()) {
+    if (realDictData?.audioUrl) {
       preloadNativeAudio(realDictData.audioUrl);
     }
   }, [realDictData?.audioUrl]);
@@ -104,13 +104,8 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
   const handlePlayNativeOrTts = () => {
-    // Native speech starts synchronously inside the tap on mobile. Fetching or
-    // awaiting an MP3 first can consume Safari/Chrome's user-activation token.
-    if (speechHelper.isMobileDevice() && speakText(word.word, 0.85)) {
-      return;
-    }
-
     if (realDictData?.audioUrl) {
+      speechHelper.stopSpeaking();
       playNativeAudio(realDictData.audioUrl).then((played) => {
         if (!played) speakText(word.word, 0.85);
       });

@@ -8,6 +8,7 @@ const CACHE_DATABASE = 'lingogoc_learning_cache';
 const CACHE_STORE = 'vocabulary_enrichment';
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const activeEnrichmentRequests = new Map();
+const REQUIRED_CONTEXT_EXAMPLES = 5;
 
 function cleanText(value, maxLength = 500) {
   return typeof value === 'string'
@@ -16,6 +17,7 @@ function cleanText(value, maxLength = 500) {
 }
 
 function normalizeEnrichment(data) {
+  const seenContexts = new Set();
   const contextExamples = Array.isArray(data?.contextExamples)
     ? data.contextExamples
       .map((example) => ({
@@ -23,8 +25,16 @@ function normalizeEnrichment(data) {
         en: cleanText(example?.en),
         vi: cleanText(example?.vi),
       }))
-      .filter((example) => example.en.length >= 8 && example.vi.length >= 5)
-      .slice(0, 5)
+      .filter((example) => {
+        const contextKey = example.context.toLowerCase();
+        const isValid = contextKey
+          && example.en.length >= 8
+          && example.vi.length >= 5
+          && !seenContexts.has(contextKey);
+        if (isValid) seenContexts.add(contextKey);
+        return isValid;
+      })
+      .slice(0, REQUIRED_CONTEXT_EXAMPLES)
     : [];
   const collocations = Array.isArray(data?.collocations)
     ? data.collocations
@@ -55,6 +65,10 @@ function normalizeEnrichment(data) {
     persistedOnServer: Boolean(data?.persistedOnServer),
     serverSavedAt: cleanText(data?.serverSavedAt, 40),
   };
+}
+
+export function hasCompleteWordEnrichment(data) {
+  return normalizeEnrichment(data).contextExamples.length === REQUIRED_CONTEXT_EXAMPLES;
 }
 
 export function getCachedWordEnrichment(word) {
@@ -181,7 +195,9 @@ async function performWordEnrichment(
   if (cached) {
     // Migrate entries created by older releases into the durable two-tier cache.
     const migrated = cached.savedAt ? cached : await cacheWordEnrichment(word, cached);
-    if (migrated.persistedOnServer) return { ...migrated, fromCache: true };
+    if (migrated.persistedOnServer && hasCompleteWordEnrichment(migrated)) {
+      return { ...migrated, fromCache: true };
+    }
     localFallback = migrated;
   }
 
@@ -190,7 +206,9 @@ async function performWordEnrichment(
     if (signal?.aborted) throw new DOMException('The request was aborted.', 'AbortError');
     if (persistent) {
       const restored = await cacheWordEnrichment(word, persistent);
-      if (restored.persistedOnServer) return { ...restored, fromCache: true };
+      if (restored.persistedOnServer && hasCompleteWordEnrichment(restored)) {
+        return { ...restored, fromCache: true };
+      }
       localFallback = restored;
     }
   }
@@ -227,8 +245,8 @@ async function performWordEnrichment(
         throw error;
       }
       const result = normalizeEnrichment(payload?.data || payload);
-      if (!result.contextExamples.length) {
-        const error = new Error('Backend AI chưa trả về ví dụ song ngữ hợp lệ.');
+      if (!hasCompleteWordEnrichment(result)) {
+        const error = new Error(`Backend AI chưa trả về đủ ${REQUIRED_CONTEXT_EXAMPLES} ví dụ thuộc các ngữ cảnh khác nhau.`);
         error.retryable = true;
         throw error;
       }

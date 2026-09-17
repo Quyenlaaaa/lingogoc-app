@@ -21,9 +21,9 @@ import {
 import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
-import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
+import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
 import { hasBackendApi } from '../utils/backendApi';
-import { fetchRealWordData } from '../utils/realDictionaryService';
+import { fetchRealWordData, getCachedNativeAudioUrl, playNativeAudio } from '../utils/realDictionaryService';
 import {
   buildClozePrompt,
   buildQuizOptions,
@@ -140,7 +140,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     const queue = visibleListWords.filter((item) => {
       const key = item.word.toLowerCase();
       return !requestedDictionaryWords.current.has(key)
-        && getTrustedExamples(item).length < 2;
+        && (getTrustedExamples(item).length < 2 || !getCachedNativeAudioUrl(item.word));
     });
     if (!queue.length) return undefined;
     queue.forEach((item) => requestedDictionaryWords.current.add(item.word.toLowerCase()));
@@ -183,7 +183,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
       // Entries created before Workers KV existed still need one server sync.
       // enrichWordWithLLM keeps the local examples visible while performing it.
       return !requestedAiWords.current.has(key)
-        && (!cached || !cached.persistedOnServer);
+        && (!cached || !cached.persistedOnServer || !hasCompleteWordEnrichment(cached));
     });
     if (!queue.length) return undefined;
     queue.forEach((item) => requestedAiWords.current.add(item.word.toLowerCase()));
@@ -364,7 +364,16 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   };
 
   // Play Audio
-  const handleSpeak = (text, rate = voiceSpeed) => {
+  const handleSpeak = (text, rate = voiceSpeed, suppliedAudioUrl = null) => {
+    const isSingleWord = String(text || '').trim().split(/\s+/).length === 1;
+    const audioUrl = suppliedAudioUrl || (isSingleWord ? getCachedNativeAudioUrl(text) : null);
+    if (audioUrl) {
+      speechHelper.stopSpeaking();
+      playNativeAudio(audioUrl, rate).then((played) => {
+        if (!played) speechHelper.speak(text, { rate });
+      });
+      return;
+    }
     speechHelper.speak(text, { rate });
   };
 
@@ -604,7 +613,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   <button
                     className="card-audio-btn"
                     title="Nghe phát âm chuẩn US"
-                    onClick={() => handleSpeak(currentCard.word)}
+                    onClick={() => handleSpeak(currentCard.word, voiceSpeed, flashcardDictionaryData?.audioUrl)}
                   >
                     <Volume2 size={20} />
                     <span>Nghe</span>
@@ -613,7 +622,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   <button 
                     className="card-audio-btn slow-btn"
                     title="Nghe chậm 0.75x"
-                    onClick={() => handleSpeak(currentCard.word, 0.75)}
+                    onClick={() => handleSpeak(currentCard.word, 0.75, flashcardDictionaryData?.audioUrl)}
                   >
                     <span>🐢 Chậm</span>
                   </button>
@@ -842,7 +851,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                     <div className="item-card-footer">
                       <button 
                         className="item-btn audio" 
-                        onClick={() => handleSpeak(w.word)}
+                        onClick={() => handleSpeak(w.word, voiceSpeed, listDictionaryData[w.word.toLowerCase()]?.audioUrl)}
                         title="Nghe phát âm"
                       >
                         <Volume2 size={16} />

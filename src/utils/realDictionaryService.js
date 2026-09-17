@@ -14,6 +14,16 @@ function getNativeAudio() {
   return nativeAudio;
 }
 
+export function getCachedNativeAudioUrl(word) {
+  if (!word || typeof localStorage === 'undefined') return null;
+  try {
+    const cached = JSON.parse(localStorage.getItem(`${DICT_CACHE_PREFIX}${word.trim().toLowerCase()}`) || 'null');
+    return typeof cached?.audioUrl === 'string' && cached.audioUrl ? cached.audioUrl : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchRealWordData(word) {
   if (!word) return null;
   const cleanWord = word.trim().toLowerCase();
@@ -121,7 +131,7 @@ export function preloadNativeAudio(audioUrl) {
   }
 }
 
-export function playNativeAudio(audioUrl) {
+export function playNativeAudio(audioUrl, playbackRate = 1) {
   const audio = getNativeAudio();
   if (!audio || !audioUrl) return Promise.resolve(false);
 
@@ -132,6 +142,8 @@ export function playNativeAudio(audioUrl) {
       audio.load();
     }
     audio.currentTime = 0;
+    audio.playbackRate = Math.min(2, Math.max(0.5, playbackRate || 1));
+    audio.defaultPlaybackRate = audio.playbackRate;
 
     // Do not await before play(): mobile browsers require this call to remain
     // in the original pointer/click event stack.
