@@ -1,5 +1,5 @@
 // sw.js - Service Worker for LingoGoc AI PWA Offline Mode
-const CACHE_NAME = 'lingogoc-pwa-v11';
+const CACHE_NAME = 'lingogoc-pwa-v12';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -33,31 +33,41 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event (Network First with Cache Fallback)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+  // Ignore mutations, browser-extension resources and third-party requests.
+  // CacheStorage only accepts HTTP(S) requests, and external APIs already
+  // provide their own caching/fallback behavior.
   if (event.request.method !== 'GET') return;
+  const requestUrl = new URL(event.request.url);
+  if (!['http:', 'https:'].includes(requestUrl.protocol)) return;
+  if (requestUrl.origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(event.request)
-      .then((networkResponse) => {
-        // Cache clone if valid response
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+      .then(async (networkResponse) => {
+        // Only cache successful same-origin responses. Await and contain the
+        // write so a rejected Cache.put() never becomes an unhandled promise.
+        if (networkResponse?.ok && networkResponse.type === 'basic') {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, networkResponse.clone());
+          } catch (error) {
+            console.warn('Service worker cache write skipped:', error);
+          }
         }
         return networkResponse;
       })
-      .catch(() => {
-        // Fallback to cache when offline
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // If navigation, return index.html
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
+      .catch(async () => {
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) return cachedResponse;
+
+        if (event.request.mode === 'navigate') {
+          const appShell = await caches.match('./index.html');
+          if (appShell) return appShell;
+        }
+
+        return new Response('LingoGoc is offline.', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
       })
   );
