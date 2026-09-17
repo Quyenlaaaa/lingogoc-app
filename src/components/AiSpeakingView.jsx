@@ -23,7 +23,6 @@ import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import AudioWave from './AudioWave';
 import {
   loadSpeakingConfig,
-  requestCloudSpeech,
   requestSpeakingReply,
   saveSpeakingConfig,
 } from '../utils/speakingAiService';
@@ -55,8 +54,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
 
   const recognitionRef = useRef(null);
   const requestControllerRef = useRef(null);
-  const audioRef = useRef(null);
-  const audioUrlRef = useRef('');
   const autoListenTimerRef = useRef(null);
   const startMicRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -70,16 +67,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       autoListenTimerRef.current = null;
     }
     speechHelper.stopSpeaking();
-    if (audioRef.current) {
-      audioRef.current.onended = null;
-      audioRef.current.onerror = null;
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = '';
-    }
     if (updateState && isMountedRef.current) setIsSpeaking(false);
   }, []);
 
@@ -88,11 +75,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     stopAudio();
     setIsSpeaking(true);
     const finishSpeech = () => {
-      if (audioRef.current) audioRef.current = null;
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-        audioUrlRef.current = '';
-      }
       if (!isMountedRef.current) return;
       setIsSpeaking(false);
       if (options.resumeListening && config.autoListen) {
@@ -100,34 +82,13 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       }
     };
 
-    // Cloud audio is created only after a network round-trip. Mobile browsers
-    // may reject that delayed play(), so use their native speech engine there.
-    if (config.useCloudVoice && connected && !speechHelper.isMobileDevice()) {
-      try {
-        const url = await requestCloudSpeech({ config, text });
-        if (!isMountedRef.current) {
-          URL.revokeObjectURL(url);
-          return;
-        }
-        audioUrlRef.current = url;
-        const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.onended = finishSpeech;
-        audio.onerror = finishSpeech;
-        await audio.play();
-        return;
-      } catch (cloudError) {
-        console.warn('Cloud TTS failed, using browser voice:', cloudError);
-      }
-    }
-
     if (!isMountedRef.current) return;
     speechHelper.speak(text, {
       rate: voiceSpeed,
       onEnd: finishSpeech,
       onError: finishSpeech,
     });
-  }, [config, connected, stopAudio, voiceSpeed]);
+  }, [config.autoListen, stopAudio, voiceSpeed]);
 
   const startScenario = useCallback((nextScenario) => {
     requestControllerRef.current?.abort();

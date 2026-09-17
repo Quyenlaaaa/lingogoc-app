@@ -1,7 +1,7 @@
 // speechHelper.js - Web Speech API utilities for TTS and STT.
-// Mobile browsers are deliberately kept on the native speech engine. Unlike an
-// HTMLAudioElement, speechSynthesis does not need a delayed, cross-origin audio
-// request that can lose the user-activation token before playback starts.
+// Browsers expose different synthesis voices. Use one backend audio stream on
+// every device and keep speechSynthesis only as an availability fallback.
+import { getBackendUrl, hasBackendApi } from './backendApi.js';
 
 export class SpeechHelper {
   constructor() {
@@ -11,6 +11,9 @@ export class SpeechHelper {
     this.isListening = false;
     this.defaultRate = 0.85;
     this.activeUtterance = null;
+    this.audio = null;
+    this.activeAudio = null;
+    this.audioRequestId = 0;
     this.keepAliveTimer = null;
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     this.mobileDevice = typeof navigator !== 'undefined' && (
@@ -71,6 +74,72 @@ export class SpeechHelper {
     }
   }
 
+  getAudio() {
+    if (typeof Audio === 'undefined') return null;
+    if (!this.audio) {
+      this.audio = new Audio();
+      this.audio.preload = 'auto';
+      this.audio.playsInline = true;
+    }
+    return this.audio;
+  }
+
+  speakWithBackendAudio(text, options) {
+    const audio = this.getAudio();
+    if (!audio || !hasBackendApi()) return false;
+
+    this.stopSpeaking();
+    const requestId = ++this.audioRequestId;
+    this.activeAudio = audio;
+    let fallbackStarted = false;
+    const clearAudioCallbacks = () => {
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
+    };
+    const fallbackToBrowserVoice = (error) => {
+      if (fallbackStarted || this.activeAudio !== audio || this.audioRequestId !== requestId) return;
+      fallbackStarted = true;
+      clearAudioCallbacks();
+      this.activeAudio = null;
+      try {
+        audio.pause();
+      } catch {
+        // Ignore media engines that throw while changing source.
+      }
+      this.speak(text, { ...options, browserOnly: true, fallbackError: error });
+    };
+
+    audio.onplay = (event) => {
+      if (this.activeAudio === audio && this.audioRequestId === requestId) options.onStart?.(event);
+    };
+    audio.onended = (event) => {
+      if (this.activeAudio !== audio || this.audioRequestId !== requestId) return;
+      clearAudioCallbacks();
+      this.activeAudio = null;
+      options.onEnd?.(event);
+    };
+    audio.onerror = (event) => fallbackToBrowserVoice(event);
+
+    try {
+      const language = String(options.lang || 'en-US').slice(0, 12);
+      audio.src = getBackendUrl(`/api/speech/audio?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(language)}`);
+      audio.currentTime = 0;
+      audio.playbackRate = Math.min(2, Math.max(0.5, options.rate ?? this.defaultRate));
+      audio.defaultPlaybackRate = audio.playbackRate;
+      audio.load();
+
+      // Calling play() before leaving the click handler preserves the mobile
+      // user-activation token while the browser downloads the audio stream.
+      const playResult = audio.play();
+      Promise.resolve(playResult).catch(fallbackToBrowserVoice);
+      return true;
+    } catch (error) {
+      fallbackToBrowserVoice(error);
+      return true;
+    }
+  }
+
   // Keep long speech alive on mobile Chromium, which can otherwise pause a
   // long utterance when the page has been speaking continuously for a while.
   startKeepAlive(utterance) {
@@ -91,8 +160,17 @@ export class SpeechHelper {
   // engine. Keeping synth.speak() in this call stack is important on iOS.
   speak(text, options = {}) {
     const cleanText = String(text || '').trim();
-    if (!cleanText || !this.synth || typeof SpeechSynthesisUtterance === 'undefined') {
+    if (!cleanText) {
       options.onError?.({ error: 'speech-synthesis-not-supported' });
+      return false;
+    }
+
+    if (!options.browserOnly && this.speakWithBackendAudio(cleanText, options)) {
+      return true;
+    }
+
+    if (!this.synth || typeof SpeechSynthesisUtterance === 'undefined') {
+      options.onError?.(options.fallbackError || { error: 'speech-synthesis-not-supported' });
       return false;
     }
 
@@ -142,6 +220,20 @@ export class SpeechHelper {
 
   stopSpeaking() {
     this.clearKeepAlive();
+    this.audioRequestId += 1;
+    if (this.activeAudio) {
+      const audio = this.activeAudio;
+      this.activeAudio = null;
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {
+        // Ignore media engines that throw while already idle.
+      }
+    }
     const shouldCancel = Boolean(this.activeUtterance || this.synth?.speaking || this.synth?.pending);
     this.activeUtterance = null;
     if (!this.synth || !shouldCancel) return;

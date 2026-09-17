@@ -272,15 +272,21 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
-async function vocabularyPronunciation(request, origin, context) {
+async function speechAudio(request, origin, context) {
   const url = new URL(request.url);
-  const word = cleanText(url.searchParams.get('word'), 80).toLowerCase();
-  if (!word || !/^[a-z][a-z '-]*$/i.test(word)) {
-    return json({ error: 'Từ vựng không hợp lệ.' }, 400, origin);
+  const text = cleanText(url.searchParams.get('text') || url.searchParams.get('word'), 200);
+  const requestedLanguage = cleanText(url.searchParams.get('lang'), 12).toLowerCase();
+  const language = /^[a-z]{2,3}(?:-[a-z]{2,4})?$/i.test(requestedLanguage) ? requestedLanguage : 'en-us';
+  const hasControlCharacters = [...text].some((character) => {
+    const code = character.charCodeAt(0);
+    return code < 32 || code === 127;
+  });
+  if (!text || hasControlCharacters) {
+    return json({ error: 'Nội dung đọc không hợp lệ.' }, 400, origin);
   }
 
   const cache = caches.default;
-  const cacheKey = new Request(`https://lingogoc-cache.invalid/pronunciation/${encodeURIComponent(word)}`);
+  const cacheKey = new Request(`https://lingogoc-cache.invalid/speech/${language}/${encodeURIComponent(text)}`);
   const cached = await cache.match(cacheKey);
   if (cached) {
     return new Response(cached.body, {
@@ -293,12 +299,12 @@ async function vocabularyPronunciation(request, origin, context) {
     });
   }
 
-  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(word)}`;
+  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(language)}&q=${encodeURIComponent(text)}`;
   const audioResponse = await fetch(ttsUrl, {
     headers: { 'User-Agent': 'Mozilla/5.0 LingoGoc/1.0' },
   });
   if (!audioResponse.ok || !audioResponse.body) {
-    return json({ error: 'Không thể tạo audio phát âm cho từ này.' }, 502, origin);
+    return json({ error: 'Không thể tạo audio cho nội dung này.' }, 502, origin);
   }
 
   const responseHeaders = {
@@ -362,7 +368,10 @@ export default {
         return await enrichVocabulary(request, env, origin, context);
       }
       if (url.pathname === '/api/vocabulary/pronunciation' && request.method === 'GET') {
-        return await vocabularyPronunciation(request, origin, context);
+        return await speechAudio(request, origin, context);
+      }
+      if (url.pathname === '/api/speech/audio' && request.method === 'GET') {
+        return await speechAudio(request, origin, context);
       }
       if (url.pathname === '/api/vocabulary/cambridge' && request.method === 'GET') {
         // Optional licensed integration. Returning 204 lets the frontend use

@@ -1,5 +1,6 @@
 // WordDetailModal.jsx - Đối chiếu dữ liệu từ điển và bổ sung ngữ cảnh bằng Gemini.
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Volume2, 
@@ -8,10 +9,10 @@ import {
   Lightbulb, 
   Layers
 } from 'lucide-react';
-import { fetchRealWordData, getPronunciationAudioUrl, playNativeAudio, preloadNativeAudio } from '../utils/realDictionaryService';
+import { fetchRealWordData } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
-import { speakText, speechHelper } from '../utils/speechHelper';
+import { speakText } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
 export default function WordDetailModal({ word, initialEnrichment, isOpen, onClose }) {
@@ -81,12 +82,20 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   }, [initialEnrichment, isOpen, word]);
 
   useEffect(() => {
-    if (realDictData?.audioUrl) {
-      preloadNativeAudio(realDictData.audioUrl);
-    }
-  }, [realDictData?.audioUrl]);
+    if (!isOpen || typeof document === 'undefined') return undefined;
 
-  if (!isOpen || !word) return null;
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscrollBehavior = document.body.style.overscrollBehavior;
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousOverscrollBehavior;
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !word || typeof document === 'undefined') return null;
 
   const storedExamples = getTrustedExamples(word);
   const dictionaryExamples = (realDictData?.examples || [])
@@ -103,19 +112,9 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
     .slice(0, 10);
   const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
-  const handlePlayNativeOrTts = () => {
-    const pronunciationUrl = realDictData?.audioUrl || getPronunciationAudioUrl(word.word);
-    if (pronunciationUrl) {
-      speechHelper.stopSpeaking();
-      playNativeAudio(pronunciationUrl).then((played) => {
-        if (!played) speakText(word.word, 0.85);
-      });
-    } else {
-      speakText(word.word, 0.85);
-    }
-  };
+  const handlePlayAudio = () => speakText(word.word, 0.85);
 
-  return (
+  return createPortal(
     <div className="word-detail-modal-overlay" style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
@@ -170,18 +169,16 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
               {word.level || 'A1'} • {word.topic}
             </span>
 
-            {realDictData?.audioUrl ? (
-              <span style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                padding: '3px 10px',
-                borderRadius: '6px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                color: '#10b981'
-              }}>
-                🎧 Giọng Bản Xứ Thật (MP3)
-              </span>
-            ) : null}
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: '6px',
+              background: 'rgba(16, 185, 129, 0.15)',
+              color: '#10b981'
+            }}>
+              🎧 Giọng Anh-Mỹ thống nhất
+            </span>
           </div>
 
           <h1 className="word-detail-word" style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>
@@ -205,12 +202,12 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
 
           {/* Audio Button */}
           <button
-            onClick={handlePlayNativeOrTts}
+            onClick={handlePlayAudio}
             className="btn btn-primary word-detail-audio-button"
             style={{ borderRadius: '24px', padding: '10px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
           >
             <Volume2 size={20} />
-            <span>{realDictData?.audioUrl ? 'Nghe Giọng Bản Xứ (Người Thật)' : 'Nghe Phát Âm Chuẩn'}</span>
+            <span>Nghe Phát Âm Chuẩn</span>
           </button>
 
         </div>
@@ -374,6 +371,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

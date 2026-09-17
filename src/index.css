@@ -3062,21 +3062,29 @@ a {
   .quiz-answer-explanation button { margin-left: 0; }
 
   .word-detail-modal-overlay {
-    align-items: flex-end !important;
+    inset: 0 !important;
+    width: 100vw;
+    height: 100dvh;
+    align-items: stretch !important;
     padding: 0 !important;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
-  .word-detail-modal-card {
+  .word-detail-modal-overlay > .word-detail-modal-card {
     width: 100% !important;
     max-width: none !important;
-    max-height: 94dvh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     margin: 0 !important;
-    padding: 22px 14px calc(18px + env(safe-area-inset-bottom)) !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-    border-radius: 22px 22px 0 0 !important;
+    box-sizing: border-box;
+    padding: calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom)) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow-x: hidden;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .word-detail-header {

@@ -152,6 +152,17 @@ assert.equal(pronunciationResponse.status, 200);
 assert.equal(pronunciationResponse.headers.get('Content-Type'), 'audio/mpeg');
 assert.ok((await pronunciationResponse.arrayBuffer()).byteLength > 0);
 
+const sentenceAudioResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/speech/audio?text=How%20are%20you%3F&lang=en-US', {
+    headers: { Origin: 'http://localhost:5173' },
+  }),
+  env,
+  context,
+);
+assert.equal(sentenceAudioResponse.status, 200);
+assert.equal(sentenceAudioResponse.headers.get('Content-Type'), 'audio/mpeg');
+assert.ok((await sentenceAudioResponse.arrayBuffer()).byteLength > 0);
+
 const cambridgeResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/cambridge?word=accept', {
     headers: { Origin: 'http://localhost:5173' },

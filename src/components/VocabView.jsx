@@ -23,7 +23,7 @@ import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
 import { hasBackendApi } from '../utils/backendApi';
-import { fetchRealWordData, getCachedNativeAudioUrl, getPronunciationAudioUrl, playNativeAudio } from '../utils/realDictionaryService';
+import { fetchRealWordData, getCachedNativeAudioUrl } from '../utils/realDictionaryService';
 import {
   buildClozePrompt,
   buildQuizOptions,
@@ -364,18 +364,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   };
 
   // Play Audio
-  const handleSpeak = (text, rate = voiceSpeed, suppliedAudioUrl = null) => {
-    const isSingleWord = String(text || '').trim().split(/\s+/).length === 1;
-    const audioUrl = suppliedAudioUrl || (isSingleWord
-      ? getCachedNativeAudioUrl(text) || getPronunciationAudioUrl(text)
-      : null);
-    if (audioUrl) {
-      speechHelper.stopSpeaking();
-      playNativeAudio(audioUrl, rate).then((played) => {
-        if (!played) speechHelper.speak(text, { rate });
-      });
-      return;
-    }
+  const handleSpeak = (text, rate = voiceSpeed) => {
     speechHelper.speak(text, { rate });
   };
 
@@ -615,7 +604,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   <button
                     className="card-audio-btn"
                     title="Nghe phát âm chuẩn US"
-                    onClick={() => handleSpeak(currentCard.word, voiceSpeed, flashcardDictionaryData?.audioUrl)}
+                    onClick={() => handleSpeak(currentCard.word, voiceSpeed)}
                   >
                     <Volume2 size={20} />
                     <span>Nghe</span>
@@ -624,7 +613,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   <button 
                     className="card-audio-btn slow-btn"
                     title="Nghe chậm 0.75x"
-                    onClick={() => handleSpeak(currentCard.word, 0.75, flashcardDictionaryData?.audioUrl)}
+                    onClick={() => handleSpeak(currentCard.word, 0.75)}
                   >
                     <span>🐢 Chậm</span>
                   </button>
@@ -853,7 +842,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                     <div className="item-card-footer">
                       <button 
                         className="item-btn audio" 
-                        onClick={() => handleSpeak(w.word, voiceSpeed, listDictionaryData[w.word.toLowerCase()]?.audioUrl)}
+                        onClick={() => handleSpeak(w.word, voiceSpeed)}
                         title="Nghe phát âm"
                       >
                         <Volume2 size={16} />
