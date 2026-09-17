@@ -124,6 +124,7 @@ node backend/test-worker.mjs  # kiểm tra hợp đồng API của Worker
 | --- | --- | --- |
 | `GET` | `/health` | Kiểm tra trạng thái backend và cấu hình AI/KV |
 | `POST` | `/api/vocabulary/enrich` | Sinh và lưu bộ dữ liệu từ vựng với 5 ngữ cảnh khác nhau |
+| `POST` | `/api/vocabulary/meanings` | Chuẩn hóa nhanh nghĩa tiếng Việt theo lô, tối đa 30 từ |
 | `GET` | `/api/vocabulary/pronunciation?word=hello` | Audio phát âm tương thích ngược cho từ đơn |
 | `GET` | `/api/speech/audio?text=How%20are%20you%3F&lang=en-US` | Audio thống nhất cho từ hoặc câu |
 | `GET` | `/api/vocabulary/cambridge?word=hello` | Tích hợp Cambridge tùy chọn; trả `204` khi chưa cấu hình |
@@ -137,6 +138,7 @@ Chi tiết request/response nằm trong [BACKEND_API.md](./BACKEND_API.md) và [
 - Worker tự thử lại khi nhà cung cấp trả lỗi tạm thời, giới hạn lượt gọi hoặc dữ liệu chưa hợp lệ.
 - Kết quả hợp lệ được lưu trong Workers KV và cache ở trình duyệt.
 - Việc đóng modal hoặc chuyển màn hình không hủy yêu cầu đang chạy; khi hoàn tất, dữ liệu vẫn được lưu để sử dụng lại.
+- Hàng đợi nền quét toàn bộ kho từ, bỏ qua mục đã đủ 5 ngữ cảnh và tự quay lại các mục lỗi tạm thời để không bỏ sót từ.
 
 ## Kho từ vựng cá nhân
 

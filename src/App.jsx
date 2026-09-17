@@ -22,6 +22,11 @@ import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
 import { loadPrivateVocabulary } from './utils/privateVocabulary';
+import {
+  getVocabularyEnrichmentQueueStatus,
+  startVocabularyEnrichmentQueue,
+  subscribeVocabularyEnrichmentQueue,
+} from './utils/vocabularyEnrichmentQueue';
 
 const initialPrivateVocabulary = loadPrivateVocabulary();
 
@@ -33,6 +38,7 @@ export default function App() {
   const [dueSrsCount, setDueSrsCount] = useState(0);
   const [vocabulary, setVocabulary] = useState(() => initialPrivateVocabulary || []);
   const [usesPrivateVocabulary, setUsesPrivateVocabulary] = useState(() => Boolean(initialPrivateVocabulary));
+  const [enrichmentQueueStatus, setEnrichmentQueueStatus] = useState(getVocabularyEnrichmentQueueStatus);
 
   // Modals
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
@@ -54,7 +60,10 @@ export default function App() {
     if (!vocabulary.length) return;
     const stats = getSrsStats(vocabulary);
     setDueSrsCount(stats.dueCount || 0);
+    startVocabularyEnrichmentQueue(vocabulary);
   }, [vocabulary]);
+
+  useEffect(() => subscribeVocabularyEnrichmentQueue(setEnrichmentQueueStatus), []);
 
   // Update theme class on body
   useEffect(() => {
@@ -179,6 +188,7 @@ export default function App() {
               onUpdateUserData={handleUpdateUserData} 
               voiceSpeed={voiceSpeed}
               vocabulary={vocabulary}
+              enrichmentQueueStatus={enrichmentQueueStatus}
             />
           )}
 

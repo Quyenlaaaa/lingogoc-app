@@ -140,6 +140,37 @@ assert.equal(regeneratedPayload.data.contextExamples.length, 5);
 assert.equal(regenerationCalls, 2, 'invalid AI content must be regenerated automatically');
 customProviderResponse = null;
 
+let meaningProviderCalls = 0;
+customProviderResponse = async () => {
+  meaningProviderCalls += 1;
+  return new Response(JSON.stringify({
+    choices: [{ message: { content: JSON.stringify({
+      meanings: [{ word: 'abandon', meaningVi: 'từ bỏ; bỏ rơi' }],
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const meaningRequest = () => new Request('http://localhost:8787/api/vocabulary/meanings', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({
+    items: [
+      { word: 'accept', pos: 'v', meaning: 'chấp nhận' },
+      { word: 'abandon', pos: 'v', meaning: 'bộm từ bỏ' },
+    ],
+  }),
+});
+const meaningResponse = await worker.fetch(meaningRequest(), env, context);
+const meaningPayload = await meaningResponse.json();
+assert.equal(meaningResponse.status, 200);
+assert.equal(meaningPayload.data.meanings.length, 2);
+assert.equal(meaningPayload.data.meanings.find((item) => item.word === 'accept').meaningVi, 'chấp nhận');
+assert.equal(meaningPayload.data.meanings.find((item) => item.word === 'abandon').meaningVi, 'từ bỏ; bỏ rơi');
+assert.equal(meaningProviderCalls, 1, 'one batch request should translate every uncached meaning');
+
+await worker.fetch(meaningRequest(), env, context);
+assert.equal(meaningProviderCalls, 1, 'translated meanings must be served from KV cache');
+customProviderResponse = null;
+
 const pronunciationResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/pronunciation?word=hello', {
     headers: { Origin: 'http://localhost:5173' },

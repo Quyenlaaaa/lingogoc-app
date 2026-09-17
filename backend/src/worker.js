@@ -1,6 +1,7 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 const MAX_BODY_BYTES = 20_000;
 const VOCABULARY_PROMPT_VERSION = 2;
+const MEANING_PROMPT_VERSION = 1;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
@@ -272,6 +273,101 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
+function meaningCacheKey(env, item) {
+  return `meaning:v${MEANING_PROMPT_VERSION}:${env.AI_MODEL || 'default'}:${item.word}:${item.pos || '-'}`;
+}
+
+async function translateVocabularyMeanings(request, env, origin) {
+  const body = await readJson(request);
+  const seen = new Set();
+  const items = (Array.isArray(body?.items) ? body.items : [])
+    .slice(0, 30)
+    .map((item) => ({
+      word: cleanText(item?.word, 80).toLowerCase(),
+      pos: cleanText(item?.pos || item?.type, 30).toLowerCase(),
+      currentMeaning: cleanText(item?.meaning || item?.currentMeaning, 300),
+    }))
+    .filter((item) => {
+      if (!item.word || !/^[a-z][a-z '-]*$/i.test(item.word) || seen.has(item.word)) return false;
+      seen.add(item.word);
+      return true;
+    });
+  if (!items.length) return json({ error: 'Danh sách từ vựng không hợp lệ.' }, 400, origin);
+
+  const resolved = new Map();
+  if (env.VOCAB_CACHE) {
+    await Promise.all(items.map(async (item) => {
+      const cachedMeaning = await env.VOCAB_CACHE.get(meaningCacheKey(env, item), 'json');
+      const meaningVi = cleanText(cachedMeaning?.meaningVi, 240);
+      if (meaningVi) {
+        resolved.set(item.word, { word: item.word, meaningVi, source: 'meaning-cache' });
+        return;
+      }
+
+      // Reuse the richer vocabulary record when this word was enriched before.
+      const enrichmentIdentity = await cacheIdentityFor({
+        version: VOCABULARY_PROMPT_VERSION,
+        model: env.AI_MODEL,
+        word: item.word,
+      });
+      const enrichment = await env.VOCAB_CACHE.get(enrichmentIdentity.serverKey, 'json');
+      const enrichedMeaning = cleanText(enrichment?.primaryMeaningVi, 240);
+      if (enrichedMeaning) {
+        resolved.set(item.word, { word: item.word, meaningVi: enrichedMeaning, source: 'enrichment-cache' });
+      }
+    }));
+  }
+
+  const missing = items.filter((item) => !resolved.has(item.word));
+  if (missing.length) {
+    const systemPrompt = `You are an English-Vietnamese lexicographer for Vietnamese CEFR A1-B2 learners.
+Return only valid JSON with no Markdown using this schema: {"meanings":[{"word":"...","meaningVi":"..."}]}.
+For every supplied word, provide one concise, natural, modern Vietnamese definition matching its part of speech. Include up to three common senses separated by semicolons when needed. Prefer meanings useful in daily English. Correct noisy or mistranslated supplied meanings. Never explain in English, transliterate, or omit a word.`;
+    let generated = [];
+    let generationError = null;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const content = await callChatModel(env, [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: JSON.stringify({ items: missing }) },
+        ], 0.15);
+        const raw = extractJson(content);
+        const requested = new Set(missing.map((item) => item.word));
+        generated = (Array.isArray(raw?.meanings) ? raw.meanings : [])
+          .map((item) => ({
+            word: cleanText(item?.word, 80).toLowerCase(),
+            meaningVi: cleanText(item?.meaningVi, 240),
+            source: 'ai',
+          }))
+          .filter((item) => requested.has(item.word) && item.meaningVi.length >= 2);
+        if (new Set(generated.map((item) => item.word)).size === missing.length) break;
+        throw new Error('INCOMPLETE_MEANING_TRANSLATION');
+      } catch (error) {
+        generationError = error;
+        generated = [];
+      }
+    }
+    if (!generated.length) throw generationError || new Error('INVALID_AI_JSON');
+
+    await Promise.all(generated.map(async (item) => {
+      resolved.set(item.word, item);
+      if (env.VOCAB_CACHE) {
+        const input = missing.find((candidate) => candidate.word === item.word);
+        await env.VOCAB_CACHE.put(meaningCacheKey(env, input), JSON.stringify({
+          meaningVi: item.meaningVi,
+          savedAt: new Date().toISOString(),
+        }));
+      }
+    }));
+  }
+
+  return json({
+    data: {
+      meanings: items.map((item) => resolved.get(item.word)).filter(Boolean),
+    },
+  }, 200, origin, { 'Cache-Control': 'private, max-age=300' });
+}
+
 async function speechAudio(request, origin, context) {
   const url = new URL(request.url);
   const text = cleanText(url.searchParams.get('text') || url.searchParams.get('word'), 200);
@@ -366,6 +462,9 @@ export default {
     try {
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);
+      }
+      if (url.pathname === '/api/vocabulary/meanings' && request.method === 'POST') {
+        return await translateVocabularyMeanings(request, env, origin);
       }
       if (url.pathname === '/api/vocabulary/pronunciation' && request.method === 'GET') {
         return await speechAudio(request, origin, context);

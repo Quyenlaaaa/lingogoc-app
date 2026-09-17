@@ -34,6 +34,34 @@ Response có thể bọc trong `{ "data": ... }` hoặc trả trực tiếp:
 }
 ```
 
+## `POST /api/vocabulary/meanings`
+
+Chuẩn hóa nghĩa tiếng Việt theo lô để hiển thị nhanh trong danh sách, flashcard và trắc nghiệm. Mỗi request nhận tối đa 30 từ. Backend ưu tiên kết quả enrichment/Workers KV đã có và chỉ gọi AI một lần cho các mục còn thiếu.
+
+Request:
+
+```json
+{
+  "items": [
+    { "word": "abandon", "pos": "v", "meaning": "bộm từ bỏ" },
+    { "word": "ability", "pos": "n", "meaning": "năng lực, khả năng" }
+  ]
+}
+```
+
+Response:
+
+```json
+{
+  "data": {
+    "meanings": [
+      { "word": "abandon", "meaningVi": "từ bỏ; bỏ rơi", "source": "ai" },
+      { "word": "ability", "meaningVi": "khả năng; năng lực", "source": "meaning-cache" }
+    ]
+  }
+}
+```
+
 ## `GET /api/vocabulary/cambridge?word=accept`
 
 Đây là tích hợp tùy chọn. Nếu backend chưa có nhà cung cấp Cambridge được cấp phép, endpoint trả `204 No Content`; frontend sẽ tiếp tục dùng Free Dictionary và AI mà không hiển thị lỗi.
