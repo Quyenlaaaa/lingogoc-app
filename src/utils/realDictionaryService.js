@@ -1,5 +1,6 @@
 // realDictionaryService.js - Dịch vụ tích hợp dữ liệu từ điển thật 100% từ Free Dictionary API
 // Cung cấp audio, định nghĩa tiếng Anh, từ đồng nghĩa và ví dụ từ dictionaryapi.dev.
+import { getBackendUrl, hasBackendApi } from './backendApi.js';
 
 const DICT_CACHE_PREFIX = 'lingogoc_real_dict_';
 let nativeAudio = null;
@@ -22,6 +23,11 @@ export function getCachedNativeAudioUrl(word) {
   } catch {
     return null;
   }
+}
+
+export function getPronunciationAudioUrl(word) {
+  if (!word || !hasBackendApi()) return null;
+  return getBackendUrl(`/api/vocabulary/pronunciation?word=${encodeURIComponent(word.trim().toLowerCase())}`);
 }
 
 export async function fetchRealWordData(word) {

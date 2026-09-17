@@ -14,6 +14,12 @@ let providerCallCount = 0;
 let customProviderResponse = null;
 const serverCache = new Map();
 globalThis.fetch = async (url, options) => {
+  if (String(url).startsWith('https://api.dictionaryapi.dev/')) {
+    return new Response(JSON.stringify([{
+      word: 'hello',
+      phonetics: [{ audio: 'https://audio.example.com/hello.mp3' }],
+    }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
   providerCallCount += 1;
   providerRequest = { url, options, body: JSON.parse(options.body) };
   if (customProviderResponse) return customProviderResponse(providerRequest);
@@ -133,6 +139,17 @@ assert.equal(regeneratedResponse.status, 200);
 assert.equal(regeneratedPayload.data.contextExamples.length, 5);
 assert.equal(regenerationCalls, 2, 'invalid AI content must be regenerated automatically');
 customProviderResponse = null;
+
+const pronunciationResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/pronunciation?word=hello', {
+    headers: { Origin: 'http://localhost:5173' },
+    redirect: 'manual',
+  }),
+  env,
+  context,
+);
+assert.equal(pronunciationResponse.status, 302);
+assert.equal(pronunciationResponse.headers.get('Location'), 'https://audio.example.com/hello.mp3');
 
 const cambridgeResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/cambridge?word=accept', {

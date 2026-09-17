@@ -3060,6 +3060,114 @@ a {
 @media (max-width: 640px) {
   .quiz-answer-explanation { align-items: flex-start; flex-direction: column; }
   .quiz-answer-explanation button { margin-left: 0; }
+
+  .word-detail-modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .word-detail-modal-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 94dvh !important;
+    margin: 0 !important;
+    padding: 22px 14px calc(18px + env(safe-area-inset-bottom)) !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+    overscroll-behavior: contain;
+  }
+
+  .word-detail-header {
+    margin-bottom: 18px !important;
+    padding-inline: 4px;
+  }
+
+  .word-detail-header-badges {
+    min-height: 28px;
+    flex-wrap: wrap;
+    gap: 6px !important;
+    padding-inline: 30px;
+  }
+
+  .word-detail-header-badges > span {
+    max-width: 100%;
+    font-size: 0.66rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  .word-detail-word {
+    font-size: clamp(2.15rem, 12vw, 3rem) !important;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .word-detail-meaning {
+    font-size: 1.08rem !important;
+    line-height: 1.4;
+  }
+
+  .word-detail-audio-button {
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+    padding-inline: 14px !important;
+  }
+
+  .word-detail-examples-title {
+    align-items: flex-start !important;
+    font-size: 0.92rem !important;
+    line-height: 1.35;
+  }
+
+  .word-detail-examples-list {
+    gap: 8px !important;
+  }
+
+  .word-detail-example-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    align-items: start !important;
+    gap: 9px;
+    padding: 12px !important;
+  }
+
+  .word-detail-example-content {
+    font-size: 0.9rem;
+    line-height: 1.48;
+  }
+
+  .word-detail-example-row > button {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .example-source-label {
+    font-size: 0.62rem;
+    line-height: 1.25;
+  }
+
+  .sense-row,
+  .definition-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .sense-row small,
+  .definition-row small {
+    grid-column: 1;
+  }
+
+  .item-example-box {
+    padding: 10px 11px;
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
 }
 
 /* Private learning data */

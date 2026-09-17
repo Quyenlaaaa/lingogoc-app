@@ -8,7 +8,7 @@ import {
   Lightbulb, 
   Layers
 } from 'lucide-react';
-import { fetchRealWordData, playNativeAudio, preloadNativeAudio } from '../utils/realDictionaryService';
+import { fetchRealWordData, getPronunciationAudioUrl, playNativeAudio, preloadNativeAudio } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
 import { speakText, speechHelper } from '../utils/speechHelper';
@@ -104,9 +104,10 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
 
   const handlePlayNativeOrTts = () => {
-    if (realDictData?.audioUrl) {
+    const pronunciationUrl = realDictData?.audioUrl || getPronunciationAudioUrl(word.word);
+    if (pronunciationUrl) {
       speechHelper.stopSpeaking();
-      playNativeAudio(realDictData.audioUrl).then((played) => {
+      playNativeAudio(pronunciationUrl).then((played) => {
         if (!played) speakText(word.word, 0.85);
       });
     } else {
@@ -115,7 +116,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   };
 
   return (
-    <div style={{
+    <div className="word-detail-modal-overlay" style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
       background: 'var(--scrim)',
@@ -155,8 +156,8 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
         </button>
 
         {/* Word Header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
+        <div className="word-detail-header" style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div className="word-detail-header-badges" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
             <span style={{
               fontSize: '0.75rem',
               fontWeight: 700,
@@ -183,7 +184,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
             ) : null}
           </div>
 
-          <h1 style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>
+          <h1 className="word-detail-word" style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0' }}>
             {word.word}
           </h1>
 
@@ -191,7 +192,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
             {realDictData?.phonetic || word.ipa}
           </div>
 
-          <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
+          <div className="word-detail-meaning" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
             {displayMeaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({word.pos || word.type})</span>
           </div>
           <div className="meaning-source-note">
@@ -205,7 +206,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
           {/* Audio Button */}
           <button
             onClick={handlePlayNativeOrTts}
-            className="btn btn-primary"
+            className="btn btn-primary word-detail-audio-button"
             style={{ borderRadius: '24px', padding: '10px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
           >
             <Volume2 size={20} />
@@ -270,13 +271,13 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
             )}
 
             {/* 2. Contextual Real Examples */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div className="word-detail-examples-section" style={{ marginBottom: '20px' }}>
+              <div className="word-detail-examples-title" style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <BookOpen size={18} color="#38bdf8" />
                 <span>Ví dụ tự nhiên theo nhiều ngữ cảnh:</span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="word-detail-examples-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {contextExamples.map((ex, idx) => (
                   <div
                     key={idx}

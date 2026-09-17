@@ -23,7 +23,7 @@ import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
 import { hasBackendApi } from '../utils/backendApi';
-import { fetchRealWordData, getCachedNativeAudioUrl, playNativeAudio } from '../utils/realDictionaryService';
+import { fetchRealWordData, getCachedNativeAudioUrl, getPronunciationAudioUrl, playNativeAudio } from '../utils/realDictionaryService';
 import {
   buildClozePrompt,
   buildQuizOptions,
@@ -366,7 +366,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   // Play Audio
   const handleSpeak = (text, rate = voiceSpeed, suppliedAudioUrl = null) => {
     const isSingleWord = String(text || '').trim().split(/\s+/).length === 1;
-    const audioUrl = suppliedAudioUrl || (isSingleWord ? getCachedNativeAudioUrl(text) : null);
+    const audioUrl = suppliedAudioUrl || (isSingleWord
+      ? getCachedNativeAudioUrl(text) || getPronunciationAudioUrl(text)
+      : null);
     if (audioUrl) {
       speechHelper.stopSpeaking();
       playNativeAudio(audioUrl, rate).then((played) => {

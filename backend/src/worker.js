@@ -272,6 +272,32 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
+async function vocabularyPronunciation(request, origin) {
+  const url = new URL(request.url);
+  const word = cleanText(url.searchParams.get('word'), 80).toLowerCase();
+  if (!word || !/^[a-z][a-z '-]*$/i.test(word)) {
+    return json({ error: 'Từ vựng không hợp lệ.' }, 400, origin);
+  }
+
+  const dictionaryResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+  if (!dictionaryResponse.ok) return json({ error: 'Không tìm thấy audio phát âm cho từ này.' }, 404, origin);
+  const entries = await dictionaryResponse.json();
+  const audioUrl = entries
+    ?.flatMap((entry) => Array.isArray(entry?.phonetics) ? entry.phonetics : [])
+    .map((phonetic) => String(phonetic?.audio || '').trim())
+    .find((audio) => audio && /^https?:\/\//i.test(audio));
+  if (!audioUrl) return json({ error: 'Không tìm thấy audio phát âm cho từ này.' }, 404, origin);
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      ...corsHeaders(origin),
+      Location: audioUrl,
+      'Cache-Control': 'public, max-age=86400',
+    },
+  });
+}
+
 async function speakingChat(request, env, origin) {
   const body = await readJson(request);
   const scenario = cleanText(
@@ -319,6 +345,9 @@ export default {
     try {
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);
+      }
+      if (url.pathname === '/api/vocabulary/pronunciation' && request.method === 'GET') {
+        return await vocabularyPronunciation(request, origin);
       }
       if (url.pathname === '/api/vocabulary/cambridge' && request.method === 'GET') {
         // Optional licensed integration. Returning 204 lets the frontend use
