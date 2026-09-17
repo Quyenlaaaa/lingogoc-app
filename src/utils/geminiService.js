@@ -58,6 +58,7 @@ function normalizeEnrichment(data) {
     meaningNote: cleanText(data?.meaningNote, 500),
     mnemonicTip: cleanText(data?.mnemonicTip, 500),
     wordFamily: cleanText(data?.wordFamily, 500),
+    generatedByModel: cleanText(data?.generatedByModel, 120),
     contextExamples,
     collocations,
     senses,

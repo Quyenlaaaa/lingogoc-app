@@ -2,6 +2,7 @@ const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 const MAX_BODY_BYTES = 20_000;
 const VOCABULARY_PROMPT_VERSION = 2;
 const MEANING_PROMPT_VERSION = 1;
+let freeModelCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
@@ -95,63 +96,103 @@ function normalizeEnrichment(data, word) {
     })).filter((item) => item.phrase && item.meaning) : [],
     mnemonicTip: cleanText(data?.mnemonicTip, 500),
     wordFamily: cleanText(data?.wordFamily, 500),
+    generatedByModel: cleanText(data?.generatedByModel, 120),
     isAiGenerated: true,
     persistedOnServer: Boolean(data?.persistedOnServer),
     serverSavedAt: cleanText(data?.serverSavedAt, 40),
   };
 }
 
+function getFreeModel(env) {
+  return cleanText(env.AI_FREE_MODEL || env.AI_MODEL, 120);
+}
+
+function getPaidModel(env) {
+  const paid = cleanText(env.AI_PAID_MODEL, 120);
+  return paid && paid !== getFreeModel(env) ? paid : '';
+}
+
+function isQuotaError(status, detail) {
+  return status === 402
+    || ((status === 400 || status === 403 || status === 429)
+      && /quota|rate.?limit|daily.?limit|insufficient|credit|balance|billing|resource.?exhausted|too many requests/i.test(detail));
+}
+
 async function callChatModel(env, messages, temperature = 0.45) {
   const apiKey = env.XTROUTER_API_KEY || env.AI_API_KEY;
-  if (!apiKey || !env.AI_MODEL || env.AI_MODEL === 'set-your-model-id') {
+  const freeModel = getFreeModel(env);
+  const paidModel = getPaidModel(env);
+  if (!apiKey || !freeModel || freeModel === 'set-your-model-id') {
     throw new Error('AI_NOT_CONFIGURED');
   }
   const baseUrl = String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, '');
   const retryableStatuses = new Set([429, 500, 502, 503, 504]);
   let lastError = 'AI_PROVIDER_UNKNOWN';
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
-        ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
-      },
-      body: JSON.stringify({ model: env.AI_MODEL, temperature, messages }),
-    });
-    if (response.ok) {
-      const rawPayload = await response.text();
-      if (!rawPayload.trim()) {
-        lastError = 'AI_PROVIDER_EMPTY_RESPONSE';
-        if (attempt < 2) {
-          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-          continue;
+  const freeModelCoolingDown = Boolean(paidModel && Date.now() < freeModelCooldownUntil);
+  const models = [
+    ...(!freeModelCoolingDown ? [freeModel] : []),
+    ...(paidModel ? [paidModel] : []),
+  ];
+
+  for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
+    const model = models[modelIndex];
+    const isFreeTier = model === freeModel;
+    let shouldUsePaidFallback = false;
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
+          ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
+        },
+        body: JSON.stringify({ model, temperature, messages }),
+      });
+      if (response.ok) {
+        const rawPayload = await response.text();
+        if (!rawPayload.trim()) {
+          lastError = 'AI_PROVIDER_EMPTY_RESPONSE';
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
+          break;
         }
+        let payload;
+        try {
+          payload = JSON.parse(rawPayload);
+        } catch {
+          lastError = 'AI_PROVIDER_INVALID_JSON';
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
+          break;
+        }
+        return { content: payload?.choices?.[0]?.message?.content || '', model };
+      }
+
+      const detail = cleanText(await response.text(), 500);
+      lastError = `AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`;
+      const quotaExceeded = isQuotaError(response.status, detail);
+      // An explicit quota/balance error switches immediately. A generic 429
+      // gets short free-tier retries first, then falls back after attempt 3.
+      if (isFreeTier && paidModel && (quotaExceeded || (response.status === 429 && attempt === 2))) {
+        freeModelCooldownUntil = Date.now() + (quotaExceeded ? 5 * 60 * 1000 : 60 * 1000);
+        shouldUsePaidFallback = true;
         break;
       }
-      let payload;
-      try {
-        payload = JSON.parse(rawPayload);
-      } catch {
-        lastError = 'AI_PROVIDER_INVALID_JSON';
-        if (attempt < 2) {
-          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-          continue;
-        }
-        break;
-      }
-      return payload?.choices?.[0]?.message?.content || '';
+      if (!retryableStatuses.has(response.status) || attempt === 2) break;
+      const retryAfter = Number(response.headers.get('Retry-After'));
+      const waitMs = Number.isFinite(retryAfter)
+        ? Math.min(2500, Math.max(400, retryAfter * 1000))
+        : 500 * (attempt + 1);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
 
-    const detail = cleanText(await response.text(), 500);
-    lastError = `AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`;
-    if (!retryableStatuses.has(response.status) || attempt === 2) break;
-    const retryAfter = Number(response.headers.get('Retry-After'));
-    const waitMs = Number.isFinite(retryAfter)
-      ? Math.min(2500, Math.max(400, retryAfter * 1000))
-      : 500 * (attempt + 1);
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
+    if (!shouldUsePaidFallback) break;
   }
   throw new Error(lastError);
 }
@@ -184,11 +225,11 @@ async function enrichVocabulary(request, env, origin, context) {
   };
 
   const cache = caches.default;
-  // Include the model in the cache key so switching models never serves an
-  // older provider response for a newly requested word.
+  // Keep the free model as the stable cache namespace. Paid fallback output is
+  // interchangeable for this prompt and should be reused instead of paid twice.
   const cacheIdentity = await cacheIdentityFor({
     version: VOCABULARY_PROMPT_VERSION,
-    model: env.AI_MODEL,
+    model: getFreeModel(env),
     word,
   });
   const cached = await cache.match(cacheIdentity.edgeRequest);
@@ -234,14 +275,16 @@ Every English sentence must use the target word naturally. Every Vietnamese tran
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
 Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","meaningVi":"...","usage":"..."}],"contextExamples":[{"context":"...","en":"...","vi":"..."}],"collocations":[{"phrase":"...","meaning":"..."}],"mnemonicTip":"...","wordFamily":"..."}`;
   let normalized = null;
+  let generatedByModel = '';
   let generationError = null;
   for (let generationAttempt = 0; generationAttempt < 3; generationAttempt += 1) {
     try {
-      const content = await callChatModel(env, [
+      const completion = await callChatModel(env, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: JSON.stringify(input) },
       ]);
-      normalized = normalizeEnrichment(extractJson(content), word);
+      generatedByModel = completion.model;
+      normalized = normalizeEnrichment(extractJson(completion.content), word);
       break;
     } catch (error) {
       generationError = error;
@@ -258,6 +301,7 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
 
   const result = {
     ...normalized,
+    generatedByModel,
     persistedOnServer: Boolean(env.VOCAB_CACHE),
     serverSavedAt: new Date().toISOString(),
   };
@@ -274,7 +318,7 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
 }
 
 function meaningCacheKey(env, item) {
-  return `meaning:v${MEANING_PROMPT_VERSION}:${env.AI_MODEL || 'default'}:${item.word}:${item.pos || '-'}`;
+  return `meaning:v${MEANING_PROMPT_VERSION}:${getFreeModel(env) || 'default'}:${item.word}:${item.pos || '-'}`;
 }
 
 async function translateVocabularyMeanings(request, env, origin) {
@@ -307,7 +351,7 @@ async function translateVocabularyMeanings(request, env, origin) {
       // Reuse the richer vocabulary record when this word was enriched before.
       const enrichmentIdentity = await cacheIdentityFor({
         version: VOCABULARY_PROMPT_VERSION,
-        model: env.AI_MODEL,
+        model: getFreeModel(env),
         word: item.word,
       });
       const enrichment = await env.VOCAB_CACHE.get(enrichmentIdentity.serverKey, 'json');
@@ -327,11 +371,11 @@ For every supplied word, provide one concise, natural, modern Vietnamese definit
     let generationError = null;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        const content = await callChatModel(env, [
+        const completion = await callChatModel(env, [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: JSON.stringify({ items: missing }) },
         ], 0.15);
-        const raw = extractJson(content);
+        const raw = extractJson(completion.content);
         const requested = new Set(missing.map((item) => item.word));
         generated = (Array.isArray(raw?.meanings) ? raw.meanings : [])
           .map((item) => ({
@@ -429,14 +473,14 @@ async function speakingChat(request, env, origin) {
     content: cleanText(item?.content, 1000),
   })).filter((item) => item.content);
   const system = `You are a friendly English speaking coach. Scenario: ${scenario}. Reply at CEFR A2-B1 level. Return only JSON with keys replyEn, replyVi, correction, encouragement, and hints (an array of up to 3 objects with en and vi). Keep the conversation moving with one short question.`;
-  const content = await callChatModel(env, [{ role: 'system', content: system }, ...messages], 0.6);
-  return json(extractJson(content), 200, origin);
+  const completion = await callChatModel(env, [{ role: 'system', content: system }, ...messages], 0.6);
+  return json({ ...extractJson(completion.content), generatedByModel: completion.model }, 200, origin);
 }
 
 function publicError(error) {
   const code = String(error?.message || 'UNKNOWN_ERROR');
   if (code === 'PAYLOAD_TOO_LARGE') return ['Dữ liệu gửi lên quá lớn.', 413, code, false];
-  if (code === 'AI_NOT_CONFIGURED') return ['Backend chưa được cấu hình XTROUTER_API_KEY và AI_MODEL.', 503, code, false];
+  if (code === 'AI_NOT_CONFIGURED') return ['Backend chưa được cấu hình XTROUTER_API_KEY và AI_FREE_MODEL.', 503, code, false];
   if (code.startsWith('AI_PROVIDER_')) return ['Nhà cung cấp AI đang từ chối hoặc tạm thời không khả dụng.', 502, code, true];
   if (code === 'INVALID_AI_JSON' || code === 'INSUFFICIENT_BILINGUAL_EXAMPLES') return ['AI trả về dữ liệu chưa đúng định dạng, hệ thống sẽ thử lại.', 502, code, true];
   if (error instanceof SyntaxError) return ['JSON không hợp lệ.', 400, 'INVALID_REQUEST_JSON', false];
@@ -451,10 +495,15 @@ export default {
 
     const url = new URL(request.url);
     if (url.pathname === '/health' && request.method === 'GET') {
+      const freeModel = getFreeModel(env);
+      const paidModel = getPaidModel(env);
       return json({
         ok: true,
-        aiConfigured: Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && env.AI_MODEL),
-        model: env.AI_MODEL || '',
+        aiConfigured: Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && freeModel),
+        model: freeModel,
+        freeModel,
+        paidFallbackModel: paidModel,
+        paidFallbackConfigured: Boolean(paidModel),
         serverStorageConfigured: Boolean(env.VOCAB_CACHE),
       }, 200, origin);
     }

@@ -1,6 +1,8 @@
 # LingoGoc AI backend (Cloudflare Worker)
 
-Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định sử dụng API tương thích OpenAI của xkiro với model `mistralai/mistral-large-2512`. Vẫn có thể đổi sang Groq, OpenRouter hoặc nhà cung cấp tương thích khác.
+Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định dùng chung API tương thích OpenAI của xkiro: ưu tiên model miễn phí `mistralai/mistral-large-2512`, sau đó tự chuyển sang model trả phí `x-ai/grok-build-0.1` khi model miễn phí báo hết quota hoặc rate limit kéo dài.
+
+Sau lỗi quota rõ ràng, Worker tạm ngừng thăm dò model miễn phí trong 5 phút để hàng đợi nền không lặp lại một request chắc chắn thất bại trước mỗi request trả phí. Hết thời gian này, Worker tự thử model miễn phí trước trở lại.
 
 Ví dụ đã sinh được lưu bền vững trong Cloudflare Workers KV qua binding `VOCAB_CACHE`. Khóa lưu được chuẩn hóa theo phiên bản prompt, model và từ vựng, vì vậy Danh sách 3000, Thẻ nhớ 3D và các thiết bị khác nhau dùng chung một bản ghi mà không gọi lại AI.
 
@@ -38,5 +40,7 @@ Sau khi deploy, đặt URL Worker vào `VITE_API_BASE_URL` rồi build/deploy l�
 Các biến không bí mật đặt trong `wrangler.toml`:
 
 - `AI_BASE_URL`: URL gốc API tương thích OpenAI, không gồm `/chat/completions` (mặc định `https://api.xkiro.com/v1`).
-- `AI_MODEL`: mã model chính xác do nhà cung cấp cấp.
+- `AI_FREE_MODEL`: model được gọi trước cho mọi request.
+- `AI_PAID_MODEL`: model dự phòng chỉ được gọi khi model miễn phí báo hết quota/rate limit; để trống để tắt fallback trả phí.
+- `AI_MODEL`: tên biến tương thích với cấu hình cũ, chỉ được dùng khi chưa có `AI_FREE_MODEL`.
 - `ALLOWED_ORIGINS`: danh sách origin frontend, phân cách bằng dấu phẩy.

@@ -92,7 +92,8 @@ Sao chép `backend/.dev.vars.example` thành `backend/.dev.vars`:
 
 ```env
 XTROUTER_API_KEY=your_secret_key
-AI_MODEL=mistralai/mistral-large-2512
+AI_FREE_MODEL=mistralai/mistral-large-2512
+AI_PAID_MODEL=x-ai/grok-build-0.1
 AI_BASE_URL=https://api.xkiro.com/v1
 ALLOWED_ORIGINS=http://localhost:5173
 ```

@@ -54,7 +54,8 @@ globalThis.fetch = async (url, options) => {
 
 const env = {
   XTROUTER_API_KEY: 'server-only-test-key',
-  AI_MODEL: 'mistralai/mistral-large-2512',
+  AI_FREE_MODEL: 'mistralai/mistral-large-2512',
+  AI_PAID_MODEL: 'x-ai/grok-build-0.1',
   AI_BASE_URL: 'https://api.xkiro.com/v1',
   ALLOWED_ORIGINS: 'http://localhost:5173',
   VOCAB_CACHE: {
@@ -74,6 +75,9 @@ const healthResponse = await worker.fetch(
 );
 const healthPayload = await healthResponse.json();
 assert.equal(healthPayload.model, 'mistralai/mistral-large-2512');
+assert.equal(healthPayload.freeModel, 'mistralai/mistral-large-2512');
+assert.equal(healthPayload.paidFallbackModel, 'x-ai/grok-build-0.1');
+assert.equal(healthPayload.paidFallbackConfigured, true);
 assert.equal(healthPayload.serverStorageConfigured, true);
 
 const request = new Request('http://localhost:8787/api/vocabulary/enrich', {
@@ -109,7 +113,39 @@ assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'KV');
 assert.equal(kvPayload.data.persistedOnServer, true);
 assert.equal(providerCallCount, 3);
 
+const fallbackModels = [];
+customProviderResponse = async ({ body }) => {
+  fallbackModels.push(body.model);
+  if (body.model === env.AI_FREE_MODEL) {
+    return new Response(JSON.stringify({ error: 'Daily quota exhausted' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+    primaryMeaningVi: 'bản sao lưu; phương án dự phòng',
+    contextExamples: [
+      { context: 'Đời sống', en: 'Keep a backup of your photos.', vi: 'Hãy giữ một bản sao lưu ảnh của bạn.' },
+      { context: 'Công việc', en: 'The team created a backup before the update.', vi: 'Nhóm đã tạo bản sao lưu trước khi cập nhật.' },
+      { context: 'Học tập', en: 'My backup notes helped me revise.', vi: 'Ghi chú dự phòng giúp tôi ôn tập.' },
+      { context: 'Hội thoại', en: 'Do you have a backup plan?', vi: 'Bạn có phương án dự phòng không?' },
+      { context: 'Cụm từ', en: 'We always keep a backup copy.', vi: 'Chúng tôi luôn giữ một bản sao dự phòng.' },
+    ],
+  }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const fallbackResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'backup', meaning: 'bản sao lưu', topic: 'Công nghệ' }),
+}), env, context);
+const fallbackPayload = await fallbackResponse.json();
+assert.equal(fallbackResponse.status, 200);
+assert.deepEqual(fallbackModels, [env.AI_FREE_MODEL, env.AI_PAID_MODEL]);
+assert.equal(fallbackPayload.data.generatedByModel, env.AI_PAID_MODEL);
+customProviderResponse = null;
+
 let regenerationCalls = 0;
+const cooldownModels = [];
 const patientExamples = [
   { context: 'Đời sống', en: 'Please be patient while I check your order.', vi: 'Vui lòng kiên nhẫn trong lúc tôi kiểm tra đơn hàng.' },
   { context: 'Công việc', en: 'A patient manager listens before making a decision.', vi: 'Một quản lý kiên nhẫn sẽ lắng nghe trước khi quyết định.' },
@@ -117,8 +153,9 @@ const patientExamples = [
   { context: 'Hội thoại', en: 'Can you be patient for just a few more minutes?', vi: 'Bạn có thể kiên nhẫn thêm vài phút nữa không?' },
   { context: 'Cụm từ', en: 'The doctor was patient with every worried parent.', vi: 'Bác sĩ kiên nhẫn với từng phụ huynh đang lo lắng.' },
 ];
-customProviderResponse = async () => {
+customProviderResponse = async ({ body }) => {
   regenerationCalls += 1;
+  cooldownModels.push(body.model);
   const content = JSON.stringify({
     primaryMeaningVi: 'kiên nhẫn',
     contextExamples: regenerationCalls === 1 ? patientExamples.slice(0, 4) : patientExamples,
@@ -138,6 +175,7 @@ const regeneratedPayload = await regeneratedResponse.json();
 assert.equal(regeneratedResponse.status, 200);
 assert.equal(regeneratedPayload.data.contextExamples.length, 5);
 assert.equal(regenerationCalls, 2, 'invalid AI content must be regenerated automatically');
+assert.deepEqual(cooldownModels, [env.AI_PAID_MODEL, env.AI_PAID_MODEL], 'free quota cooldown must avoid repeated failed free calls');
 customProviderResponse = null;
 
 let meaningProviderCalls = 0;
