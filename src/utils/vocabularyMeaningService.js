@@ -1,4 +1,5 @@
 import { getBackendUrl, hasBackendApi, readBackendError, readJsonResponse } from './backendApi.js';
+import { isLowQualityMeaning } from './vocabularyQuality.js';
 
 const MEANING_CACHE_PREFIX = 'lingogoc_vocabulary_meaning_v1_';
 
@@ -10,10 +11,20 @@ export function getMeaningCacheKey(item) {
 
 export function getCachedVietnameseMeaning(item) {
   if (!item?.word || typeof localStorage === 'undefined') return null;
+  const storageKey = `${MEANING_CACHE_PREFIX}${getMeaningCacheKey(item)}`;
   try {
-    const cached = JSON.parse(localStorage.getItem(`${MEANING_CACHE_PREFIX}${getMeaningCacheKey(item)}`) || 'null');
-    return typeof cached?.meaningVi === 'string' && cached.meaningVi.trim() ? cached : null;
+    const cached = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    if (typeof cached?.meaningVi !== 'string' || isLowQualityMeaning(cached.meaningVi)) {
+      localStorage.removeItem(storageKey);
+      return null;
+    }
+    return cached;
   } catch {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // Storage can be blocked in private browsing; the server result is still usable in memory.
+    }
     return null;
   }
 }
@@ -25,7 +36,7 @@ function cacheMeaning(item, result) {
     source: result?.source || 'ai',
     savedAt: new Date().toISOString(),
   };
-  if (!normalized.meaningVi) return null;
+  if (!normalized.meaningVi || isLowQualityMeaning(normalized.meaningVi)) return null;
   try {
     localStorage.setItem(`${MEANING_CACHE_PREFIX}${getMeaningCacheKey(item)}`, JSON.stringify(normalized));
   } catch {

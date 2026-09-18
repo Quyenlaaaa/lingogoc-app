@@ -666,7 +666,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                 <div className="card-center-word">
                   <h3 className="card-word-text">{currentCard.word}</h3>
-                  <div className="card-ipa-text">{currentCard.ipa}</div>
+                  <div className="card-ipa-text">{flashcardDictionaryData?.phonetic || currentCard.ipa}</div>
                 </div>
 
                 <div className="card-instruction-hint">
@@ -885,7 +885,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                     <div className="item-word-body">
                       <div className="item-word-name">{w.word}</div>
-                      <div className="item-ipa-text">{w.ipa}</div>
+                      <div className="item-ipa-text">{listDictionaryData[w.word.toLowerCase()]?.phonetic || w.ipa}</div>
                       <div className="item-meaning-text">{displayMeaning}</div>
                       <div className="item-example-box">
                         <div className="item-example-summary">
