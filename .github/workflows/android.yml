@@ -44,7 +44,19 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee android-build.log
+
+      - name: Report Android build failure
+        if: failure()
+        working-directory: android
+        run: |
+          details="$(tail -n 120 android-build.log)"
+          details="${details//'%'/'%25'}"
+          details="${details//$'\r'/'%0D'}"
+          details="${details//$'\n'/'%0A'}"
+          echo "::error title=Android build failed::$details"
+          exit 1
 
       - uses: actions/upload-artifact@v4
         with:
