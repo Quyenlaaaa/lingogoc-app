@@ -45,7 +45,7 @@ jobs:
         run: |
           chmod +x gradlew
           set -o pipefail
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee android-build.log
+          ./gradlew assembleDebug --console=plain 2>&1 | tee android-build.log
 
       - name: Report Android build failure
         if: failure()
