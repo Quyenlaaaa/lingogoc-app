@@ -42,6 +42,36 @@ function uniqueBy(items, getKey) {
   });
 }
 
+const BUNDLED_NUMBERED_SENSE_PATTERN = /\d/;
+const TEXT_ENCODING_ERROR_PATTERN = /(?:â€™|â€|Ã|�)/;
+
+export function isInvalidBundledVocabularyWord(word) {
+  const text = normalizeText(typeof word === 'string' ? word : word?.word);
+  return (
+    !text
+    || BUNDLED_NUMBERED_SENSE_PATTERN.test(text)
+    || TEXT_ENCODING_ERROR_PATTERN.test(text)
+  );
+}
+
+// The bundled word list must contain real headwords only. Some source dictionaries
+// append numbers to distinguish meanings (for example can1/can2); those labels are
+// not words learners should see. Keep this stricter rule scoped to bundled data so
+// imported personal terms such as Web3 or 2FA remain valid.
+export function sanitizeBundledVocabulary(vocabulary) {
+  if (!Array.isArray(vocabulary)) return [];
+
+  const seen = new Set();
+  return vocabulary.filter((item) => {
+    if (isInvalidBundledVocabularyWord(item)) return false;
+
+    const key = normalizeText(item.word).toLocaleLowerCase('en');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function isLowQualityExample(example) {
   const text = normalizeText(example);
   if (!text || text.length < 8) return true;

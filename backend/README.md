@@ -6,6 +6,8 @@ Sau lỗi quota rõ ràng, Worker tạm ngừng thăm dò model miễn phí tron
 
 Ví dụ đã sinh được lưu bền vững trong Cloudflare Workers KV qua binding `VOCAB_CACHE`. Khóa lưu được chuẩn hóa theo phiên bản prompt, model và từ vựng, vì vậy Danh sách 3000, Thẻ nhớ 3D và các thiết bị khác nhau dùng chung một bản ghi mà không gọi lại AI.
 
+Kho 3.000 từ nền (từ, IPA, nghĩa và ví dụ song ngữ) cũng được lưu trong KV tại khóa `system-vocabulary:v1`. Frontend đọc khóa này qua `GET /api/vocabulary/catalog`; dữ liệu đóng gói chỉ được dùng khi backend tạm thời không khả dụng.
+
 Nếu provider phản hồi chậm, lỗi tạm thời hoặc trả JSON chưa đủ ví dụ, Worker sẽ tự gọi lại. Ở frontend, thao tác “Thử lại AI” tiếp tục retry với backoff cho đến khi nhận được kết quả hợp lệ. Việc chuyển tab hoặc đóng modal trong ứng dụng không hủy request; kết quả hoàn tất trong nền vẫn được lưu để hiển thị khi người dùng quay lại.
 
 ## Chạy thử tại máy
@@ -25,7 +27,11 @@ Có thể kiểm tra hợp đồng API không cần khóa thật bằng `node te
 cd backend
 npx wrangler secret put XTROUTER_API_KEY
 npx wrangler deploy
+cd ..
+npm run sync:vocab-db
 ```
+
+Lệnh đồng bộ kiểm tra đúng 3.000 từ hợp lệ rồi ghi catalog thành một khóa KV duy nhất, tránh vượt hạn mức ghi hằng ngày của gói miễn phí. Có thể kiểm tra mà không ghi DB bằng `node scripts/sync-vocabulary-kv.mjs --dry-run`.
 
 Namespace KV hiện được khai báo trong `wrangler.toml`. Nếu triển khai sang một tài khoản Cloudflare khác, tạo namespace mới bằng:
 

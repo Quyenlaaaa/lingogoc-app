@@ -80,6 +80,29 @@ assert.equal(healthPayload.paidFallbackModel, 'x-ai/grok-build-0.1');
 assert.equal(healthPayload.paidFallbackConfigured, true);
 assert.equal(healthPayload.serverStorageConfigured, true);
 
+serverCache.set('system-vocabulary:v1', JSON.stringify({
+  schemaVersion: 1,
+  contentHash: 'catalog-test-hash',
+  count: 3000,
+  words: Array.from({ length: 3000 }, (_, index) => ({
+    id: index + 1,
+    word: `word ${index + 1}`,
+    meaning: `nghĩa ${index + 1}`,
+    example: `This is system word ${index + 1}.`,
+    exampleVi: `Đây là từ hệ thống ${index + 1}.`,
+  })),
+}));
+const catalogResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/catalog', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const catalogPayload = await catalogResponse.json();
+assert.equal(catalogResponse.status, 200);
+assert.equal(catalogResponse.headers.get('X-LingoGoc-Source'), 'KV');
+assert.equal(catalogPayload.data.words.length, 3000);
+serverCache.delete('system-vocabulary:v1');
+
 const request = new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },

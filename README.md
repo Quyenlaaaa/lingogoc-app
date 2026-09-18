@@ -124,6 +124,7 @@ node backend/test-worker.mjs  # kiểm tra hợp đồng API của Worker
 | Phương thức | Endpoint | Chức năng |
 | --- | --- | --- |
 | `GET` | `/health` | Kiểm tra trạng thái backend và cấu hình AI/KV |
+| `GET` | `/api/vocabulary/catalog` | Đọc kho 3.000 từ hệ thống đã đồng bộ trên Workers KV |
 | `POST` | `/api/vocabulary/enrich` | Sinh và lưu bộ dữ liệu từ vựng với 5 ngữ cảnh khác nhau |
 | `POST` | `/api/vocabulary/meanings` | Chuẩn hóa nhanh nghĩa tiếng Việt theo lô, tối đa 30 từ |
 | `GET` | `/api/vocabulary/pronunciation?word=hello` | Audio phát âm tương thích ngược cho từ đơn |
@@ -141,39 +142,21 @@ Chi tiết request/response nằm trong [BACKEND_API.md](./BACKEND_API.md) và [
 - Việc đóng modal hoặc chuyển màn hình không hủy yêu cầu đang chạy; khi hoàn tất, dữ liệu vẫn được lưu để sử dụng lại.
 - Hàng đợi nền quét toàn bộ kho từ, bỏ qua mục đã đủ 5 ngữ cảnh và tự quay lại các mục lỗi tạm thời để không bỏ sót từ.
 
-## Kho từ vựng cá nhân
+## Kho từ vựng hệ thống
 
-Mở **Cài đặt → Kho dữ liệu cá nhân** để nhập JSON hoặc CSV. Hai trường bắt buộc là `word` và `meaning`.
+Người học luôn sử dụng kho 3.000 từ do hệ thống quản lý. Bản chính được đọc từ Workers KV qua `/api/vocabulary/catalog`; bản trong `src/data/vocabData.js` là dữ liệu dự phòng khi server tạm thời không khả dụng.
 
-Các trường được hỗ trợ:
+Sau khi cập nhật kho từ, đồng bộ toàn bộ từ, IPA, nghĩa và ví dụ lên KV bằng một lượt ghi:
 
-```text
-word, meaning, ipa, level, topic, example, exampleVi
+```bash
+npm run sync:vocab-db
 ```
 
-Ví dụ JSON:
-
-```json
-{
-  "words": [
-    {
-      "word": "hello",
-      "meaning": "xin chào",
-      "ipa": "/həˈləʊ/",
-      "level": "A1",
-      "topic": "Giao tiếp",
-      "example": "Hello, how are you?",
-      "exampleVi": "Xin chào, bạn khỏe không?"
-    }
-  ]
-}
-```
-
-Dữ liệu nhập được lưu trong trình duyệt và không được tự động đưa vào Git. Không đặt dữ liệu cá nhân trong `src/data`.
+Script chỉ thực hiện đồng bộ khi kho sau kiểm tra có đúng 3.000 từ hợp lệ và duy nhất.
 
 ## Quyền riêng tư và bảo mật
 
-- Tiến độ, cài đặt và kho từ cá nhân mặc định được lưu trên thiết bị hiện tại.
+- Tiến độ và cài đặt người học được lưu trên thiết bị hiện tại.
 - Nội dung AI đã chuẩn hóa có thể được lưu trên Workers KV để dùng lại giữa các thiết bị.
 - API key chỉ tồn tại trong secret của Cloudflare Worker.
 - Nên xuất bản sao lưu trước khi xóa dữ liệu trình duyệt.
@@ -187,6 +170,8 @@ Dữ liệu nhập được lưu trong trình duyệt và không được tự �
 cd backend
 npx wrangler secret put XTROUTER_API_KEY
 npx wrangler deploy
+cd ..
+npm run sync:vocab-db
 ```
 
 Sau khi triển khai, kiểm tra `/health` và bảo đảm `aiConfigured` là `true`.

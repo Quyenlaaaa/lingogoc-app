@@ -21,14 +21,12 @@ import PwaInstallPrompt from './components/PwaInstallPrompt';
 import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
-import { loadPrivateVocabulary } from './utils/privateVocabulary';
+import { loadSystemVocabulary } from './utils/systemVocabularyService';
 import {
   getVocabularyEnrichmentQueueStatus,
   startVocabularyEnrichmentQueue,
   subscribeVocabularyEnrichmentQueue,
 } from './utils/vocabularyEnrichmentQueue';
-
-const initialPrivateVocabulary = loadPrivateVocabulary();
 
 export default function App() {
   const [userData, setUserData] = useState(() => loadUserData());
@@ -36,24 +34,26 @@ export default function App() {
   const [voiceSpeed, setVoiceSpeed] = useState(0.85);
   const [theme, setTheme] = useState('dark');
   const [dueSrsCount, setDueSrsCount] = useState(0);
-  const [vocabulary, setVocabulary] = useState(() => initialPrivateVocabulary || []);
-  const [usesPrivateVocabulary, setUsesPrivateVocabulary] = useState(() => Boolean(initialPrivateVocabulary));
+  const [vocabulary, setVocabulary] = useState([]);
   const [enrichmentQueueStatus, setEnrichmentQueueStatus] = useState(getVocabularyEnrichmentQueueStatus);
 
   // Modals
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  // Load bundled demo vocabulary only when no private dataset exists.
+  // The learning catalog is fully managed by the application. Learners always
+  // receive the same curated system vocabulary on every device.
   useEffect(() => {
     if (userData?.settings) {
       if (userData.settings.theme) setTheme(userData.settings.theme);
       if (userData.settings.voiceSpeed) setVoiceSpeed(userData.settings.voiceSpeed);
     }
 
-    if (!initialPrivateVocabulary) {
-      import('./data/vocabData').then(({ vocabData }) => setVocabulary(vocabData));
-    }
+    let active = true;
+    loadSystemVocabulary().then((words) => {
+      if (active) setVocabulary(words);
+    });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -75,13 +75,6 @@ export default function App() {
     setUserData(newData);
     saveUserData(newData);
     const stats = getSrsStats(vocabulary);
-    setDueSrsCount(stats.dueCount || 0);
-  };
-
-  const handleVocabularyChange = (nextVocabulary, isPrivate) => {
-    setVocabulary(nextVocabulary);
-    setUsesPrivateVocabulary(isPrivate);
-    const stats = getSrsStats(nextVocabulary);
     setDueSrsCount(stats.dueCount || 0);
   };
 
@@ -160,7 +153,6 @@ export default function App() {
               setActiveTab={setActiveTab} 
               userData={userData}
               vocabularyCount={vocabulary.length}
-              usesPrivateVocabulary={usesPrivateVocabulary}
             />
           )}
 
@@ -303,9 +295,6 @@ export default function App() {
         userData={userData}
         onUpdateUserData={handleUpdateUserData}
         onOpenVipModal={() => setIsVipModalOpen(true)}
-        vocabulary={vocabulary}
-        usesPrivateVocabulary={usesPrivateVocabulary}
-        onVocabularyChange={handleVocabularyChange}
       />
     </div>
   );

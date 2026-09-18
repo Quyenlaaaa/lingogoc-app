@@ -15,7 +15,7 @@ import {
   Brain
 } from 'lucide-react';
 
-export default function RoadmapView({ setActiveTab, userData, vocabularyCount = 0, usesPrivateVocabulary = false }) {
+export default function RoadmapView({ setActiveTab, userData, vocabularyCount = 0 }) {
   const [diagnosticResult, setDiagnosticResult] = useState(null);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function RoadmapView({ setActiveTab, userData, vocabularyCount = 
       <div className="roadmap-hero-card">
         <div className="hero-badge">
           <Sparkles size={16} />
-          <span>{usesPrivateVocabulary ? `Đang dùng kho riêng · ${vocabularyCount.toLocaleString('vi-VN')} từ` : 'Lộ trình dành cho người học lại từ gốc'}</span>
+          <span>Kho từ hệ thống · {vocabularyCount.toLocaleString('vi-VN')} từ</span>
         </div>
         <h1 className="hero-title">
           Hành Trình Chinh Phục Tiếng Anh Từ Con Số 0

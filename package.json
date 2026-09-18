@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "test:speech": "node scripts/test_speech_mobile.mjs",
     "test:vocab": "node scripts/test_vocab_quality.mjs",
+    "sync:vocab-db": "node scripts/sync-vocabulary-kv.mjs",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"

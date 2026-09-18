@@ -2,6 +2,7 @@ const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 const MAX_BODY_BYTES = 20_000;
 const VOCABULARY_PROMPT_VERSION = 2;
 const MEANING_PROMPT_VERSION = 1;
+const SYSTEM_VOCABULARY_KEY = 'system-vocabulary:v1';
 let freeModelCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
@@ -317,6 +318,22 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   return json({ data: result }, 200, origin, { 'X-LingoGoc-Cache': 'MISS' });
 }
 
+async function getSystemVocabulary(env, origin) {
+  if (!env.VOCAB_CACHE) {
+    return json({ error: 'Kho dữ liệu server chưa được cấu hình.' }, 503, origin);
+  }
+  const catalog = await env.VOCAB_CACHE.get(SYSTEM_VOCABULARY_KEY, 'json');
+  if (!catalog || !Array.isArray(catalog.words) || catalog.words.length !== 3000) {
+    return json({ error: 'Kho từ hệ thống trên DB chưa được đồng bộ đầy đủ.' }, 503, origin);
+  }
+  const contentHash = cleanText(catalog.contentHash, 128);
+  return json({ data: catalog }, 200, origin, {
+    'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
+    ...(contentHash ? { ETag: `"${contentHash}"` } : {}),
+    'X-LingoGoc-Source': 'KV',
+  });
+}
+
 function meaningCacheKey(env, item) {
   return `meaning:v${MEANING_PROMPT_VERSION}:${getFreeModel(env) || 'default'}:${item.word}:${item.pos || '-'}`;
 }
@@ -509,6 +526,9 @@ export default {
     }
 
     try {
+      if (url.pathname === '/api/vocabulary/catalog' && request.method === 'GET') {
+        return await getSystemVocabulary(env, origin);
+      }
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);
       }

@@ -519,7 +519,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   };
 
   if (!vocabList.length) {
-    return <div className="empty-state-card">Chưa có từ vựng. Hãy mở Cài đặt để nhập kho dữ liệu cá nhân.</div>;
+    return <div className="empty-state-card">Kho từ hệ thống đang được tải. Vui lòng thử lại sau giây lát.</div>;
   }
 
   return (
