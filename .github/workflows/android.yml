@@ -1,0 +1,53 @@
+name: Android Kotlin APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.js"
+      - ".github/workflows/android.yml"
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      VITE_API_BASE_URL: https://lingogoc-api.lingogoc-api.workers.dev
+      VITE_SPEAKING_AUTO_LISTEN: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lingogoc-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

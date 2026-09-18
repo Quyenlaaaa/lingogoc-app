@@ -14,6 +14,7 @@ const defaultData = {
   completedItTerms: [],
   settings: {
     voiceSpeed: 0.85, // 0.75 or 1.0
+    voicePreset: 'auto',
     theme: 'dark',
     soundEffects: true,
     showVietnamese: true,
@@ -44,7 +45,14 @@ export function loadUserData() {
       data.lastActiveDate = today;
       saveUserData(data);
     }
-    return { ...defaultData, ...data };
+    return {
+      ...defaultData,
+      ...data,
+      settings: {
+        ...defaultData.settings,
+        ...(data.settings || {}),
+      },
+    };
   } catch (e) {
     console.error('Failed to load user data', e);
     return defaultData;
@@ -67,6 +75,7 @@ export function resetUserData() {
   localStorage.removeItem('lingogoc_diagnostic_result');
   const freshData = {
     ...defaultData,
+    settings: { ...defaultData.settings },
     lastActiveDate: new Date().toISOString().split('T')[0],
     masteredWords: [],
     bookmarkedWords: [],

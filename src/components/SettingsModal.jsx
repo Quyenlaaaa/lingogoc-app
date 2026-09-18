@@ -6,9 +6,12 @@ import {
   Upload, 
   Trash2, 
   X, 
-  Crown
+  Crown,
+  Play,
+  Volume2
 } from 'lucide-react';
 import { loadUserData, saveUserData, resetUserData } from '../utils/storage';
+import speechHelper, { VOICE_PRESETS } from '../utils/speechHelper';
 
 const AVATARS = ['👤', '🦁', '🦄', '👑', '🌸', '🚀', '🐱', '⚽', '🎸', '⚡', '🦅', '💎'];
 
@@ -21,6 +24,7 @@ export default function SettingsModal({
 }) {
   const [name, setName] = useState(userData?.name || 'Học Viên LingoGoc');
   const [selectedAvatar, setSelectedAvatar] = useState(userData?.avatar || '👤');
+  const [selectedVoice, setSelectedVoice] = useState(userData?.settings?.voicePreset || 'auto');
   const fileInputRef = useRef(null);
   const [notice, setNotice] = useState(null);
 
@@ -36,13 +40,36 @@ export default function SettingsModal({
     setNotice({ type: 'success', text: 'Đã lưu hồ sơ học viên.' });
   };
 
+  const handlePreviewVoice = () => {
+    speechHelper.speak("Hello! Welcome to LingoGoc. Let's practice English together.", {
+      rate: userData?.settings?.voiceSpeed || 0.85,
+      voicePreset: selectedVoice,
+    });
+  };
+
+  const handleSaveVoice = () => {
+    onUpdateUserData({
+      ...userData,
+      settings: {
+        ...(userData?.settings || {}),
+        voicePreset: selectedVoice,
+      },
+    });
+    setNotice({ type: 'success', text: 'Đã lưu giọng đọc cho toàn bộ ứng dụng.' });
+  };
+
   // Xuất file JSON sao lưu
   const handleExportData = () => {
     const fullData = loadUserData();
+    const fileName = `lingogoc_backup_${new Date().toISOString().split('T')[0]}.json`;
+    if (typeof window !== 'undefined' && typeof window.LingoGocNative?.saveBackup === 'function') {
+      window.LingoGocNative.saveBackup(fileName, JSON.stringify(fullData, null, 2));
+      return;
+    }
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `lingogoc_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", fileName);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -187,6 +214,64 @@ export default function SettingsModal({
                 {av}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Voice selection */}
+        <div style={{
+          background: 'var(--surface-soft)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '16px',
+          padding: '16px 20px',
+          marginBottom: '24px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>
+            <Volume2 size={18} color="#38bdf8" />
+            <span>Giọng đọc tiếng Anh</span>
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '12px' }}>
+            Áp dụng cho từ vựng, ví dụ và các bài luyện nghe. Giọng thực tế phụ thuộc vào giọng có sẵn trên điện thoại hoặc máy tính.
+          </div>
+          <select
+            value={selectedVoice}
+            onChange={(event) => setSelectedVoice(event.target.value)}
+            aria-label="Chọn giọng đọc tiếng Anh"
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: '12px',
+              border: '1.5px solid var(--border-color)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontSize: '0.95rem',
+              marginBottom: '8px'
+            }}
+          >
+            {VOICE_PRESETS.map((preset) => (
+              <option key={preset.id} value={preset.id}>{preset.label}</option>
+            ))}
+          </select>
+          <div style={{ minHeight: '38px', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45, marginBottom: '12px' }}>
+            {VOICE_PRESETS.find((preset) => preset.id === selectedVoice)?.description}
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handlePreviewVoice}
+              className="btn btn-outline"
+              style={{ flex: '1 1 150px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Play size={16} />
+              Nghe thử
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveVoice}
+              className="btn btn-primary"
+              style={{ flex: '1 1 150px', padding: '10px 14px', fontWeight: 700 }}
+            >
+              Lưu giọng đọc
+            </button>
           </div>
         </div>
 

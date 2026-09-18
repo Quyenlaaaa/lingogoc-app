@@ -28,9 +28,9 @@ gantt
     Tích hợp Gemini API LLM + Sửa ngữ pháp sâu         :p2, 2026-11, 2026-12
     Thuật toán Spaced Repetition (FSRS / SM-2)        :p3, 2026-11, 2026-12
     section Giai đoạn 3 (Tháng 4 - 6)
-    PWA Offline Mode & Cài đặt Mobile                 :p4, 2027-01, 2027-02
+    Android Kotlin & Offline Bundle                   :done, p4, 2026-09, 2026-10
     Đấu trường từ vựng 1vs1 (PvP) & BXH tuần          :p5, 2027-02, 2027-03
-    Mobile App (React Native / Capacitor)             :p6, 2027-03, 2027-04
+    Hoàn thiện và phát hành Android Kotlin            :p6, 2027-03, 2027-04
     section Giai đoạn 4 (Tháng 7 - 12)
     Cổng thanh toán MoMo, ZaloPay, VietQR             :p7, 2027-04, 2027-06
     Mô hình Freemium & Gói VIP Subscription           :p8, 2027-05, 2027-08
@@ -73,13 +73,13 @@ gantt
 
 ### 📍 Giai Đoạn 3: Đa Nền Tảng & Mạng Xã Hội Học Tập (Tháng 4 - 6)
 
-#### 1. Biến Thành PWA (Progressive Web App) & Offline Mode
-- Tích hợp Service Worker và IndexedDB: Cho phép cài đặt ứng dụng trực tiếp lên màn hình chính điện thoại (iOS / Android) như một native app không cần thông qua App Store.
-- Hỗ trợ **Học Offline**: Tải trước danh sách 500 từ vựng và bài tập IPA để người dùng có thể học khi ngồi xe buýt, máy bay hoặc nơi mất sóng.
+#### 1. Ứng Dụng Android Kotlin & Offline Mode
+- Đóng gói frontend và kho từ hệ thống trực tiếp trong APK bằng `WebViewAssetLoader`.
+- Hỗ trợ **Học Offline** đối với nội dung đã đóng gói và tiến độ cục bộ; chức năng AI tiếp tục dùng backend khi có mạng.
 
-#### 2. Xuất Bản Ứng Dụng Di Động Native (iOS & Android)
-- Đóng gói dự án bằng **Capacitor** hoặc xây dựng ứng dụng với **React Native**:
-  - Đưa lên Google Play Store và Apple App Store.
+#### 2. Xuất Bản Ứng Dụng Di Động Native
+- Hoàn thiện ứng dụng **Android Kotlin** và nghiên cứu phiên bản iOS riêng:
+  - Đưa bản Android lên Google Play Store.
   - Tích hợp thông báo đẩy (Push Notifications) nhắc nhở giữ chuỗi Streak thông minh theo khung giờ rảnh rỗi của từng người dùng.
 
 #### 3. Tính Năng Gamification & Cộng Đồng (Social Learning)
@@ -110,7 +110,7 @@ gantt
 ## 3. Kiến Trúc Kỹ Thuật Mục Tiêu (Target System Architecture)
 
 ```
-[Người Dùng: Web / Mobile PWA / iOS / Android]
+[Người Dùng: Web / Android Kotlin / iOS tương lai]
                       │
                       ▼
 [Cloudflare CDN & Edge Caching / HTTPS]

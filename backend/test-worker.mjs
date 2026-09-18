@@ -109,6 +109,19 @@ assert.equal(healthPayload.openRouterConfigured, false);
 assert.equal(healthPayload.freeProviderStrategy, 'single-provider');
 assert.equal(healthPayload.serverStorageConfigured, true);
 
+const androidHealthResponse = await worker.fetch(
+  new Request('http://localhost:8787/health', {
+    headers: { Origin: 'https://appassets.androidplatform.net' },
+  }),
+  env,
+  context,
+);
+assert.equal(
+  androidHealthResponse.headers.get('Access-Control-Allow-Origin'),
+  'https://appassets.androidplatform.net',
+  'the bundled Kotlin app origin must be accepted by CORS',
+);
+
 serverCache.set('system-vocabulary:v1', JSON.stringify({
   schemaVersion: 1,
   contentHash: 'catalog-test-hash',

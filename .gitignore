@@ -29,6 +29,14 @@ backend/.wrangler/
 *.sw?
 scripts/data_cache
 
+# Android build and local machine files
+android/.gradle/
+android/local.properties
+android/**/build/
+android/captures/
+android/*.jks
+android/*.keystore
+
 # Personal learning datasets (never commit these)
 private-data/
 public/private-data/

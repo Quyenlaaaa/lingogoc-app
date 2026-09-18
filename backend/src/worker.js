@@ -20,12 +20,16 @@ let workersAiCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
+  const normalizedOrigin = origin.replace(/\/+$/, '');
+  // WebViewAssetLoader serves the bundled Android app from this secure,
+  // local-only origin so browser APIs and the backend can be used safely.
+  if (normalizedOrigin === 'https://appassets.androidplatform.net') return origin;
   const allowed = String(env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((item) => item.trim().replace(/\/+$/, ''))
     .filter(Boolean);
   if (!origin) return allowed[0] || '*';
-  return allowed.includes('*') || allowed.includes(origin.replace(/\/+$/, '')) ? origin : '';
+  return allowed.includes('*') || allowed.includes(normalizedOrigin) ? origin : '';
 }
 
 function corsHeaders(origin) {

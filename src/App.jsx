@@ -17,11 +17,11 @@ import DictationView from './components/DictationView';
 import TrapsView from './components/TrapsView';
 import VipUpgradeModal from './components/VipUpgradeModal';
 import SettingsModal from './components/SettingsModal';
-import PwaInstallPrompt from './components/PwaInstallPrompt';
 import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
 import { loadBundledSystemVocabulary, refreshSystemVocabulary } from './utils/systemVocabularyService';
+import speechHelper from './utils/speechHelper';
 
 export default function App() {
   const [userData, setUserData] = useState(() => loadUserData());
@@ -41,6 +41,7 @@ export default function App() {
     if (userData?.settings) {
       if (userData.settings.theme) setTheme(userData.settings.theme);
       if (userData.settings.voiceSpeed) setVoiceSpeed(userData.settings.voiceSpeed);
+      speechHelper.setVoicePreset(userData.settings.voicePreset || 'auto');
     }
 
     let active = true;
@@ -67,6 +68,7 @@ export default function App() {
 
   // Update User Data & sync with LocalStorage
   const handleUpdateUserData = (newData) => {
+    speechHelper.setVoicePreset(newData?.settings?.voicePreset || 'auto');
     setUserData(newData);
     saveUserData(newData);
     const stats = getSrsStats(vocabulary);
@@ -123,9 +125,6 @@ export default function App() {
 
   return (
     <div className={`app-root ${theme}-theme`}>
-      {/* PWA Install Notification Prompt */}
-      <PwaInstallPrompt />
-
       {/* Top Navigation Bar */}
       <Navbar
         activeTab={activeTab}

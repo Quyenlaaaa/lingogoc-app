@@ -1,6 +1,6 @@
 # LingoGoc AI
 
-Ứng dụng web tự học tiếng Anh dành cho người Việt muốn xây lại nền tảng từ phát âm, từ vựng, phản xạ đến hội thoại. LingoGoc chạy tốt trên máy tính và thiết bị di động, có thể cài như một PWA và lưu tiến độ học ngay trên trình duyệt.
+Ứng dụng tự học tiếng Anh dành cho người Việt muốn xây lại nền tảng từ phát âm, từ vựng, phản xạ đến hội thoại. LingoGoc có bản web responsive và bản Android viết bằng Kotlin; tiến độ học được lưu ngay trên thiết bị.
 
 **Bản đang hoạt động:** [https://quyenlaaaa.github.io/lingogoc-app/](https://quyenlaaaa.github.io/lingogoc-app/)
 
@@ -25,6 +25,7 @@
 | Thành phần | Công nghệ |
 | --- | --- |
 | Frontend | React 19, Vite 8, CSS thuần, Lucide React |
+| Android | Kotlin, Android WebView, WebViewAssetLoader, native TTS |
 | Backend | Cloudflare Workers |
 | Lưu kết quả AI | Cloudflare Workers KV |
 | AI | API tương thích OpenAI, cấu hình hoàn toàn ở backend |
@@ -203,7 +204,8 @@ Lệnh này build ứng dụng và xuất bản thư mục `dist` lên nhánh Gi
 ```text
 lingogoc-app/
 ├── backend/              # Cloudflare Worker, cấu hình và test API
-├── public/               # tài nguyên tĩnh và PWA
+├── android/              # ứng dụng Android Kotlin và hướng dẫn tạo APK
+├── public/               # tài nguyên tĩnh của frontend
 ├── scripts/              # các script kiểm thử
 ├── src/
 │   ├── components/       # các màn hình và thành phần React
