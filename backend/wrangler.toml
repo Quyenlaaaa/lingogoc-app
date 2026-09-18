@@ -9,6 +9,9 @@ AI_FREE_MODEL = "mistralai/mistral-large-2512"
 AI_PAID_MODEL = "x-ai/grok-build-0.1"
 ALLOWED_ORIGINS = "http://localhost:5173,https://quyenlaaaa.github.io"
 
+[triggers]
+crons = ["*/15 * * * *"]
+
 [[kv_namespaces]]
 binding = "VOCAB_CACHE"
 id = "17736059afb349f68eafd1945eb541dc"

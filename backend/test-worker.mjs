@@ -110,7 +110,33 @@ const manifestPayload = await manifestResponse.json();
 assert.equal(manifestResponse.status, 200);
 assert.equal(manifestPayload.data.contentHash, 'catalog-test-hash');
 assert.equal(manifestPayload.data.count, 3000);
+serverCache.set('system-vocabulary:backfill:v1', JSON.stringify({
+  contentHash: 'catalog-test-hash',
+  cursor: 17,
+  generated: 4,
+  status: 'quota_wait',
+  nextRunAt: new Date(Date.now() + 60_000).toISOString(),
+}));
+const scheduledPending = [];
+await worker.scheduled(
+  { scheduledTime: Date.now(), cron: '*/15 * * * *' },
+  env,
+  { waitUntil: (promise) => scheduledPending.push(promise) },
+);
+await Promise.all(scheduledPending);
+const backfillStatusResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/backfill/status', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const backfillStatusPayload = await backfillStatusResponse.json();
+assert.equal(backfillStatusResponse.status, 200);
+assert.equal(backfillStatusPayload.data.status, 'quota_wait');
+assert.equal(backfillStatusPayload.data.cursor, 17);
+assert.equal(backfillStatusPayload.data.totalWords, 3000);
+assert.equal(providerCallCount, 0, 'paused scheduled backfill must not call the AI provider');
 serverCache.delete('system-vocabulary:v1');
+serverCache.delete('system-vocabulary:backfill:v1');
 
 const request = new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',

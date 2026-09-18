@@ -4,6 +4,9 @@ const VOCABULARY_PROMPT_VERSION = 2;
 const MEANING_PROMPT_VERSION = 1;
 const SYSTEM_VOCABULARY_KEY = 'system-vocabulary:v1';
 const SYSTEM_VOCABULARY_MANIFEST_KEY = 'system-vocabulary:manifest:v1';
+const VOCABULARY_BACKFILL_STATE_KEY = 'system-vocabulary:backfill:v1';
+const BACKFILL_SCAN_LIMIT = 96;
+const BACKFILL_GENERATE_LIMIT = 2;
 let freeModelCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
@@ -412,6 +415,136 @@ async function getVocabularyBatch(request, env, origin) {
   }, 200, origin, { 'Cache-Control': 'private, max-age=60' });
 }
 
+function newBackfillState(contentHash) {
+  return {
+    contentHash,
+    cursor: 0,
+    passes: 0,
+    generated: 0,
+    generatedInCurrentPass: 0,
+    status: 'active',
+    nextRunAt: null,
+    lastRunAt: null,
+    lastSuccessAt: null,
+    lastWord: null,
+    lastError: null,
+  };
+}
+
+async function saveBackfillState(env, state) {
+  await env.VOCAB_CACHE.put(VOCABULARY_BACKFILL_STATE_KEY, JSON.stringify(state));
+}
+
+async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date.now()) {
+  if (!env.VOCAB_CACHE) return { status: 'disabled', reason: 'KV_NOT_CONFIGURED' };
+  const catalog = await env.VOCAB_CACHE.get(SYSTEM_VOCABULARY_KEY, 'json');
+  if (!catalog || !Array.isArray(catalog.words) || catalog.words.length !== 3000 || !catalog.contentHash) {
+    return { status: 'disabled', reason: 'CATALOG_NOT_READY' };
+  }
+
+  const storedState = await env.VOCAB_CACHE.get(VOCABULARY_BACKFILL_STATE_KEY, 'json');
+  const state = storedState?.contentHash === catalog.contentHash
+    ? { ...newBackfillState(catalog.contentHash), ...storedState }
+    : newBackfillState(catalog.contentHash);
+  const now = Number(scheduledTime) || Date.now();
+  if (state.status === 'complete') return state;
+  if (state.nextRunAt && Date.parse(state.nextRunAt) > now) return state;
+  if (state.status === 'running' && Date.parse(state.lastRunAt) + 30 * 60 * 1000 > now) return state;
+
+  state.status = 'running';
+  state.lastRunAt = new Date(now).toISOString();
+  state.nextRunAt = null;
+  await saveBackfillState(env, state);
+  let scanned = 0;
+  let generated = 0;
+
+  while (scanned < BACKFILL_SCAN_LIMIT && generated < BACKFILL_GENERATE_LIMIT) {
+    const item = catalog.words[state.cursor];
+    if (!item) {
+      state.cursor = 0;
+      continue;
+    }
+    const word = cleanText(item.word, 80).toLowerCase();
+    const identity = await cacheIdentityFor({
+      version: VOCABULARY_PROMPT_VERSION,
+      model: getFreeModel(env),
+      word,
+    });
+    const storedEnrichment = await env.VOCAB_CACHE.get(identity.serverKey, 'json');
+    let isComplete = false;
+    try {
+      if (storedEnrichment) {
+        normalizeEnrichment(storedEnrichment, word);
+        isComplete = true;
+      }
+    } catch {
+      isComplete = false;
+    }
+
+    if (!isComplete) {
+      try {
+        const request = new Request('https://lingogoc-internal.invalid/api/vocabulary/enrich', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word, meaning: item.meaning, topic: item.topic }),
+        });
+        // Scheduled bulk work is deliberately free-tier only. Interactive
+        // requests still retain the configured paid fallback, but an unattended
+        // cron must never create unbounded wallet charges.
+        await enrichVocabulary(request, { ...env, AI_PAID_MODEL: '' }, '', context);
+        generated += 1;
+        state.generated += 1;
+        state.generatedInCurrentPass += 1;
+        state.lastSuccessAt = new Date().toISOString();
+        state.lastWord = word;
+        state.lastError = null;
+      } catch (error) {
+        const code = cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120);
+        const isProviderFailure = code.startsWith('AI_PROVIDER_') || code === 'AI_NOT_CONFIGURED';
+        state.status = isProviderFailure ? 'quota_wait' : 'retry_wait';
+        state.lastError = code;
+        state.nextRunAt = new Date(now + (isProviderFailure ? 6 * 60 * 60 * 1000 : 30 * 60 * 1000)).toISOString();
+        await saveBackfillState(env, state);
+        return state;
+      }
+    }
+
+    state.cursor += 1;
+    scanned += 1;
+    if (state.cursor >= catalog.words.length) {
+      state.cursor = 0;
+      state.passes += 1;
+      if (state.generatedInCurrentPass === 0) {
+        state.status = 'complete';
+        state.completedAt = new Date().toISOString();
+        await saveBackfillState(env, state);
+        return state;
+      }
+      state.generatedInCurrentPass = 0;
+    }
+    if (!isComplete) await saveBackfillState(env, state);
+  }
+
+  state.status = 'active';
+  await saveBackfillState(env, state);
+  return state;
+}
+
+async function getVocabularyBackfillStatus(env, origin) {
+  const [state, manifest] = await Promise.all([
+    env.VOCAB_CACHE?.get(VOCABULARY_BACKFILL_STATE_KEY, 'json'),
+    env.VOCAB_CACHE?.get(SYSTEM_VOCABULARY_MANIFEST_KEY, 'json'),
+  ]);
+  return json({
+    data: {
+      ...(state || { status: 'not_started', cursor: 0, generated: 0 }),
+      totalWords: manifest?.count || 3000,
+      schedule: 'every 15 minutes (UTC)',
+      generatedPerRun: BACKFILL_GENERATE_LIMIT,
+    },
+  }, 200, origin, { 'Cache-Control': 'no-store' });
+}
+
 function meaningCacheKey(env, item) {
   return `meaning:v${MEANING_PROMPT_VERSION}:${getFreeModel(env) || 'default'}:${item.word}:${item.pos || '-'}`;
 }
@@ -613,6 +746,9 @@ export default {
       if (url.pathname === '/api/vocabulary/batch' && request.method === 'POST') {
         return await getVocabularyBatch(request, env, origin);
       }
+      if (url.pathname === '/api/vocabulary/backfill/status' && request.method === 'GET') {
+        return await getVocabularyBackfillStatus(env, origin);
+      }
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);
       }
@@ -641,5 +777,8 @@ export default {
       const [message, status, code, retryable] = publicError(error);
       return json({ error: message, code, retryable }, status, origin);
     }
+  },
+  async scheduled(controller, env, context) {
+    context.waitUntil(runScheduledVocabularyBackfill(env, context, controller.scheduledTime));
   },
 };

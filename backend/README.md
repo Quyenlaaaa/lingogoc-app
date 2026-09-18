@@ -1,5 +1,9 @@
 # LingoGoc AI backend (Cloudflare Worker)
 
+## Automatic vocabulary backfill
+
+The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only the free model and can never spend the paid-model wallet; quota failures pause the queue for six hours, then retry the same word automatically. Interactive requests retain the configured paid fallback. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
+
 Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định dùng chung API tương thích OpenAI của xkiro: ưu tiên model miễn phí `mistralai/mistral-large-2512`, sau đó tự chuyển sang model trả phí `x-ai/grok-build-0.1` khi model miễn phí báo hết quota hoặc rate limit kéo dài.
 
 Sau lỗi quota rõ ràng, Worker tạm ngừng thăm dò model miễn phí trong 5 phút để hàng đợi nền không lặp lại một request chắc chắn thất bại trước mỗi request trả phí. Hết thời gian này, Worker tự thử model miễn phí trước trở lại.
