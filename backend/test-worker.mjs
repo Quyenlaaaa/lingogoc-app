@@ -78,8 +78,10 @@ assert.equal(healthPayload.model, 'mistralai/mistral-large-2512');
 assert.equal(healthPayload.freeModel, 'mistralai/mistral-large-2512');
 assert.equal(healthPayload.paidFallbackModel, 'x-ai/grok-build-0.1');
 assert.equal(healthPayload.paidFallbackConfigured, true);
+assert.equal(healthPayload.groqConfigured, false);
+assert.equal(healthPayload.workersAiConfigured, false);
 assert.equal(healthPayload.openRouterConfigured, false);
-assert.equal(healthPayload.freeProviderStrategy, 'xkiro-only');
+assert.equal(healthPayload.freeProviderStrategy, 'single-provider');
 assert.equal(healthPayload.serverStorageConfigured, true);
 
 serverCache.set('system-vocabulary:v1', JSON.stringify({
@@ -187,7 +189,7 @@ assert.equal(kvPayload.data.persistedOnServer, true);
 assert.equal(providerCallCount, 3);
 
 const parallelProviderUrls = [];
-customProviderResponse = async ({ url, body }) => {
+customProviderResponse = async ({ url }) => {
   parallelProviderUrls.push(url);
   if (url.startsWith(env.AI_BASE_URL)) {
     await new Promise((resolve) => setTimeout(resolve, 30));
@@ -217,6 +219,52 @@ assert.equal(parallelResponse.status, 200);
 assert.equal(parallelPayload.generatedByModel, 'deepseek/deepseek-v4-flash-0731:free');
 assert.ok(parallelProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
 assert.ok(parallelProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+customProviderResponse = null;
+
+const allProviderUrls = [];
+let workersAiCalls = 0;
+customProviderResponse = async ({ url, body }) => {
+  allProviderUrls.push(url);
+  if (!url.startsWith('https://api.groq.com/openai/v1')) {
+    await new Promise((resolve) => setTimeout(resolve, 30));
+  }
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify({
+      replyEn: 'All providers are ready.',
+      replyVi: 'Tất cả nhà cung cấp đã sẵn sàng.',
+      correction: '',
+      encouragement: 'Great!',
+      hints: [],
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const allProviderResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ scenario: 'Daily conversation', messages: [{ role: 'user', content: 'Hello again' }] }),
+}), {
+  ...env,
+  GROQ_API_KEY: 'groq-test-key',
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  GROQ_FREE_MODEL: 'qwen/qwen3.8-27b',
+  OPENROUTER_API_KEY: 'openrouter-test-key',
+  OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
+  AI: {
+    run: async () => {
+      workersAiCalls += 1;
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      return { response: JSON.stringify({ replyEn: 'Cloudflare ready.', replyVi: 'Cloudflare sẵn sàng.' }) };
+    },
+  },
+}, context);
+const allProviderPayload = await allProviderResponse.json();
+assert.equal(allProviderResponse.status, 200);
+assert.equal(allProviderPayload.generatedByModel, 'qwen/qwen3.8-27b');
+assert.ok(allProviderUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
+assert.ok(allProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
+assert.ok(allProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+assert.equal(workersAiCalls, 1);
 customProviderResponse = null;
 
 const fallbackModels = [];

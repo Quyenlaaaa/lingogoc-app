@@ -6,7 +6,13 @@ The Worker Cron Trigger runs every 15 minutes and enriches at most two missing w
 
 ## Parallel free AI providers
 
-When `OPENROUTER_API_KEY` is configured, each AI request races xKiro's `mistralai/mistral-large-2512` against OpenRouter's exact free endpoint `deepseek/deepseek-v4-flash-0731:free`. The first successful response wins and the slower request is aborted. The paid xKiro model is considered only after all configured free providers fail with a quota/rate-limit condition. Configure the production key with `npx wrangler secret put OPENROUTER_API_KEY --config backend/wrangler.toml`.
+Interactive AI requests race all configured free providers: Groq `qwen/qwen3.8-27b`, Cloudflare Workers AI `@cf/google/gemma-4-26b-a4b-it`, xKiro `mistralai/mistral-large-2512`, and OpenRouter `deepseek/deepseek-v4-flash-0731:free`. The first valid response wins. Background vocabulary backfill calls them sequentially in that order to avoid spending several provider requests for one word. The paid xKiro model is considered only for interactive requests after the free providers report a quota/rate-limit condition.
+
+Cloudflare Workers AI is attached through the `AI` binding and needs no API secret. The application limits it to 100 requests per UTC day through `WORKERS_AI_DAILY_REQUEST_LIMIT`. Groq remains disabled until its secret is installed:
+
+```powershell
+npx wrangler secret put GROQ_API_KEY --config backend/wrangler.toml
+```
 
 Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định dùng chung API tương thích OpenAI của xkiro: ưu tiên model miễn phí `mistralai/mistral-large-2512`, sau đó tự chuyển sang model trả phí `x-ai/grok-build-0.1` khi model miễn phí báo hết quota hoặc rate limit kéo dài.
 

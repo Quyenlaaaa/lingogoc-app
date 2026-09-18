@@ -7,8 +7,11 @@ const SYSTEM_VOCABULARY_MANIFEST_KEY = 'system-vocabulary:manifest:v1';
 const VOCABULARY_BACKFILL_STATE_KEY = 'system-vocabulary:backfill:v1';
 const BACKFILL_SCAN_LIMIT = 96;
 const BACKFILL_GENERATE_LIMIT = 2;
+const DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT = 100;
 let freeModelCooldownUntil = 0;
 let openRouterCooldownUntil = 0;
+let groqCooldownUntil = 0;
+let workersAiCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
@@ -131,6 +134,7 @@ async function callProviderModel({
   messages,
   temperature,
   extraHeaders = {},
+  extraBody = {},
   signal,
   provider,
 }) {
@@ -147,7 +151,7 @@ async function callProviderModel({
           ...extraHeaders,
         },
         signal,
-        body: JSON.stringify({ model, temperature, messages }),
+        body: JSON.stringify({ model, temperature, messages, ...extraBody }),
       });
       if (response.ok) {
         const rawPayload = await response.text();
@@ -155,7 +159,7 @@ async function callProviderModel({
           try {
             const payload = JSON.parse(rawPayload);
             const content = payload?.choices?.[0]?.message?.content || '';
-            if (content) return { content, model, provider };
+            if (content) return { content, model: payload?.model || model, provider };
           } catch {
             // Retry malformed provider JSON below.
           }
@@ -182,32 +186,92 @@ async function callProviderModel({
   throw lastError;
 }
 
+async function claimWorkersAiDailyBudget(env) {
+  if (!env.VOCAB_CACHE) return;
+  const limit = Math.max(1, Math.min(500, Number(env.WORKERS_AI_DAILY_REQUEST_LIMIT) || DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT));
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `usage:workers-ai:${day}`;
+  const usage = await env.VOCAB_CACHE.get(key, 'json');
+  const count = Number(usage?.count) || 0;
+  if (count >= limit) {
+    throw Object.assign(new Error('WORKERS_AI_DAILY_LIMIT'), {
+      provider: 'CLOUDFLARE_FREE',
+      status: 429,
+      quota: true,
+    });
+  }
+  await env.VOCAB_CACHE.put(key, JSON.stringify({ count: count + 1, day }), { expirationTtl: 172800 });
+}
+
+async function callWorkersAiModel(env, messages, temperature) {
+  const provider = 'CLOUDFLARE_FREE';
+  const model = cleanText(env.WORKERS_AI_MODEL || '@cf/google/gemma-4-26b-a4b-it', 160);
+  await claimWorkersAiDailyBudget(env);
+  try {
+    const payload = await env.AI.run(model, {
+      messages,
+      temperature,
+      max_completion_tokens: 1800,
+      response_format: { type: 'json_object' },
+    });
+    const content = payload?.response || payload?.choices?.[0]?.message?.content || '';
+    if (!content) throw new Error('CLOUDFLARE_FREE_INVALID_RESPONSE');
+    return { content, model: payload?.model || model, provider };
+  } catch (error) {
+    if (error?.provider) throw error;
+    const detail = cleanText(error?.message || error, 300);
+    const quota = /quota|limit|capacity|busy|neurons|rate/i.test(detail);
+    throw Object.assign(new Error(`AI_PROVIDER_CLOUDFLARE${detail ? `: ${detail}` : ''}`), {
+      provider,
+      status: quota ? 429 : 502,
+      quota,
+    });
+  }
+}
+
 async function callChatModel(env, messages, temperature = 0.45) {
   const xkiroApiKey = env.XTROUTER_API_KEY || env.AI_API_KEY;
   const freeModel = getFreeModel(env);
   const paidModel = getPaidModel(env);
   const xkiroBaseUrl = String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, '');
+  const groqApiKey = cleanText(env.GROQ_API_KEY, 500);
+  const groqModel = cleanText(env.GROQ_FREE_MODEL || 'qwen/qwen3.8-27b', 160);
+  const groqBaseUrl = String(env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/+$/, '');
   const openRouterApiKey = cleanText(env.OPENROUTER_API_KEY, 500);
   const openRouterModel = cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160);
   const openRouterBaseUrl = String(env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/+$/, '');
   const now = Date.now();
-  const controllers = [];
-  const freeCalls = [];
-  const addFreeCall = (options) => {
-    const controller = new AbortController();
-    controllers.push(controller);
-    freeCalls.push(callProviderModel({ ...options, messages, temperature, signal: controller.signal }));
-  };
+  const providers = [];
+  const addHttpProvider = (options) => providers.push({
+    provider: options.provider,
+    invoke: (signal) => callProviderModel({ ...options, messages, temperature, signal }),
+  });
 
+  if (groqApiKey && groqModel && now >= groqCooldownUntil) {
+    addHttpProvider({
+      apiKey: groqApiKey,
+      baseUrl: groqBaseUrl,
+      model: groqModel,
+      provider: 'GROQ_FREE',
+      extraBody: { response_format: { type: 'json_object' } },
+    });
+  }
+  if (env.AI?.run && now >= workersAiCooldownUntil) {
+    providers.push({
+      provider: 'CLOUDFLARE_FREE',
+      invoke: () => callWorkersAiModel(env, messages, temperature),
+    });
+  }
   if (xkiroApiKey && freeModel && freeModel !== 'set-your-model-id' && now >= freeModelCooldownUntil) {
-    addFreeCall({ apiKey: xkiroApiKey, baseUrl: xkiroBaseUrl, model: freeModel, provider: 'XKIRO_FREE' });
+    addHttpProvider({ apiKey: xkiroApiKey, baseUrl: xkiroBaseUrl, model: freeModel, provider: 'XKIRO_FREE' });
   }
   if (openRouterApiKey && openRouterModel && now >= openRouterCooldownUntil) {
-    addFreeCall({
+    addHttpProvider({
       apiKey: openRouterApiKey,
       baseUrl: openRouterBaseUrl,
       model: openRouterModel,
       provider: 'OPENROUTER_FREE',
+      extraBody: { response_format: { type: 'json_object' } },
       extraHeaders: {
         ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
         ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
@@ -215,23 +279,39 @@ async function callChatModel(env, messages, temperature = 0.45) {
     });
   }
 
+  const markProviderCooldown = (providerError) => {
+    if (!providerError?.quota) return;
+    if (providerError.provider === 'GROQ_FREE') groqCooldownUntil = now + 5 * 60 * 1000;
+    if (providerError.provider === 'CLOUDFLARE_FREE') workersAiCooldownUntil = now + 5 * 60 * 1000;
+    if (providerError.provider === 'XKIRO_FREE') freeModelCooldownUntil = now + 5 * 60 * 1000;
+    if (providerError.provider === 'OPENROUTER_FREE') openRouterCooldownUntil = now + 5 * 60 * 1000;
+  };
   let freeErrors = [];
-  if (freeCalls.length) {
+  if (env.AI_ROUTING_MODE === 'background') {
+    for (const provider of providers) {
+      try {
+        return await provider.invoke();
+      } catch (error) {
+        freeErrors.push(error);
+        markProviderCooldown(error);
+      }
+    }
+  } else if (providers.length) {
+    const controllers = providers.map(() => new AbortController());
     try {
-      return await Promise.any(freeCalls);
+      return await Promise.any(providers.map((provider, index) => provider.invoke(controllers[index].signal)));
     } catch (error) {
       freeErrors = error?.errors || [error];
-      freeErrors.forEach((providerError) => {
-        if (!providerError?.quota) return;
-        if (providerError.provider === 'XKIRO_FREE') freeModelCooldownUntil = now + 5 * 60 * 1000;
-        if (providerError.provider === 'OPENROUTER_FREE') openRouterCooldownUntil = now + 5 * 60 * 1000;
-      });
+      freeErrors.forEach(markProviderCooldown);
     } finally {
       controllers.forEach((controller) => controller.abort());
     }
   }
 
-  const freeProvidersCoolingDown = now < freeModelCooldownUntil || now < openRouterCooldownUntil;
+  const freeProvidersCoolingDown = now < groqCooldownUntil
+    || now < workersAiCooldownUntil
+    || now < freeModelCooldownUntil
+    || now < openRouterCooldownUntil;
   const canUsePaidFallback = xkiroApiKey && paidModel
     && (freeProvidersCoolingDown || freeErrors.some((error) => error?.quota));
   if (canUsePaidFallback) {
@@ -244,7 +324,7 @@ async function callChatModel(env, messages, temperature = 0.45) {
       provider: 'XKIRO_PAID',
     });
   }
-  if (!freeCalls.length) throw new Error('AI_NOT_CONFIGURED');
+  if (!providers.length) throw new Error('AI_NOT_CONFIGURED');
   throw freeErrors[0] || new Error('AI_PROVIDER_UNKNOWN');
 }
 
@@ -537,7 +617,11 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
         // Scheduled bulk work is deliberately free-tier only. Interactive
         // requests still retain the configured paid fallback, but an unattended
         // cron must never create unbounded wallet charges.
-        await enrichVocabulary(request, { ...env, AI_PAID_MODEL: '' }, '', context);
+        await enrichVocabulary(request, {
+          ...env,
+          AI_PAID_MODEL: '',
+          AI_ROUTING_MODE: 'background',
+        }, '', context);
         generated += 1;
         state.generated += 1;
         state.generatedInCurrentPass += 1;
@@ -771,16 +855,27 @@ export default {
     if (url.pathname === '/health' && request.method === 'GET') {
       const freeModel = getFreeModel(env);
       const paidModel = getPaidModel(env);
+      const groqConfigured = Boolean(env.GROQ_API_KEY);
+      const workersAiConfigured = Boolean(env.AI?.run);
+      const xkiroConfigured = Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && freeModel);
+      const openRouterConfigured = Boolean(env.OPENROUTER_API_KEY);
+      const configuredFreeProviders = [groqConfigured, workersAiConfigured, xkiroConfigured, openRouterConfigured]
+        .filter(Boolean).length;
       return json({
         ok: true,
-        aiConfigured: Boolean((env.XTROUTER_API_KEY || env.AI_API_KEY) && freeModel),
+        aiConfigured: configuredFreeProviders > 0,
         model: freeModel,
         freeModel,
         paidFallbackModel: paidModel,
         paidFallbackConfigured: Boolean(paidModel),
+        groqModel: cleanText(env.GROQ_FREE_MODEL || 'qwen/qwen3.8-27b', 160),
+        groqConfigured,
+        workersAiModel: cleanText(env.WORKERS_AI_MODEL || '@cf/google/gemma-4-26b-a4b-it', 160),
+        workersAiConfigured,
+        workersAiDailyRequestLimit: Math.max(1, Math.min(500, Number(env.WORKERS_AI_DAILY_REQUEST_LIMIT) || DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT)),
         openRouterModel: cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160),
-        openRouterConfigured: Boolean(env.OPENROUTER_API_KEY),
-        freeProviderStrategy: env.OPENROUTER_API_KEY ? 'parallel-race' : 'xkiro-only',
+        openRouterConfigured,
+        freeProviderStrategy: configuredFreeProviders > 1 ? 'parallel-race' : 'single-provider',
         serverStorageConfigured: Boolean(env.VOCAB_CACHE),
       }, 200, origin);
     }
