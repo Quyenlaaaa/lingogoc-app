@@ -21,12 +21,7 @@ import PwaInstallPrompt from './components/PwaInstallPrompt';
 import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
-import { loadSystemVocabulary } from './utils/systemVocabularyService';
-import {
-  getVocabularyEnrichmentQueueStatus,
-  startVocabularyEnrichmentQueue,
-  subscribeVocabularyEnrichmentQueue,
-} from './utils/vocabularyEnrichmentQueue';
+import { loadBundledSystemVocabulary, refreshSystemVocabulary } from './utils/systemVocabularyService';
 
 export default function App() {
   const [userData, setUserData] = useState(() => loadUserData());
@@ -35,7 +30,6 @@ export default function App() {
   const [theme, setTheme] = useState('dark');
   const [dueSrsCount, setDueSrsCount] = useState(0);
   const [vocabulary, setVocabulary] = useState([]);
-  const [enrichmentQueueStatus, setEnrichmentQueueStatus] = useState(getVocabularyEnrichmentQueueStatus);
 
   // Modals
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
@@ -50,8 +44,12 @@ export default function App() {
     }
 
     let active = true;
-    loadSystemVocabulary().then((words) => {
-      if (active) setVocabulary(words);
+    loadBundledSystemVocabulary().then((words) => {
+      if (!active) return;
+      setVocabulary(words);
+      refreshSystemVocabulary(words).then((updatedWords) => {
+        if (active && updatedWords) setVocabulary(updatedWords);
+      });
     });
     return () => { active = false; };
   }, []);
@@ -60,10 +58,7 @@ export default function App() {
     if (!vocabulary.length) return;
     const stats = getSrsStats(vocabulary);
     setDueSrsCount(stats.dueCount || 0);
-    startVocabularyEnrichmentQueue(vocabulary);
   }, [vocabulary]);
-
-  useEffect(() => subscribeVocabularyEnrichmentQueue(setEnrichmentQueueStatus), []);
 
   // Update theme class on body
   useEffect(() => {
@@ -177,10 +172,9 @@ export default function App() {
           {activeTab === 'vocab' && (
             <VocabView 
               userData={userData} 
-              onUpdateUserData={handleUpdateUserData} 
+              onUpdateUserData={handleUpdateUserData}
               voiceSpeed={voiceSpeed}
               vocabulary={vocabulary}
-              enrichmentQueueStatus={enrichmentQueueStatus}
             />
           )}
 

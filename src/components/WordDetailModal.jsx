@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import { fetchRealWordData } from '../utils/realDictionaryService';
 import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
-import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
+import { getCachedWordEnrichment } from '../utils/geminiService';
+import { fetchVocabularyBatch } from '../utils/vocabularyBatchService';
 import { speakText } from '../utils/speechHelper';
 import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
 
@@ -35,9 +36,10 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
 
     const loadDetails = async () => {
       try {
-        const [dictionaryResult, cambridgeResult] = await Promise.allSettled([
+        const [dictionaryResult, cambridgeResult, batchResult] = await Promise.allSettled([
           fetchRealWordData(word.word),
           fetchCambridgeWordData(word.word),
+          fetchVocabularyBatch([word]),
         ]);
         const dictData = dictionaryResult.status === 'fulfilled' ? dictionaryResult.value : null;
         const officialData = cambridgeResult.status === 'fulfilled' ? cambridgeResult.value : null;
@@ -45,21 +47,16 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
         setRealDictData(dictData);
         setCambridgeData(officialData);
         if (cambridgeResult.status === 'rejected') setCambridgeError(cambridgeResult.reason?.message || 'Không thể tải Cambridge API.');
-
-        if (!hasCompleteWordEnrichment(readyAiData)) {
-          const aiData = await enrichWordWithLLM(
-            word.word,
-            word.meaning,
-            word.topic,
-            [
-              ...(officialData?.definitions || []).map((text) => ({ partOfSpeech: '', text, source: 'Cambridge' })),
-              ...(dictData?.definitions || []),
-            ],
-            undefined,
-            { retryUntilSuccess: true, keepAlive: true },
-          );
-          if (!isMounted) return;
-          setAiEnrichData(aiData);
+        const batchData = batchResult.status === 'fulfilled'
+          ? batchResult.value?.[word.word.toLowerCase()]
+          : null;
+        if (batchData?.enrichment) setAiEnrichData(batchData.enrichment);
+        else if (!readyAiData && batchData?.pending) {
+          setAiEnrichData({
+            isAiGenerated: false,
+            contextExamples: [],
+            unavailableReason: 'SYSTEM_ENRICHMENT_PENDING',
+          });
         }
       } catch (error) {
         if (error?.name !== 'AbortError' && isMounted) {

@@ -21,10 +21,11 @@ import {
 import confetti from 'canvas-confetti';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
-import { enrichWordWithLLM, getCachedWordEnrichment, hasCompleteWordEnrichment } from '../utils/geminiService';
+import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
 import { hasBackendApi } from '../utils/backendApi';
 import { fetchRealWordData, getCachedNativeAudioUrl } from '../utils/realDictionaryService';
-import { fetchVietnameseMeanings, getCachedVietnameseMeaning, getMeaningCacheKey } from '../utils/vocabularyMeaningService';
+import { getCachedVietnameseMeaning, getMeaningCacheKey } from '../utils/vocabularyMeaningService';
+import { fetchVocabularyBatch, toMeaningResultMap } from '../utils/vocabularyBatchService';
 import {
   buildClozePrompt,
   buildQuizOptions,
@@ -54,7 +55,7 @@ function mergeMeaningResults(current, incoming) {
   return changed ? next : current;
 }
 
-export default function VocabView({ userData, onUpdateUserData, voiceSpeed, vocabulary = [], enrichmentQueueStatus }) {
+export default function VocabView({ userData, onUpdateUserData, voiceSpeed, vocabulary = [] }) {
   const vocabList = vocabulary;
   const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
   const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
@@ -79,7 +80,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const [translatedMeanings, setTranslatedMeanings] = useState({});
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const requestedDictionaryWords = useRef(new Set());
-  const requestedAiWords = useRef(new Set());
   const viewMountedRef = useRef(true);
   const listDictionaryDataRef = useRef({});
   const itemsPerPage = 24;
@@ -150,15 +150,8 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
   useEffect(() => {
     viewMountedRef.current = true;
-    const handleBackgroundEnrichment = (event) => {
-      const word = String(event.detail?.word || '').toLowerCase();
-      if (!word || !event.detail?.data) return;
-      setListAiData((current) => ({ ...current, [word]: event.detail.data }));
-    };
-    window.addEventListener('lingogoc:vocabulary-enriched', handleBackgroundEnrichment);
     return () => {
       viewMountedRef.current = false;
-      window.removeEventListener('lingogoc:vocabulary-enriched', handleBackgroundEnrichment);
     };
   }, []);
 
@@ -203,51 +196,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     return () => { cancelled = true; };
   }, [studyMode, visibleListWords]);
 
-  // Generate bilingual examples through the private backend. Concurrency is kept
-  // deliberately low and successful results are cached by geminiService.
-  useEffect(() => {
-    if (studyMode !== 'list' || !hasBackendApi()) return undefined;
-
-    const queue = visibleListWords.filter((item) => {
-      const key = item.word.toLowerCase();
-      const cached = getCachedWordEnrichment(item.word);
-      // Entries created before Workers KV existed still need one server sync.
-      // enrichWordWithLLM keeps the local examples visible while performing it.
-      return !requestedAiWords.current.has(key)
-        && (!cached || !cached.persistedOnServer || !hasCompleteWordEnrichment(cached));
-    });
-    if (!queue.length) return undefined;
-    queue.forEach((item) => requestedAiWords.current.add(item.word.toLowerCase()));
-
-    let isViewActive = true;
-    let cursor = 0;
-    const loadNext = async () => {
-      while (cursor < queue.length) {
-        const item = queue[cursor];
-        cursor += 1;
-        const dictionaryData = listDictionaryDataRef.current[item.word.toLowerCase()];
-        const result = await enrichWordWithLLM(
-          item.word,
-          item.meaning,
-          item.topic,
-          dictionaryData?.definitions || [],
-          undefined,
-          { keepAlive: true, maxAttempts: 2 },
-        ).catch(() => null);
-        if (isViewActive && result) {
-          setListAiData((current) => ({ ...current, [item.word.toLowerCase()]: result }));
-        }
-      }
-    };
-
-    // Free AI tiers are sensitive to bursts; one request at a time is more
-    // reliable and successful words are then served from the persistent cache.
-    Promise.allSettled(Array.from({ length: Math.min(1, queue.length) }, () => loadNext()));
-    return () => {
-      isViewActive = false;
-    };
-  }, [studyMode, visibleListWords]);
-
   // Reset pagination / card index when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -265,23 +213,40 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     return [];
   }, [currentCard, quizQuestion, studyMode, visibleListWords]);
 
-  // Translate the current screen in one request. Cached KV/local results are
-  // returned first, while at most one AI call fills every missing meaning.
+  // Read only the current screen from server KV in one request. Missing records
+  // remain pending for the server-side maintenance pipeline; browsing never
+  // launches an unbounded AI job.
   useEffect(() => {
     if (!meaningCandidates.length) return undefined;
 
     const controller = new AbortController();
-    fetchVietnameseMeanings(meaningCandidates, controller.signal)
+    fetchVocabularyBatch(meaningCandidates, controller.signal)
       .then((results) => {
-        if (viewMountedRef.current && Object.keys(results).length) {
-          setTranslatedMeanings((current) => mergeMeaningResults(current, results));
+        if (!viewMountedRef.current) return;
+        const meanings = toMeaningResultMap(meaningCandidates, results);
+        if (Object.keys(meanings).length) {
+          setTranslatedMeanings((current) => mergeMeaningResults(current, meanings));
+        }
+        if (studyMode === 'list') {
+          setListAiData((current) => {
+            const next = { ...current };
+            meaningCandidates.forEach((item) => {
+              const result = results[item.word.toLowerCase()];
+              if (result?.enrichment) next[item.word.toLowerCase()] = result.enrichment;
+              else if (result?.pending) next[item.word.toLowerCase()] = { unavailableReason: 'SYSTEM_ENRICHMENT_PENDING' };
+            });
+            return next;
+          });
+        } else if (studyMode === 'flashcard' && currentCard) {
+          const result = results[currentCard.word.toLowerCase()];
+          if (result?.enrichment) setFlashcardAiData(result.enrichment);
         }
       })
       .catch((error) => {
-        if (error?.name !== 'AbortError') console.warn('Could not translate vocabulary meanings:', error);
+        if (error?.name !== 'AbortError') console.warn('Could not read vocabulary batch:', error);
       });
     return () => controller.abort();
-  }, [meaningCandidates]);
+  }, [currentCard, meaningCandidates, studyMode]);
 
   useEffect(() => {
     if (studyMode !== 'flashcard' || !currentCard) return undefined;
@@ -293,14 +258,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
       const dictionaryResult = await fetchRealWordData(currentCard.word).catch(() => null);
       if (cancelled) return;
       setFlashcardDictionaryData(dictionaryResult);
-
-      const aiResult = await enrichWordWithLLM(
-        currentCard.word,
-        currentCard.meaning,
-        currentCard.topic,
-        dictionaryResult?.definitions || [],
-      ).catch(() => null);
-      if (!cancelled && aiResult) setFlashcardAiData(aiResult);
       if (!cancelled) setIsLoadingFlashcardExamples(false);
     };
     loadExamples();
@@ -571,17 +528,6 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
             </button>
           </div>
         </div>
-        {hasBackendApi() && enrichmentQueueStatus?.total > 0 && (
-          <div className={`vocab-enrichment-queue ${enrichmentQueueStatus.running ? 'is-running' : 'is-complete'}`}>
-            <Sparkles size={16} />
-            <span>
-              {enrichmentQueueStatus.running
-                ? `AI đang bổ sung nền: ${enrichmentQueueStatus.completed}/${enrichmentQueueStatus.total} từ${enrichmentQueueStatus.currentWord ? ` · ${enrichmentQueueStatus.currentWord}` : ''}`
-                : `Đã có đủ ví dụ đa ngữ cảnh: ${enrichmentQueueStatus.completed}/${enrichmentQueueStatus.total} từ`}
-            </span>
-          </div>
-        )}
-
         {/* Search & Filter Controls */}
         <div className="search-filter-grid">
           {/* Search Box */}
@@ -897,7 +843,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                             </>
                           ) : (
                             <div className="item-example-loading">
-                            {aiState?.unavailableReason
+                            {aiState?.unavailableReason === 'SYSTEM_ENRICHMENT_PENDING'
+                              ? 'Ví dụ đa ngữ cảnh đang được hệ thống chuẩn bị.'
+                              : aiState?.unavailableReason
                               ? 'AI đang bận, chưa thể tạo ví dụ.'
                               : dictionaryStateExists && (aiStateExists || !hasBackendApi())
                               ? 'Chưa có ví dụ đã kiểm chứng.'

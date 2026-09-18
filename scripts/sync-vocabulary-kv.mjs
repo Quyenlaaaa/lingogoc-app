@@ -23,6 +23,13 @@ const catalog = {
   enrichmentPromptVersion: 2,
   words,
 };
+const manifest = {
+  schemaVersion: catalog.schemaVersion,
+  contentHash,
+  updatedAt: catalog.updatedAt,
+  count: catalog.count,
+  enrichmentPromptVersion: catalog.enrichmentPromptVersion,
+};
 
 if (process.argv.includes('--dry-run')) {
   console.log(`System vocabulary is valid: ${words.length} words, SHA-256 ${contentHash}`);
@@ -32,11 +39,18 @@ if (process.argv.includes('--dry-run')) {
 const tempDirectory = await mkdtemp(path.join(tmpdir(), 'lingogoc-vocabulary-'));
 const bulkFile = path.join(tempDirectory, 'catalog.json');
 try {
-  await writeFile(bulkFile, JSON.stringify([{
-    key: 'system-vocabulary:v1',
-    value: JSON.stringify(catalog),
-    metadata: { schemaVersion: 1, count: words.length, contentHash },
-  }]), 'utf8');
+  await writeFile(bulkFile, JSON.stringify([
+    {
+      key: 'system-vocabulary:v1',
+      value: JSON.stringify(catalog),
+      metadata: { schemaVersion: 1, count: words.length, contentHash },
+    },
+    {
+      key: 'system-vocabulary:manifest:v1',
+      value: JSON.stringify(manifest),
+      metadata: { schemaVersion: 1, count: words.length, contentHash },
+    },
+  ]), 'utf8');
 
   const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
   const mode = process.argv.includes('--local') ? '--local' : '--remote';

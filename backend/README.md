@@ -8,6 +8,8 @@ Ví dụ đã sinh được lưu bền vững trong Cloudflare Workers KV qua bi
 
 Kho 3.000 từ nền (từ, IPA, nghĩa và ví dụ song ngữ) cũng được lưu trong KV tại khóa `system-vocabulary:v1`. Frontend đọc khóa này qua `GET /api/vocabulary/catalog`; dữ liệu đóng gói chỉ được dùng khi backend tạm thời không khả dụng.
 
+Frontend hiển thị snapshot đóng gói trước, sau đó gọi `GET /api/vocabulary/manifest` để so hash trong nền. `POST /api/vocabulary/batch` chỉ đọc tối đa 24 bản ghi nghĩa/ví dụ từ KV và không gọi model. Việc bổ sung toàn kho được thực hiện bởi pipeline quản trị `npm run backfill:vocab`, có checkpoint và giới hạn mặc định 100 từ mỗi lượt.
+
 Nếu provider phản hồi chậm, lỗi tạm thời hoặc trả JSON chưa đủ ví dụ, Worker sẽ tự gọi lại. Ở frontend, thao tác “Thử lại AI” tiếp tục retry với backoff cho đến khi nhận được kết quả hợp lệ. Việc chuyển tab hoặc đóng modal trong ứng dụng không hủy request; kết quả hoàn tất trong nền vẫn được lưu để hiển thị khi người dùng quay lại.
 
 ## Chạy thử tại máy

@@ -124,7 +124,9 @@ node backend/test-worker.mjs  # kiểm tra hợp đồng API của Worker
 | Phương thức | Endpoint | Chức năng |
 | --- | --- | --- |
 | `GET` | `/health` | Kiểm tra trạng thái backend và cấu hình AI/KV |
+| `GET` | `/api/vocabulary/manifest` | Kiểm tra nhanh phiên bản/hash catalog mà không tải 3.000 từ |
 | `GET` | `/api/vocabulary/catalog` | Đọc kho 3.000 từ hệ thống đã đồng bộ trên Workers KV |
+| `POST` | `/api/vocabulary/batch` | Đọc nghĩa và ví dụ đã có trong KV cho tối đa 24 từ, không gọi AI |
 | `POST` | `/api/vocabulary/enrich` | Sinh và lưu bộ dữ liệu từ vựng với 5 ngữ cảnh khác nhau |
 | `POST` | `/api/vocabulary/meanings` | Chuẩn hóa nhanh nghĩa tiếng Việt theo lô, tối đa 30 từ |
 | `GET` | `/api/vocabulary/pronunciation?word=hello` | Audio phát âm tương thích ngược cho từ đơn |
@@ -140,7 +142,8 @@ Chi tiết request/response nằm trong [BACKEND_API.md](./BACKEND_API.md) và [
 - Worker tự thử lại khi nhà cung cấp trả lỗi tạm thời, giới hạn lượt gọi hoặc dữ liệu chưa hợp lệ.
 - Kết quả hợp lệ được lưu trong Workers KV và cache ở trình duyệt.
 - Việc đóng modal hoặc chuyển màn hình không hủy yêu cầu đang chạy; khi hoàn tất, dữ liệu vẫn được lưu để sử dụng lại.
-- Hàng đợi nền quét toàn bộ kho từ, bỏ qua mục đã đủ 5 ngữ cảnh và tự quay lại các mục lỗi tạm thời để không bỏ sót từ.
+- Trình duyệt chỉ đọc dữ liệu của màn hình hiện tại theo lô; không chạy hàng đợi AI 3.000 từ trên thiết bị người học.
+- Pipeline quản trị `npm run backfill:vocab` quét KV trước, chỉ gọi AI cho từ còn thiếu và lưu checkpoint để tiếp tục vào ngày sau.
 
 ## Kho từ vựng hệ thống
 
@@ -153,6 +156,15 @@ npm run sync:vocab-db
 ```
 
 Script chỉ thực hiện đồng bộ khi kho sau kiểm tra có đúng 3.000 từ hợp lệ và duy nhất.
+
+Kiểm tra chất lượng bản phát hành và bổ sung tối đa 100 từ còn thiếu mỗi lượt:
+
+```bash
+npm run audit:vocab
+npm run backfill:vocab
+```
+
+Checkpoint nằm trong `scripts/data_cache` (không commit). Chỉ dùng `npm run sync:vocab-db` để phát hành catalog; người dùng không tham gia quá trình tạo dữ liệu AI.
 
 ## Quyền riêng tư và bảo mật
 

@@ -29,7 +29,7 @@ export function getCachedVietnameseMeaning(item) {
   }
 }
 
-function cacheMeaning(item, result) {
+export function cacheVietnameseMeaning(item, result) {
   const normalized = {
     word: String(item.word || '').trim().toLowerCase(),
     meaningVi: String(result?.meaningVi || '').replace(/\s+/g, ' ').trim().slice(0, 240),
@@ -82,7 +82,7 @@ export async function fetchVietnameseMeanings(items, signal) {
   translated.forEach((result) => {
     const item = missing.find((candidate) => candidate.word.toLowerCase() === String(result?.word || '').toLowerCase());
     if (!item) return;
-    const cached = cacheMeaning(item, result);
+    const cached = cacheVietnameseMeaning(item, result);
     if (cached) results[getMeaningCacheKey(item)] = cached;
   });
   return results;

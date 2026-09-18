@@ -3,6 +3,7 @@ const MAX_BODY_BYTES = 20_000;
 const VOCABULARY_PROMPT_VERSION = 2;
 const MEANING_PROMPT_VERSION = 1;
 const SYSTEM_VOCABULARY_KEY = 'system-vocabulary:v1';
+const SYSTEM_VOCABULARY_MANIFEST_KEY = 'system-vocabulary:manifest:v1';
 let freeModelCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
@@ -334,6 +335,83 @@ async function getSystemVocabulary(env, origin) {
   });
 }
 
+async function getSystemVocabularyManifest(env, origin) {
+  if (!env.VOCAB_CACHE) {
+    return json({ error: 'Kho dữ liệu server chưa được cấu hình.' }, 503, origin);
+  }
+  let manifest = await env.VOCAB_CACHE.get(SYSTEM_VOCABULARY_MANIFEST_KEY, 'json');
+  if (!manifest) {
+    const catalog = await env.VOCAB_CACHE.get(SYSTEM_VOCABULARY_KEY, 'json');
+    if (catalog) {
+      manifest = {
+        schemaVersion: catalog.schemaVersion,
+        contentHash: catalog.contentHash,
+        updatedAt: catalog.updatedAt,
+        count: catalog.count,
+        enrichmentPromptVersion: catalog.enrichmentPromptVersion,
+      };
+    }
+  }
+  if (!manifest || manifest.count !== 3000 || !manifest.contentHash) {
+    return json({ error: 'Manifest kho từ hệ thống chưa sẵn sàng.' }, 503, origin);
+  }
+  return json({ data: manifest }, 200, origin, {
+    'Cache-Control': 'public, max-age=300, stale-while-revalidate=86400',
+    ETag: `"${cleanText(manifest.contentHash, 128)}"`,
+    'X-LingoGoc-Source': 'KV',
+  });
+}
+
+async function getVocabularyBatch(request, env, origin) {
+  const body = await readJson(request);
+  const seen = new Set();
+  const items = (Array.isArray(body?.items) ? body.items : [])
+    .slice(0, 24)
+    .map((item) => ({
+      word: cleanText(item?.word, 80).toLowerCase(),
+      pos: cleanText(item?.pos || item?.type, 30).toLowerCase(),
+    }))
+    .filter((item) => {
+      if (!item.word || !/^[a-z][a-z '-]*$/i.test(item.word) || seen.has(item.word)) return false;
+      seen.add(item.word);
+      return true;
+    });
+  if (!items.length) return json({ error: 'Danh sách từ vựng không hợp lệ.' }, 400, origin);
+  if (!env.VOCAB_CACHE) return json({ data: { items: [], missing: items.map((item) => item.word) } }, 200, origin);
+
+  const records = await Promise.all(items.map(async (item) => {
+    const identity = await cacheIdentityFor({
+      version: VOCABULARY_PROMPT_VERSION,
+      model: getFreeModel(env),
+      word: item.word,
+    });
+    const storedEnrichment = await env.VOCAB_CACHE.get(identity.serverKey, 'json');
+    let enrichment = null;
+    try {
+      if (storedEnrichment) enrichment = normalizeEnrichment(storedEnrichment, item.word);
+    } catch {
+      enrichment = null;
+    }
+    // A complete enrichment already contains the canonical Vietnamese meaning.
+    // Only spend a second KV read when that richer record is unavailable.
+    const storedMeaning = enrichment
+      ? null
+      : await env.VOCAB_CACHE.get(meaningCacheKey(env, item), 'json');
+    const meaningVi = cleanText(enrichment?.primaryMeaningVi || storedMeaning?.meaningVi, 240);
+    return (enrichment || meaningVi) ? { word: item.word, meaningVi, enrichment } : null;
+  }));
+  const ready = records.filter(Boolean);
+  const readyWords = new Set(ready.map((item) => item.word));
+  const enrichedWords = new Set(ready.filter((item) => item.enrichment).map((item) => item.word));
+  return json({
+    data: {
+      items: ready,
+      missing: items.filter((item) => !readyWords.has(item.word)).map((item) => item.word),
+      needsEnrichment: items.filter((item) => !enrichedWords.has(item.word)).map((item) => item.word),
+    },
+  }, 200, origin, { 'Cache-Control': 'private, max-age=60' });
+}
+
 function meaningCacheKey(env, item) {
   return `meaning:v${MEANING_PROMPT_VERSION}:${getFreeModel(env) || 'default'}:${item.word}:${item.pos || '-'}`;
 }
@@ -526,8 +604,14 @@ export default {
     }
 
     try {
+      if (url.pathname === '/api/vocabulary/manifest' && request.method === 'GET') {
+        return await getSystemVocabularyManifest(env, origin);
+      }
       if (url.pathname === '/api/vocabulary/catalog' && request.method === 'GET') {
         return await getSystemVocabulary(env, origin);
+      }
+      if (url.pathname === '/api/vocabulary/batch' && request.method === 'POST') {
+        return await getVocabularyBatch(request, env, origin);
       }
       if (url.pathname === '/api/vocabulary/enrich' && request.method === 'POST') {
         return await enrichVocabulary(request, env, origin, context);

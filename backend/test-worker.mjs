@@ -101,6 +101,15 @@ const catalogPayload = await catalogResponse.json();
 assert.equal(catalogResponse.status, 200);
 assert.equal(catalogResponse.headers.get('X-LingoGoc-Source'), 'KV');
 assert.equal(catalogPayload.data.words.length, 3000);
+const manifestResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/manifest', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const manifestPayload = await manifestResponse.json();
+assert.equal(manifestResponse.status, 200);
+assert.equal(manifestPayload.data.contentHash, 'catalog-test-hash');
+assert.equal(manifestPayload.data.count, 3000);
 serverCache.delete('system-vocabulary:v1');
 
 const request = new Request('http://localhost:8787/api/vocabulary/enrich', {
@@ -125,6 +134,19 @@ assert.equal(providerRequest.body.model, 'mistralai/mistral-large-2512');
 assert.equal(providerCallCount, 3);
 assert.equal(payload.data.persistedOnServer, true);
 assert.equal(serverCache.size, 1);
+
+const batchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'accept', pos: 'v' }, { word: 'not-ready', pos: 'adj' }] }),
+}), env, context);
+const batchPayload = await batchResponse.json();
+assert.equal(batchResponse.status, 200);
+assert.equal(batchPayload.data.items[0].word, 'accept');
+assert.equal(batchPayload.data.items[0].enrichment.contextExamples.length, 5);
+assert.deepEqual(batchPayload.data.missing, ['not-ready']);
+assert.deepEqual(batchPayload.data.needsEnrichment, ['not-ready']);
+assert.equal(providerCallCount, 3, 'batch reads must never call the AI provider');
 
 const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',

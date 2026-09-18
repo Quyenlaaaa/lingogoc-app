@@ -133,7 +133,7 @@ async function writePersistentEnrichment(word, payload) {
   database.close();
 }
 
-async function cacheWordEnrichment(word, data) {
+export async function cacheWordEnrichment(word, data) {
   if (!word || typeof window === 'undefined') return data;
   const payload = {
     schemaVersion: CACHE_SCHEMA_VERSION,
