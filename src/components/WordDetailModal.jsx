@@ -27,6 +27,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
     if (!isOpen || !word) return;
 
     let isMounted = true;
+    const controller = new AbortController();
     const readyAiData = initialEnrichment || getCachedWordEnrichment(word.word);
     setLoading(!readyAiData);
     setRealDictData(null);
@@ -35,21 +36,20 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
     setAiEnrichData(readyAiData);
 
     const loadDetails = async () => {
+      fetchRealWordData(word.word, controller.signal).then((data) => {
+        if (isMounted && data) setRealDictData(data);
+      });
+      fetchCambridgeWordData(word.word, controller.signal).then((data) => {
+        if (isMounted && data) setCambridgeData(data);
+      }).catch((error) => {
+        if (isMounted && error?.name !== 'AbortError') {
+          setCambridgeError(error?.message || 'Không thể tải Cambridge API.');
+        }
+      });
       try {
-        const [dictionaryResult, cambridgeResult, batchResult] = await Promise.allSettled([
-          fetchRealWordData(word.word),
-          fetchCambridgeWordData(word.word),
-          fetchVocabularyBatch([word]),
-        ]);
-        const dictData = dictionaryResult.status === 'fulfilled' ? dictionaryResult.value : null;
-        const officialData = cambridgeResult.status === 'fulfilled' ? cambridgeResult.value : null;
+        const batchResult = await fetchVocabularyBatch([word], controller.signal);
         if (!isMounted) return;
-        setRealDictData(dictData);
-        setCambridgeData(officialData);
-        if (cambridgeResult.status === 'rejected') setCambridgeError(cambridgeResult.reason?.message || 'Không thể tải Cambridge API.');
-        const batchData = batchResult.status === 'fulfilled'
-          ? batchResult.value?.[word.word.toLowerCase()]
-          : null;
+        const batchData = batchResult?.[word.word.toLowerCase()] || null;
         if (batchData?.enrichment) setAiEnrichData(batchData.enrichment);
         else if (!readyAiData && batchData?.pending) {
           setAiEnrichData({
@@ -75,6 +75,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [initialEnrichment, isOpen, word]);
 

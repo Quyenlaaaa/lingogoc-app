@@ -2,10 +2,18 @@ import assert from 'node:assert/strict';
 import worker from './src/worker.js';
 
 let cachedResponse = null;
+const dictionaryEdgeCache = new Map();
 globalThis.caches = {
   default: {
-    match: async () => null,
-    put: async (_key, response) => { cachedResponse = response; },
+    match: async (key) => {
+      const url = typeof key === 'string' ? key : key.url;
+      return url.includes('/dictionary/') ? dictionaryEdgeCache.get(url)?.clone() || null : null;
+    },
+    put: async (key, response) => {
+      cachedResponse = response;
+      const url = typeof key === 'string' ? key : key.url;
+      if (url.includes('/dictionary/')) dictionaryEdgeCache.set(url, response.clone());
+    },
   },
 };
 
@@ -19,6 +27,22 @@ globalThis.fetch = async (url, options) => {
       status: 200,
       headers: { 'Content-Type': 'audio/mpeg' },
     });
+  }
+  if (String(url).startsWith('https://api.dictionaryapi.dev/api/v2/entries/en/')) {
+    return new Response(JSON.stringify([{
+      word: 'explore',
+      phonetic: '/ɪkˈsplɔːr/',
+      phonetics: [{ text: '/ɪkˈsplɔːr/', audio: '//audio.example/explore.mp3' }],
+      meanings: [{
+        partOfSpeech: 'verb',
+        definitions: [{
+          definition: 'Travel through an unfamiliar place to learn about it.',
+          example: 'They explore the forest together.',
+          synonyms: ['investigate'],
+          antonyms: ['ignore'],
+        }],
+      }],
+    }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
   providerCallCount += 1;
   providerRequest = { url, options, body: JSON.parse(options.body) };
@@ -263,8 +287,8 @@ const allProviderPayload = await allProviderResponse.json();
 assert.equal(allProviderResponse.status, 200);
 assert.equal(allProviderPayload.generatedByModel, 'qwen/qwen3.8-27b');
 assert.ok(allProviderUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
-assert.ok(allProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
-assert.ok(allProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+assert.equal(allProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)), false);
+assert.equal(allProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')), false);
 assert.equal(workersAiCalls, 1);
 customProviderResponse = null;
 
@@ -306,10 +330,10 @@ const validationFailoverPayload = await validationFailoverResponse.json();
 assert.equal(validationFailoverResponse.status, 200);
 assert.equal(validationFailoverPayload.data.contextExamples.length, 5);
 assert.equal(validationFailoverPayload.data.primaryMeaningVi, 'khám phá; tìm hiểu');
-assert.equal(validationFailoverPayload.data.generatedByProvider, 'OPENROUTER_FREE');
+assert.equal(validationFailoverPayload.data.generatedByProvider, 'XKIRO_FREE');
 assert.ok(validationFailoverUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
 assert.ok(validationFailoverUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
-assert.ok(validationFailoverUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+assert.equal(validationFailoverUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')), false);
 
 customProviderResponse = async ({ body }) => new Response(JSON.stringify({
   model: body.model,
@@ -341,6 +365,39 @@ const partialBatchPayload = await partialBatchResponse.json();
 assert.equal(partialBatchPayload.data.items[0].meaningVi, 'khảo sát; xem xét');
 assert.equal(partialBatchPayload.data.items[0].status, 'partial');
 assert.deepEqual(partialBatchPayload.data.needsEnrichment, ['survey']);
+let requestedMissingExamples = null;
+customProviderResponse = async ({ body }) => {
+  const input = JSON.parse(body.messages.at(-1).content);
+  requestedMissingExamples = input.missingExampleCount;
+  const content = JSON.stringify({
+    primaryMeaningVi: 'khảo sát; xem xét',
+    contextExamples: [
+      { context: 'Đời sống', en: 'They survey the neighborhood before moving.', vi: 'Họ khảo sát khu phố trước khi chuyển đến.' },
+      { context: 'Học tập', en: 'Students survey local wildlife for the project.', vi: 'Học sinh khảo sát động vật địa phương cho dự án.' },
+      { context: 'Hội thoại', en: 'Can we survey the area this afternoon?', vi: 'Chúng ta có thể khảo sát khu vực vào chiều nay không?' },
+      { context: 'Cụm từ', en: 'Engineers conduct a survey of the bridge.', vi: 'Các kỹ sư tiến hành khảo sát cây cầu.' },
+    ],
+  });
+  return new Response(JSON.stringify({ model: body.model, choices: [{ message: { content } }] }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+const completedPartialResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'survey', meaning: "từ 'survey' (v)", topic: 'Công việc' }),
+}), {
+  ...env,
+  XTROUTER_API_KEY: '',
+  AI_PAID_MODEL: '',
+  GROQ_API_KEY: 'groq-test-key',
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+}, context);
+const completedPartialPayload = await completedPartialResponse.json();
+assert.equal(completedPartialResponse.status, 200);
+assert.equal(requestedMissingExamples, 4);
+assert.equal(completedPartialPayload.data.contextExamples.length, 5);
 customProviderResponse = null;
 
 const fallbackModels = [];
@@ -470,6 +527,19 @@ const cambridgeResponse = await worker.fetch(
   context,
 );
 assert.equal(cambridgeResponse.status, 204);
+
+const dictionaryRequest = () => new Request('http://localhost:8787/api/vocabulary/dictionary?word=explore', {
+  headers: { Origin: 'http://localhost:5173' },
+});
+const dictionaryResponse = await worker.fetch(dictionaryRequest(), env, context);
+const dictionaryPayload = await dictionaryResponse.json();
+await Promise.all(pending.splice(0));
+assert.equal(dictionaryResponse.status, 200);
+assert.equal(dictionaryResponse.headers.get('X-LingoGoc-Cache'), 'MISS');
+assert.equal(dictionaryPayload.data.examples[0], 'They explore the forest together.');
+assert.equal(dictionaryPayload.data.audioUrl, 'https://audio.example/explore.mp3');
+const cachedDictionaryResponse = await worker.fetch(dictionaryRequest(), env, context);
+assert.equal(cachedDictionaryResponse.headers.get('X-LingoGoc-Cache'), 'HIT');
 
 serverCache.clear();
 serverCache.set('system-vocabulary:v1', JSON.stringify({

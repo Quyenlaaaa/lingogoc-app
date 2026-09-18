@@ -8,6 +8,10 @@ The Worker Cron Trigger runs every 15 minutes and enriches at most two missing w
 
 Interactive AI requests race all configured free providers: Groq `qwen/qwen3.8-27b`, Cloudflare Workers AI `@cf/google/gemma-4-26b-a4b-it`, xKiro `mistralai/mistral-large-2512`, and OpenRouter `deepseek/deepseek-v4-flash-0731:free`. The first valid response wins. Background vocabulary backfill calls them sequentially in that order to avoid spending several provider requests for one word. The paid xKiro model is considered only for interactive requests after the free providers report a quota/rate-limit condition.
 
+Interactive routing starts the two preferred providers immediately and hedges the remaining providers after short delays. Every provider call has a 12-second timeout. Vocabulary records with one to four valid examples request only the missing `5 - N` contexts; validated old and new examples are merged before the record becomes complete.
+
+Public dictionary data is read through `GET /api/vocabulary/dictionary?word=...`. The Worker limits a cold upstream lookup to 3.5 seconds and edge-caches successful responses for 30 days. Vocabulary list and flashcard rendering never fan out dictionary requests for every visible card; dictionary details load lazily without blocking the server KV result.
+
 Cloudflare Workers AI is attached through the `AI` binding and needs no API secret. The application limits it to 100 requests per UTC day through `WORKERS_AI_DAILY_REQUEST_LIMIT`. Groq remains disabled until its secret is installed:
 
 ```powershell

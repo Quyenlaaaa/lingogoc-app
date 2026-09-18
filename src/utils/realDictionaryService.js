@@ -1,6 +1,6 @@
 // realDictionaryService.js - Dịch vụ tích hợp dữ liệu từ điển thật 100% từ Free Dictionary API
 // Cung cấp audio, định nghĩa tiếng Anh, từ đồng nghĩa và ví dụ từ dictionaryapi.dev.
-import { getBackendUrl, hasBackendApi } from './backendApi.js';
+import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi.js';
 
 const DICT_CACHE_PREFIX = 'lingogoc_real_dict_';
 let nativeAudio = null;
@@ -30,7 +30,7 @@ export function getPronunciationAudioUrl(word) {
   return getBackendUrl(`/api/vocabulary/pronunciation?word=${encodeURIComponent(word.trim().toLowerCase())}`);
 }
 
-export async function fetchRealWordData(word) {
+export async function fetchRealWordData(word, signal) {
   if (!word) return null;
   const cleanWord = word.trim().toLowerCase();
 
@@ -40,84 +40,26 @@ export async function fetchRealWordData(word) {
     if (cached) {
       return JSON.parse(cached);
     }
-  } catch (e) {}
+  } catch {}
 
-  // 2. Gọi Free Dictionary API. Không gắn nhãn Oxford/Cambridge vì API không
-  // đảm bảo mọi mục từ đến từ các nhà xuất bản đó.
+  if (!hasBackendApi()) return null;
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      return null;
-    }
-
-    const entry = data[0];
-
-    // Tìm file âm thanh MP3 người bản xứ đọc thật
-    let audioUrl = null;
-    if (entry.phonetics && Array.isArray(entry.phonetics)) {
-      for (const p of entry.phonetics) {
-        if (p.audio && p.audio.endsWith('.mp3')) {
-          audioUrl = p.audio.startsWith('//') ? `https:${p.audio}` : p.audio;
-          break;
-        }
-      }
-    }
-
-    // Thu thập các câu ví dụ thật và định nghĩa
-    const realExamples = [];
-    const synonyms = new Set();
-    const antonyms = new Set();
-    const definitions = [];
-
-    if (entry.meanings && Array.isArray(entry.meanings)) {
-      for (const m of entry.meanings) {
-        const partOfSpeech = m.partOfSpeech || '';
-        if (m.definitions && Array.isArray(m.definitions)) {
-          for (const d of m.definitions) {
-            if (d.definition && definitions.length < 5) {
-              definitions.push({ partOfSpeech, text: d.definition });
-            }
-            if (d.example && realExamples.length < 6) {
-              realExamples.push(d.example);
-            }
-            if (d.synonyms && Array.isArray(d.synonyms)) {
-              d.synonyms.forEach(s => synonyms.add(s));
-            }
-            if (d.antonyms && Array.isArray(d.antonyms)) {
-              d.antonyms.forEach(a => antonyms.add(a));
-            }
-          }
-        }
-        if (m.synonyms && Array.isArray(m.synonyms)) {
-          m.synonyms.forEach(s => synonyms.add(s));
-        }
-      }
-    }
-
-    const result = {
-      word: entry.word || cleanWord,
-      phonetic: entry.phonetic || (entry.phonetics?.[0]?.text || ''),
-      audioUrl: audioUrl,
-      definitions: definitions,
-      examples: realExamples,
-      synonyms: Array.from(synonyms).slice(0, 6),
-      antonyms: Array.from(antonyms).slice(0, 6),
-      sourceUrls: entry.sourceUrls || []
-    };
-
-    // Lưu vào cache
+    const response = await fetch(
+      getBackendUrl(`/api/vocabulary/dictionary?word=${encodeURIComponent(cleanWord)}`),
+      { headers: { Accept: 'application/json' }, signal },
+    );
+    if (response.status === 204 || !response.ok) return null;
+    const payload = await readJsonResponse(response, 'Dữ liệu từ điển không hợp lệ.');
+    const result = payload?.data || null;
+    if (!result) return null;
     try {
       localStorage.setItem(`${DICT_CACHE_PREFIX}${cleanWord}`, JSON.stringify(result));
-    } catch (e) {}
-
+    } catch {
+      // Edge cache remains available when browser storage is unavailable.
+    }
     return result;
-  } catch (err) {
-    console.warn(`Could not fetch real dictionary data for ${cleanWord}:`, err);
+  } catch (error) {
+    if (error?.name !== 'AbortError') console.warn(`Could not fetch dictionary data for ${cleanWord}:`, error);
     return null;
   }
 }

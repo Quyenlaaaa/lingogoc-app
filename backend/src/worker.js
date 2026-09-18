@@ -10,6 +10,9 @@ const BACKFILL_SCAN_LIMIT = 96;
 const BACKFILL_GENERATE_LIMIT = 2;
 const BACKFILL_ATTEMPT_LIMIT = 2;
 const DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT = 100;
+const PROVIDER_TIMEOUT_MS = 12_000;
+const DICTIONARY_TIMEOUT_MS = 3_500;
+const DICTIONARY_CACHE_SECONDS = 30 * 24 * 60 * 60;
 let freeModelCooldownUntil = 0;
 let openRouterCooldownUntil = 0;
 let groqCooldownUntil = 0;
@@ -45,6 +48,21 @@ function cleanText(value, maxLength) {
   return typeof value === 'string'
     ? value.replace(/\*\*|__|`/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLength)
     : '';
+}
+
+function waitWithSignal(delayMs, signal) {
+  if (!delayMs) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason || new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+    const timer = setTimeout(resolve, delayMs);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(signal.reason || new DOMException('Aborted', 'AbortError'));
+    }, { once: true });
+  });
 }
 
 async function readJson(request) {
@@ -136,6 +154,24 @@ function normalizeEnrichment(data, word) {
   return { ...normalized, status: 'complete' };
 }
 
+function mergePartialEnrichment(existing, incoming, word) {
+  if (!existing) return normalizePartialEnrichment(incoming, word);
+  return normalizePartialEnrichment({
+    ...existing,
+    ...incoming,
+    primaryMeaningVi: incoming?.primaryMeaningVi || existing.primaryMeaningVi,
+    meaningNote: incoming?.meaningNote || existing.meaningNote,
+    senses: incoming?.senses?.length ? incoming.senses : existing.senses,
+    contextExamples: [
+      ...(existing.contextExamples || []),
+      ...(incoming?.contextExamples || []),
+    ],
+    collocations: incoming?.collocations?.length ? incoming.collocations : existing.collocations,
+    mnemonicTip: incoming?.mnemonicTip || existing.mnemonicTip,
+    wordFamily: incoming?.wordFamily || existing.wordFamily,
+  }, word);
+}
+
 function getFreeModel(env) {
   return cleanText(env.AI_FREE_MODEL || env.AI_MODEL, 120);
 }
@@ -167,6 +203,8 @@ async function callProviderModel({
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
+      const timeoutSignal = AbortSignal.timeout(PROVIDER_TIMEOUT_MS);
+      const requestSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
       const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -174,7 +212,7 @@ async function callProviderModel({
           'Content-Type': 'application/json',
           ...extraHeaders,
         },
-        signal,
+        signal: requestSignal,
         body: JSON.stringify({ model, temperature, messages, ...extraBody }),
       });
       if (response.ok) {
@@ -201,7 +239,9 @@ async function callProviderModel({
     } catch (error) {
       if (signal?.aborted) throw error;
       if (error?.provider) lastError = error;
-      else lastError = Object.assign(new Error(`${provider}_NETWORK_ERROR`), { provider, quota: false });
+      else if (error?.name === 'TimeoutError') {
+        lastError = Object.assign(new Error(`${provider}_TIMEOUT`), { provider, status: 504, quota: false });
+      } else lastError = Object.assign(new Error(`${provider}_NETWORK_ERROR`), { provider, quota: false });
       if ((error?.quota || !retryableStatuses.has(error?.status)) && error?.provider) throw error;
     }
 
@@ -231,13 +271,19 @@ async function callWorkersAiModel(env, messages, temperature) {
   const provider = 'CLOUDFLARE_FREE';
   const model = cleanText(env.WORKERS_AI_MODEL || '@cf/google/gemma-4-26b-a4b-it', 160);
   await claimWorkersAiDailyBudget(env);
+  let timeoutHandle;
   try {
-    const payload = await env.AI.run(model, {
-      messages,
-      temperature,
-      max_completion_tokens: 1800,
-      response_format: { type: 'json_object' },
-    });
+    const payload = await Promise.race([
+      env.AI.run(model, {
+        messages,
+        temperature,
+        max_completion_tokens: 1800,
+        response_format: { type: 'json_object' },
+      }),
+      new Promise((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error('WORKERS_AI_TIMEOUT')), PROVIDER_TIMEOUT_MS);
+      }),
+    ]);
     const content = payload?.response || payload?.choices?.[0]?.message?.content || '';
     if (!content) throw new Error('CLOUDFLARE_FREE_INVALID_RESPONSE');
     return { content, model: payload?.model || model, provider };
@@ -250,6 +296,8 @@ async function callWorkersAiModel(env, messages, temperature) {
       status: quota ? 429 : 502,
       quota,
     });
+  } finally {
+    clearTimeout(timeoutHandle);
   }
 }
 
@@ -332,7 +380,14 @@ async function callChatModel(env, messages, temperature = 0.45, validateCompleti
   } else if (providers.length) {
     const controllers = providers.map(() => new AbortController());
     try {
-      return await Promise.any(providers.map((provider, index) => invokeProvider(provider, controllers[index].signal)));
+      return await Promise.any(providers.map(async (provider, index) => {
+        // Start the two preferred providers immediately. Hedge slower fallbacks
+        // only when no valid answer has arrived, which preserves low latency
+        // without spending all free-provider quotas on every interaction.
+        const hedgeDelay = index < 2 ? 0 : (index - 1) * 800;
+        await waitWithSignal(hedgeDelay, controllers[index].signal);
+        return invokeProvider(provider, controllers[index].signal);
+      }));
     } catch (error) {
       freeErrors = error?.errors || [error];
       freeErrors.forEach(markProviderCooldown);
@@ -453,9 +508,16 @@ async function enrichVocabulary(request, env, origin, context) {
     }
   }
 
+  const missingExampleCount = Math.max(0, 5 - (bestPartial?.contextExamples?.length || 0));
+  const generationInput = {
+    ...input,
+    existingExamples: bestPartial?.contextExamples || [],
+    missingExampleCount,
+  };
   const systemPrompt = `You are a meticulous English-Vietnamese lexicographer for CEFR A1-B2 learners.
 Return only valid JSON with plain text values and no Markdown. Never use generic templates such as "She used the word ... in her sentence."
-Create exactly 5 natural examples in genuinely different situations: daily life, work or study, conversation, the supplied topic, and an idiomatic or common collocation context.
+When existingExamples is empty, create exactly 5 natural examples in genuinely different situations: daily life, work or study, conversation, the supplied topic, and an idiomatic or common collocation context.
+When existingExamples is supplied, preserve those examples and return exactly missingExampleCount NEW examples. Their contexts and sentences must differ from every existing example. Do not repeat existing examples.
 Every English sentence must use the target word naturally. Every Vietnamese translation must faithfully translate that sentence and sound natural to Vietnamese speakers.
 The primaryMeaningVi field must be a concise Vietnamese definition, never an English definition or a placeholder such as "từ 'word'".
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
@@ -464,16 +526,16 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
   const validateVocabularyCompletion = (completion) => {
     const raw = extractJson(completion.content);
     const candidate = { ...raw, generatedByModel: completion.model };
-    const partial = normalizePartialEnrichment(candidate, word);
+    const partial = mergePartialEnrichment(bestPartial, candidate, word);
     if (partialScore(partial) > partialScore(bestPartial)) bestPartial = partial;
-    return { completion, normalized: normalizeEnrichment(candidate, word) };
+    return { completion, normalized: normalizeEnrichment(partial, word) };
   };
 
   let generated;
   try {
     generated = await callChatModel(env, [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: JSON.stringify(input) },
+      { role: 'user', content: JSON.stringify(generationInput) },
     ], 0.45, validateVocabularyCompletion);
   } catch (error) {
     if (env.VOCAB_CACHE && bestPartial?.primaryMeaningVi) {
@@ -892,6 +954,91 @@ For every supplied word, provide one concise, natural, modern Vietnamese definit
   }, 200, origin, { 'Cache-Control': 'private, max-age=300' });
 }
 
+async function dictionaryWordData(request, origin, context) {
+  const word = cleanText(new URL(request.url).searchParams.get('word'), 80).toLowerCase();
+  if (!word || !/^[a-z][a-z '-]*$/i.test(word)) {
+    return json({ error: 'Từ cần tra không hợp lệ.' }, 400, origin);
+  }
+  const cache = caches.default;
+  const cacheKey = new Request(`https://lingogoc-cache.invalid/dictionary/${encodeURIComponent(word)}`);
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    return new Response(cached.body, {
+      status: cached.status,
+      headers: { ...Object.fromEntries(cached.headers), ...corsHeaders(origin), 'X-LingoGoc-Cache': 'HIT' },
+    });
+  }
+  const unavailable = () => {
+    const negativeResponse = new Response(JSON.stringify({ data: null, available: false }), {
+      status: 200,
+      headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=3600' },
+    });
+    context.waitUntil(cache.put(cacheKey, negativeResponse.clone()));
+    return new Response(negativeResponse.body, {
+      status: 200,
+      headers: { ...Object.fromEntries(negativeResponse.headers), ...corsHeaders(origin), 'X-LingoGoc-Cache': 'MISS-NEGATIVE' },
+    });
+  };
+
+  let response;
+  try {
+    response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(DICTIONARY_TIMEOUT_MS),
+    });
+  } catch {
+    return unavailable();
+  }
+  if (!response.ok) return unavailable();
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    return unavailable();
+  }
+  const entry = Array.isArray(payload) ? payload[0] : null;
+  if (!entry) return unavailable();
+
+  const examples = [];
+  const definitions = [];
+  const synonyms = new Set();
+  const antonyms = new Set();
+  for (const meaning of Array.isArray(entry.meanings) ? entry.meanings : []) {
+    for (const definition of Array.isArray(meaning.definitions) ? meaning.definitions : []) {
+      if (definition.definition && definitions.length < 5) {
+        definitions.push({ partOfSpeech: cleanText(meaning.partOfSpeech, 40), text: cleanText(definition.definition, 400) });
+      }
+      if (definition.example && examples.length < 6) examples.push(cleanText(definition.example, 500));
+      for (const synonym of Array.isArray(definition.synonyms) ? definition.synonyms : []) synonyms.add(cleanText(synonym, 80));
+      for (const antonym of Array.isArray(definition.antonyms) ? definition.antonyms : []) antonyms.add(cleanText(antonym, 80));
+    }
+    for (const synonym of Array.isArray(meaning.synonyms) ? meaning.synonyms : []) synonyms.add(cleanText(synonym, 80));
+    for (const antonym of Array.isArray(meaning.antonyms) ? meaning.antonyms : []) antonyms.add(cleanText(antonym, 80));
+  }
+  const audioUrl = (Array.isArray(entry.phonetics) ? entry.phonetics : [])
+    .map((item) => cleanText(item?.audio, 500))
+    .find((url) => url && url.endsWith('.mp3')) || '';
+  const result = {
+    word: cleanText(entry.word || word, 80),
+    phonetic: cleanText(entry.phonetic || entry.phonetics?.find((item) => item?.text)?.text, 120),
+    audioUrl: audioUrl.startsWith('//') ? `https:${audioUrl}` : audioUrl,
+    definitions,
+    examples: [...new Set(examples)].slice(0, 6),
+    synonyms: [...synonyms].filter(Boolean).slice(0, 6),
+    antonyms: [...antonyms].filter(Boolean).slice(0, 6),
+    sourceUrls: Array.isArray(entry.sourceUrls) ? entry.sourceUrls.slice(0, 3) : [],
+  };
+  const cacheResponse = new Response(JSON.stringify({ data: result }), {
+    headers: { ...JSON_HEADERS, 'Cache-Control': `public, max-age=${DICTIONARY_CACHE_SECONDS}` },
+  });
+  context.waitUntil(cache.put(cacheKey, cacheResponse.clone()));
+  return new Response(cacheResponse.body, {
+    status: 200,
+    headers: { ...Object.fromEntries(cacheResponse.headers), ...corsHeaders(origin), 'X-LingoGoc-Cache': 'MISS' },
+  });
+}
+
 async function speechAudio(request, origin, context) {
   const url = new URL(request.url);
   const text = cleanText(url.searchParams.get('text') || url.searchParams.get('word'), 200);
@@ -997,7 +1144,8 @@ export default {
         workersAiDailyRequestLimit: Math.max(1, Math.min(500, Number(env.WORKERS_AI_DAILY_REQUEST_LIMIT) || DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT)),
         openRouterModel: cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160),
         openRouterConfigured,
-        freeProviderStrategy: configuredFreeProviders > 1 ? 'parallel-race' : 'single-provider',
+        freeProviderStrategy: configuredFreeProviders > 1 ? 'hedged-race' : 'single-provider',
+        providerTimeoutMs: PROVIDER_TIMEOUT_MS,
         serverStorageConfigured: Boolean(env.VOCAB_CACHE),
       }, 200, origin);
     }
@@ -1023,6 +1171,9 @@ export default {
       }
       if (url.pathname === '/api/vocabulary/pronunciation' && request.method === 'GET') {
         return await speechAudio(request, origin, context);
+      }
+      if (url.pathname === '/api/vocabulary/dictionary' && request.method === 'GET') {
+        return await dictionaryWordData(request, origin, context);
       }
       if (url.pathname === '/api/speech/audio' && request.method === 'GET') {
         return await speechAudio(request, origin, context);
