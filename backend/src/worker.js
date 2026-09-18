@@ -63,7 +63,11 @@ function extractJson(text) {
     const start = cleaned.indexOf('{');
     const end = cleaned.lastIndexOf('}');
     if (start === -1 || end <= start) throw new Error('INVALID_AI_JSON');
-    return JSON.parse(cleaned.slice(start, end + 1));
+    try {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    } catch {
+      throw new Error('INVALID_AI_JSON');
+    }
   }
 }
 
