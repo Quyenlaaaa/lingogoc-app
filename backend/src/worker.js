@@ -8,6 +8,7 @@ const VOCABULARY_BACKFILL_STATE_KEY = 'system-vocabulary:backfill:v1';
 const BACKFILL_SCAN_LIMIT = 96;
 const BACKFILL_GENERATE_LIMIT = 2;
 let freeModelCooldownUntil = 0;
+let openRouterCooldownUntil = 0;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('Origin') || '';
@@ -123,83 +124,128 @@ function isQuotaError(status, detail) {
       && /quota|rate.?limit|daily.?limit|insufficient|credit|balance|billing|resource.?exhausted|too many requests/i.test(detail));
 }
 
-async function callChatModel(env, messages, temperature = 0.45) {
-  const apiKey = env.XTROUTER_API_KEY || env.AI_API_KEY;
-  const freeModel = getFreeModel(env);
-  const paidModel = getPaidModel(env);
-  if (!apiKey || !freeModel || freeModel === 'set-your-model-id') {
-    throw new Error('AI_NOT_CONFIGURED');
-  }
-  const baseUrl = String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, '');
+async function callProviderModel({
+  apiKey,
+  baseUrl,
+  model,
+  messages,
+  temperature,
+  extraHeaders = {},
+  signal,
+  provider,
+}) {
   const retryableStatuses = new Set([429, 500, 502, 503, 504]);
-  let lastError = 'AI_PROVIDER_UNKNOWN';
-  const freeModelCoolingDown = Boolean(paidModel && Date.now() < freeModelCooldownUntil);
-  const models = [
-    ...(!freeModelCoolingDown ? [freeModel] : []),
-    ...(paidModel ? [paidModel] : []),
-  ];
+  let lastError = Object.assign(new Error(`${provider}_UNKNOWN`), { provider, quota: false });
 
-  for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
-    const model = models[modelIndex];
-    const isFreeTier = model === freeModel;
-    let shouldUsePaidFallback = false;
-
-    for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
       const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
-          ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
+          ...extraHeaders,
         },
+        signal,
         body: JSON.stringify({ model, temperature, messages }),
       });
       if (response.ok) {
         const rawPayload = await response.text();
-        if (!rawPayload.trim()) {
-          lastError = 'AI_PROVIDER_EMPTY_RESPONSE';
-          if (attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-            continue;
+        if (rawPayload.trim()) {
+          try {
+            const payload = JSON.parse(rawPayload);
+            const content = payload?.choices?.[0]?.message?.content || '';
+            if (content) return { content, model, provider };
+          } catch {
+            // Retry malformed provider JSON below.
           }
-          break;
         }
-        let payload;
-        try {
-          payload = JSON.parse(rawPayload);
-        } catch {
-          lastError = 'AI_PROVIDER_INVALID_JSON';
-          if (attempt < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-            continue;
-          }
-          break;
-        }
-        return { content: payload?.choices?.[0]?.message?.content || '', model };
+        lastError = Object.assign(new Error(`${provider}_INVALID_RESPONSE`), { provider, quota: false });
+      } else {
+        const detail = cleanText(await response.text(), 500);
+        const quota = isQuotaError(response.status, detail) || (response.status === 429 && attempt === 2);
+        lastError = Object.assign(
+          new Error(`AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`),
+          { provider, status: response.status, quota },
+        );
+        if (!retryableStatuses.has(response.status) || isQuotaError(response.status, detail)) throw lastError;
       }
-
-      const detail = cleanText(await response.text(), 500);
-      lastError = `AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`;
-      const quotaExceeded = isQuotaError(response.status, detail);
-      // An explicit quota/balance error switches immediately. A generic 429
-      // gets short free-tier retries first, then falls back after attempt 3.
-      if (isFreeTier && paidModel && (quotaExceeded || (response.status === 429 && attempt === 2))) {
-        freeModelCooldownUntil = Date.now() + (quotaExceeded ? 5 * 60 * 1000 : 60 * 1000);
-        shouldUsePaidFallback = true;
-        break;
-      }
-      if (!retryableStatuses.has(response.status) || attempt === 2) break;
-      const retryAfter = Number(response.headers.get('Retry-After'));
-      const waitMs = Number.isFinite(retryAfter)
-        ? Math.min(2500, Math.max(400, retryAfter * 1000))
-        : 500 * (attempt + 1);
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      if (error?.provider) lastError = error;
+      else lastError = Object.assign(new Error(`${provider}_NETWORK_ERROR`), { provider, quota: false });
+      if ((error?.quota || !retryableStatuses.has(error?.status)) && error?.provider) throw error;
     }
 
-    if (!shouldUsePaidFallback) break;
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
   }
-  throw new Error(lastError);
+  throw lastError;
+}
+
+async function callChatModel(env, messages, temperature = 0.45) {
+  const xkiroApiKey = env.XTROUTER_API_KEY || env.AI_API_KEY;
+  const freeModel = getFreeModel(env);
+  const paidModel = getPaidModel(env);
+  const xkiroBaseUrl = String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, '');
+  const openRouterApiKey = cleanText(env.OPENROUTER_API_KEY, 500);
+  const openRouterModel = cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160);
+  const openRouterBaseUrl = String(env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/+$/, '');
+  const now = Date.now();
+  const controllers = [];
+  const freeCalls = [];
+  const addFreeCall = (options) => {
+    const controller = new AbortController();
+    controllers.push(controller);
+    freeCalls.push(callProviderModel({ ...options, messages, temperature, signal: controller.signal }));
+  };
+
+  if (xkiroApiKey && freeModel && freeModel !== 'set-your-model-id' && now >= freeModelCooldownUntil) {
+    addFreeCall({ apiKey: xkiroApiKey, baseUrl: xkiroBaseUrl, model: freeModel, provider: 'XKIRO_FREE' });
+  }
+  if (openRouterApiKey && openRouterModel && now >= openRouterCooldownUntil) {
+    addFreeCall({
+      apiKey: openRouterApiKey,
+      baseUrl: openRouterBaseUrl,
+      model: openRouterModel,
+      provider: 'OPENROUTER_FREE',
+      extraHeaders: {
+        ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
+        ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
+      },
+    });
+  }
+
+  let freeErrors = [];
+  if (freeCalls.length) {
+    try {
+      return await Promise.any(freeCalls);
+    } catch (error) {
+      freeErrors = error?.errors || [error];
+      freeErrors.forEach((providerError) => {
+        if (!providerError?.quota) return;
+        if (providerError.provider === 'XKIRO_FREE') freeModelCooldownUntil = now + 5 * 60 * 1000;
+        if (providerError.provider === 'OPENROUTER_FREE') openRouterCooldownUntil = now + 5 * 60 * 1000;
+      });
+    } finally {
+      controllers.forEach((controller) => controller.abort());
+    }
+  }
+
+  const freeProvidersCoolingDown = now < freeModelCooldownUntil || now < openRouterCooldownUntil;
+  const canUsePaidFallback = xkiroApiKey && paidModel
+    && (freeProvidersCoolingDown || freeErrors.some((error) => error?.quota));
+  if (canUsePaidFallback) {
+    return callProviderModel({
+      apiKey: xkiroApiKey,
+      baseUrl: xkiroBaseUrl,
+      model: paidModel,
+      messages,
+      temperature,
+      provider: 'XKIRO_PAID',
+    });
+  }
+  if (!freeCalls.length) throw new Error('AI_NOT_CONFIGURED');
+  throw freeErrors[0] || new Error('AI_PROVIDER_UNKNOWN');
 }
 
 async function cacheIdentityFor(data) {
@@ -732,6 +778,9 @@ export default {
         freeModel,
         paidFallbackModel: paidModel,
         paidFallbackConfigured: Boolean(paidModel),
+        openRouterModel: cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160),
+        openRouterConfigured: Boolean(env.OPENROUTER_API_KEY),
+        freeProviderStrategy: env.OPENROUTER_API_KEY ? 'parallel-race' : 'xkiro-only',
         serverStorageConfigured: Boolean(env.VOCAB_CACHE),
       }, 200, origin);
     }

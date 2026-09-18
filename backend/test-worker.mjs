@@ -78,6 +78,8 @@ assert.equal(healthPayload.model, 'mistralai/mistral-large-2512');
 assert.equal(healthPayload.freeModel, 'mistralai/mistral-large-2512');
 assert.equal(healthPayload.paidFallbackModel, 'x-ai/grok-build-0.1');
 assert.equal(healthPayload.paidFallbackConfigured, true);
+assert.equal(healthPayload.openRouterConfigured, false);
+assert.equal(healthPayload.freeProviderStrategy, 'xkiro-only');
 assert.equal(healthPayload.serverStorageConfigured, true);
 
 serverCache.set('system-vocabulary:v1', JSON.stringify({
@@ -183,6 +185,39 @@ const kvPayload = await kvResponse.json();
 assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'KV');
 assert.equal(kvPayload.data.persistedOnServer, true);
 assert.equal(providerCallCount, 3);
+
+const parallelProviderUrls = [];
+customProviderResponse = async ({ url, body }) => {
+  parallelProviderUrls.push(url);
+  if (url.startsWith(env.AI_BASE_URL)) {
+    await new Promise((resolve) => setTimeout(resolve, 30));
+  }
+  return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+    replyEn: 'How can I help you today?',
+    replyVi: 'HÃ´m nay tÃ´i cÃ³ thá»ƒ giÃºp gÃ¬ cho báº¡n?',
+    correction: '',
+    encouragement: 'Great start!',
+    hints: [],
+  }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const parallelResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ scenario: 'Daily conversation', messages: [{ role: 'user', content: 'Hello' }] }),
+}), {
+  ...env,
+  OPENROUTER_API_KEY: 'openrouter-test-key',
+  OPENROUTER_FREE_MODEL: 'deepseek/deepseek-v4-flash-0731:free',
+  OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
+  OPENROUTER_SITE_URL: 'https://example.com',
+  OPENROUTER_APP_NAME: 'LingoGoc Test',
+}, context);
+const parallelPayload = await parallelResponse.json();
+assert.equal(parallelResponse.status, 200);
+assert.equal(parallelPayload.generatedByModel, 'deepseek/deepseek-v4-flash-0731:free');
+assert.ok(parallelProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
+assert.ok(parallelProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+customProviderResponse = null;
 
 const fallbackModels = [];
 customProviderResponse = async ({ body }) => {

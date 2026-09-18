@@ -2,7 +2,11 @@
 
 ## Automatic vocabulary backfill
 
-The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only the free model and can never spend the paid-model wallet; quota failures pause the queue for six hours, then retry the same word automatically. Interactive requests retain the configured paid fallback. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
+The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only free providers and can never spend the paid-model wallet; quota failures pause the queue for six hours, then retry the same word automatically. Interactive requests retain the configured paid fallback. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
+
+## Parallel free AI providers
+
+When `OPENROUTER_API_KEY` is configured, each AI request races xKiro's `mistralai/mistral-large-2512` against OpenRouter's exact free endpoint `deepseek/deepseek-v4-flash-0731:free`. The first successful response wins and the slower request is aborted. The paid xKiro model is considered only after all configured free providers fail with a quota/rate-limit condition. Configure the production key with `npx wrangler secret put OPENROUTER_API_KEY --config backend/wrangler.toml`.
 
 Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định dùng chung API tương thích OpenAI của xkiro: ưu tiên model miễn phí `mistralai/mistral-large-2512`, sau đó tự chuyển sang model trả phí `x-ai/grok-build-0.1` khi model miễn phí báo hết quota hoặc rate limit kéo dài.
 
