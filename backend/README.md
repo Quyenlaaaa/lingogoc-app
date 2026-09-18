@@ -2,7 +2,7 @@
 
 ## Automatic vocabulary backfill
 
-The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only free providers and can never spend the paid-model wallet; quota failures pause the queue for six hours, then retry the same word automatically. Interactive requests retain the configured paid fallback. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
+The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only free providers and can never spend the paid-model wallet. Invalid content now fails over to the next provider, while a word that still fails gets its own 30-minute/2-hour/6-hour/24-hour retry schedule and no longer blocks later words. A valid Vietnamese meaning is saved as a partial record even when five examples are not ready yet. Provider-wide quota failures pause the queue for six hours. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
 
 ## Parallel free AI providers
 

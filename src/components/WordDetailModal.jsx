@@ -107,7 +107,8 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
   const contextExamples = [...cambridgeExamples, ...aiExamples, ...dictionaryExamples, ...storedExamples]
     .filter((example, index, list) => list.findIndex((item) => item.en.toLowerCase() === example.en.toLowerCase()) === index)
     .slice(0, 10);
-  const displayMeaning = aiEnrichData?.primaryMeaningVi || word.meaning;
+  const displayMeaning = aiEnrichData?.primaryMeaningVi
+    || (isLowQualityMeaning(word.meaning) ? 'Đang bổ sung nghĩa tiếng Việt…' : word.meaning);
 
   const handlePlayAudio = () => speakText(word.word, 0.85);
 

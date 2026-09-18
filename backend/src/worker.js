@@ -5,8 +5,10 @@ const MEANING_PROMPT_VERSION = 1;
 const SYSTEM_VOCABULARY_KEY = 'system-vocabulary:v1';
 const SYSTEM_VOCABULARY_MANIFEST_KEY = 'system-vocabulary:manifest:v1';
 const VOCABULARY_BACKFILL_STATE_KEY = 'system-vocabulary:backfill:v1';
+const VOCABULARY_BACKFILL_RETRY_PREFIX = 'system-vocabulary:backfill-retry:v1:';
 const BACKFILL_SCAN_LIMIT = 96;
 const BACKFILL_GENERATE_LIMIT = 2;
+const BACKFILL_ATTEMPT_LIMIT = 2;
 const DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT = 100;
 let freeModelCooldownUntil = 0;
 let openRouterCooldownUntil = 0;
@@ -65,7 +67,17 @@ function extractJson(text) {
   }
 }
 
-function normalizeEnrichment(data, word) {
+function isUsefulVietnameseMeaning(value, word = '') {
+  const meaning = cleanText(value, 240);
+  if (!meaning || meaning.length < 2) return false;
+  if (/^từ(?: vựng)?\s*['"]/i.test(meaning) || /chưa có nghĩa/i.test(meaning)) return false;
+  if (word && meaning.toLocaleLowerCase('en') === word.toLocaleLowerCase('en')) return false;
+  const hasVietnameseSignal = /[ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i.test(meaning)
+    || /\b(?:là|và|hoặc|của|cho|với|một|người|việc|sự|để|không|trong|trên|dùng|làm|có|được)\b/i.test(meaning);
+  return hasVietnameseSignal;
+}
+
+function normalizePartialEnrichment(data, word) {
   const normalizedWord = word.toLowerCase();
   const seenContexts = new Set();
   const examples = Array.isArray(data?.contextExamples)
@@ -87,11 +99,11 @@ function normalizeEnrichment(data, word) {
       })
       .slice(0, 5)
     : [];
-  if (examples.length !== 5) throw new Error('INSUFFICIENT_BILINGUAL_EXAMPLES');
-
   return {
     word,
-    primaryMeaningVi: cleanText(data?.primaryMeaningVi, 240),
+    primaryMeaningVi: isUsefulVietnameseMeaning(data?.primaryMeaningVi, word)
+      ? cleanText(data?.primaryMeaningVi, 240)
+      : '',
     meaningNote: cleanText(data?.meaningNote, 500),
     senses: Array.isArray(data?.senses) ? data.senses.slice(0, 5).map((item) => ({
       pos: cleanText(item?.pos, 40),
@@ -109,7 +121,15 @@ function normalizeEnrichment(data, word) {
     isAiGenerated: true,
     persistedOnServer: Boolean(data?.persistedOnServer),
     serverSavedAt: cleanText(data?.serverSavedAt, 40),
+    status: examples.length === 5 && isUsefulVietnameseMeaning(data?.primaryMeaningVi, word) ? 'complete' : 'partial',
   };
+}
+
+function normalizeEnrichment(data, word) {
+  const normalized = normalizePartialEnrichment(data, word);
+  if (!normalized.primaryMeaningVi) throw new Error('INVALID_VIETNAMESE_MEANING');
+  if (normalized.contextExamples.length !== 5) throw new Error('INSUFFICIENT_BILINGUAL_EXAMPLES');
+  return { ...normalized, status: 'complete' };
 }
 
 function getFreeModel(env) {
@@ -229,7 +249,7 @@ async function callWorkersAiModel(env, messages, temperature) {
   }
 }
 
-async function callChatModel(env, messages, temperature = 0.45) {
+async function callChatModel(env, messages, temperature = 0.45, validateCompletion = null) {
   const xkiroApiKey = env.XTROUTER_API_KEY || env.AI_API_KEY;
   const freeModel = getFreeModel(env);
   const paidModel = getPaidModel(env);
@@ -286,11 +306,20 @@ async function callChatModel(env, messages, temperature = 0.45) {
     if (providerError.provider === 'XKIRO_FREE') freeModelCooldownUntil = now + 5 * 60 * 1000;
     if (providerError.provider === 'OPENROUTER_FREE') openRouterCooldownUntil = now + 5 * 60 * 1000;
   };
+  const invokeProvider = async (provider, signal) => {
+    try {
+      const completion = await provider.invoke(signal);
+      return validateCompletion ? await validateCompletion(completion) : completion;
+    } catch (error) {
+      if (error && !error.provider) error.provider = provider.provider;
+      throw error;
+    }
+  };
   let freeErrors = [];
   if (env.AI_ROUTING_MODE === 'background') {
     for (const provider of providers) {
       try {
-        return await provider.invoke();
+        return await invokeProvider(provider);
       } catch (error) {
         freeErrors.push(error);
         markProviderCooldown(error);
@@ -299,7 +328,7 @@ async function callChatModel(env, messages, temperature = 0.45) {
   } else if (providers.length) {
     const controllers = providers.map(() => new AbortController());
     try {
-      return await Promise.any(providers.map((provider, index) => provider.invoke(controllers[index].signal)));
+      return await Promise.any(providers.map((provider, index) => invokeProvider(provider, controllers[index].signal)));
     } catch (error) {
       freeErrors = error?.errors || [error];
       freeErrors.forEach(markProviderCooldown);
@@ -315,17 +344,36 @@ async function callChatModel(env, messages, temperature = 0.45) {
   const canUsePaidFallback = xkiroApiKey && paidModel
     && (freeProvidersCoolingDown || freeErrors.some((error) => error?.quota));
   if (canUsePaidFallback) {
-    return callProviderModel({
-      apiKey: xkiroApiKey,
-      baseUrl: xkiroBaseUrl,
-      model: paidModel,
-      messages,
-      temperature,
-      provider: 'XKIRO_PAID',
-    });
+    let paidError = null;
+    for (let attempt = 0; attempt < (validateCompletion ? 2 : 1); attempt += 1) {
+      try {
+        const paidCompletion = await callProviderModel({
+          apiKey: xkiroApiKey,
+          baseUrl: xkiroBaseUrl,
+          model: paidModel,
+          messages,
+          temperature,
+          provider: 'XKIRO_PAID',
+        });
+        return validateCompletion ? await validateCompletion(paidCompletion) : paidCompletion;
+      } catch (error) {
+        paidError = error;
+        if (attempt === 0 && validateCompletion && !error?.quota) {
+          await new Promise((resolve) => setTimeout(resolve, 750));
+        }
+      }
+    }
+    throw paidError || new Error('AI_PROVIDER_UNKNOWN');
   }
   if (!providers.length) throw new Error('AI_NOT_CONFIGURED');
-  throw freeErrors[0] || new Error('AI_PROVIDER_UNKNOWN');
+  const finalError = freeErrors[0] || new Error('AI_PROVIDER_UNKNOWN');
+  finalError.allProvidersQuota = freeErrors.length > 0 && freeErrors.every((error) => error?.quota);
+  finalError.providerErrors = freeErrors.map((error) => ({
+    provider: error?.provider || 'unknown',
+    code: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+    quota: Boolean(error?.quota),
+  }));
+  throw finalError;
 }
 
 async function cacheIdentityFor(data) {
@@ -363,6 +411,7 @@ async function enrichVocabulary(request, env, origin, context) {
     model: getFreeModel(env),
     word,
   });
+  let bestPartial = null;
   const cached = await cache.match(cacheIdentity.edgeRequest);
   if (cached) {
     try {
@@ -394,7 +443,8 @@ async function enrichVocabulary(request, env, origin, context) {
           'X-LingoGoc-Cache': 'KV',
         });
       } catch {
-        // Ignore a corrupt/old record and regenerate it below.
+        const partial = normalizePartialEnrichment(stored, word);
+        if (partial.primaryMeaningVi || partial.contextExamples.length) bestPartial = partial;
       }
     }
   }
@@ -403,36 +453,42 @@ async function enrichVocabulary(request, env, origin, context) {
 Return only valid JSON with plain text values and no Markdown. Never use generic templates such as "She used the word ... in her sentence."
 Create exactly 5 natural examples in genuinely different situations: daily life, work or study, conversation, the supplied topic, and an idiomatic or common collocation context.
 Every English sentence must use the target word naturally. Every Vietnamese translation must faithfully translate that sentence and sound natural to Vietnamese speakers.
+The primaryMeaningVi field must be a concise Vietnamese definition, never an English definition or a placeholder such as "từ 'word'".
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
 Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","meaningVi":"...","usage":"..."}],"contextExamples":[{"context":"...","en":"...","vi":"..."}],"collocations":[{"phrase":"...","meaning":"..."}],"mnemonicTip":"...","wordFamily":"..."}`;
-  let normalized = null;
-  let generatedByModel = '';
-  let generationError = null;
-  for (let generationAttempt = 0; generationAttempt < 3; generationAttempt += 1) {
-    try {
-      const completion = await callChatModel(env, [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: JSON.stringify(input) },
-      ]);
-      generatedByModel = completion.model;
-      normalized = normalizeEnrichment(extractJson(completion.content), word);
-      break;
-    } catch (error) {
-      generationError = error;
-      const code = String(error?.message || '');
-      const canRegenerate = code !== 'AI_NOT_CONFIGURED' && code !== 'PAYLOAD_TOO_LARGE';
-      if (canRegenerate && generationAttempt < 2) {
-        await new Promise((resolve) => setTimeout(resolve, 750 * (generationAttempt + 1)));
-      } else {
-        break;
-      }
+  const partialScore = (value) => (value?.primaryMeaningVi ? 10 : 0) + (value?.contextExamples?.length || 0);
+  const validateVocabularyCompletion = (completion) => {
+    const raw = extractJson(completion.content);
+    const candidate = { ...raw, generatedByModel: completion.model };
+    const partial = normalizePartialEnrichment(candidate, word);
+    if (partialScore(partial) > partialScore(bestPartial)) bestPartial = partial;
+    return { completion, normalized: normalizeEnrichment(candidate, word) };
+  };
+
+  let generated;
+  try {
+    generated = await callChatModel(env, [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: JSON.stringify(input) },
+    ], 0.45, validateVocabularyCompletion);
+  } catch (error) {
+    if (env.VOCAB_CACHE && bestPartial?.primaryMeaningVi) {
+      await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify({
+        ...bestPartial,
+        status: 'partial',
+        persistedOnServer: true,
+        serverSavedAt: new Date().toISOString(),
+        lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+      }));
     }
+    throw error;
   }
-  if (!normalized) throw generationError || new Error('AI_PROVIDER_UNKNOWN');
 
   const result = {
-    ...normalized,
-    generatedByModel,
+    ...generated.normalized,
+    generatedByModel: generated.completion.model,
+    generatedByProvider: generated.completion.provider,
+    status: 'complete',
     persistedOnServer: Boolean(env.VOCAB_CACHE),
     serverSavedAt: new Date().toISOString(),
   };
@@ -516,18 +572,26 @@ async function getVocabularyBatch(request, env, origin) {
     });
     const storedEnrichment = await env.VOCAB_CACHE.get(identity.serverKey, 'json');
     let enrichment = null;
+    let partial = null;
     try {
       if (storedEnrichment) enrichment = normalizeEnrichment(storedEnrichment, item.word);
     } catch {
       enrichment = null;
+      if (storedEnrichment) partial = normalizePartialEnrichment(storedEnrichment, item.word);
     }
     // A complete enrichment already contains the canonical Vietnamese meaning.
     // Only spend a second KV read when that richer record is unavailable.
-    const storedMeaning = enrichment
+    const storedMeaning = enrichment || partial?.primaryMeaningVi
       ? null
       : await env.VOCAB_CACHE.get(meaningCacheKey(env, item), 'json');
-    const meaningVi = cleanText(enrichment?.primaryMeaningVi || storedMeaning?.meaningVi, 240);
-    return (enrichment || meaningVi) ? { word: item.word, meaningVi, enrichment } : null;
+    const meaningVi = cleanText(enrichment?.primaryMeaningVi || partial?.primaryMeaningVi || storedMeaning?.meaningVi, 240);
+    return (enrichment || meaningVi) ? {
+      word: item.word,
+      meaningVi,
+      enrichment,
+      status: enrichment ? 'complete' : 'partial',
+      exampleCount: enrichment?.contextExamples?.length || partial?.contextExamples?.length || 0,
+    } : null;
   }));
   const ready = records.filter(Boolean);
   const readyWords = new Set(ready.map((item) => item.word));
@@ -548,17 +612,30 @@ function newBackfillState(contentHash) {
     passes: 0,
     generated: 0,
     generatedInCurrentPass: 0,
+    retryPendingInCurrentPass: 0,
+    verifiedInCurrentPass: 0,
+    failed: 0,
+    retried: 0,
     status: 'active',
     nextRunAt: null,
     lastRunAt: null,
     lastSuccessAt: null,
     lastWord: null,
+    lastProvider: null,
     lastError: null,
   };
 }
 
 async function saveBackfillState(env, state) {
   await env.VOCAB_CACHE.put(VOCABULARY_BACKFILL_STATE_KEY, JSON.stringify(state));
+}
+
+function backfillRetryKey(word) {
+  return `${VOCABULARY_BACKFILL_RETRY_PREFIX}${encodeURIComponent(word)}`;
+}
+
+function retryDelayMs(attempts) {
+  return [30 * 60, 2 * 60 * 60, 6 * 60 * 60, 24 * 60 * 60][Math.min(Math.max(attempts - 1, 0), 3)] * 1000;
 }
 
 async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date.now()) {
@@ -574,7 +651,7 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
     : newBackfillState(catalog.contentHash);
   const now = Number(scheduledTime) || Date.now();
   if (state.status === 'complete') return state;
-  if (state.nextRunAt && Date.parse(state.nextRunAt) > now) return state;
+  if (state.status === 'quota_wait' && state.nextRunAt && Date.parse(state.nextRunAt) > now) return state;
   if (state.status === 'running' && Date.parse(state.lastRunAt) + 30 * 60 * 1000 > now) return state;
 
   state.status = 'running';
@@ -583,8 +660,11 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
   await saveBackfillState(env, state);
   let scanned = 0;
   let generated = 0;
+  let attempted = 0;
+  let failed = 0;
+  let retrySkipped = 0;
 
-  while (scanned < BACKFILL_SCAN_LIMIT && generated < BACKFILL_GENERATE_LIMIT) {
+  while (scanned < BACKFILL_SCAN_LIMIT && generated < BACKFILL_GENERATE_LIMIT && attempted < BACKFILL_ATTEMPT_LIMIT) {
     const item = catalog.words[state.cursor];
     if (!item) {
       state.cursor = 0;
@@ -602,40 +682,78 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
       if (storedEnrichment) {
         normalizeEnrichment(storedEnrichment, word);
         isComplete = true;
+        state.verifiedInCurrentPass += 1;
       }
     } catch {
       isComplete = false;
     }
 
     if (!isComplete) {
+      const retryKey = backfillRetryKey(word);
+      const retryState = await env.VOCAB_CACHE.get(retryKey, 'json');
+      if (retryState?.nextRetryAt && Date.parse(retryState.nextRetryAt) > now) {
+        retrySkipped += 1;
+        state.retryPendingInCurrentPass += 1;
+        state.cursor += 1;
+        scanned += 1;
+        if (state.cursor >= catalog.words.length) {
+          state.cursor = 0;
+          state.passes += 1;
+          state.generatedInCurrentPass = 0;
+          state.retryPendingInCurrentPass = 0;
+          state.verifiedInCurrentPass = 0;
+        }
+        continue;
+      }
+      attempted += 1;
       try {
         const request = new Request('https://lingogoc-internal.invalid/api/vocabulary/enrich', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word, meaning: item.meaning, topic: item.topic }),
+          body: JSON.stringify({ word, meaning: item.meaning, topic: item.topic, pos: item.pos || item.type }),
         });
         // Scheduled bulk work is deliberately free-tier only. Interactive
         // requests still retain the configured paid fallback, but an unattended
         // cron must never create unbounded wallet charges.
-        await enrichVocabulary(request, {
+        const enrichmentResponse = await enrichVocabulary(request, {
           ...env,
           AI_PAID_MODEL: '',
           AI_ROUTING_MODE: 'background',
         }, '', context);
+        const enrichmentPayload = await enrichmentResponse.json();
         generated += 1;
         state.generated += 1;
         state.generatedInCurrentPass += 1;
         state.lastSuccessAt = new Date().toISOString();
         state.lastWord = word;
+        state.lastProvider = enrichmentPayload?.data?.generatedByProvider || null;
         state.lastError = null;
+        if (env.VOCAB_CACHE.delete) await env.VOCAB_CACHE.delete(retryKey);
       } catch (error) {
         const code = cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120);
-        const isProviderFailure = code.startsWith('AI_PROVIDER_') || code === 'AI_NOT_CONFIGURED';
-        state.status = isProviderFailure ? 'quota_wait' : 'retry_wait';
+        const isGlobalProviderFailure = error?.allProvidersQuota || code === 'AI_NOT_CONFIGURED';
         state.lastError = code;
-        state.nextRunAt = new Date(now + (isProviderFailure ? 6 * 60 * 60 * 1000 : 30 * 60 * 1000)).toISOString();
-        await saveBackfillState(env, state);
-        return state;
+        state.lastWord = word;
+        if (isGlobalProviderFailure) {
+          state.status = 'quota_wait';
+          state.nextRunAt = new Date(now + 6 * 60 * 60 * 1000).toISOString();
+          await saveBackfillState(env, state);
+          return state;
+        }
+        const retryAttempts = (Number(retryState?.attempts) || 0) + 1;
+        const nextRetryAt = new Date(now + retryDelayMs(retryAttempts)).toISOString();
+        await env.VOCAB_CACHE.put(retryKey, JSON.stringify({
+          word,
+          attempts: retryAttempts,
+          lastError: code,
+          lastProviderErrors: error?.providerErrors || [],
+          lastTriedAt: new Date(now).toISOString(),
+          nextRetryAt,
+        }), { expirationTtl: 7 * 24 * 60 * 60 });
+        failed += 1;
+        state.failed += 1;
+        state.retried += retryAttempts > 1 ? 1 : 0;
+        state.retryPendingInCurrentPass += 1;
       }
     }
 
@@ -644,18 +762,22 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
     if (state.cursor >= catalog.words.length) {
       state.cursor = 0;
       state.passes += 1;
-      if (state.generatedInCurrentPass === 0) {
+      if (state.generatedInCurrentPass === 0 && state.retryPendingInCurrentPass === 0) {
         state.status = 'complete';
         state.completedAt = new Date().toISOString();
         await saveBackfillState(env, state);
         return state;
       }
       state.generatedInCurrentPass = 0;
+      state.retryPendingInCurrentPass = 0;
+      state.verifiedInCurrentPass = 0;
     }
     if (!isComplete) await saveBackfillState(env, state);
   }
 
   state.status = 'active';
+  state.nextRunAt = null;
+  state.lastRunSummary = { scanned, attempted, generated, failed, retrySkipped };
   await saveBackfillState(env, state);
   return state;
 }
@@ -671,6 +793,8 @@ async function getVocabularyBackfillStatus(env, origin) {
       totalWords: manifest?.count || 3000,
       schedule: 'every 15 minutes (UTC)',
       generatedPerRun: BACKFILL_GENERATE_LIMIT,
+      attemptedPerRun: BACKFILL_ATTEMPT_LIMIT,
+      browserRequired: false,
     },
   }, 200, origin, { 'Cache-Control': 'no-store' });
 }
@@ -725,31 +849,25 @@ async function translateVocabularyMeanings(request, env, origin) {
     const systemPrompt = `You are an English-Vietnamese lexicographer for Vietnamese CEFR A1-B2 learners.
 Return only valid JSON with no Markdown using this schema: {"meanings":[{"word":"...","meaningVi":"..."}]}.
 For every supplied word, provide one concise, natural, modern Vietnamese definition matching its part of speech. Include up to three common senses separated by semicolons when needed. Prefer meanings useful in daily English. Correct noisy or mistranslated supplied meanings. Never explain in English, transliterate, or omit a word.`;
-    let generated = [];
-    let generationError = null;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      try {
-        const completion = await callChatModel(env, [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: JSON.stringify({ items: missing }) },
-        ], 0.15);
+    const validated = await callChatModel(env, [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: JSON.stringify({ items: missing }) },
+    ], 0.15, (completion) => {
         const raw = extractJson(completion.content);
         const requested = new Set(missing.map((item) => item.word));
-        generated = (Array.isArray(raw?.meanings) ? raw.meanings : [])
+        const generated = (Array.isArray(raw?.meanings) ? raw.meanings : [])
           .map((item) => ({
             word: cleanText(item?.word, 80).toLowerCase(),
             meaningVi: cleanText(item?.meaningVi, 240),
             source: 'ai',
           }))
-          .filter((item) => requested.has(item.word) && item.meaningVi.length >= 2);
-        if (new Set(generated.map((item) => item.word)).size === missing.length) break;
-        throw new Error('INCOMPLETE_MEANING_TRANSLATION');
-      } catch (error) {
-        generationError = error;
-        generated = [];
-      }
-    }
-    if (!generated.length) throw generationError || new Error('INVALID_AI_JSON');
+          .filter((item) => requested.has(item.word) && isUsefulVietnameseMeaning(item.meaningVi, item.word));
+        if (new Set(generated.map((item) => item.word)).size !== missing.length) {
+          throw new Error('INCOMPLETE_MEANING_TRANSLATION');
+        }
+        return { completion, generated };
+      });
+    const generated = validated.generated;
 
     await Promise.all(generated.map(async (item) => {
       resolved.set(item.word, item);
@@ -840,7 +958,7 @@ function publicError(error) {
   if (code === 'PAYLOAD_TOO_LARGE') return ['Dữ liệu gửi lên quá lớn.', 413, code, false];
   if (code === 'AI_NOT_CONFIGURED') return ['Backend chưa được cấu hình XTROUTER_API_KEY và AI_FREE_MODEL.', 503, code, false];
   if (code.startsWith('AI_PROVIDER_')) return ['Nhà cung cấp AI đang từ chối hoặc tạm thời không khả dụng.', 502, code, true];
-  if (code === 'INVALID_AI_JSON' || code === 'INSUFFICIENT_BILINGUAL_EXAMPLES') return ['AI trả về dữ liệu chưa đúng định dạng, hệ thống sẽ thử lại.', 502, code, true];
+  if (code === 'INVALID_AI_JSON' || code === 'INSUFFICIENT_BILINGUAL_EXAMPLES' || code === 'INVALID_VIETNAMESE_MEANING' || code === 'INCOMPLETE_MEANING_TRANSLATION') return ['AI trả về dữ liệu chưa đúng định dạng, hệ thống sẽ thử lại.', 502, code, true];
   if (error instanceof SyntaxError) return ['JSON không hợp lệ.', 400, 'INVALID_REQUEST_JSON', false];
   return ['Máy chủ AI gặp lỗi tạm thời.', 500, code, true];
 }

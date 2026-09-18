@@ -102,7 +102,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const getDisplayMeaning = (item, enrichment = null) => {
     if (!item) return '';
     const translated = translatedMeanings[getMeaningCacheKey(item)] || getCachedVietnameseMeaning(item);
-    return enrichment?.primaryMeaningVi || translated?.meaningVi || item.meaning;
+    if (enrichment?.primaryMeaningVi) return enrichment.primaryMeaningVi;
+    if (translated?.meaningVi) return translated.meaningVi;
+    return isLowQualityMeaning(item.meaning) ? 'Đang bổ sung nghĩa tiếng Việt…' : item.meaning;
   };
 
   // Filter 3000 vocabulary words

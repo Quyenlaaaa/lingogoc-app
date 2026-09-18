@@ -64,6 +64,7 @@ const env = {
       return type === 'json' && value ? JSON.parse(value) : value || null;
     },
     put: async (key, value) => { serverCache.set(key, value); },
+    delete: async (key) => { serverCache.delete(key); },
   },
 };
 const pending = [];
@@ -267,6 +268,81 @@ assert.ok(allProviderUrls.some((url) => url.startsWith('https://openrouter.ai/ap
 assert.equal(workersAiCalls, 1);
 customProviderResponse = null;
 
+const exploreExamples = [
+  { context: 'Đời sống', en: 'We explore the old town on foot.', vi: 'Chúng tôi khám phá khu phố cổ bằng cách đi bộ.' },
+  { context: 'Công việc', en: 'The team will explore several new ideas.', vi: 'Nhóm sẽ tìm hiểu một số ý tưởng mới.' },
+  { context: 'Học tập', en: 'Students explore how plants grow.', vi: 'Học sinh tìm hiểu cách cây cối phát triển.' },
+  { context: 'Hội thoại', en: 'Would you like to explore this area with me?', vi: 'Bạn có muốn khám phá khu vực này cùng tôi không?' },
+  { context: 'Cụm từ', en: 'The report explores the issue in depth.', vi: 'Báo cáo tìm hiểu vấn đề một cách sâu sắc.' },
+];
+const validationFailoverUrls = [];
+customProviderResponse = async ({ url, body }) => {
+  validationFailoverUrls.push(url);
+  const isGroq = url.startsWith('https://api.groq.com/openai/v1');
+  const isOpenRouter = url.startsWith('https://openrouter.ai/api/v1');
+  const content = JSON.stringify({
+    primaryMeaningVi: isGroq ? 'to travel around and learn about a place' : 'khám phá; tìm hiểu',
+    contextExamples: isGroq || isOpenRouter ? exploreExamples : exploreExamples.slice(0, 3),
+  });
+  return new Response(JSON.stringify({ model: body.model, choices: [{ message: { content } }] }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+const validationFailoverResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'explore', meaning: "từ 'explore' (v)", topic: 'Đời sống' }),
+}), {
+  ...env,
+  AI_ROUTING_MODE: 'background',
+  AI_PAID_MODEL: '',
+  GROQ_API_KEY: 'groq-test-key',
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  OPENROUTER_API_KEY: 'openrouter-test-key',
+  OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
+}, context);
+const validationFailoverPayload = await validationFailoverResponse.json();
+assert.equal(validationFailoverResponse.status, 200);
+assert.equal(validationFailoverPayload.data.contextExamples.length, 5);
+assert.equal(validationFailoverPayload.data.primaryMeaningVi, 'khám phá; tìm hiểu');
+assert.equal(validationFailoverPayload.data.generatedByProvider, 'OPENROUTER_FREE');
+assert.ok(validationFailoverUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
+assert.ok(validationFailoverUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
+assert.ok(validationFailoverUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+
+customProviderResponse = async ({ body }) => new Response(JSON.stringify({
+  model: body.model,
+  choices: [{ message: { content: JSON.stringify({
+    primaryMeaningVi: 'khảo sát; xem xét',
+    contextExamples: [
+      { context: 'Công việc', en: 'We survey the customers every month.', vi: 'Chúng tôi khảo sát khách hàng mỗi tháng.' },
+    ],
+  }) } }],
+}), { status: 200, headers: { 'Content-Type': 'application/json' } });
+const partialResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'survey', meaning: "từ 'survey' (v)", topic: 'Công việc' }),
+}), {
+  ...env,
+  XTROUTER_API_KEY: '',
+  AI_PAID_MODEL: '',
+  GROQ_API_KEY: 'groq-test-key',
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+}, context);
+assert.equal(partialResponse.status, 502);
+const partialBatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'survey', pos: 'v' }] }),
+}), env, context);
+const partialBatchPayload = await partialBatchResponse.json();
+assert.equal(partialBatchPayload.data.items[0].meaningVi, 'khảo sát; xem xét');
+assert.equal(partialBatchPayload.data.items[0].status, 'partial');
+assert.deepEqual(partialBatchPayload.data.needsEnrichment, ['survey']);
+customProviderResponse = null;
+
 const fallbackModels = [];
 customProviderResponse = async ({ body }) => {
   fallbackModels.push(body.model);
@@ -394,4 +470,64 @@ const cambridgeResponse = await worker.fetch(
   context,
 );
 assert.equal(cambridgeResponse.status, 204);
+
+serverCache.clear();
+serverCache.set('system-vocabulary:v1', JSON.stringify({
+  schemaVersion: 1,
+  contentHash: 'non-blocking-backfill-test',
+  count: 3000,
+  words: [
+    { id: 1, word: 'stumble', meaning: "từ 'stumble' (v)", pos: 'v', topic: 'Đời sống' },
+    { id: 2, word: 'explore', meaning: "từ 'explore' (v)", pos: 'v', topic: 'Đời sống' },
+    ...Array.from({ length: 2998 }, (_, index) => ({
+      id: index + 3,
+      word: `placeholder ${index + 3}`,
+      meaning: 'đang chờ',
+      pos: 'n',
+      topic: 'Đời sống',
+    })),
+  ],
+}));
+let scheduledProviderCalls = 0;
+customProviderResponse = async ({ body }) => {
+  scheduledProviderCalls += 1;
+  const input = JSON.parse(body.messages.at(-1).content);
+  const examples = input.word === 'explore'
+    ? exploreExamples
+    : [{ context: 'Đời sống', en: 'I stumble sometimes.', vi: 'Đôi khi tôi bị vấp.' }];
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify({
+      primaryMeaningVi: input.word === 'explore' ? 'khám phá; tìm hiểu' : 'vấp; tình cờ gặp',
+      contextExamples: examples,
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const nonBlockingPending = [];
+await worker.scheduled(
+  { scheduledTime: Date.now(), cron: '*/15 * * * *' },
+  {
+    ...env,
+    XTROUTER_API_KEY: '',
+    AI_PAID_MODEL: '',
+    GROQ_API_KEY: 'groq-test-key',
+    GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  },
+  { waitUntil: (promise) => nonBlockingPending.push(promise) },
+);
+await Promise.all(nonBlockingPending);
+const nonBlockingState = JSON.parse(serverCache.get('system-vocabulary:backfill:v1'));
+assert.equal(nonBlockingState.status, 'active');
+assert.equal(nonBlockingState.cursor, 2);
+assert.equal(nonBlockingState.generated, 1);
+assert.equal(nonBlockingState.failed, 1);
+assert.deepEqual(nonBlockingState.lastRunSummary, {
+  scanned: 2,
+  attempted: 2,
+  generated: 1,
+  failed: 1,
+  retrySkipped: 0,
+});
+assert.equal(scheduledProviderCalls, 2, 'one invalid word must not block the next vocabulary item');
+customProviderResponse = null;
 console.log('Worker vocabulary contract: OK');
