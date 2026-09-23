@@ -558,42 +558,72 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
     ], 0.45, validateVocabularyCompletion);
   } catch (error) {
     if (env.VOCAB_CACHE && bestPartial?.primaryMeaningVi) {
-      await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify({
-        ...bestPartial,
-        status: 'partial',
-        persistedOnServer: true,
-        serverSavedAt: new Date().toISOString(),
-        lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
-      }));
+      try {
+        await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify({
+          ...bestPartial,
+          status: 'partial',
+          persistedOnServer: true,
+          serverSavedAt: new Date().toISOString(),
+          lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+        }));
+      } catch {
+        // Preserve the original provider error when KV has reached its limit.
+      }
     }
     if (env.VOCAB_CACHE) {
-      const previousRetry = await env.VOCAB_CACHE.get(retryKey, 'json');
-      const attempts = (Number(previousRetry?.attempts) || 0) + 1;
-      const now = Date.now();
-      await env.VOCAB_CACHE.put(retryKey, JSON.stringify({
-        word,
-        attempts,
-        lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
-        lastTriedAt: new Date(now).toISOString(),
-        nextRetryAt: new Date(now + retryDelayMs(attempts)).toISOString(),
-      }), { expirationTtl: 7 * 24 * 60 * 60 });
+      try {
+        const previousRetry = await env.VOCAB_CACHE.get(retryKey, 'json');
+        const attempts = (Number(previousRetry?.attempts) || 0) + 1;
+        const now = Date.now();
+        await env.VOCAB_CACHE.put(retryKey, JSON.stringify({
+          word,
+          attempts,
+          lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+          lastTriedAt: new Date(now).toISOString(),
+          nextRetryAt: new Date(now + retryDelayMs(attempts)).toISOString(),
+        }), { expirationTtl: 7 * 24 * 60 * 60 });
+      } catch {
+        // A failed retry marker must not replace the useful provider error.
+      }
     }
     throw error;
   }
 
-  const result = {
+  let result = {
     ...generated.normalized,
     generatedByModel: generated.completion.model,
     generatedByProvider: generated.completion.provider,
     status: 'complete',
-    persistedOnServer: Boolean(env.VOCAB_CACHE),
-    serverSavedAt: new Date().toISOString(),
+    persistedOnServer: false,
+    serverSavedAt: '',
   };
   if (env.VOCAB_CACHE) {
-    // Await the durable write: the client only receives success after the
-    // generated examples have been safely stored on the server.
-    await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(result));
-    if (env.VOCAB_CACHE.delete) await env.VOCAB_CACHE.delete(retryKey);
+    try {
+      const persistedResult = {
+        ...result,
+        persistedOnServer: true,
+        serverSavedAt: new Date().toISOString(),
+      };
+      await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(persistedResult));
+      result = persistedResult;
+      if (env.VOCAB_CACHE.delete) {
+        try {
+          await env.VOCAB_CACHE.delete(retryKey);
+        } catch {
+          // The completed value is durable; stale retry metadata is harmless.
+        }
+      }
+    } catch (error) {
+      // Scheduled work must only count durable results. Interactive/manual
+      // requests still return the completed payload so the browser can cache it
+      // even when the daily Workers KV write limit has been exhausted.
+      if (env.AI_ROUTING_MODE === 'background') throw error;
+      result = {
+        ...result,
+        persistencePending: true,
+        persistenceError: cleanText(String(error?.message || 'KV_WRITE_FAILED').split(':')[0], 120),
+      };
+    }
   }
   const cacheResponse = new Response(JSON.stringify(result), {
     headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=604800' },

@@ -284,7 +284,7 @@ async function performWordEnrichment(
   }
 
   // A single user action is always bounded. Further automatic attempts wait
-  // for the persisted 30-minute cooldown; manual retry may bypass that wait.
+  // for the persisted one-hour cooldown; manual retry may bypass that wait.
   const maxAttempts = Math.min(3, Math.max(1, Number(options.maxAttempts) || 1));
   let attempt = 0;
 
@@ -336,6 +336,7 @@ async function performWordEnrichment(
           ...localFallback,
           fromCache: true,
           serverSyncPending: true,
+          unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
           nextRetryAt: failure.nextRetryAt,
           unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
         };
@@ -367,7 +368,9 @@ export function enrichWordWithLLM(
     return performWordEnrichment(word, meaning, topic, dictionaryDefinitions, signal, options);
   }
 
-  const requestKey = String(word || '').trim().toLowerCase();
+  // A manual retry must never attach itself to an older automatic request,
+  // because only the manual request carries force=true through server cooldown.
+  const requestKey = `${String(word || '').trim().toLowerCase()}:${options.manualRetry ? 'manual' : 'automatic'}`;
   const existingRequest = activeEnrichmentRequests.get(requestKey);
   if (existingRequest) return existingRequest;
 

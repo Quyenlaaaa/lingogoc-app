@@ -488,6 +488,42 @@ assert.equal(regenerationCalls, 2, 'invalid AI content must be regenerated autom
 assert.deepEqual(cooldownModels, [env.AI_PAID_MODEL, env.AI_PAID_MODEL], 'free quota cooldown must avoid repeated failed free calls');
 customProviderResponse = null;
 
+const ticketExamples = [
+  { context: 'Đời sống', en: 'I bought a ticket for the evening show.', vi: 'Tôi đã mua vé cho suất diễn buổi tối.' },
+  { context: 'Công việc', en: 'Please open a support ticket for this issue.', vi: 'Vui lòng mở một phiếu hỗ trợ cho vấn đề này.' },
+  { context: 'Học tập', en: 'Each student received a ticket to the science museum.', vi: 'Mỗi học sinh nhận được một vé vào bảo tàng khoa học.' },
+  { context: 'Hội thoại', en: 'Where can I collect my train ticket?', vi: 'Tôi có thể nhận vé tàu ở đâu?' },
+  { context: 'Cụm từ', en: 'A return ticket is cheaper than two single tickets.', vi: 'Vé khứ hồi rẻ hơn hai vé một chiều.' },
+];
+customProviderResponse = async ({ body }) => new Response(JSON.stringify({
+  model: body.model,
+  choices: [{ message: { content: JSON.stringify({
+    primaryMeaningVi: 'vé; phiếu',
+    contextExamples: ticketExamples,
+  }) } }],
+}), { status: 200, headers: { 'Content-Type': 'application/json' } });
+const kvLimitedEnv = {
+  ...env,
+  VOCAB_CACHE: {
+    ...env.VOCAB_CACHE,
+    put: async (key, value) => {
+      if (key.startsWith('vocabulary:v')) throw new Error('KV put() limit exceeded for the day.');
+      serverCache.set(key, value);
+    },
+  },
+};
+const manualKvLimitResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'ticket', meaning: 'vé', topic: 'Du lịch', force: true }),
+}), kvLimitedEnv, context);
+const manualKvLimitPayload = await manualKvLimitResponse.json();
+assert.equal(manualKvLimitResponse.status, 200, 'manual retry must return AI data when KV writes are exhausted');
+assert.equal(manualKvLimitPayload.data.contextExamples.length, 5);
+assert.equal(manualKvLimitPayload.data.persistedOnServer, false);
+assert.equal(manualKvLimitPayload.data.persistencePending, true);
+customProviderResponse = null;
+
 let meaningProviderCalls = 0;
 customProviderResponse = async () => {
   meaningProviderCalls += 1;

@@ -258,7 +258,16 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
       );
       if (viewMountedRef.current) setFlashcardAiData(result);
     } catch (error) {
-      if (error?.name !== 'AbortError') console.warn('Could not retry vocabulary examples:', error);
+      if (error?.name !== 'AbortError') {
+        console.warn('Could not retry vocabulary examples:', error);
+        if (viewMountedRef.current) {
+          setFlashcardAiData({
+            isAiGenerated: false,
+            contextExamples: [],
+            unavailableReason: error?.message || 'Không thể kết nối API AI.',
+          });
+        }
+      }
     } finally {
       if (viewMountedRef.current) {
         setIsLoadingFlashcardExamples(false);
@@ -291,7 +300,19 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         setListAiData((current) => ({ ...current, [key]: result }));
       }
     } catch (error) {
-      if (error?.name !== 'AbortError') console.warn('Could not retry vocabulary examples:', error);
+      if (error?.name !== 'AbortError') {
+        console.warn('Could not retry vocabulary examples:', error);
+        if (viewMountedRef.current) {
+          setListAiData((current) => ({
+            ...current,
+            [key]: {
+              isAiGenerated: false,
+              contextExamples: [],
+              unavailableReason: error?.message || 'Không thể kết nối API AI.',
+            },
+          }));
+        }
+      }
     }
   };
 
