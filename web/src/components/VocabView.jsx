@@ -73,11 +73,13 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
   // List Pagination
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageInput, setPageInput] = useState('1');
   const [listAiData, setListAiData] = useState({});
   const [flashcardAiData, setFlashcardAiData] = useState(null);
   const [translatedMeanings, setTranslatedMeanings] = useState({});
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const viewMountedRef = useRef(true);
+  const listContainerRef = useRef(null);
   const itemsPerPage = 24;
 
   // Quiz States
@@ -141,6 +143,22 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     return result;
   }, [searchQuery, selectedTopic, selectedLevel, selectedStatus, masteredSet, bookmarkedSet, translatedMeanings, vocabList]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredWords.length / itemsPerPage));
+
+  const goToPage = (requestedPage) => {
+    const parsedPage = Number.parseInt(String(requestedPage), 10);
+    const nextPage = Number.isFinite(parsedPage)
+      ? Math.min(totalPages, Math.max(1, parsedPage))
+      : currentPage;
+    setCurrentPage(nextPage);
+    setPageInput(String(nextPage));
+    if (nextPage !== currentPage) {
+      window.requestAnimationFrame(() => {
+        listContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  };
+
   const visibleListWords = useMemo(
     () => filteredWords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
     [filteredWords, currentPage],
@@ -156,6 +174,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   // Reset pagination / card index when filters change
   useEffect(() => {
     setCurrentPage(1);
+    setPageInput('1');
     setCardIndex(0);
     setIsFlipped(false);
   }, [searchQuery, selectedTopic, selectedLevel, selectedStatus]);
@@ -730,7 +749,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
       {/* Mode 2: Word List / Grid Table */}
       {studyMode === 'list' && (
-        <div className="vocab-list-container">
+        <div ref={listContainerRef} className="vocab-list-container">
           <div className="vocab-cards-grid">
             {visibleListWords
               .map((w) => {
@@ -842,26 +861,55 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           </div>
 
           {/* Pagination */}
-          <div className="pagination-bar">
-            <button 
-              className="page-btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          <div className="pagination-section">
+            <div className="pagination-bar">
+              <button
+                type="button"
+                className="page-btn"
+                disabled={currentPage === 1}
+                onClick={() => goToPage(currentPage - 1)}
+              >
+                <ArrowLeft size={16} />
+                <span>Trang trước</span>
+              </button>
+              <span className="page-indicator">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                className="page-btn"
+                disabled={currentPage >= totalPages}
+                onClick={() => goToPage(currentPage + 1)}
+              >
+                <span>Trang sau</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+
+            <form
+              className="page-jump-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                goToPage(pageInput);
+              }}
             >
-              <ArrowLeft size={16} />
-              <span>Trang trước</span>
-            </button>
-            <span className="page-indicator">
-              Trang {currentPage} / {Math.ceil(filteredWords.length / itemsPerPage) || 1}
-            </span>
-            <button 
-              className="page-btn"
-              disabled={currentPage >= Math.ceil(filteredWords.length / itemsPerPage)}
-              onClick={() => setCurrentPage(prev => prev + 1)}
-            >
-              <span>Trang sau</span>
-              <ArrowRight size={16} />
-            </button>
+              <label htmlFor="vocabulary-page-input">Đến trang</label>
+              <input
+                id="vocabulary-page-input"
+                className="page-jump-input"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max={totalPages}
+                value={pageInput}
+                onChange={(event) => setPageInput(event.target.value)}
+                onBlur={() => {
+                  if (!pageInput) setPageInput(String(currentPage));
+                }}
+                aria-label={`Nhập số trang từ 1 đến ${totalPages}`}
+              />
+              <button type="submit" className="page-jump-btn">Chuyển trang</button>
+            </form>
           </div>
         </div>
       )}

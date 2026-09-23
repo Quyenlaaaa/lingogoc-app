@@ -18,7 +18,7 @@ OPENROUTER_APP_NAME = "LingoGoc"
 ALLOWED_ORIGINS = "http://localhost:5173,https://quyenlaaaa.github.io"
 
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["0 * * * *"]
 
 [ai]
 binding = "AI"

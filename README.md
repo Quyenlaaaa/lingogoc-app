@@ -140,7 +140,8 @@ Chi tiết request/response nằm trong [BACKEND_API.md](./web/BACKEND_API.md) v
 ### Dữ liệu AI và retry
 
 - Kết quả chỉ được chấp nhận khi có đủ 5 ví dụ song ngữ thuộc 5 ngữ cảnh riêng biệt.
-- Mỗi thao tác tương tác chỉ tạo tối đa một yêu cầu AI. Sau lỗi, trình duyệt và Worker cùng khóa tự động gọi lại trong 30 phút; nút **Thử lại AI** cho phép người dùng chủ động gọi ngay.
+- Mỗi thao tác tương tác chỉ tạo tối đa một yêu cầu AI. Sau lỗi, trình duyệt và Worker chờ 1 giờ trước khi tự động gọi lại; nút **Thử lại AI** cho phép người dùng chủ động gọi ngay.
+- Cron backend chạy vào đầu mỗi giờ, bỏ qua từ đã đủ 5 ngữ cảnh và chỉ bổ sung các từ còn thiếu; mỗi lượt được giới hạn tối đa 2 từ để kiểm soát token.
 - Kết quả hợp lệ được lưu trong Workers KV và cache ở trình duyệt.
 - Việc đóng modal hoặc chuyển màn hình không hủy yêu cầu đang chạy; khi hoàn tất, dữ liệu vẫn được lưu để sử dụng lại.
 - Trình duyệt chỉ đọc dữ liệu của màn hình hiện tại theo lô; không chạy hàng đợi AI 3.000 từ trên thiết bị người học.

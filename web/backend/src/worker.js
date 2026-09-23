@@ -9,6 +9,7 @@ const VOCABULARY_BACKFILL_RETRY_PREFIX = 'system-vocabulary:backfill-retry:v1:';
 const BACKFILL_SCAN_LIMIT = 96;
 const BACKFILL_GENERATE_LIMIT = 2;
 const BACKFILL_ATTEMPT_LIMIT = 2;
+const BACKFILL_RETRY_DELAY_MS = 60 * 60 * 1000;
 const DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT = 100;
 const PROVIDER_TIMEOUT_MS = 12_000;
 const DICTIONARY_TIMEOUT_MS = 3_500;
@@ -518,7 +519,7 @@ async function enrichVocabulary(request, env, origin, context) {
     const nextRetryAtMs = Date.parse(retryState?.nextRetryAt || '');
     if (Number.isFinite(nextRetryAtMs) && nextRetryAtMs > Date.now()) {
       return json({
-        error: 'AI đang tạm nghỉ sau lần gọi lỗi. Hệ thống sẽ tự thử lại sau 30 phút hoặc bạn có thể bấm Thử lại AI.',
+        error: 'AI đang tạm nghỉ sau lần gọi lỗi. Hệ thống sẽ tự thử lại sau 1 giờ hoặc bạn có thể bấm Thử lại AI.',
         code: 'ENRICHMENT_COOLDOWN',
         retryable: true,
         nextRetryAt: retryState.nextRetryAt,
@@ -731,8 +732,8 @@ function backfillRetryKey(word) {
   return `${VOCABULARY_BACKFILL_RETRY_PREFIX}${encodeURIComponent(word)}`;
 }
 
-function retryDelayMs(attempts) {
-  return [30 * 60, 2 * 60 * 60, 6 * 60 * 60, 24 * 60 * 60][Math.min(Math.max(attempts - 1, 0), 3)] * 1000;
+function retryDelayMs() {
+  return BACKFILL_RETRY_DELAY_MS;
 }
 
 async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date.now()) {
@@ -838,7 +839,7 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
         state.lastWord = word;
         if (isGlobalProviderFailure) {
           state.status = 'quota_wait';
-          state.nextRunAt = new Date(now + 6 * 60 * 60 * 1000).toISOString();
+          state.nextRunAt = new Date(now + BACKFILL_RETRY_DELAY_MS).toISOString();
           await saveBackfillState(env, state);
           return state;
         }
@@ -893,7 +894,7 @@ async function getVocabularyBackfillStatus(env, origin) {
     data: {
       ...(state || { status: 'not_started', cursor: 0, generated: 0 }),
       totalWords: manifest?.count || 3000,
-      schedule: 'every 15 minutes (UTC)',
+      schedule: 'hourly (UTC)',
       generatedPerRun: BACKFILL_GENERATE_LIMIT,
       attemptedPerRun: BACKFILL_ATTEMPT_LIMIT,
       browserRequired: false,

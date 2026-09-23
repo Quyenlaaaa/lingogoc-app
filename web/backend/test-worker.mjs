@@ -161,7 +161,7 @@ serverCache.set('system-vocabulary:backfill:v1', JSON.stringify({
 }));
 const scheduledPending = [];
 await worker.scheduled(
-  { scheduledTime: Date.now(), cron: '*/15 * * * *' },
+  { scheduledTime: Date.now(), cron: '0 * * * *' },
   env,
   { waitUntil: (promise) => scheduledPending.push(promise) },
 );
@@ -176,6 +176,7 @@ assert.equal(backfillStatusResponse.status, 200);
 assert.equal(backfillStatusPayload.data.status, 'quota_wait');
 assert.equal(backfillStatusPayload.data.cursor, 17);
 assert.equal(backfillStatusPayload.data.totalWords, 3000);
+assert.equal(backfillStatusPayload.data.schedule, 'hourly (UTC)');
 assert.equal(providerCallCount, 0, 'paused scheduled backfill must not call the AI provider');
 serverCache.delete('system-vocabulary:v1');
 serverCache.delete('system-vocabulary:backfill:v1');
@@ -597,7 +598,7 @@ customProviderResponse = async ({ body }) => {
 };
 const nonBlockingPending = [];
 await worker.scheduled(
-  { scheduledTime: Date.now(), cron: '*/15 * * * *' },
+  { scheduledTime: Date.now(), cron: '0 * * * *' },
   {
     ...env,
     XTROUTER_API_KEY: '',
@@ -613,6 +614,9 @@ assert.equal(nonBlockingState.status, 'active');
 assert.equal(nonBlockingState.cursor, 2);
 assert.equal(nonBlockingState.generated, 1);
 assert.equal(nonBlockingState.failed, 1);
+const stumbleRetry = JSON.parse(serverCache.get('system-vocabulary:backfill-retry:v1:stumble'));
+const stumbleRetryDelay = Date.parse(stumbleRetry.nextRetryAt) - Date.parse(stumbleRetry.lastTriedAt);
+assert.equal(stumbleRetryDelay, 60 * 60 * 1000, 'incomplete words must retry after one hour');
 assert.deepEqual(nonBlockingState.lastRunSummary, {
   scanned: 2,
   attempted: 2,

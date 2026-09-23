@@ -1833,12 +1833,23 @@ a {
 }
 
 /* Pagination Bar */
+.pagination-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.vocab-list-container {
+  scroll-margin-top: 16px;
+}
+
 .pagination-bar {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 20px;
 }
 
 .page-btn {
@@ -3003,6 +3014,66 @@ a {
 
 .reset-progress-btn:hover {
   background: rgba(244, 63, 94, 0.16);
+}
+
+.page-jump-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.page-jump-input {
+  width: 72px;
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: center;
+}
+
+.page-jump-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+  outline: none;
+}
+
+.page-jump-btn {
+  min-height: 38px;
+  padding: 7px 14px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .pagination-bar {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .pagination-bar .page-btn {
+    flex: 1;
+    justify-content: center;
+    padding-inline: 10px;
+  }
+
+  .page-indicator {
+    white-space: nowrap;
+  }
+
+  .page-jump-form {
+    width: 100%;
+  }
 }
 
 /* Vocabulary quality and harder quiz feedback */
