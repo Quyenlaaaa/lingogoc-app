@@ -3,16 +3,24 @@ import worker from './src/worker.js';
 
 let cachedResponse = null;
 const dictionaryEdgeCache = new Map();
+const vocabularyEdgeCache = new Map();
 globalThis.caches = {
   default: {
     match: async (key) => {
       const url = typeof key === 'string' ? key : key.url;
-      return url.includes('/dictionary/') ? dictionaryEdgeCache.get(url)?.clone() || null : null;
+      if (url.includes('/dictionary/')) return dictionaryEdgeCache.get(url)?.clone() || null;
+      if (url.includes('/vocabulary/')) return vocabularyEdgeCache.get(url)?.clone() || null;
+      return null;
     },
     put: async (key, response) => {
       cachedResponse = response;
       const url = typeof key === 'string' ? key : key.url;
       if (url.includes('/dictionary/')) dictionaryEdgeCache.set(url, response.clone());
+      if (url.includes('/vocabulary/')) vocabularyEdgeCache.set(url, response.clone());
+    },
+    delete: async (key) => {
+      const url = typeof key === 'string' ? key : key.url;
+      return dictionaryEdgeCache.delete(url) || vocabularyEdgeCache.delete(url);
     },
   },
 };
@@ -223,7 +231,7 @@ const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/voc
   body: JSON.stringify({ word: 'accept', meaning: 'chấp nhận', topic: 'Công việc' }),
 }), env, context);
 const kvPayload = await kvResponse.json();
-assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'KV');
+assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'HIT');
 assert.equal(kvPayload.data.persistedOnServer, true);
 assert.equal(providerCallCount, 3);
 
@@ -522,6 +530,19 @@ assert.equal(manualKvLimitResponse.status, 200, 'manual retry must return AI dat
 assert.equal(manualKvLimitPayload.data.contextExamples.length, 5);
 assert.equal(manualKvLimitPayload.data.persistedOnServer, false);
 assert.equal(manualKvLimitPayload.data.persistencePending, true);
+await Promise.all(pending);
+const providerCallsBeforeEdgeReload = providerCallCount;
+const edgeReloadBatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'ticket', pos: 'n' }] }),
+}), kvLimitedEnv, context);
+const edgeReloadBatchPayload = await edgeReloadBatchResponse.json();
+assert.equal(edgeReloadBatchResponse.status, 200);
+assert.equal(edgeReloadBatchPayload.data.items[0].enrichment.contextExamples.length, 5,
+  'page reload must recover completed examples from Edge Cache while KV writes are exhausted');
+assert.equal(providerCallCount, providerCallsBeforeEdgeReload,
+  'recovering examples after reload must not spend another AI request');
 customProviderResponse = null;
 
 let meaningProviderCalls = 0;
@@ -660,6 +681,6 @@ assert.deepEqual(nonBlockingState.lastRunSummary, {
   failed: 1,
   retrySkipped: 0,
 });
-assert.equal(scheduledProviderCalls, 2, 'one invalid word must not block the next vocabulary item');
+assert.equal(scheduledProviderCalls, 1, 'scheduled retries must reuse a valid Edge Cache result without another AI call');
 customProviderResponse = null;
 console.log('Worker vocabulary contract: OK');

@@ -478,19 +478,32 @@ async function enrichVocabulary(request, env, origin, context) {
   let bestPartial = null;
   const cached = await cache.match(cacheIdentity.edgeRequest);
   if (cached) {
+    let data = null;
     try {
       // Old edge entries with fewer than five distinct contexts are invalidated
       // and regenerated instead of being returned as a successful cache hit.
-      const data = normalizeEnrichment(await cached.json(), word);
+      data = normalizeEnrichment(await cached.json(), word);
+    } catch {
+      // Only invalid content should evict Edge Cache. A temporary KV write
+      // failure must keep the completed AI result available after page reload.
+      context.waitUntil(cache.delete(cacheIdentity.edgeRequest));
+    }
+    if (data) {
       if (env.VOCAB_CACHE && !data.persistedOnServer) {
         const backfilled = { ...data, persistedOnServer: true, serverSavedAt: new Date().toISOString() };
-        await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));
-        return json({ data: { ...backfilled, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+KV' });
+        try {
+          await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(backfilled));
+          return json({ data: { ...backfilled, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+KV' });
+        } catch (error) {
+          return json({ data: {
+            ...data,
+            fromCache: true,
+            persistencePending: true,
+            persistenceError: cleanText(String(error?.message || 'KV_WRITE_FAILED').split(':')[0], 120),
+          } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT+PENDING' });
+        }
       }
       return json({ data: { ...data, fromCache: true } }, 200, origin, { 'X-LingoGoc-Cache': 'HIT' });
-    } catch {
-      // Remove an incomplete edge response and continue with durable KV/AI.
-      context.waitUntil(cache.delete(cacheIdentity.edgeRequest));
     }
   }
 
@@ -706,6 +719,33 @@ async function getVocabularyBatch(request, env, origin) {
     } catch {
       enrichment = null;
       if (storedEnrichment) partial = normalizePartialEnrichment(storedEnrichment, item.word);
+    }
+    if (!enrichment) {
+      const edgeResponse = await caches.default.match(identity.edgeRequest);
+      if (edgeResponse) {
+        try {
+          enrichment = normalizeEnrichment(await edgeResponse.json(), item.word);
+          if (!enrichment.persistedOnServer) {
+            const backfilled = {
+              ...enrichment,
+              persistedOnServer: true,
+              serverSavedAt: new Date().toISOString(),
+            };
+            try {
+              await env.VOCAB_CACHE.put(identity.serverKey, JSON.stringify(backfilled));
+              enrichment = backfilled;
+            } catch (error) {
+              enrichment = {
+                ...enrichment,
+                persistencePending: true,
+                persistenceError: cleanText(String(error?.message || 'KV_WRITE_FAILED').split(':')[0], 120),
+              };
+            }
+          }
+        } catch {
+          enrichment = null;
+        }
+      }
     }
     // A complete enrichment already contains the canonical Vietnamese meaning.
     // Only spend a second KV read when that richer record is unavailable.

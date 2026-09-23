@@ -60,11 +60,15 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
         }
       } catch (error) {
         if (error?.name !== 'AbortError' && isMounted) {
-          setAiEnrichData({
-            isAiGenerated: false,
-            contextExamples: [],
-            unavailableReason: error?.message || 'Không thể tạo ví dụ đa ngữ cảnh.',
-          });
+          // Keep examples restored from browser storage when the server is
+          // temporarily unavailable; a failed refresh must not erase them.
+          if (!readyAiData) {
+            setAiEnrichData({
+              isAiGenerated: false,
+              contextExamples: [],
+              unavailableReason: error?.message || 'Không thể tạo ví dụ đa ngữ cảnh.',
+            });
+          }
         }
       } finally {
         if (isMounted) setLoading(false);

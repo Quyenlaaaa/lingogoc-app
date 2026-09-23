@@ -1,5 +1,9 @@
 import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi.js';
-import { cacheWordEnrichment, getCachedWordEnrichment } from './geminiService.js';
+import {
+  cacheWordEnrichment,
+  getCachedWordEnrichment,
+  getDurableCachedWordEnrichment,
+} from './geminiService.js';
 import {
   cacheVietnameseMeaning,
   getCachedVietnameseMeaning,
@@ -28,13 +32,14 @@ export async function fetchVocabularyBatch(items, signal) {
   });
 
   const results = {};
-  unique.forEach((item) => {
+  await Promise.all(unique.map(async (item) => {
     const meaning = getCachedVietnameseMeaning(item);
-    const enrichment = getCachedWordEnrichment(item.word);
+    const enrichment = getCachedWordEnrichment(item.word)
+      || await getDurableCachedWordEnrichment(item.word);
     if (meaning || enrichment) {
       results[item.word.toLowerCase()] = { meaning, enrichment, fromLocalCache: true };
     }
-  });
+  }));
   if (!unique.length || !hasBackendApi()) return results;
 
   const requestKey = batchKey(unique);

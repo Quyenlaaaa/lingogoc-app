@@ -166,6 +166,14 @@ async function readPersistentEnrichment(word) {
   });
 }
 
+export async function getDurableCachedWordEnrichment(word) {
+  const cached = getCachedWordEnrichment(word);
+  if (cached) return cached;
+  const persistent = await readPersistentEnrichment(word);
+  if (!persistent) return null;
+  return cacheWordEnrichment(word, persistent);
+}
+
 async function writePersistentEnrichment(word, payload) {
   const database = await openCacheDatabase();
   if (!database) return;
