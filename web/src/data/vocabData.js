@@ -1,28 +1,5 @@
-// vocabData.js - 3000 Oxford Essential Words with IPA, VN meanings & examples
-// Generated for LingoGoc AI
-
-export const topics = [
-  'Tất cả',
-  'Chào hỏi & Giao tiếp',
-  'Ăn uống',
-  'Gia đình',
-  'Mua sắm',
-  'Đi lại & Du lịch',
-  'Công việc & Công sở',
-  'Sức khỏe & Y tế',
-  'Cảm xúc & Tính cách',
-  'Thời gian & Ngày tháng',
-  'Nhà cửa & Đồ vật',
-  'Công nghệ & Thiết bị',
-  'Thời tiết & Thiên nhiên',
-  'Giáo dục & Học tập',
-  'Thể thao & Giải trí',
-  'Đời sống'
-];
-
-export const levels = ['Tất cả', 'A1 (Cốt lõi)', 'A2 (Mở rộng)', 'B1 (Làm chủ)'];
-
-export const vocabList = [
+// LingoGoc system vocabulary. IPA backfilled from open-dict-data/ipa-dict (MIT).
+export const vocabData = [
   {
     "id": 1,
     "word": "abandon",
@@ -191,7 +168,7 @@ export const vocabList = [
   {
     "id": 16,
     "word": "according to",
-    "ipa": "/according to/",
+    "ipa": "/əˈkɔɹdɪŋ ˈtu/",
     "pos": "prep",
     "meaning": "từ 'according to' (prep)",
     "example": "Practice speaking 'according to' clearly.",
@@ -543,7 +520,7 @@ export const vocabList = [
   {
     "id": 48,
     "word": "advertise",
-    "ipa": "/advertise/",
+    "ipa": "/ˈædvɝˌtaɪz/",
     "pos": "v",
     "meaning": "từ 'advertise' (v)",
     "example": "Practice speaking 'advertise' clearly.",
@@ -565,7 +542,7 @@ export const vocabList = [
   {
     "id": 50,
     "word": "advertising",
-    "ipa": "/advertising/",
+    "ipa": "/ˈædvɝˌtaɪzɪŋ/",
     "pos": "n",
     "meaning": "từ 'advertising' (n)",
     "example": "Practice speaking 'advertising' clearly.",
@@ -664,7 +641,7 @@ export const vocabList = [
   {
     "id": 59,
     "word": "afterwards",
-    "ipa": "/afterwards/",
+    "ipa": "/ˈæftɝwɝdz/",
     "pos": "adv",
     "meaning": "từ 'afterwards' (adv)",
     "example": "Practice speaking 'afterwards' clearly.",
@@ -862,7 +839,7 @@ export const vocabList = [
   {
     "id": 77,
     "word": "airline",
-    "ipa": "/airline/",
+    "ipa": "/ˈɛɹˌɫaɪn/",
     "pos": "n",
     "meaning": "từ 'airline' (n)",
     "example": "Practice speaking 'airline' clearly.",
@@ -873,7 +850,7 @@ export const vocabList = [
   {
     "id": 78,
     "word": "airport",
-    "ipa": "/airport/",
+    "ipa": "/ˈɛɹˌpɔɹt/",
     "pos": "n",
     "meaning": "từ 'airport' (n)",
     "example": "Practice speaking 'airport' clearly.",
@@ -950,7 +927,7 @@ export const vocabList = [
   {
     "id": 85,
     "word": "allright",
-    "ipa": "/allright/",
+    "ipa": "/ɑɫˈɹaɪt/",
     "pos": "adj/adv",
     "meaning": "từ 'allright' (adj/adv)",
     "example": "Practice speaking 'allright' clearly.",
@@ -1071,7 +1048,7 @@ export const vocabList = [
   {
     "id": 96,
     "word": "amazed",
-    "ipa": "/amazed/",
+    "ipa": "/əˈmeɪzd/",
     "pos": "adj",
     "meaning": "từ 'amazed' (adj)",
     "example": "Practice speaking 'amazed' clearly.",
@@ -1115,7 +1092,7 @@ export const vocabList = [
   {
     "id": 100,
     "word": "among",
-    "ipa": "/among/",
+    "ipa": "/əˈməŋ/",
     "pos": "prep",
     "meaning": "từ 'among' (prep)",
     "example": "Practice speaking 'among' clearly.",
@@ -1368,7 +1345,7 @@ export const vocabList = [
   {
     "id": 123,
     "word": "any more",
-    "ipa": "/any more/",
+    "ipa": "/ˈɛni ˈmɔɹ/",
     "pos": "adv",
     "meaning": "từ 'any more' (adv)",
     "example": "Practice speaking 'any more' clearly.",
@@ -1401,7 +1378,7 @@ export const vocabList = [
   {
     "id": 126,
     "word": "anyway",
-    "ipa": "/anyway/",
+    "ipa": "/ˈɛniˌweɪ/",
     "pos": "adv",
     "meaning": "từ 'anyway' (adv)",
     "example": "Practice speaking 'anyway' clearly.",
@@ -1445,7 +1422,7 @@ export const vocabList = [
   {
     "id": 130,
     "word": "apologize",
-    "ipa": "/apologize/",
+    "ipa": "/əˈpɑɫəˌdʒaɪz/",
     "pos": "v",
     "meaning": "từ 'apologize' (v)",
     "example": "Practice speaking 'apologize' clearly.",
@@ -1456,7 +1433,7 @@ export const vocabList = [
   {
     "id": 131,
     "word": "app",
-    "ipa": "/app/",
+    "ipa": "/ˈæp/",
     "pos": "n",
     "meaning": "từ 'app' (n)",
     "example": "Practice speaking 'app' clearly.",
@@ -1478,7 +1455,7 @@ export const vocabList = [
   {
     "id": 133,
     "word": "apparently",
-    "ipa": "/apparently/",
+    "ipa": "/əˈpɛɹəntɫi/",
     "pos": "adv",
     "meaning": "từ 'apparently' (adv)",
     "example": "Practice speaking 'apparently' clearly.",
@@ -1621,7 +1598,7 @@ export const vocabList = [
   {
     "id": 146,
     "word": "approximately",
-    "ipa": "/approximately/",
+    "ipa": "/əˈpɹɑksəmətɫi/",
     "pos": "adv",
     "meaning": "từ 'approximately' (adv)",
     "example": "Practice speaking 'approximately' clearly.",
@@ -1731,7 +1708,7 @@ export const vocabList = [
   {
     "id": 156,
     "word": "arms",
-    "ipa": "/arms/",
+    "ipa": "/ˈɑɹmz/",
     "pos": "n",
     "meaning": "từ 'arms' (n)",
     "example": "Practice speaking 'arms' clearly.",
@@ -1863,7 +1840,7 @@ export const vocabList = [
   {
     "id": 168,
     "word": "artistic",
-    "ipa": "/artistic/",
+    "ipa": "/ɑɹˈtɪstɪk/",
     "pos": "adj",
     "meaning": "từ 'artistic' (adj)",
     "example": "Practice speaking 'artistic' clearly.",
@@ -1995,7 +1972,7 @@ export const vocabList = [
   {
     "id": 180,
     "word": "associated",
-    "ipa": "/associated/",
+    "ipa": "/əˈsoʊsiˌeɪtɪd/",
     "pos": "adj",
     "meaning": "từ 'associated' (adj)",
     "example": "Practice speaking 'associated' clearly.",
@@ -2512,7 +2489,7 @@ export const vocabList = [
   {
     "id": 227,
     "word": "based",
-    "ipa": "/based/",
+    "ipa": "/ˈbeɪst/",
     "pos": "adj",
     "meaning": "từ 'based' (adj)",
     "example": "Practice speaking 'based' clearly.",
@@ -2556,7 +2533,7 @@ export const vocabList = [
   {
     "id": 231,
     "word": "basketball",
-    "ipa": "/basketball/",
+    "ipa": "/ˈbæskətˌbɔɫ/",
     "pos": "n",
     "meaning": "từ 'basketball' (n)",
     "example": "Practice speaking 'basketball' clearly.",
@@ -2710,7 +2687,7 @@ export const vocabList = [
   {
     "id": 245,
     "word": "bed",
-    "ipa": "/bed/",
+    "ipa": "/ˈbɛd/",
     "pos": "n",
     "meaning": "cái giường",
     "example": "She used the word 'bed' in her sentence.",
@@ -2776,7 +2753,7 @@ export const vocabList = [
   {
     "id": 251,
     "word": "beg",
-    "ipa": "/beg/",
+    "ipa": "/ˈbɛɡ/",
     "pos": "v",
     "meaning": "ăn xin, xin",
     "example": "She used the word 'beg' in her sentence.",
@@ -2908,7 +2885,7 @@ export const vocabList = [
   {
     "id": 263,
     "word": "belt",
-    "ipa": "/belt/",
+    "ipa": "/ˈbɛɫt/",
     "pos": "n",
     "meaning": "dây lưng, thắt lưng",
     "example": "She used the word 'belt' in her sentence.",
@@ -2941,7 +2918,7 @@ export const vocabList = [
   {
     "id": 266,
     "word": "bent",
-    "ipa": "/bent/",
+    "ipa": "/ˈbɛnt/",
     "pos": "adj",
     "meaning": "khiếu, sở thích; xu hướng, khuynh hướng",
     "example": "She used the word 'bent' in her sentence.",
@@ -2952,7 +2929,7 @@ export const vocabList = [
   {
     "id": 267,
     "word": "best",
-    "ipa": "/best/",
+    "ipa": "/ˈbɛst/",
     "pos": "adj",
     "meaning": "tốt nhất, hay nhất, đẹp nhất, giỏi nhất",
     "example": "She used the word 'best' in her sentence.",
@@ -2963,7 +2940,7 @@ export const vocabList = [
   {
     "id": 268,
     "word": "bet",
-    "ipa": "/bet/",
+    "ipa": "/ˈbɛt/",
     "pos": "v",
     "meaning": "sự đánh cuộc",
     "example": "She used the word 'bet' in her sentence.",
@@ -3018,7 +2995,7 @@ export const vocabList = [
   {
     "id": 273,
     "word": "big",
-    "ipa": "/big/",
+    "ipa": "/ˈbɪɡ/",
     "pos": "adj",
     "meaning": "to, lớn",
     "example": "She used the word 'big' in her sentence.",
@@ -3062,7 +3039,7 @@ export const vocabList = [
   {
     "id": 277,
     "word": "bin",
-    "ipa": "/bin/",
+    "ipa": "/ˈbɪn/",
     "pos": "n",
     "meaning": "thùng",
     "example": "She used the word 'bin' in her sentence.",
@@ -3128,7 +3105,7 @@ export const vocabList = [
   {
     "id": 283,
     "word": "bit",
-    "ipa": "/bit/",
+    "ipa": "/ˈbɪt/",
     "pos": "n",
     "meaning": "miếng ; mảnh mẫu",
     "example": "She used the word 'bit' in her sentence.",
@@ -3216,7 +3193,7 @@ export const vocabList = [
   {
     "id": 291,
     "word": "blog",
-    "ipa": "/blog/",
+    "ipa": "/ˈbɫɔɡ/",
     "pos": "n",
     "meaning": "từ 'blog' (n)",
     "example": "Practice speaking 'blog' clearly.",
@@ -3381,7 +3358,7 @@ export const vocabList = [
   {
     "id": 306,
     "word": "bored",
-    "ipa": "/bored/",
+    "ipa": "/ˈbɔɹd/",
     "pos": "adj",
     "meaning": "từ 'bored' (adj)",
     "example": "Practice speaking 'bored' clearly.",
@@ -3513,7 +3490,7 @@ export const vocabList = [
   {
     "id": 318,
     "word": "boyfriend",
-    "ipa": "/boyfriend/",
+    "ipa": "/ˈbɔɪˌfɹɛnd/",
     "pos": "n",
     "meaning": "từ 'boyfriend' (n)",
     "example": "Practice speaking 'boyfriend' clearly.",
@@ -3887,7 +3864,7 @@ export const vocabList = [
   {
     "id": 352,
     "word": "business",
-    "ipa": "/business/",
+    "ipa": "/ˈbɪznəs/",
     "pos": "n",
     "meaning": "từ 'business' (n)",
     "example": "Practice speaking 'business' clearly.",
@@ -3898,7 +3875,7 @@ export const vocabList = [
   {
     "id": 353,
     "word": "businessman",
-    "ipa": "/businessman/",
+    "ipa": "/ˈbɪznəsˌmæn/",
     "pos": "n",
     "meaning": "từ 'businessman' (n)",
     "example": "Practice speaking 'businessman' clearly.",
@@ -4085,7 +4062,7 @@ export const vocabList = [
   {
     "id": 370,
     "word": "camping",
-    "ipa": "/camping/",
+    "ipa": "/ˈkæmpɪŋ/",
     "pos": "n",
     "meaning": "từ 'camping' (n)",
     "example": "Practice speaking 'camping' clearly.",
@@ -4102,28 +4079,6 @@ export const vocabList = [
     "example": "She used the word 'campus' in her sentence.",
     "exampleVi": "Cô ấy đã dùng từ 'campus' trong câu của mình.",
     "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 372,
-    "word": "can1",
-    "ipa": "/can1/",
-    "pos": "modal v",
-    "meaning": "từ 'can1' (modal v)",
-    "example": "Practice speaking 'can1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'can1' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 373,
-    "word": "can2",
-    "ipa": "/can2/",
-    "pos": "n",
-    "meaning": "từ 'can2' (n)",
-    "example": "Practice speaking 'can2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'can2' thật rõ ràng.",
-    "level": "A2",
     "topic": "Đời sống"
   },
   {
@@ -4162,7 +4117,7 @@ export const vocabList = [
   {
     "id": 377,
     "word": "cannot",
-    "ipa": "/cannot/",
+    "ipa": "/ˈkænɑt/",
     "pos": "v",
     "meaning": "từ 'cannot' (v)",
     "example": "Practice speaking 'cannot' clearly.",
@@ -4173,7 +4128,7 @@ export const vocabList = [
   {
     "id": 378,
     "word": "cap",
-    "ipa": "/cap/",
+    "ipa": "/ˈkæp/",
     "pos": "n",
     "meaning": "từ 'cap' (n)",
     "example": "Practice speaking 'cap' clearly.",
@@ -4184,7 +4139,7 @@ export const vocabList = [
   {
     "id": 379,
     "word": "capable",
-    "ipa": "/capable/",
+    "ipa": "/ˈkeɪpəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'capable' (adj)",
     "example": "Practice speaking 'capable' clearly.",
@@ -4195,7 +4150,7 @@ export const vocabList = [
   {
     "id": 380,
     "word": "capacity",
-    "ipa": "/capacity/",
+    "ipa": "/kəˈpæsəti/",
     "pos": "n",
     "meaning": "từ 'capacity' (n)",
     "example": "Practice speaking 'capacity' clearly.",
@@ -4206,7 +4161,7 @@ export const vocabList = [
   {
     "id": 381,
     "word": "capital",
-    "ipa": "/capital/",
+    "ipa": "/ˈkæpətəɫ/",
     "pos": "n",
     "meaning": "từ 'capital' (n)",
     "example": "Practice speaking 'capital' clearly.",
@@ -4217,7 +4172,7 @@ export const vocabList = [
   {
     "id": 382,
     "word": "captain",
-    "ipa": "/captain/",
+    "ipa": "/ˈkæptən/",
     "pos": "n",
     "meaning": "từ 'captain' (n)",
     "example": "Practice speaking 'captain' clearly.",
@@ -4228,7 +4183,7 @@ export const vocabList = [
   {
     "id": 383,
     "word": "capture",
-    "ipa": "/capture/",
+    "ipa": "/ˈkæptʃɝ/",
     "pos": "v",
     "meaning": "từ 'capture' (v)",
     "example": "Practice speaking 'capture' clearly.",
@@ -4239,7 +4194,7 @@ export const vocabList = [
   {
     "id": 384,
     "word": "car",
-    "ipa": "/car/",
+    "ipa": "/ˈkɑɹ/",
     "pos": "n",
     "meaning": "từ 'car' (n)",
     "example": "Practice speaking 'car' clearly.",
@@ -4250,7 +4205,7 @@ export const vocabList = [
   {
     "id": 385,
     "word": "card",
-    "ipa": "/card/",
+    "ipa": "/ˈkɑɹd/",
     "pos": "n",
     "meaning": "từ 'card' (n)",
     "example": "Practice speaking 'card' clearly.",
@@ -4261,7 +4216,7 @@ export const vocabList = [
   {
     "id": 386,
     "word": "care",
-    "ipa": "/care/",
+    "ipa": "/ˈkɛɹ/",
     "pos": "n",
     "meaning": "từ 'care' (n)",
     "example": "Practice speaking 'care' clearly.",
@@ -4283,7 +4238,7 @@ export const vocabList = [
   {
     "id": 388,
     "word": "careful",
-    "ipa": "/careful/",
+    "ipa": "/ˈkɛɹfəɫ/",
     "pos": "adj",
     "meaning": "từ 'careful' (adj)",
     "example": "Practice speaking 'careful' clearly.",
@@ -4294,7 +4249,7 @@ export const vocabList = [
   {
     "id": 389,
     "word": "carefully",
-    "ipa": "/carefully/",
+    "ipa": "/ˈkɛɹfəɫi/",
     "pos": "adv",
     "meaning": "từ 'carefully' (adv)",
     "example": "Practice speaking 'carefully' clearly.",
@@ -4305,7 +4260,7 @@ export const vocabList = [
   {
     "id": 390,
     "word": "careless",
-    "ipa": "/careless/",
+    "ipa": "/ˈkɛɹɫəs/",
     "pos": "adj",
     "meaning": "từ 'careless' (adj)",
     "example": "Practice speaking 'careless' clearly.",
@@ -4316,7 +4271,7 @@ export const vocabList = [
   {
     "id": 391,
     "word": "carpet",
-    "ipa": "/carpet/",
+    "ipa": "/ˈkɑɹpət/",
     "pos": "n",
     "meaning": "từ 'carpet' (n)",
     "example": "Practice speaking 'carpet' clearly.",
@@ -4327,7 +4282,7 @@ export const vocabList = [
   {
     "id": 392,
     "word": "carrot",
-    "ipa": "/carrot/",
+    "ipa": "/ˈkæɹət/",
     "pos": "n",
     "meaning": "từ 'carrot' (n)",
     "example": "Practice speaking 'carrot' clearly.",
@@ -4338,7 +4293,7 @@ export const vocabList = [
   {
     "id": 393,
     "word": "carry",
-    "ipa": "/carry/",
+    "ipa": "/ˈkæɹi/",
     "pos": "v",
     "meaning": "từ 'carry' (v)",
     "example": "Practice speaking 'carry' clearly.",
@@ -4360,7 +4315,7 @@ export const vocabList = [
   {
     "id": 395,
     "word": "case",
-    "ipa": "/case/",
+    "ipa": "/ˈkeɪs/",
     "pos": "n",
     "meaning": "từ 'case' (n)",
     "example": "Practice speaking 'case' clearly.",
@@ -4382,7 +4337,7 @@ export const vocabList = [
   {
     "id": 397,
     "word": "cast",
-    "ipa": "/cast/",
+    "ipa": "/ˈkæst/",
     "pos": "n",
     "meaning": "từ 'cast' (n)",
     "example": "Practice speaking 'cast' clearly.",
@@ -4393,7 +4348,7 @@ export const vocabList = [
   {
     "id": 398,
     "word": "castle",
-    "ipa": "/castle/",
+    "ipa": "/ˈkæsəɫ/",
     "pos": "n",
     "meaning": "từ 'castle' (n)",
     "example": "Practice speaking 'castle' clearly.",
@@ -4404,7 +4359,7 @@ export const vocabList = [
   {
     "id": 399,
     "word": "cat",
-    "ipa": "/cat/",
+    "ipa": "/ˈkæt/",
     "pos": "n",
     "meaning": "từ 'cat' (n)",
     "example": "Practice speaking 'cat' clearly.",
@@ -4426,7 +4381,7 @@ export const vocabList = [
   {
     "id": 401,
     "word": "category",
-    "ipa": "/category/",
+    "ipa": "/ˈkætəˌɡɔɹi/",
     "pos": "n",
     "meaning": "từ 'category' (n)",
     "example": "Practice speaking 'category' clearly.",
@@ -4437,7 +4392,7 @@ export const vocabList = [
   {
     "id": 402,
     "word": "cause",
-    "ipa": "/cause/",
+    "ipa": "/ˈkɑz/",
     "pos": "n",
     "meaning": "từ 'cause' (n)",
     "example": "Practice speaking 'cause' clearly.",
@@ -4448,7 +4403,7 @@ export const vocabList = [
   {
     "id": 403,
     "word": "cd",
-    "ipa": "/cd/",
+    "ipa": "/ˌsiˈdi/",
     "pos": "n",
     "meaning": "từ 'cd' (n)",
     "example": "Practice speaking 'cd' clearly.",
@@ -4459,7 +4414,7 @@ export const vocabList = [
   {
     "id": 404,
     "word": "ceiling",
-    "ipa": "/ceiling/",
+    "ipa": "/ˈsiɫɪŋ/",
     "pos": "n",
     "meaning": "từ 'ceiling' (n)",
     "example": "Practice speaking 'ceiling' clearly.",
@@ -4470,7 +4425,7 @@ export const vocabList = [
   {
     "id": 405,
     "word": "celebrate",
-    "ipa": "/celebrate/",
+    "ipa": "/ˈsɛɫəˌbɹeɪt/",
     "pos": "v",
     "meaning": "từ 'celebrate' (v)",
     "example": "Practice speaking 'celebrate' clearly.",
@@ -4481,7 +4436,7 @@ export const vocabList = [
   {
     "id": 406,
     "word": "celebration",
-    "ipa": "/celebration/",
+    "ipa": "/ˌsɛɫəˈbɹeɪʃən/",
     "pos": "n",
     "meaning": "từ 'celebration' (n)",
     "example": "Practice speaking 'celebration' clearly.",
@@ -4492,7 +4447,7 @@ export const vocabList = [
   {
     "id": 407,
     "word": "celebrity",
-    "ipa": "/celebrity/",
+    "ipa": "/səˈɫɛbɹɪti/",
     "pos": "n",
     "meaning": "từ 'celebrity' (n)",
     "example": "Practice speaking 'celebrity' clearly.",
@@ -4503,7 +4458,7 @@ export const vocabList = [
   {
     "id": 408,
     "word": "cell",
-    "ipa": "/cell/",
+    "ipa": "/ˈsɛɫ/",
     "pos": "n",
     "meaning": "từ 'cell' (n)",
     "example": "Practice speaking 'cell' clearly.",
@@ -4514,7 +4469,7 @@ export const vocabList = [
   {
     "id": 409,
     "word": "cent",
-    "ipa": "/cent/",
+    "ipa": "/ˈsɛnt/",
     "pos": "n",
     "meaning": "từ 'cent' (n)",
     "example": "Practice speaking 'cent' clearly.",
@@ -4525,7 +4480,7 @@ export const vocabList = [
   {
     "id": 410,
     "word": "central",
-    "ipa": "/central/",
+    "ipa": "/ˈsɛntɹəɫ/",
     "pos": "adj",
     "meaning": "từ 'central' (adj)",
     "example": "Practice speaking 'central' clearly.",
@@ -4536,7 +4491,7 @@ export const vocabList = [
   {
     "id": 411,
     "word": "centre",
-    "ipa": "/centre/",
+    "ipa": "/ˈsɛntɝ/",
     "pos": "n",
     "meaning": "từ 'centre' (n)",
     "example": "Practice speaking 'centre' clearly.",
@@ -4547,7 +4502,7 @@ export const vocabList = [
   {
     "id": 412,
     "word": "century",
-    "ipa": "/century/",
+    "ipa": "/ˈsɛntʃɝi/",
     "pos": "n",
     "meaning": "từ 'century' (n)",
     "example": "Practice speaking 'century' clearly.",
@@ -4558,7 +4513,7 @@ export const vocabList = [
   {
     "id": 413,
     "word": "ceremony",
-    "ipa": "/ceremony/",
+    "ipa": "/ˈsɛɹəˌmoʊni/",
     "pos": "n",
     "meaning": "từ 'ceremony' (n)",
     "example": "Practice speaking 'ceremony' clearly.",
@@ -4569,7 +4524,7 @@ export const vocabList = [
   {
     "id": 414,
     "word": "certain",
-    "ipa": "/certain/",
+    "ipa": "/ˈsɝtən/",
     "pos": "adj",
     "meaning": "từ 'certain' (adj)",
     "example": "Practice speaking 'certain' clearly.",
@@ -4580,7 +4535,7 @@ export const vocabList = [
   {
     "id": 415,
     "word": "certainly",
-    "ipa": "/certainly/",
+    "ipa": "/ˈsɝtənɫi/",
     "pos": "adv",
     "meaning": "từ 'certainly' (adv)",
     "example": "Practice speaking 'certainly' clearly.",
@@ -4954,7 +4909,7 @@ export const vocabList = [
   {
     "id": 449,
     "word": "cigarette",
-    "ipa": "/cigarette/",
+    "ipa": "/ˌsɪɡɝˈɛt/",
     "pos": "n",
     "meaning": "từ 'cigarette' (n)",
     "example": "Practice speaking 'cigarette' clearly.",
@@ -4965,7 +4920,7 @@ export const vocabList = [
   {
     "id": 450,
     "word": "cinema",
-    "ipa": "/cinema/",
+    "ipa": "/ˈsɪnəmə/",
     "pos": "n",
     "meaning": "từ 'cinema' (n)",
     "example": "Practice speaking 'cinema' clearly.",
@@ -4976,7 +4931,7 @@ export const vocabList = [
   {
     "id": 451,
     "word": "circle",
-    "ipa": "/circle/",
+    "ipa": "/ˈsɝkəɫ/",
     "pos": "n",
     "meaning": "từ 'circle' (n)",
     "example": "Practice speaking 'circle' clearly.",
@@ -4987,7 +4942,7 @@ export const vocabList = [
   {
     "id": 452,
     "word": "circumstance",
-    "ipa": "/circumstance/",
+    "ipa": "/ˈsɝkəmˌstæns/",
     "pos": "n",
     "meaning": "từ 'circumstance' (n)",
     "example": "Practice speaking 'circumstance' clearly.",
@@ -4998,7 +4953,7 @@ export const vocabList = [
   {
     "id": 453,
     "word": "cite",
-    "ipa": "/cite/",
+    "ipa": "/ˈsaɪt/",
     "pos": "v",
     "meaning": "từ 'cite' (v)",
     "example": "Practice speaking 'cite' clearly.",
@@ -5009,7 +4964,7 @@ export const vocabList = [
   {
     "id": 454,
     "word": "citizen",
-    "ipa": "/citizen/",
+    "ipa": "/ˈsɪtəzən/",
     "pos": "n",
     "meaning": "từ 'citizen' (n)",
     "example": "Practice speaking 'citizen' clearly.",
@@ -5020,7 +4975,7 @@ export const vocabList = [
   {
     "id": 455,
     "word": "city",
-    "ipa": "/city/",
+    "ipa": "/ˈsɪti/",
     "pos": "n",
     "meaning": "từ 'city' (n)",
     "example": "Practice speaking 'city' clearly.",
@@ -5031,7 +4986,7 @@ export const vocabList = [
   {
     "id": 456,
     "word": "civil",
-    "ipa": "/civil/",
+    "ipa": "/ˈsɪvəɫ/",
     "pos": "adj",
     "meaning": "từ 'civil' (adj)",
     "example": "Practice speaking 'civil' clearly.",
@@ -5042,7 +4997,7 @@ export const vocabList = [
   {
     "id": 457,
     "word": "claim",
-    "ipa": "/claim/",
+    "ipa": "/ˈkɫeɪm/",
     "pos": "v",
     "meaning": "từ 'claim' (v)",
     "example": "Practice speaking 'claim' clearly.",
@@ -5053,7 +5008,7 @@ export const vocabList = [
   {
     "id": 458,
     "word": "class",
-    "ipa": "/class/",
+    "ipa": "/ˈkɫæs/",
     "pos": "n",
     "meaning": "từ 'class' (n)",
     "example": "Practice speaking 'class' clearly.",
@@ -5064,7 +5019,7 @@ export const vocabList = [
   {
     "id": 459,
     "word": "classic",
-    "ipa": "/classic/",
+    "ipa": "/ˈkɫæsɪk/",
     "pos": "adj",
     "meaning": "từ 'classic' (adj)",
     "example": "Practice speaking 'classic' clearly.",
@@ -5075,7 +5030,7 @@ export const vocabList = [
   {
     "id": 460,
     "word": "classical",
-    "ipa": "/classical/",
+    "ipa": "/ˈkɫæsɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'classical' (adj)",
     "example": "Practice speaking 'classical' clearly.",
@@ -5097,7 +5052,7 @@ export const vocabList = [
   {
     "id": 462,
     "word": "clause",
-    "ipa": "/clause/",
+    "ipa": "/ˈkɫɔz/",
     "pos": "n",
     "meaning": "từ 'clause' (n)",
     "example": "Practice speaking 'clause' clearly.",
@@ -5119,7 +5074,7 @@ export const vocabList = [
   {
     "id": 464,
     "word": "clear",
-    "ipa": "/clear/",
+    "ipa": "/ˈkɫɪɹ/",
     "pos": "adj",
     "meaning": "từ 'clear' (adj)",
     "example": "Practice speaking 'clear' clearly.",
@@ -5130,7 +5085,7 @@ export const vocabList = [
   {
     "id": 465,
     "word": "clearly",
-    "ipa": "/clearly/",
+    "ipa": "/ˈkɫɪɹɫi/",
     "pos": "adv",
     "meaning": "từ 'clearly' (adv)",
     "example": "Practice speaking 'clearly' clearly.",
@@ -5141,7 +5096,7 @@ export const vocabList = [
   {
     "id": 466,
     "word": "clever",
-    "ipa": "/clever/",
+    "ipa": "/ˈkɫɛvɝ/",
     "pos": "adj",
     "meaning": "từ 'clever' (adj)",
     "example": "Practice speaking 'clever' clearly.",
@@ -5152,7 +5107,7 @@ export const vocabList = [
   {
     "id": 467,
     "word": "click",
-    "ipa": "/click/",
+    "ipa": "/ˈkɫɪk/",
     "pos": "v",
     "meaning": "từ 'click' (v)",
     "example": "Practice speaking 'click' clearly.",
@@ -5163,7 +5118,7 @@ export const vocabList = [
   {
     "id": 468,
     "word": "client",
-    "ipa": "/client/",
+    "ipa": "/ˈkɫaɪənt/",
     "pos": "n",
     "meaning": "từ 'client' (n)",
     "example": "Practice speaking 'client' clearly.",
@@ -5174,7 +5129,7 @@ export const vocabList = [
   {
     "id": 469,
     "word": "climate",
-    "ipa": "/climate/",
+    "ipa": "/ˈkɫaɪmət/",
     "pos": "n",
     "meaning": "từ 'climate' (n)",
     "example": "Practice speaking 'climate' clearly.",
@@ -5185,7 +5140,7 @@ export const vocabList = [
   {
     "id": 470,
     "word": "climb",
-    "ipa": "/climb/",
+    "ipa": "/ˈkɫaɪm/",
     "pos": "v",
     "meaning": "từ 'climb' (v)",
     "example": "Practice speaking 'climb' clearly.",
@@ -5196,7 +5151,7 @@ export const vocabList = [
   {
     "id": 471,
     "word": "clock",
-    "ipa": "/clock/",
+    "ipa": "/ˈkɫɑk/",
     "pos": "n",
     "meaning": "từ 'clock' (n)",
     "example": "Practice speaking 'clock' clearly.",
@@ -5205,31 +5160,9 @@ export const vocabList = [
     "topic": "Thời gian & Ngày tháng"
   },
   {
-    "id": 472,
-    "word": "close1",
-    "ipa": "/close1/",
-    "pos": "v",
-    "meaning": "từ 'close1' (v)",
-    "example": "Practice speaking 'close1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'close1' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 473,
-    "word": "close2",
-    "ipa": "/close2/",
-    "pos": "adj",
-    "meaning": "từ 'close2' (adj)",
-    "example": "Practice speaking 'close2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'close2' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 474,
     "word": "closed",
-    "ipa": "/closed/",
+    "ipa": "/ˈkɫoʊzd/",
     "pos": "adj",
     "meaning": "từ 'closed' (adj)",
     "example": "Practice speaking 'closed' clearly.",
@@ -5240,7 +5173,7 @@ export const vocabList = [
   {
     "id": 475,
     "word": "closely",
-    "ipa": "/closely/",
+    "ipa": "/ˈkɫoʊsɫi/",
     "pos": "adv",
     "meaning": "từ 'closely' (adv)",
     "example": "Practice speaking 'closely' clearly.",
@@ -5284,7 +5217,7 @@ export const vocabList = [
   {
     "id": 479,
     "word": "cloud",
-    "ipa": "/cloud/",
+    "ipa": "/ˈkɫaʊd/",
     "pos": "n",
     "meaning": "từ 'cloud' (n)",
     "example": "Practice speaking 'cloud' clearly.",
@@ -5295,7 +5228,7 @@ export const vocabList = [
   {
     "id": 480,
     "word": "club",
-    "ipa": "/club/",
+    "ipa": "/ˈkɫəb/",
     "pos": "n",
     "meaning": "từ 'club' (n)",
     "example": "Practice speaking 'club' clearly.",
@@ -5306,7 +5239,7 @@ export const vocabList = [
   {
     "id": 481,
     "word": "clue",
-    "ipa": "/clue/",
+    "ipa": "/ˈkɫu/",
     "pos": "n",
     "meaning": "từ 'clue' (n)",
     "example": "Practice speaking 'clue' clearly.",
@@ -5328,7 +5261,7 @@ export const vocabList = [
   {
     "id": 483,
     "word": "coal",
-    "ipa": "/coal/",
+    "ipa": "/ˈkoʊɫ/",
     "pos": "n",
     "meaning": "từ 'coal' (n)",
     "example": "Practice speaking 'coal' clearly.",
@@ -5339,7 +5272,7 @@ export const vocabList = [
   {
     "id": 484,
     "word": "coast",
-    "ipa": "/coast/",
+    "ipa": "/ˈkoʊst/",
     "pos": "n",
     "meaning": "từ 'coast' (n)",
     "example": "Practice speaking 'coast' clearly.",
@@ -5350,7 +5283,7 @@ export const vocabList = [
   {
     "id": 485,
     "word": "coat",
-    "ipa": "/coat/",
+    "ipa": "/ˈkoʊt/",
     "pos": "n",
     "meaning": "từ 'coat' (n)",
     "example": "Practice speaking 'coat' clearly.",
@@ -5361,7 +5294,7 @@ export const vocabList = [
   {
     "id": 486,
     "word": "code",
-    "ipa": "/code/",
+    "ipa": "/ˈkoʊd/",
     "pos": "n",
     "meaning": "từ 'code' (n)",
     "example": "Practice speaking 'code' clearly.",
@@ -5383,7 +5316,7 @@ export const vocabList = [
   {
     "id": 488,
     "word": "coin",
-    "ipa": "/coin/",
+    "ipa": "/ˈkɔɪn/",
     "pos": "n",
     "meaning": "từ 'coin' (n)",
     "example": "Practice speaking 'coin' clearly.",
@@ -5394,7 +5327,7 @@ export const vocabList = [
   {
     "id": 489,
     "word": "cold",
-    "ipa": "/cold/",
+    "ipa": "/ˈkoʊɫd/",
     "pos": "adj",
     "meaning": "từ 'cold' (adj)",
     "example": "Practice speaking 'cold' clearly.",
@@ -5405,7 +5338,7 @@ export const vocabList = [
   {
     "id": 490,
     "word": "collapse",
-    "ipa": "/collapse/",
+    "ipa": "/kəˈɫæps/",
     "pos": "v",
     "meaning": "từ 'collapse' (v)",
     "example": "Practice speaking 'collapse' clearly.",
@@ -5416,7 +5349,7 @@ export const vocabList = [
   {
     "id": 491,
     "word": "colleague",
-    "ipa": "/colleague/",
+    "ipa": "/ˈkɑɫiɡ/",
     "pos": "n",
     "meaning": "từ 'colleague' (n)",
     "example": "Practice speaking 'colleague' clearly.",
@@ -5427,7 +5360,7 @@ export const vocabList = [
   {
     "id": 492,
     "word": "collect",
-    "ipa": "/collect/",
+    "ipa": "/kəˈɫɛkt/",
     "pos": "v",
     "meaning": "từ 'collect' (v)",
     "example": "Practice speaking 'collect' clearly.",
@@ -5438,7 +5371,7 @@ export const vocabList = [
   {
     "id": 493,
     "word": "collection",
-    "ipa": "/collection/",
+    "ipa": "/kəˈɫɛkʃən/",
     "pos": "n",
     "meaning": "từ 'collection' (n)",
     "example": "Practice speaking 'collection' clearly.",
@@ -5449,7 +5382,7 @@ export const vocabList = [
   {
     "id": 494,
     "word": "college",
-    "ipa": "/college/",
+    "ipa": "/ˈkɑɫɪdʒ/",
     "pos": "n",
     "meaning": "từ 'college' (n)",
     "example": "Practice speaking 'college' clearly.",
@@ -5460,7 +5393,7 @@ export const vocabList = [
   {
     "id": 495,
     "word": "colour",
-    "ipa": "/colour/",
+    "ipa": "/ˈkəɫɝ/",
     "pos": "n",
     "meaning": "từ 'colour' (n)",
     "example": "Practice speaking 'colour' clearly.",
@@ -5471,7 +5404,7 @@ export const vocabList = [
   {
     "id": 496,
     "word": "coloured",
-    "ipa": "/coloured/",
+    "ipa": "/ˈkəɫɝd/",
     "pos": "adj",
     "meaning": "từ 'coloured' (adj)",
     "example": "Practice speaking 'coloured' clearly.",
@@ -5482,7 +5415,7 @@ export const vocabList = [
   {
     "id": 497,
     "word": "column",
-    "ipa": "/column/",
+    "ipa": "/ˈkɑɫəm/",
     "pos": "n",
     "meaning": "từ 'column' (n)",
     "example": "Practice speaking 'column' clearly.",
@@ -5493,7 +5426,7 @@ export const vocabList = [
   {
     "id": 498,
     "word": "combination",
-    "ipa": "/combination/",
+    "ipa": "/ˌkɑmbəˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'combination' (n)",
     "example": "Practice speaking 'combination' clearly.",
@@ -5504,7 +5437,7 @@ export const vocabList = [
   {
     "id": 499,
     "word": "combine",
-    "ipa": "/combine/",
+    "ipa": "/ˈkɑmbaɪn/",
     "pos": "v",
     "meaning": "từ 'combine' (v)",
     "example": "Practice speaking 'combine' clearly.",
@@ -5526,7 +5459,7 @@ export const vocabList = [
   {
     "id": 501,
     "word": "comedy",
-    "ipa": "/comedy/",
+    "ipa": "/ˈkɑmədi/",
     "pos": "n",
     "meaning": "từ 'comedy' (n)",
     "example": "Practice speaking 'comedy' clearly.",
@@ -5537,7 +5470,7 @@ export const vocabList = [
   {
     "id": 502,
     "word": "comfort",
-    "ipa": "/comfort/",
+    "ipa": "/ˈkəmfɝt/",
     "pos": "n",
     "meaning": "từ 'comfort' (n)",
     "example": "Practice speaking 'comfort' clearly.",
@@ -5548,7 +5481,7 @@ export const vocabList = [
   {
     "id": 503,
     "word": "comfortable",
-    "ipa": "/comfortable/",
+    "ipa": "/ˈkəmfɝtəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'comfortable' (adj)",
     "example": "Practice speaking 'comfortable' clearly.",
@@ -5559,7 +5492,7 @@ export const vocabList = [
   {
     "id": 504,
     "word": "command",
-    "ipa": "/command/",
+    "ipa": "/kəˈmænd/",
     "pos": "n",
     "meaning": "từ 'command' (n)",
     "example": "Practice speaking 'command' clearly.",
@@ -5570,7 +5503,7 @@ export const vocabList = [
   {
     "id": 505,
     "word": "comment",
-    "ipa": "/comment/",
+    "ipa": "/ˈkɑmɛnt/",
     "pos": "n",
     "meaning": "từ 'comment' (n)",
     "example": "Practice speaking 'comment' clearly.",
@@ -5581,7 +5514,7 @@ export const vocabList = [
   {
     "id": 506,
     "word": "commercial",
-    "ipa": "/commercial/",
+    "ipa": "/kəˈmɝʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'commercial' (adj)",
     "example": "Practice speaking 'commercial' clearly.",
@@ -5592,7 +5525,7 @@ export const vocabList = [
   {
     "id": 507,
     "word": "commission",
-    "ipa": "/commission/",
+    "ipa": "/kəˈmɪʃən/",
     "pos": "n",
     "meaning": "từ 'commission' (n)",
     "example": "Practice speaking 'commission' clearly.",
@@ -5603,7 +5536,7 @@ export const vocabList = [
   {
     "id": 508,
     "word": "commit",
-    "ipa": "/commit/",
+    "ipa": "/kəˈmɪt/",
     "pos": "v",
     "meaning": "từ 'commit' (v)",
     "example": "Practice speaking 'commit' clearly.",
@@ -5614,7 +5547,7 @@ export const vocabList = [
   {
     "id": 509,
     "word": "commitment",
-    "ipa": "/commitment/",
+    "ipa": "/kəˈmɪtmənt/",
     "pos": "n",
     "meaning": "từ 'commitment' (n)",
     "example": "Practice speaking 'commitment' clearly.",
@@ -5636,7 +5569,7 @@ export const vocabList = [
   {
     "id": 511,
     "word": "common",
-    "ipa": "/common/",
+    "ipa": "/ˈkɑmən/",
     "pos": "adj",
     "meaning": "từ 'common' (adj)",
     "example": "Practice speaking 'common' clearly.",
@@ -5647,7 +5580,7 @@ export const vocabList = [
   {
     "id": 512,
     "word": "commonly",
-    "ipa": "/commonly/",
+    "ipa": "/ˈkɑmənɫi/",
     "pos": "adv",
     "meaning": "từ 'commonly' (adv)",
     "example": "Practice speaking 'commonly' clearly.",
@@ -5658,7 +5591,7 @@ export const vocabList = [
   {
     "id": 513,
     "word": "communicate",
-    "ipa": "/communicate/",
+    "ipa": "/kəmˈjunəˌkeɪt/",
     "pos": "v",
     "meaning": "từ 'communicate' (v)",
     "example": "Practice speaking 'communicate' clearly.",
@@ -5669,7 +5602,7 @@ export const vocabList = [
   {
     "id": 514,
     "word": "communication",
-    "ipa": "/communication/",
+    "ipa": "/kəmˌjunəˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'communication' (n)",
     "example": "Practice speaking 'communication' clearly.",
@@ -5680,7 +5613,7 @@ export const vocabList = [
   {
     "id": 515,
     "word": "community",
-    "ipa": "/community/",
+    "ipa": "/kəmˈjunəti/",
     "pos": "n",
     "meaning": "từ 'community' (n)",
     "example": "Practice speaking 'community' clearly.",
@@ -5691,7 +5624,7 @@ export const vocabList = [
   {
     "id": 516,
     "word": "company",
-    "ipa": "/company/",
+    "ipa": "/ˈkəmpəˌni/",
     "pos": "n",
     "meaning": "từ 'company' (n)",
     "example": "Practice speaking 'company' clearly.",
@@ -5702,7 +5635,7 @@ export const vocabList = [
   {
     "id": 517,
     "word": "compare",
-    "ipa": "/compare/",
+    "ipa": "/kəmˈpɛɹ/",
     "pos": "v",
     "meaning": "từ 'compare' (v)",
     "example": "Practice speaking 'compare' clearly.",
@@ -5713,7 +5646,7 @@ export const vocabList = [
   {
     "id": 518,
     "word": "comparison",
-    "ipa": "/comparison/",
+    "ipa": "/kəmˈpɛɹəsən/",
     "pos": "n",
     "meaning": "từ 'comparison' (n)",
     "example": "Practice speaking 'comparison' clearly.",
@@ -5724,7 +5657,7 @@ export const vocabList = [
   {
     "id": 519,
     "word": "compete",
-    "ipa": "/compete/",
+    "ipa": "/kəmˈpit/",
     "pos": "v",
     "meaning": "từ 'compete' (v)",
     "example": "Practice speaking 'compete' clearly.",
@@ -5735,7 +5668,7 @@ export const vocabList = [
   {
     "id": 520,
     "word": "competition",
-    "ipa": "/competition/",
+    "ipa": "/ˌkɑmpəˈtɪʃən/",
     "pos": "n",
     "meaning": "từ 'competition' (n)",
     "example": "Practice speaking 'competition' clearly.",
@@ -5746,7 +5679,7 @@ export const vocabList = [
   {
     "id": 521,
     "word": "competitive",
-    "ipa": "/competitive/",
+    "ipa": "/kəmˈpɛtətɪv/",
     "pos": "adj",
     "meaning": "từ 'competitive' (adj)",
     "example": "Practice speaking 'competitive' clearly.",
@@ -5757,7 +5690,7 @@ export const vocabList = [
   {
     "id": 522,
     "word": "competitor",
-    "ipa": "/competitor/",
+    "ipa": "/kəmˈpɛtətɝ/",
     "pos": "n",
     "meaning": "từ 'competitor' (n)",
     "example": "Practice speaking 'competitor' clearly.",
@@ -5768,7 +5701,7 @@ export const vocabList = [
   {
     "id": 523,
     "word": "complain",
-    "ipa": "/complain/",
+    "ipa": "/kəmˈpɫeɪn/",
     "pos": "v",
     "meaning": "từ 'complain' (v)",
     "example": "Practice speaking 'complain' clearly.",
@@ -5779,7 +5712,7 @@ export const vocabList = [
   {
     "id": 524,
     "word": "complaint",
-    "ipa": "/complaint/",
+    "ipa": "/kəmˈpɫeɪnt/",
     "pos": "n",
     "meaning": "từ 'complaint' (n)",
     "example": "Practice speaking 'complaint' clearly.",
@@ -5790,7 +5723,7 @@ export const vocabList = [
   {
     "id": 525,
     "word": "complete",
-    "ipa": "/complete/",
+    "ipa": "/kəmˈpɫit/",
     "pos": "adj",
     "meaning": "từ 'complete' (adj)",
     "example": "Practice speaking 'complete' clearly.",
@@ -5801,7 +5734,7 @@ export const vocabList = [
   {
     "id": 526,
     "word": "completely",
-    "ipa": "/completely/",
+    "ipa": "/kəmˈpɫitɫi/",
     "pos": "adv",
     "meaning": "từ 'completely' (adv)",
     "example": "Practice speaking 'completely' clearly.",
@@ -5812,7 +5745,7 @@ export const vocabList = [
   {
     "id": 527,
     "word": "complex",
-    "ipa": "/complex/",
+    "ipa": "/ˈkɑmpɫɛks/",
     "pos": "adj",
     "meaning": "từ 'complex' (adj)",
     "example": "Practice speaking 'complex' clearly.",
@@ -5823,7 +5756,7 @@ export const vocabList = [
   {
     "id": 528,
     "word": "complicated",
-    "ipa": "/complicated/",
+    "ipa": "/ˈkɑmpɫəˌkeɪtəd/",
     "pos": "adj",
     "meaning": "từ 'complicated' (adj)",
     "example": "Practice speaking 'complicated' clearly.",
@@ -5834,7 +5767,7 @@ export const vocabList = [
   {
     "id": 529,
     "word": "component",
-    "ipa": "/component/",
+    "ipa": "/kəmˈpoʊnənt/",
     "pos": "n",
     "meaning": "từ 'component' (n)",
     "example": "Practice speaking 'component' clearly.",
@@ -5845,7 +5778,7 @@ export const vocabList = [
   {
     "id": 530,
     "word": "computer",
-    "ipa": "/computer/",
+    "ipa": "/kəmˈpjutɝ/",
     "pos": "n",
     "meaning": "từ 'computer' (n)",
     "example": "Practice speaking 'computer' clearly.",
@@ -5856,7 +5789,7 @@ export const vocabList = [
   {
     "id": 531,
     "word": "concentrate",
-    "ipa": "/concentrate/",
+    "ipa": "/ˈkɑnsənˌtɹeɪt/",
     "pos": "v",
     "meaning": "từ 'concentrate' (v)",
     "example": "Practice speaking 'concentrate' clearly.",
@@ -5867,7 +5800,7 @@ export const vocabList = [
   {
     "id": 532,
     "word": "concentration",
-    "ipa": "/concentration/",
+    "ipa": "/ˌkɑnsənˈtɹeɪʃən/",
     "pos": "n",
     "meaning": "từ 'concentration' (n)",
     "example": "Practice speaking 'concentration' clearly.",
@@ -5878,7 +5811,7 @@ export const vocabList = [
   {
     "id": 533,
     "word": "concept",
-    "ipa": "/concept/",
+    "ipa": "/ˈkɑnsɛpt/",
     "pos": "n",
     "meaning": "từ 'concept' (n)",
     "example": "Practice speaking 'concept' clearly.",
@@ -5889,7 +5822,7 @@ export const vocabList = [
   {
     "id": 534,
     "word": "concern",
-    "ipa": "/concern/",
+    "ipa": "/kənˈsɝn/",
     "pos": "n",
     "meaning": "từ 'concern' (n)",
     "example": "Practice speaking 'concern' clearly.",
@@ -5900,7 +5833,7 @@ export const vocabList = [
   {
     "id": 535,
     "word": "concerned",
-    "ipa": "/concerned/",
+    "ipa": "/kənˈsɝnd/",
     "pos": "adj",
     "meaning": "từ 'concerned' (adj)",
     "example": "Practice speaking 'concerned' clearly.",
@@ -5911,7 +5844,7 @@ export const vocabList = [
   {
     "id": 536,
     "word": "concert",
-    "ipa": "/concert/",
+    "ipa": "/ˈkɑnsɝt/",
     "pos": "n",
     "meaning": "từ 'concert' (n)",
     "example": "Practice speaking 'concert' clearly.",
@@ -5922,7 +5855,7 @@ export const vocabList = [
   {
     "id": 537,
     "word": "conclude",
-    "ipa": "/conclude/",
+    "ipa": "/kənˈkɫud/",
     "pos": "v",
     "meaning": "từ 'conclude' (v)",
     "example": "Practice speaking 'conclude' clearly.",
@@ -5933,7 +5866,7 @@ export const vocabList = [
   {
     "id": 538,
     "word": "conclusion",
-    "ipa": "/conclusion/",
+    "ipa": "/kənˈkɫuʒən/",
     "pos": "n",
     "meaning": "từ 'conclusion' (n)",
     "example": "Practice speaking 'conclusion' clearly.",
@@ -5944,7 +5877,7 @@ export const vocabList = [
   {
     "id": 539,
     "word": "condition",
-    "ipa": "/condition/",
+    "ipa": "/kənˈdɪʃən/",
     "pos": "n",
     "meaning": "từ 'condition' (n)",
     "example": "Practice speaking 'condition' clearly.",
@@ -5955,7 +5888,7 @@ export const vocabList = [
   {
     "id": 540,
     "word": "conduct",
-    "ipa": "/conduct/",
+    "ipa": "/ˈkɑndəkt/",
     "pos": "v",
     "meaning": "từ 'conduct' (v)",
     "example": "Practice speaking 'conduct' clearly.",
@@ -5966,7 +5899,7 @@ export const vocabList = [
   {
     "id": 541,
     "word": "conference",
-    "ipa": "/conference/",
+    "ipa": "/ˈkɑnfɝəns/",
     "pos": "n",
     "meaning": "từ 'conference' (n)",
     "example": "Practice speaking 'conference' clearly.",
@@ -5977,7 +5910,7 @@ export const vocabList = [
   {
     "id": 542,
     "word": "confidence",
-    "ipa": "/confidence/",
+    "ipa": "/ˈkɑnfədəns/",
     "pos": "n",
     "meaning": "từ 'confidence' (n)",
     "example": "Practice speaking 'confidence' clearly.",
@@ -5988,7 +5921,7 @@ export const vocabList = [
   {
     "id": 543,
     "word": "confident",
-    "ipa": "/confident/",
+    "ipa": "/ˈkɑnfədənt/",
     "pos": "adj",
     "meaning": "từ 'confident' (adj)",
     "example": "Practice speaking 'confident' clearly.",
@@ -5999,7 +5932,7 @@ export const vocabList = [
   {
     "id": 544,
     "word": "confirm",
-    "ipa": "/confirm/",
+    "ipa": "/kənˈfɝm/",
     "pos": "v",
     "meaning": "từ 'confirm' (v)",
     "example": "Practice speaking 'confirm' clearly.",
@@ -6010,7 +5943,7 @@ export const vocabList = [
   {
     "id": 545,
     "word": "conflict",
-    "ipa": "/conflict/",
+    "ipa": "/ˈkɑnfɫɪkt/",
     "pos": "n",
     "meaning": "từ 'conflict' (n)",
     "example": "Practice speaking 'conflict' clearly.",
@@ -6021,7 +5954,7 @@ export const vocabList = [
   {
     "id": 546,
     "word": "confuse",
-    "ipa": "/confuse/",
+    "ipa": "/kənˈfjuz/",
     "pos": "v",
     "meaning": "từ 'confuse' (v)",
     "example": "Practice speaking 'confuse' clearly.",
@@ -6032,7 +5965,7 @@ export const vocabList = [
   {
     "id": 547,
     "word": "confused",
-    "ipa": "/confused/",
+    "ipa": "/kənˈfjuzd/",
     "pos": "adj",
     "meaning": "từ 'confused' (adj)",
     "example": "Practice speaking 'confused' clearly.",
@@ -6043,7 +5976,7 @@ export const vocabList = [
   {
     "id": 548,
     "word": "confusing",
-    "ipa": "/confusing/",
+    "ipa": "/kənˈfjuzɪŋ/",
     "pos": "adj",
     "meaning": "từ 'confusing' (adj)",
     "example": "Practice speaking 'confusing' clearly.",
@@ -6054,7 +5987,7 @@ export const vocabList = [
   {
     "id": 549,
     "word": "connect",
-    "ipa": "/connect/",
+    "ipa": "/kəˈnɛkt/",
     "pos": "v",
     "meaning": "từ 'connect' (v)",
     "example": "Practice speaking 'connect' clearly.",
@@ -6065,7 +5998,7 @@ export const vocabList = [
   {
     "id": 550,
     "word": "connected",
-    "ipa": "/connected/",
+    "ipa": "/kəˈnɛktɪd/",
     "pos": "adj",
     "meaning": "từ 'connected' (adj)",
     "example": "Practice speaking 'connected' clearly.",
@@ -6076,7 +6009,7 @@ export const vocabList = [
   {
     "id": 551,
     "word": "connection",
-    "ipa": "/connection/",
+    "ipa": "/kəˈnɛkʃən/",
     "pos": "n",
     "meaning": "từ 'connection' (n)",
     "example": "Practice speaking 'connection' clearly.",
@@ -6087,7 +6020,7 @@ export const vocabList = [
   {
     "id": 552,
     "word": "conscious",
-    "ipa": "/conscious/",
+    "ipa": "/ˈkɑnʃəs/",
     "pos": "adj",
     "meaning": "từ 'conscious' (adj)",
     "example": "Practice speaking 'conscious' clearly.",
@@ -6098,7 +6031,7 @@ export const vocabList = [
   {
     "id": 553,
     "word": "consequence",
-    "ipa": "/consequence/",
+    "ipa": "/ˈkɑnsəkwəns/",
     "pos": "n",
     "meaning": "từ 'consequence' (n)",
     "example": "Practice speaking 'consequence' clearly.",
@@ -6109,7 +6042,7 @@ export const vocabList = [
   {
     "id": 554,
     "word": "conservative",
-    "ipa": "/conservative/",
+    "ipa": "/kənˈsɝvətɪv/",
     "pos": "adj",
     "meaning": "từ 'conservative' (adj)",
     "example": "Practice speaking 'conservative' clearly.",
@@ -6120,7 +6053,7 @@ export const vocabList = [
   {
     "id": 555,
     "word": "consider",
-    "ipa": "/consider/",
+    "ipa": "/kənˈsɪdɝ/",
     "pos": "v",
     "meaning": "từ 'consider' (v)",
     "example": "Practice speaking 'consider' clearly.",
@@ -6131,7 +6064,7 @@ export const vocabList = [
   {
     "id": 556,
     "word": "consideration",
-    "ipa": "/consideration/",
+    "ipa": "/kənˌsɪdɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'consideration' (n)",
     "example": "Practice speaking 'consideration' clearly.",
@@ -6142,7 +6075,7 @@ export const vocabList = [
   {
     "id": 557,
     "word": "consist",
-    "ipa": "/consist/",
+    "ipa": "/kənˈsɪst/",
     "pos": "v",
     "meaning": "từ 'consist' (v)",
     "example": "Practice speaking 'consist' clearly.",
@@ -6153,7 +6086,7 @@ export const vocabList = [
   {
     "id": 558,
     "word": "consistent",
-    "ipa": "/consistent/",
+    "ipa": "/kənˈsɪstənt/",
     "pos": "adj",
     "meaning": "từ 'consistent' (adj)",
     "example": "Practice speaking 'consistent' clearly.",
@@ -6164,7 +6097,7 @@ export const vocabList = [
   {
     "id": 559,
     "word": "constant",
-    "ipa": "/constant/",
+    "ipa": "/ˈkɑnstənt/",
     "pos": "adj",
     "meaning": "từ 'constant' (adj)",
     "example": "Practice speaking 'constant' clearly.",
@@ -6175,7 +6108,7 @@ export const vocabList = [
   {
     "id": 560,
     "word": "constantly",
-    "ipa": "/constantly/",
+    "ipa": "/ˈkɑnstəntɫi/",
     "pos": "adv",
     "meaning": "từ 'constantly' (adv)",
     "example": "Practice speaking 'constantly' clearly.",
@@ -6186,7 +6119,7 @@ export const vocabList = [
   {
     "id": 561,
     "word": "construct",
-    "ipa": "/construct/",
+    "ipa": "/ˈkɑnstɹəkt/",
     "pos": "v",
     "meaning": "từ 'construct' (v)",
     "example": "Practice speaking 'construct' clearly.",
@@ -6197,7 +6130,7 @@ export const vocabList = [
   {
     "id": 562,
     "word": "construction",
-    "ipa": "/construction/",
+    "ipa": "/kənˈstɹəkʃən/",
     "pos": "n",
     "meaning": "từ 'construction' (n)",
     "example": "Practice speaking 'construction' clearly.",
@@ -6208,7 +6141,7 @@ export const vocabList = [
   {
     "id": 563,
     "word": "consume",
-    "ipa": "/consume/",
+    "ipa": "/kənˈsum/",
     "pos": "v",
     "meaning": "từ 'consume' (v)",
     "example": "Practice speaking 'consume' clearly.",
@@ -6219,7 +6152,7 @@ export const vocabList = [
   {
     "id": 564,
     "word": "consumer",
-    "ipa": "/consumer/",
+    "ipa": "/kənˈsumɝ/",
     "pos": "n",
     "meaning": "từ 'consumer' (n)",
     "example": "Practice speaking 'consumer' clearly.",
@@ -6230,7 +6163,7 @@ export const vocabList = [
   {
     "id": 565,
     "word": "contact",
-    "ipa": "/contact/",
+    "ipa": "/ˈkɑnˌtækt/",
     "pos": "n",
     "meaning": "từ 'contact' (n)",
     "example": "Practice speaking 'contact' clearly.",
@@ -6241,7 +6174,7 @@ export const vocabList = [
   {
     "id": 566,
     "word": "contain",
-    "ipa": "/contain/",
+    "ipa": "/kənˈteɪn/",
     "pos": "v",
     "meaning": "từ 'contain' (v)",
     "example": "Practice speaking 'contain' clearly.",
@@ -6252,7 +6185,7 @@ export const vocabList = [
   {
     "id": 567,
     "word": "container",
-    "ipa": "/container/",
+    "ipa": "/kənˈteɪnɝ/",
     "pos": "n",
     "meaning": "từ 'container' (n)",
     "example": "Practice speaking 'container' clearly.",
@@ -6263,7 +6196,7 @@ export const vocabList = [
   {
     "id": 568,
     "word": "contemporary",
-    "ipa": "/contemporary/",
+    "ipa": "/kənˈtɛmpɝˌɛɹi/",
     "pos": "adj",
     "meaning": "từ 'contemporary' (adj)",
     "example": "Practice speaking 'contemporary' clearly.",
@@ -6272,20 +6205,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 569,
-    "word": "content1",
-    "ipa": "/content1/",
-    "pos": "n",
-    "meaning": "từ 'content1' (n)",
-    "example": "Practice speaking 'content1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'content1' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
     "id": 570,
     "word": "contest",
-    "ipa": "/contest/",
+    "ipa": "/ˈkɑntɛst/",
     "pos": "n",
     "meaning": "từ 'contest' (n)",
     "example": "Practice speaking 'contest' clearly.",
@@ -6296,7 +6218,7 @@ export const vocabList = [
   {
     "id": 571,
     "word": "context",
-    "ipa": "/context/",
+    "ipa": "/ˈkɑntɛkst/",
     "pos": "n",
     "meaning": "từ 'context' (n)",
     "example": "Practice speaking 'context' clearly.",
@@ -6307,7 +6229,7 @@ export const vocabList = [
   {
     "id": 572,
     "word": "continent",
-    "ipa": "/continent/",
+    "ipa": "/ˈkɑntənənt/",
     "pos": "n",
     "meaning": "từ 'continent' (n)",
     "example": "Practice speaking 'continent' clearly.",
@@ -6318,7 +6240,7 @@ export const vocabList = [
   {
     "id": 573,
     "word": "continue",
-    "ipa": "/continue/",
+    "ipa": "/kənˈtɪnju/",
     "pos": "v",
     "meaning": "từ 'continue' (v)",
     "example": "Practice speaking 'continue' clearly.",
@@ -6329,7 +6251,7 @@ export const vocabList = [
   {
     "id": 574,
     "word": "continuous",
-    "ipa": "/continuous/",
+    "ipa": "/kənˈtɪnjuəs/",
     "pos": "adj",
     "meaning": "từ 'continuous' (adj)",
     "example": "Practice speaking 'continuous' clearly.",
@@ -6340,7 +6262,7 @@ export const vocabList = [
   {
     "id": 575,
     "word": "contract",
-    "ipa": "/contract/",
+    "ipa": "/ˈkɑnˌtɹækt/",
     "pos": "n",
     "meaning": "từ 'contract' (n)",
     "example": "Practice speaking 'contract' clearly.",
@@ -6351,7 +6273,7 @@ export const vocabList = [
   {
     "id": 576,
     "word": "contrast",
-    "ipa": "/contrast/",
+    "ipa": "/ˈkɑntɹæst/",
     "pos": "n",
     "meaning": "từ 'contrast' (n)",
     "example": "Practice speaking 'contrast' clearly.",
@@ -6362,7 +6284,7 @@ export const vocabList = [
   {
     "id": 577,
     "word": "contribute",
-    "ipa": "/contribute/",
+    "ipa": "/kənˈtɹɪbjut/",
     "pos": "v",
     "meaning": "từ 'contribute' (v)",
     "example": "Practice speaking 'contribute' clearly.",
@@ -6373,7 +6295,7 @@ export const vocabList = [
   {
     "id": 578,
     "word": "contribution",
-    "ipa": "/contribution/",
+    "ipa": "/ˌkɑntɹəbˈjuʃən/",
     "pos": "n",
     "meaning": "từ 'contribution' (n)",
     "example": "Practice speaking 'contribution' clearly.",
@@ -6384,7 +6306,7 @@ export const vocabList = [
   {
     "id": 579,
     "word": "control",
-    "ipa": "/control/",
+    "ipa": "/kənˈtɹoʊɫ/",
     "pos": "n",
     "meaning": "từ 'control' (n)",
     "example": "Practice speaking 'control' clearly.",
@@ -6395,7 +6317,7 @@ export const vocabList = [
   {
     "id": 580,
     "word": "convenient",
-    "ipa": "/convenient/",
+    "ipa": "/kənˈvinjənt/",
     "pos": "adj",
     "meaning": "từ 'convenient' (adj)",
     "example": "Practice speaking 'convenient' clearly.",
@@ -6406,7 +6328,7 @@ export const vocabList = [
   {
     "id": 581,
     "word": "conversation",
-    "ipa": "/conversation/",
+    "ipa": "/ˌkɑnvɝˈseɪʃən/",
     "pos": "n",
     "meaning": "từ 'conversation' (n)",
     "example": "Practice speaking 'conversation' clearly.",
@@ -6417,7 +6339,7 @@ export const vocabList = [
   {
     "id": 582,
     "word": "convert",
-    "ipa": "/convert/",
+    "ipa": "/ˈkɑnvɝt/",
     "pos": "v",
     "meaning": "từ 'convert' (v)",
     "example": "Practice speaking 'convert' clearly.",
@@ -6428,7 +6350,7 @@ export const vocabList = [
   {
     "id": 583,
     "word": "convince",
-    "ipa": "/convince/",
+    "ipa": "/kənˈvɪns/",
     "pos": "v",
     "meaning": "từ 'convince' (v)",
     "example": "Practice speaking 'convince' clearly.",
@@ -6439,7 +6361,7 @@ export const vocabList = [
   {
     "id": 584,
     "word": "convinced",
-    "ipa": "/convinced/",
+    "ipa": "/kənˈvɪnst/",
     "pos": "adj",
     "meaning": "từ 'convinced' (adj)",
     "example": "Practice speaking 'convinced' clearly.",
@@ -6494,7 +6416,7 @@ export const vocabList = [
   {
     "id": 589,
     "word": "copy",
-    "ipa": "/copy/",
+    "ipa": "/ˈkɑpi/",
     "pos": "n",
     "meaning": "từ 'copy' (n)",
     "example": "Practice speaking 'copy' clearly.",
@@ -6505,7 +6427,7 @@ export const vocabList = [
   {
     "id": 590,
     "word": "core",
-    "ipa": "/core/",
+    "ipa": "/ˈkɔɹ/",
     "pos": "n",
     "meaning": "từ 'core' (n)",
     "example": "Practice speaking 'core' clearly.",
@@ -6516,7 +6438,7 @@ export const vocabList = [
   {
     "id": 591,
     "word": "corner",
-    "ipa": "/corner/",
+    "ipa": "/ˈkɔɹnɝ/",
     "pos": "n",
     "meaning": "từ 'corner' (n)",
     "example": "Practice speaking 'corner' clearly.",
@@ -6527,7 +6449,7 @@ export const vocabList = [
   {
     "id": 592,
     "word": "corporate",
-    "ipa": "/corporate/",
+    "ipa": "/ˈkɔɹpɝət/",
     "pos": "adj",
     "meaning": "từ 'corporate' (adj)",
     "example": "Practice speaking 'corporate' clearly.",
@@ -6538,7 +6460,7 @@ export const vocabList = [
   {
     "id": 593,
     "word": "correct",
-    "ipa": "/correct/",
+    "ipa": "/kɝˈɛkt/",
     "pos": "adj",
     "meaning": "từ 'correct' (adj)",
     "example": "Practice speaking 'correct' clearly.",
@@ -6549,7 +6471,7 @@ export const vocabList = [
   {
     "id": 594,
     "word": "correctly",
-    "ipa": "/correctly/",
+    "ipa": "/kɝˈɛktɫi/",
     "pos": "adv",
     "meaning": "từ 'correctly' (adv)",
     "example": "Practice speaking 'correctly' clearly.",
@@ -6571,7 +6493,7 @@ export const vocabList = [
   {
     "id": 596,
     "word": "costume",
-    "ipa": "/costume/",
+    "ipa": "/ˈkɑstum/",
     "pos": "n",
     "meaning": "từ 'costume' (n)",
     "example": "Practice speaking 'costume' clearly.",
@@ -6582,7 +6504,7 @@ export const vocabList = [
   {
     "id": 597,
     "word": "cottage",
-    "ipa": "/cottage/",
+    "ipa": "/ˈkɑtədʒ/",
     "pos": "n",
     "meaning": "từ 'cottage' (n)",
     "example": "Practice speaking 'cottage' clearly.",
@@ -6593,7 +6515,7 @@ export const vocabList = [
   {
     "id": 598,
     "word": "cotton",
-    "ipa": "/cotton/",
+    "ipa": "/ˈkɑtən/",
     "pos": "n",
     "meaning": "từ 'cotton' (n)",
     "example": "Practice speaking 'cotton' clearly.",
@@ -6604,7 +6526,7 @@ export const vocabList = [
   {
     "id": 599,
     "word": "could",
-    "ipa": "/could/",
+    "ipa": "/ˈkʊd/",
     "pos": "modal v",
     "meaning": "từ 'could' (modal v)",
     "example": "Practice speaking 'could' clearly.",
@@ -6615,7 +6537,7 @@ export const vocabList = [
   {
     "id": 600,
     "word": "council",
-    "ipa": "/council/",
+    "ipa": "/ˈkaʊnsəɫ/",
     "pos": "n",
     "meaning": "từ 'council' (n)",
     "example": "Practice speaking 'council' clearly.",
@@ -6626,7 +6548,7 @@ export const vocabList = [
   {
     "id": 601,
     "word": "count",
-    "ipa": "/count/",
+    "ipa": "/ˈkaʊnt/",
     "pos": "v",
     "meaning": "từ 'count' (v)",
     "example": "Practice speaking 'count' clearly.",
@@ -6637,7 +6559,7 @@ export const vocabList = [
   {
     "id": 602,
     "word": "country",
-    "ipa": "/country/",
+    "ipa": "/ˈkəntɹi/",
     "pos": "n",
     "meaning": "từ 'country' (n)",
     "example": "Practice speaking 'country' clearly.",
@@ -6648,7 +6570,7 @@ export const vocabList = [
   {
     "id": 603,
     "word": "countryside",
-    "ipa": "/countryside/",
+    "ipa": "/ˈkəntɹiˌsaɪd/",
     "pos": "n",
     "meaning": "từ 'countryside' (n)",
     "example": "Practice speaking 'countryside' clearly.",
@@ -6659,7 +6581,7 @@ export const vocabList = [
   {
     "id": 604,
     "word": "county",
-    "ipa": "/county/",
+    "ipa": "/ˈkaʊni/",
     "pos": "n",
     "meaning": "từ 'county' (n)",
     "example": "Practice speaking 'county' clearly.",
@@ -6670,7 +6592,7 @@ export const vocabList = [
   {
     "id": 605,
     "word": "couple",
-    "ipa": "/couple/",
+    "ipa": "/ˈkəpəɫ/",
     "pos": "n",
     "meaning": "từ 'couple' (n)",
     "example": "Practice speaking 'couple' clearly.",
@@ -6681,7 +6603,7 @@ export const vocabList = [
   {
     "id": 606,
     "word": "courage",
-    "ipa": "/courage/",
+    "ipa": "/ˈkɝədʒ/",
     "pos": "n",
     "meaning": "từ 'courage' (n)",
     "example": "Practice speaking 'courage' clearly.",
@@ -6692,7 +6614,7 @@ export const vocabList = [
   {
     "id": 607,
     "word": "course",
-    "ipa": "/course/",
+    "ipa": "/ˈkɔɹs/",
     "pos": "n",
     "meaning": "từ 'course' (n)",
     "example": "Practice speaking 'course' clearly.",
@@ -6703,7 +6625,7 @@ export const vocabList = [
   {
     "id": 608,
     "word": "court",
-    "ipa": "/court/",
+    "ipa": "/ˈkɔɹt/",
     "pos": "n",
     "meaning": "từ 'court' (n)",
     "example": "Practice speaking 'court' clearly.",
@@ -6714,7 +6636,7 @@ export const vocabList = [
   {
     "id": 609,
     "word": "cousin",
-    "ipa": "/cousin/",
+    "ipa": "/ˈkəzən/",
     "pos": "n",
     "meaning": "từ 'cousin' (n)",
     "example": "Practice speaking 'cousin' clearly.",
@@ -6725,7 +6647,7 @@ export const vocabList = [
   {
     "id": 610,
     "word": "cover",
-    "ipa": "/cover/",
+    "ipa": "/ˈkəvɝ/",
     "pos": "v",
     "meaning": "từ 'cover' (v)",
     "example": "Practice speaking 'cover' clearly.",
@@ -6736,7 +6658,7 @@ export const vocabList = [
   {
     "id": 611,
     "word": "covered",
-    "ipa": "/covered/",
+    "ipa": "/ˈkəvɝd/",
     "pos": "adj",
     "meaning": "từ 'covered' (adj)",
     "example": "Practice speaking 'covered' clearly.",
@@ -6747,7 +6669,7 @@ export const vocabList = [
   {
     "id": 612,
     "word": "cow",
-    "ipa": "/cow/",
+    "ipa": "/ˈkaʊ/",
     "pos": "n",
     "meaning": "từ 'cow' (n)",
     "example": "Practice speaking 'cow' clearly.",
@@ -6769,7 +6691,7 @@ export const vocabList = [
   {
     "id": 614,
     "word": "crazy",
-    "ipa": "/crazy/",
+    "ipa": "/ˈkɹeɪzi/",
     "pos": "adj",
     "meaning": "từ 'crazy' (adj)",
     "example": "Practice speaking 'crazy' clearly.",
@@ -6780,7 +6702,7 @@ export const vocabList = [
   {
     "id": 615,
     "word": "cream",
-    "ipa": "/cream/",
+    "ipa": "/ˈkɹim/",
     "pos": "n",
     "meaning": "từ 'cream' (n)",
     "example": "Practice speaking 'cream' clearly.",
@@ -6791,7 +6713,7 @@ export const vocabList = [
   {
     "id": 616,
     "word": "create",
-    "ipa": "/create/",
+    "ipa": "/kɹiˈeɪt/",
     "pos": "v",
     "meaning": "từ 'create' (v)",
     "example": "Practice speaking 'create' clearly.",
@@ -6802,7 +6724,7 @@ export const vocabList = [
   {
     "id": 617,
     "word": "creation",
-    "ipa": "/creation/",
+    "ipa": "/kɹiˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'creation' (n)",
     "example": "Practice speaking 'creation' clearly.",
@@ -6813,7 +6735,7 @@ export const vocabList = [
   {
     "id": 618,
     "word": "creative",
-    "ipa": "/creative/",
+    "ipa": "/kɹiˈeɪtɪv/",
     "pos": "adj",
     "meaning": "từ 'creative' (adj)",
     "example": "Practice speaking 'creative' clearly.",
@@ -6824,7 +6746,7 @@ export const vocabList = [
   {
     "id": 619,
     "word": "creature",
-    "ipa": "/creature/",
+    "ipa": "/ˈkɹitʃɝ/",
     "pos": "n",
     "meaning": "từ 'creature' (n)",
     "example": "Practice speaking 'creature' clearly.",
@@ -6835,7 +6757,7 @@ export const vocabList = [
   {
     "id": 620,
     "word": "credit",
-    "ipa": "/credit/",
+    "ipa": "/ˈkɹɛdət/",
     "pos": "n",
     "meaning": "từ 'credit' (n)",
     "example": "Practice speaking 'credit' clearly.",
@@ -6846,7 +6768,7 @@ export const vocabList = [
   {
     "id": 621,
     "word": "crew",
-    "ipa": "/crew/",
+    "ipa": "/ˈkɹu/",
     "pos": "n",
     "meaning": "từ 'crew' (n)",
     "example": "Practice speaking 'crew' clearly.",
@@ -6857,7 +6779,7 @@ export const vocabList = [
   {
     "id": 622,
     "word": "crime",
-    "ipa": "/crime/",
+    "ipa": "/ˈkɹaɪm/",
     "pos": "n",
     "meaning": "từ 'crime' (n)",
     "example": "Practice speaking 'crime' clearly.",
@@ -6868,7 +6790,7 @@ export const vocabList = [
   {
     "id": 623,
     "word": "criminal",
-    "ipa": "/criminal/",
+    "ipa": "/ˈkɹɪmənəɫ/",
     "pos": "n",
     "meaning": "từ 'criminal' (n)",
     "example": "Practice speaking 'criminal' clearly.",
@@ -6879,7 +6801,7 @@ export const vocabList = [
   {
     "id": 624,
     "word": "crisis",
-    "ipa": "/crisis/",
+    "ipa": "/ˈkɹaɪsəs/",
     "pos": "n",
     "meaning": "từ 'crisis' (n)",
     "example": "Practice speaking 'crisis' clearly.",
@@ -6890,7 +6812,7 @@ export const vocabList = [
   {
     "id": 625,
     "word": "criterion",
-    "ipa": "/criterion/",
+    "ipa": "/kɹaɪˈtɪɹiən/",
     "pos": "n",
     "meaning": "từ 'criterion' (n)",
     "example": "Practice speaking 'criterion' clearly.",
@@ -6901,7 +6823,7 @@ export const vocabList = [
   {
     "id": 626,
     "word": "critic",
-    "ipa": "/critic/",
+    "ipa": "/ˈkɹɪtɪk/",
     "pos": "n",
     "meaning": "từ 'critic' (n)",
     "example": "Practice speaking 'critic' clearly.",
@@ -6912,7 +6834,7 @@ export const vocabList = [
   {
     "id": 627,
     "word": "critical",
-    "ipa": "/critical/",
+    "ipa": "/ˈkɹɪtɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'critical' (adj)",
     "example": "Practice speaking 'critical' clearly.",
@@ -6923,7 +6845,7 @@ export const vocabList = [
   {
     "id": 628,
     "word": "criticism",
-    "ipa": "/criticism/",
+    "ipa": "/ˈkɹɪtɪˌsɪzəm/",
     "pos": "n",
     "meaning": "từ 'criticism' (n)",
     "example": "Practice speaking 'criticism' clearly.",
@@ -6934,7 +6856,7 @@ export const vocabList = [
   {
     "id": 629,
     "word": "criticize",
-    "ipa": "/criticize/",
+    "ipa": "/ˈkɹɪtɪˌsaɪz/",
     "pos": "v",
     "meaning": "từ 'criticize' (v)",
     "example": "Practice speaking 'criticize' clearly.",
@@ -6945,7 +6867,7 @@ export const vocabList = [
   {
     "id": 630,
     "word": "crop",
-    "ipa": "/crop/",
+    "ipa": "/ˈkɹɑp/",
     "pos": "n",
     "meaning": "từ 'crop' (n)",
     "example": "Practice speaking 'crop' clearly.",
@@ -6956,7 +6878,7 @@ export const vocabList = [
   {
     "id": 631,
     "word": "cross",
-    "ipa": "/cross/",
+    "ipa": "/ˈkɹɔs/",
     "pos": "v",
     "meaning": "từ 'cross' (v)",
     "example": "Practice speaking 'cross' clearly.",
@@ -6967,7 +6889,7 @@ export const vocabList = [
   {
     "id": 632,
     "word": "crowd",
-    "ipa": "/crowd/",
+    "ipa": "/ˈkɹaʊd/",
     "pos": "n",
     "meaning": "từ 'crowd' (n)",
     "example": "Practice speaking 'crowd' clearly.",
@@ -6978,7 +6900,7 @@ export const vocabList = [
   {
     "id": 633,
     "word": "crowded",
-    "ipa": "/crowded/",
+    "ipa": "/ˈkɹaʊdəd/",
     "pos": "adj",
     "meaning": "từ 'crowded' (adj)",
     "example": "Practice speaking 'crowded' clearly.",
@@ -6989,7 +6911,7 @@ export const vocabList = [
   {
     "id": 634,
     "word": "crucial",
-    "ipa": "/crucial/",
+    "ipa": "/ˈkɹuʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'crucial' (adj)",
     "example": "Practice speaking 'crucial' clearly.",
@@ -7000,7 +6922,7 @@ export const vocabList = [
   {
     "id": 635,
     "word": "cruel",
-    "ipa": "/cruel/",
+    "ipa": "/ˈkɹuəɫ/",
     "pos": "adj",
     "meaning": "từ 'cruel' (adj)",
     "example": "Practice speaking 'cruel' clearly.",
@@ -7022,7 +6944,7 @@ export const vocabList = [
   {
     "id": 637,
     "word": "cultural",
-    "ipa": "/cultural/",
+    "ipa": "/ˈkəɫtʃɝəɫ/",
     "pos": "adj",
     "meaning": "từ 'cultural' (adj)",
     "example": "Practice speaking 'cultural' clearly.",
@@ -7033,7 +6955,7 @@ export const vocabList = [
   {
     "id": 638,
     "word": "culture",
-    "ipa": "/culture/",
+    "ipa": "/ˈkəɫtʃɝ/",
     "pos": "n",
     "meaning": "từ 'culture' (n)",
     "example": "Practice speaking 'culture' clearly.",
@@ -7044,7 +6966,7 @@ export const vocabList = [
   {
     "id": 639,
     "word": "cup",
-    "ipa": "/cup/",
+    "ipa": "/ˈkəp/",
     "pos": "n",
     "meaning": "từ 'cup' (n)",
     "example": "Practice speaking 'cup' clearly.",
@@ -7055,7 +6977,7 @@ export const vocabList = [
   {
     "id": 640,
     "word": "cupboard",
-    "ipa": "/cupboard/",
+    "ipa": "/ˈkəbɝd/",
     "pos": "n",
     "meaning": "từ 'cupboard' (n)",
     "example": "Practice speaking 'cupboard' clearly.",
@@ -7066,7 +6988,7 @@ export const vocabList = [
   {
     "id": 641,
     "word": "cure",
-    "ipa": "/cure/",
+    "ipa": "/ˈkjʊɹ/",
     "pos": "v",
     "meaning": "từ 'cure' (v)",
     "example": "Practice speaking 'cure' clearly.",
@@ -7077,7 +6999,7 @@ export const vocabList = [
   {
     "id": 642,
     "word": "curly",
-    "ipa": "/curly/",
+    "ipa": "/ˈkɝɫi/",
     "pos": "adj",
     "meaning": "từ 'curly' (adj)",
     "example": "Practice speaking 'curly' clearly.",
@@ -7088,7 +7010,7 @@ export const vocabList = [
   {
     "id": 643,
     "word": "currency",
-    "ipa": "/currency/",
+    "ipa": "/ˈkɝənsi/",
     "pos": "n",
     "meaning": "từ 'currency' (n)",
     "example": "Practice speaking 'currency' clearly.",
@@ -7099,7 +7021,7 @@ export const vocabList = [
   {
     "id": 644,
     "word": "current",
-    "ipa": "/current/",
+    "ipa": "/ˈkɑɹənt/",
     "pos": "adj",
     "meaning": "từ 'current' (adj)",
     "example": "Practice speaking 'current' clearly.",
@@ -7110,7 +7032,7 @@ export const vocabList = [
   {
     "id": 645,
     "word": "currently",
-    "ipa": "/currently/",
+    "ipa": "/ˈkɝəntɫi/",
     "pos": "adv",
     "meaning": "từ 'currently' (adv)",
     "example": "Practice speaking 'currently' clearly.",
@@ -7121,7 +7043,7 @@ export const vocabList = [
   {
     "id": 646,
     "word": "curtain",
-    "ipa": "/curtain/",
+    "ipa": "/ˈkɝtən/",
     "pos": "n",
     "meaning": "từ 'curtain' (n)",
     "example": "Practice speaking 'curtain' clearly.",
@@ -7132,7 +7054,7 @@ export const vocabList = [
   {
     "id": 647,
     "word": "curve",
-    "ipa": "/curve/",
+    "ipa": "/ˈkɝv/",
     "pos": "n",
     "meaning": "từ 'curve' (n)",
     "example": "Practice speaking 'curve' clearly.",
@@ -7143,7 +7065,7 @@ export const vocabList = [
   {
     "id": 648,
     "word": "curved",
-    "ipa": "/curved/",
+    "ipa": "/ˈkɝvd/",
     "pos": "adj",
     "meaning": "từ 'curved' (adj)",
     "example": "Practice speaking 'curved' clearly.",
@@ -7154,7 +7076,7 @@ export const vocabList = [
   {
     "id": 649,
     "word": "custom",
-    "ipa": "/custom/",
+    "ipa": "/ˈkəstəm/",
     "pos": "n",
     "meaning": "từ 'custom' (n)",
     "example": "Practice speaking 'custom' clearly.",
@@ -7165,7 +7087,7 @@ export const vocabList = [
   {
     "id": 650,
     "word": "customer",
-    "ipa": "/customer/",
+    "ipa": "/ˈkəstəmɝ/",
     "pos": "n",
     "meaning": "từ 'customer' (n)",
     "example": "Practice speaking 'customer' clearly.",
@@ -7176,7 +7098,7 @@ export const vocabList = [
   {
     "id": 651,
     "word": "cut",
-    "ipa": "/cut/",
+    "ipa": "/ˈkət/",
     "pos": "v",
     "meaning": "từ 'cut' (v)",
     "example": "Practice speaking 'cut' clearly.",
@@ -7187,7 +7109,7 @@ export const vocabList = [
   {
     "id": 652,
     "word": "cycle",
-    "ipa": "/cycle/",
+    "ipa": "/ˈsaɪkəɫ/",
     "pos": "n",
     "meaning": "từ 'cycle' (n)",
     "example": "Practice speaking 'cycle' clearly.",
@@ -7198,7 +7120,7 @@ export const vocabList = [
   {
     "id": 653,
     "word": "dad",
-    "ipa": "/dad/",
+    "ipa": "/ˈdæd/",
     "pos": "n",
     "meaning": "từ 'dad' (n)",
     "example": "Practice speaking 'dad' clearly.",
@@ -7209,7 +7131,7 @@ export const vocabList = [
   {
     "id": 654,
     "word": "daily",
-    "ipa": "/daily/",
+    "ipa": "/ˈdeɪɫi/",
     "pos": "adj",
     "meaning": "từ 'daily' (adj)",
     "example": "Practice speaking 'daily' clearly.",
@@ -7220,7 +7142,7 @@ export const vocabList = [
   {
     "id": 655,
     "word": "damage",
-    "ipa": "/damage/",
+    "ipa": "/ˈdæmədʒ/",
     "pos": "n",
     "meaning": "từ 'damage' (n)",
     "example": "Practice speaking 'damage' clearly.",
@@ -7231,7 +7153,7 @@ export const vocabList = [
   {
     "id": 656,
     "word": "dance",
-    "ipa": "/dance/",
+    "ipa": "/ˈdæns/",
     "pos": "n",
     "meaning": "từ 'dance' (n)",
     "example": "Practice speaking 'dance' clearly.",
@@ -7242,7 +7164,7 @@ export const vocabList = [
   {
     "id": 657,
     "word": "dancer",
-    "ipa": "/dancer/",
+    "ipa": "/ˈdænsɝ/",
     "pos": "n",
     "meaning": "từ 'dancer' (n)",
     "example": "Practice speaking 'dancer' clearly.",
@@ -7253,7 +7175,7 @@ export const vocabList = [
   {
     "id": 658,
     "word": "dancing",
-    "ipa": "/dancing/",
+    "ipa": "/ˈdænsɪŋ/",
     "pos": "n",
     "meaning": "từ 'dancing' (n)",
     "example": "Practice speaking 'dancing' clearly.",
@@ -7264,7 +7186,7 @@ export const vocabList = [
   {
     "id": 659,
     "word": "danger",
-    "ipa": "/danger/",
+    "ipa": "/ˈdeɪndʒɝ/",
     "pos": "n",
     "meaning": "từ 'danger' (n)",
     "example": "Practice speaking 'danger' clearly.",
@@ -7275,7 +7197,7 @@ export const vocabList = [
   {
     "id": 660,
     "word": "dangerous",
-    "ipa": "/dangerous/",
+    "ipa": "/ˈdeɪndʒɝəs/",
     "pos": "adj",
     "meaning": "từ 'dangerous' (adj)",
     "example": "Practice speaking 'dangerous' clearly.",
@@ -7286,7 +7208,7 @@ export const vocabList = [
   {
     "id": 661,
     "word": "dark",
-    "ipa": "/dark/",
+    "ipa": "/ˈdɑɹk/",
     "pos": "adj",
     "meaning": "từ 'dark' (adj)",
     "example": "Practice speaking 'dark' clearly.",
@@ -7297,7 +7219,7 @@ export const vocabList = [
   {
     "id": 662,
     "word": "data",
-    "ipa": "/data/",
+    "ipa": "/ˈdætə/",
     "pos": "n",
     "meaning": "từ 'data' (n)",
     "example": "Practice speaking 'data' clearly.",
@@ -7308,7 +7230,7 @@ export const vocabList = [
   {
     "id": 663,
     "word": "date",
-    "ipa": "/date/",
+    "ipa": "/ˈdeɪt/",
     "pos": "n",
     "meaning": "từ 'date' (n)",
     "example": "Practice speaking 'date' clearly.",
@@ -7319,7 +7241,7 @@ export const vocabList = [
   {
     "id": 664,
     "word": "daughter",
-    "ipa": "/daughter/",
+    "ipa": "/ˈdɔtɝ/",
     "pos": "n",
     "meaning": "từ 'daughter' (n)",
     "example": "Practice speaking 'daughter' clearly.",
@@ -7330,7 +7252,7 @@ export const vocabList = [
   {
     "id": 665,
     "word": "day",
-    "ipa": "/day/",
+    "ipa": "/ˈdeɪ/",
     "pos": "n",
     "meaning": "từ 'day' (n)",
     "example": "Practice speaking 'day' clearly.",
@@ -7341,7 +7263,7 @@ export const vocabList = [
   {
     "id": 666,
     "word": "dead",
-    "ipa": "/dead/",
+    "ipa": "/ˈdɛd/",
     "pos": "adj",
     "meaning": "từ 'dead' (adj)",
     "example": "Practice speaking 'dead' clearly.",
@@ -7352,7 +7274,7 @@ export const vocabList = [
   {
     "id": 667,
     "word": "deal",
-    "ipa": "/deal/",
+    "ipa": "/ˈdiɫ/",
     "pos": "v",
     "meaning": "từ 'deal' (v)",
     "example": "Practice speaking 'deal' clearly.",
@@ -7363,7 +7285,7 @@ export const vocabList = [
   {
     "id": 668,
     "word": "dear",
-    "ipa": "/dear/",
+    "ipa": "/ˈdɪɹ/",
     "pos": "adj",
     "meaning": "từ 'dear' (adj)",
     "example": "Practice speaking 'dear' clearly.",
@@ -7385,7 +7307,7 @@ export const vocabList = [
   {
     "id": 670,
     "word": "debate",
-    "ipa": "/debate/",
+    "ipa": "/dəˈbeɪt/",
     "pos": "n",
     "meaning": "từ 'debate' (n)",
     "example": "Practice speaking 'debate' clearly.",
@@ -7396,7 +7318,7 @@ export const vocabList = [
   {
     "id": 671,
     "word": "debt",
-    "ipa": "/debt/",
+    "ipa": "/ˈdɛt/",
     "pos": "n",
     "meaning": "từ 'debt' (n)",
     "example": "Practice speaking 'debt' clearly.",
@@ -7407,7 +7329,7 @@ export const vocabList = [
   {
     "id": 672,
     "word": "decade",
-    "ipa": "/decade/",
+    "ipa": "/ˈdɛkeɪd/",
     "pos": "n",
     "meaning": "từ 'decade' (n)",
     "example": "Practice speaking 'decade' clearly.",
@@ -7418,7 +7340,7 @@ export const vocabList = [
   {
     "id": 673,
     "word": "december",
-    "ipa": "/december/",
+    "ipa": "/dɪˈsɛmbɝ/",
     "pos": "n",
     "meaning": "từ 'december' (n)",
     "example": "Practice speaking 'december' clearly.",
@@ -7429,7 +7351,7 @@ export const vocabList = [
   {
     "id": 674,
     "word": "decent",
-    "ipa": "/decent/",
+    "ipa": "/ˈdisənt/",
     "pos": "adj",
     "meaning": "từ 'decent' (adj)",
     "example": "Practice speaking 'decent' clearly.",
@@ -7451,7 +7373,7 @@ export const vocabList = [
   {
     "id": 676,
     "word": "decision",
-    "ipa": "/decision/",
+    "ipa": "/dɪˈsɪʒən/",
     "pos": "n",
     "meaning": "từ 'decision' (n)",
     "example": "Practice speaking 'decision' clearly.",
@@ -7462,7 +7384,7 @@ export const vocabList = [
   {
     "id": 677,
     "word": "declare",
-    "ipa": "/declare/",
+    "ipa": "/dɪˈkɫɛɹ/",
     "pos": "v",
     "meaning": "từ 'declare' (v)",
     "example": "Practice speaking 'declare' clearly.",
@@ -7473,7 +7395,7 @@ export const vocabList = [
   {
     "id": 678,
     "word": "decline",
-    "ipa": "/decline/",
+    "ipa": "/dɪˈkɫaɪn/",
     "pos": "v",
     "meaning": "từ 'decline' (v)",
     "example": "Practice speaking 'decline' clearly.",
@@ -7484,7 +7406,7 @@ export const vocabList = [
   {
     "id": 679,
     "word": "decorate",
-    "ipa": "/decorate/",
+    "ipa": "/ˈdɛkɝˌeɪt/",
     "pos": "v",
     "meaning": "từ 'decorate' (v)",
     "example": "Practice speaking 'decorate' clearly.",
@@ -7495,7 +7417,7 @@ export const vocabList = [
   {
     "id": 680,
     "word": "decoration",
-    "ipa": "/decoration/",
+    "ipa": "/ˌdɛkɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'decoration' (n)",
     "example": "Practice speaking 'decoration' clearly.",
@@ -7506,7 +7428,7 @@ export const vocabList = [
   {
     "id": 681,
     "word": "decrease",
-    "ipa": "/decrease/",
+    "ipa": "/ˈdiˌkɹis/",
     "pos": "v",
     "meaning": "từ 'decrease' (v)",
     "example": "Practice speaking 'decrease' clearly.",
@@ -7539,7 +7461,7 @@ export const vocabList = [
   {
     "id": 684,
     "word": "defeat",
-    "ipa": "/defeat/",
+    "ipa": "/dɪˈfit/",
     "pos": "v",
     "meaning": "từ 'defeat' (v)",
     "example": "Practice speaking 'defeat' clearly.",
@@ -7550,7 +7472,7 @@ export const vocabList = [
   {
     "id": 685,
     "word": "defence",
-    "ipa": "/defence/",
+    "ipa": "/dɪˈfɛns/",
     "pos": "n",
     "meaning": "từ 'defence' (n)",
     "example": "Practice speaking 'defence' clearly.",
@@ -7561,7 +7483,7 @@ export const vocabList = [
   {
     "id": 686,
     "word": "defend",
-    "ipa": "/defend/",
+    "ipa": "/dɪˈfɛnd/",
     "pos": "v",
     "meaning": "từ 'defend' (v)",
     "example": "Practice speaking 'defend' clearly.",
@@ -7572,7 +7494,7 @@ export const vocabList = [
   {
     "id": 687,
     "word": "define",
-    "ipa": "/define/",
+    "ipa": "/dɪˈfaɪn/",
     "pos": "v",
     "meaning": "từ 'define' (v)",
     "example": "Practice speaking 'define' clearly.",
@@ -7583,7 +7505,7 @@ export const vocabList = [
   {
     "id": 688,
     "word": "definite",
-    "ipa": "/definite/",
+    "ipa": "/ˈdɛfənət/",
     "pos": "adj",
     "meaning": "từ 'definite' (adj)",
     "example": "Practice speaking 'definite' clearly.",
@@ -7594,7 +7516,7 @@ export const vocabList = [
   {
     "id": 689,
     "word": "definitely",
-    "ipa": "/definitely/",
+    "ipa": "/ˈdɛfənətɫi/",
     "pos": "adv",
     "meaning": "từ 'definitely' (adv)",
     "example": "Practice speaking 'definitely' clearly.",
@@ -7605,7 +7527,7 @@ export const vocabList = [
   {
     "id": 690,
     "word": "definition",
-    "ipa": "/definition/",
+    "ipa": "/ˌdɛfəˈnɪʃən/",
     "pos": "n",
     "meaning": "từ 'definition' (n)",
     "example": "Practice speaking 'definition' clearly.",
@@ -7627,7 +7549,7 @@ export const vocabList = [
   {
     "id": 692,
     "word": "delay",
-    "ipa": "/delay/",
+    "ipa": "/dɪˈɫeɪ/",
     "pos": "v",
     "meaning": "từ 'delay' (v)",
     "example": "Practice speaking 'delay' clearly.",
@@ -7638,7 +7560,7 @@ export const vocabList = [
   {
     "id": 693,
     "word": "deliberate",
-    "ipa": "/deliberate/",
+    "ipa": "/dɪˈɫɪbɝˌeɪt/",
     "pos": "adj",
     "meaning": "từ 'deliberate' (adj)",
     "example": "Practice speaking 'deliberate' clearly.",
@@ -7649,7 +7571,7 @@ export const vocabList = [
   {
     "id": 694,
     "word": "deliberately",
-    "ipa": "/deliberately/",
+    "ipa": "/dɪˈɫɪbɝətɫi/",
     "pos": "adv",
     "meaning": "từ 'deliberately' (adv)",
     "example": "Practice speaking 'deliberately' clearly.",
@@ -7660,7 +7582,7 @@ export const vocabList = [
   {
     "id": 695,
     "word": "delicious",
-    "ipa": "/delicious/",
+    "ipa": "/dɪˈɫɪʃəs/",
     "pos": "adj",
     "meaning": "từ 'delicious' (adj)",
     "example": "Practice speaking 'delicious' clearly.",
@@ -7671,7 +7593,7 @@ export const vocabList = [
   {
     "id": 696,
     "word": "delight",
-    "ipa": "/delight/",
+    "ipa": "/dɪˈɫaɪt/",
     "pos": "v",
     "meaning": "từ 'delight' (v)",
     "example": "Practice speaking 'delight' clearly.",
@@ -7682,7 +7604,7 @@ export const vocabList = [
   {
     "id": 697,
     "word": "delighted",
-    "ipa": "/delighted/",
+    "ipa": "/dɪˈɫaɪtəd/",
     "pos": "adj",
     "meaning": "từ 'delighted' (adj)",
     "example": "Practice speaking 'delighted' clearly.",
@@ -7693,7 +7615,7 @@ export const vocabList = [
   {
     "id": 698,
     "word": "deliver",
-    "ipa": "/deliver/",
+    "ipa": "/dɪˈɫɪvɝ/",
     "pos": "v",
     "meaning": "từ 'deliver' (v)",
     "example": "Practice speaking 'deliver' clearly.",
@@ -7704,7 +7626,7 @@ export const vocabList = [
   {
     "id": 699,
     "word": "delivery",
-    "ipa": "/delivery/",
+    "ipa": "/dɪˈɫɪvɝi/",
     "pos": "n",
     "meaning": "từ 'delivery' (n)",
     "example": "Practice speaking 'delivery' clearly.",
@@ -7715,7 +7637,7 @@ export const vocabList = [
   {
     "id": 700,
     "word": "demand",
-    "ipa": "/demand/",
+    "ipa": "/dɪˈmænd/",
     "pos": "n",
     "meaning": "từ 'demand' (n)",
     "example": "Practice speaking 'demand' clearly.",
@@ -7726,7 +7648,7 @@ export const vocabList = [
   {
     "id": 701,
     "word": "demonstrate",
-    "ipa": "/demonstrate/",
+    "ipa": "/ˈdɛmənˌstɹeɪt/",
     "pos": "v",
     "meaning": "từ 'demonstrate' (v)",
     "example": "Practice speaking 'demonstrate' clearly.",
@@ -7737,7 +7659,7 @@ export const vocabList = [
   {
     "id": 702,
     "word": "dentist",
-    "ipa": "/dentist/",
+    "ipa": "/ˈdɛnɪst/",
     "pos": "n",
     "meaning": "từ 'dentist' (n)",
     "example": "Practice speaking 'dentist' clearly.",
@@ -7748,7 +7670,7 @@ export const vocabList = [
   {
     "id": 703,
     "word": "deny",
-    "ipa": "/deny/",
+    "ipa": "/dɪˈnaɪ/",
     "pos": "v",
     "meaning": "từ 'deny' (v)",
     "example": "Practice speaking 'deny' clearly.",
@@ -7759,7 +7681,7 @@ export const vocabList = [
   {
     "id": 704,
     "word": "department",
-    "ipa": "/department/",
+    "ipa": "/dɪˈpɑɹtmənt/",
     "pos": "n",
     "meaning": "từ 'department' (n)",
     "example": "Practice speaking 'department' clearly.",
@@ -7770,7 +7692,7 @@ export const vocabList = [
   {
     "id": 705,
     "word": "departure",
-    "ipa": "/departure/",
+    "ipa": "/dɪˈpɑɹtʃɝ/",
     "pos": "n",
     "meaning": "từ 'departure' (n)",
     "example": "Practice speaking 'departure' clearly.",
@@ -7781,7 +7703,7 @@ export const vocabList = [
   {
     "id": 706,
     "word": "depend",
-    "ipa": "/depend/",
+    "ipa": "/dɪˈpɛnd/",
     "pos": "v",
     "meaning": "từ 'depend' (v)",
     "example": "Practice speaking 'depend' clearly.",
@@ -7792,7 +7714,7 @@ export const vocabList = [
   {
     "id": 707,
     "word": "depressed",
-    "ipa": "/depressed/",
+    "ipa": "/dɪˈpɹɛst/",
     "pos": "adj",
     "meaning": "từ 'depressed' (adj)",
     "example": "Practice speaking 'depressed' clearly.",
@@ -7803,7 +7725,7 @@ export const vocabList = [
   {
     "id": 708,
     "word": "depressing",
-    "ipa": "/depressing/",
+    "ipa": "/dɪˈpɹɛsɪŋ/",
     "pos": "adj",
     "meaning": "từ 'depressing' (adj)",
     "example": "Practice speaking 'depressing' clearly.",
@@ -7825,7 +7747,7 @@ export const vocabList = [
   {
     "id": 710,
     "word": "describe",
-    "ipa": "/describe/",
+    "ipa": "/dɪsˈkɹaɪb/",
     "pos": "v",
     "meaning": "từ 'describe' (v)",
     "example": "Practice speaking 'describe' clearly.",
@@ -7836,7 +7758,7 @@ export const vocabList = [
   {
     "id": 711,
     "word": "description",
-    "ipa": "/description/",
+    "ipa": "/dɪsˈkɹɪpʃən/",
     "pos": "n",
     "meaning": "từ 'description' (n)",
     "example": "Practice speaking 'description' clearly.",
@@ -7847,7 +7769,7 @@ export const vocabList = [
   {
     "id": 712,
     "word": "desert",
-    "ipa": "/desert/",
+    "ipa": "/ˈdɛzɝt/",
     "pos": "n",
     "meaning": "từ 'desert' (n)",
     "example": "Practice speaking 'desert' clearly.",
@@ -7858,7 +7780,7 @@ export const vocabList = [
   {
     "id": 713,
     "word": "deserve",
-    "ipa": "/deserve/",
+    "ipa": "/dɪˈzɝv/",
     "pos": "v",
     "meaning": "từ 'deserve' (v)",
     "example": "Practice speaking 'deserve' clearly.",
@@ -7869,7 +7791,7 @@ export const vocabList = [
   {
     "id": 714,
     "word": "design",
-    "ipa": "/design/",
+    "ipa": "/dɪˈzaɪn/",
     "pos": "n",
     "meaning": "từ 'design' (n)",
     "example": "Practice speaking 'design' clearly.",
@@ -7880,7 +7802,7 @@ export const vocabList = [
   {
     "id": 715,
     "word": "designer",
-    "ipa": "/designer/",
+    "ipa": "/dɪˈzaɪnɝ/",
     "pos": "n",
     "meaning": "từ 'designer' (n)",
     "example": "Practice speaking 'designer' clearly.",
@@ -7891,7 +7813,7 @@ export const vocabList = [
   {
     "id": 716,
     "word": "desire",
-    "ipa": "/desire/",
+    "ipa": "/dɪˈzaɪɝ/",
     "pos": "n",
     "meaning": "từ 'desire' (n)",
     "example": "Practice speaking 'desire' clearly.",
@@ -7902,7 +7824,7 @@ export const vocabList = [
   {
     "id": 717,
     "word": "desk",
-    "ipa": "/desk/",
+    "ipa": "/ˈdɛsk/",
     "pos": "n",
     "meaning": "từ 'desk' (n)",
     "example": "Practice speaking 'desk' clearly.",
@@ -7913,7 +7835,7 @@ export const vocabList = [
   {
     "id": 718,
     "word": "desperate",
-    "ipa": "/desperate/",
+    "ipa": "/ˈdɛspɝɪt/",
     "pos": "adj",
     "meaning": "từ 'desperate' (adj)",
     "example": "Practice speaking 'desperate' clearly.",
@@ -7924,7 +7846,7 @@ export const vocabList = [
   {
     "id": 719,
     "word": "despite",
-    "ipa": "/despite/",
+    "ipa": "/dɪˈspaɪt/",
     "pos": "prep",
     "meaning": "từ 'despite' (prep)",
     "example": "Practice speaking 'despite' clearly.",
@@ -7935,7 +7857,7 @@ export const vocabList = [
   {
     "id": 720,
     "word": "destination",
-    "ipa": "/destination/",
+    "ipa": "/ˌdɛstəˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'destination' (n)",
     "example": "Practice speaking 'destination' clearly.",
@@ -7946,7 +7868,7 @@ export const vocabList = [
   {
     "id": 721,
     "word": "destroy",
-    "ipa": "/destroy/",
+    "ipa": "/dɪˈstɹɔɪ/",
     "pos": "v",
     "meaning": "từ 'destroy' (v)",
     "example": "Practice speaking 'destroy' clearly.",
@@ -7957,7 +7879,7 @@ export const vocabList = [
   {
     "id": 722,
     "word": "detail",
-    "ipa": "/detail/",
+    "ipa": "/ˈditeɪɫ/",
     "pos": "n",
     "meaning": "từ 'detail' (n)",
     "example": "Practice speaking 'detail' clearly.",
@@ -7968,7 +7890,7 @@ export const vocabList = [
   {
     "id": 723,
     "word": "detailed",
-    "ipa": "/detailed/",
+    "ipa": "/dɪˈteɪɫd/",
     "pos": "adj",
     "meaning": "từ 'detailed' (adj)",
     "example": "Practice speaking 'detailed' clearly.",
@@ -7979,7 +7901,7 @@ export const vocabList = [
   {
     "id": 724,
     "word": "detect",
-    "ipa": "/detect/",
+    "ipa": "/dɪˈtɛkt/",
     "pos": "v",
     "meaning": "từ 'detect' (v)",
     "example": "Practice speaking 'detect' clearly.",
@@ -7990,7 +7912,7 @@ export const vocabList = [
   {
     "id": 725,
     "word": "detective",
-    "ipa": "/detective/",
+    "ipa": "/dɪˈtɛktɪv/",
     "pos": "n",
     "meaning": "từ 'detective' (n)",
     "example": "Practice speaking 'detective' clearly.",
@@ -8001,7 +7923,7 @@ export const vocabList = [
   {
     "id": 726,
     "word": "determine",
-    "ipa": "/determine/",
+    "ipa": "/dəˈtɝmən/",
     "pos": "v",
     "meaning": "từ 'determine' (v)",
     "example": "Practice speaking 'determine' clearly.",
@@ -8012,7 +7934,7 @@ export const vocabList = [
   {
     "id": 727,
     "word": "determined",
-    "ipa": "/determined/",
+    "ipa": "/dɪˈtɝmənd/",
     "pos": "adj",
     "meaning": "từ 'determined' (adj)",
     "example": "Practice speaking 'determined' clearly.",
@@ -8023,7 +7945,7 @@ export const vocabList = [
   {
     "id": 728,
     "word": "develop",
-    "ipa": "/develop/",
+    "ipa": "/dɪˈvɛɫəp/",
     "pos": "v",
     "meaning": "từ 'develop' (v)",
     "example": "Practice speaking 'develop' clearly.",
@@ -8034,7 +7956,7 @@ export const vocabList = [
   {
     "id": 729,
     "word": "development",
-    "ipa": "/development/",
+    "ipa": "/dɪˈvɛɫəpmənt/",
     "pos": "n",
     "meaning": "từ 'development' (n)",
     "example": "Practice speaking 'development' clearly.",
@@ -8045,7 +7967,7 @@ export const vocabList = [
   {
     "id": 730,
     "word": "device",
-    "ipa": "/device/",
+    "ipa": "/dɪˈvaɪs/",
     "pos": "n",
     "meaning": "từ 'device' (n)",
     "example": "Practice speaking 'device' clearly.",
@@ -8056,7 +7978,7 @@ export const vocabList = [
   {
     "id": 731,
     "word": "diagram",
-    "ipa": "/diagram/",
+    "ipa": "/ˈdaɪəˌɡɹæm/",
     "pos": "n",
     "meaning": "từ 'diagram' (n)",
     "example": "Practice speaking 'diagram' clearly.",
@@ -8067,7 +7989,7 @@ export const vocabList = [
   {
     "id": 732,
     "word": "dialogue",
-    "ipa": "/dialogue/",
+    "ipa": "/ˈdaɪəˌɫɔɡ/",
     "pos": "n",
     "meaning": "từ 'dialogue' (n)",
     "example": "Practice speaking 'dialogue' clearly.",
@@ -8078,7 +8000,7 @@ export const vocabList = [
   {
     "id": 733,
     "word": "diamond",
-    "ipa": "/diamond/",
+    "ipa": "/ˈdaɪmənd/",
     "pos": "n",
     "meaning": "từ 'diamond' (n)",
     "example": "Practice speaking 'diamond' clearly.",
@@ -8089,7 +8011,7 @@ export const vocabList = [
   {
     "id": 734,
     "word": "diary",
-    "ipa": "/diary/",
+    "ipa": "/ˈdaɪɝi/",
     "pos": "n",
     "meaning": "từ 'diary' (n)",
     "example": "Practice speaking 'diary' clearly.",
@@ -8100,7 +8022,7 @@ export const vocabList = [
   {
     "id": 735,
     "word": "dictionary",
-    "ipa": "/dictionary/",
+    "ipa": "/ˈdɪkʃəˌnɛɹi/",
     "pos": "n",
     "meaning": "từ 'dictionary' (n)",
     "example": "Practice speaking 'dictionary' clearly.",
@@ -8111,7 +8033,7 @@ export const vocabList = [
   {
     "id": 736,
     "word": "die",
-    "ipa": "/die/",
+    "ipa": "/ˈdaɪ/",
     "pos": "v",
     "meaning": "từ 'die' (v)",
     "example": "Practice speaking 'die' clearly.",
@@ -8122,7 +8044,7 @@ export const vocabList = [
   {
     "id": 737,
     "word": "diet",
-    "ipa": "/diet/",
+    "ipa": "/ˈdaɪət/",
     "pos": "n",
     "meaning": "từ 'diet' (n)",
     "example": "Practice speaking 'diet' clearly.",
@@ -8133,7 +8055,7 @@ export const vocabList = [
   {
     "id": 738,
     "word": "difference",
-    "ipa": "/difference/",
+    "ipa": "/ˈdɪfɝəns/",
     "pos": "n",
     "meaning": "từ 'difference' (n)",
     "example": "Practice speaking 'difference' clearly.",
@@ -8144,7 +8066,7 @@ export const vocabList = [
   {
     "id": 739,
     "word": "different",
-    "ipa": "/different/",
+    "ipa": "/ˈdɪfɝənt/",
     "pos": "adj",
     "meaning": "từ 'different' (adj)",
     "example": "Practice speaking 'different' clearly.",
@@ -8155,7 +8077,7 @@ export const vocabList = [
   {
     "id": 740,
     "word": "differently",
-    "ipa": "/differently/",
+    "ipa": "/ˈdɪfɝˈɛntɫi/",
     "pos": "adv",
     "meaning": "từ 'differently' (adv)",
     "example": "Practice speaking 'differently' clearly.",
@@ -8166,7 +8088,7 @@ export const vocabList = [
   {
     "id": 741,
     "word": "difficult",
-    "ipa": "/difficult/",
+    "ipa": "/ˈdɪfəkəɫt/",
     "pos": "adj",
     "meaning": "từ 'difficult' (adj)",
     "example": "Practice speaking 'difficult' clearly.",
@@ -8177,7 +8099,7 @@ export const vocabList = [
   {
     "id": 742,
     "word": "difficulty",
-    "ipa": "/difficulty/",
+    "ipa": "/ˈdɪfəkəɫti/",
     "pos": "n",
     "meaning": "từ 'difficulty' (n)",
     "example": "Practice speaking 'difficulty' clearly.",
@@ -8188,7 +8110,7 @@ export const vocabList = [
   {
     "id": 743,
     "word": "dig",
-    "ipa": "/dig/",
+    "ipa": "/ˈdɪɡ/",
     "pos": "v",
     "meaning": "từ 'dig' (v)",
     "example": "Practice speaking 'dig' clearly.",
@@ -8199,7 +8121,7 @@ export const vocabList = [
   {
     "id": 744,
     "word": "digital",
-    "ipa": "/digital/",
+    "ipa": "/ˈdɪdʒətəɫ/",
     "pos": "adj",
     "meaning": "từ 'digital' (adj)",
     "example": "Practice speaking 'digital' clearly.",
@@ -8210,7 +8132,7 @@ export const vocabList = [
   {
     "id": 745,
     "word": "dinner",
-    "ipa": "/dinner/",
+    "ipa": "/ˈdɪnɝ/",
     "pos": "n",
     "meaning": "từ 'dinner' (n)",
     "example": "Practice speaking 'dinner' clearly.",
@@ -8221,7 +8143,7 @@ export const vocabList = [
   {
     "id": 746,
     "word": "direct",
-    "ipa": "/direct/",
+    "ipa": "/daɪˈɹɛkt/",
     "pos": "adj",
     "meaning": "từ 'direct' (adj)",
     "example": "Practice speaking 'direct' clearly.",
@@ -8232,7 +8154,7 @@ export const vocabList = [
   {
     "id": 747,
     "word": "direction",
-    "ipa": "/direction/",
+    "ipa": "/daɪˈɹɛkʃɪn/",
     "pos": "n",
     "meaning": "từ 'direction' (n)",
     "example": "Practice speaking 'direction' clearly.",
@@ -8243,7 +8165,7 @@ export const vocabList = [
   {
     "id": 748,
     "word": "directly",
-    "ipa": "/directly/",
+    "ipa": "/daɪˈɹɛkɫi/",
     "pos": "adv",
     "meaning": "từ 'directly' (adv)",
     "example": "Practice speaking 'directly' clearly.",
@@ -8254,7 +8176,7 @@ export const vocabList = [
   {
     "id": 749,
     "word": "director",
-    "ipa": "/director/",
+    "ipa": "/daɪˈɹɛktɝ/",
     "pos": "n",
     "meaning": "từ 'director' (n)",
     "example": "Practice speaking 'director' clearly.",
@@ -8265,7 +8187,7 @@ export const vocabList = [
   {
     "id": 750,
     "word": "dirt",
-    "ipa": "/dirt/",
+    "ipa": "/ˈdɝt/",
     "pos": "n",
     "meaning": "từ 'dirt' (n)",
     "example": "Practice speaking 'dirt' clearly.",
@@ -8276,7 +8198,7 @@ export const vocabList = [
   {
     "id": 751,
     "word": "dirty",
-    "ipa": "/dirty/",
+    "ipa": "/ˈdɝti/",
     "pos": "adj",
     "meaning": "từ 'dirty' (adj)",
     "example": "Practice speaking 'dirty' clearly.",
@@ -8287,7 +8209,7 @@ export const vocabList = [
   {
     "id": 752,
     "word": "disadvantage",
-    "ipa": "/disadvantage/",
+    "ipa": "/ˌdɪsədˈvænɪdʒ/",
     "pos": "n",
     "meaning": "từ 'disadvantage' (n)",
     "example": "Practice speaking 'disadvantage' clearly.",
@@ -8309,7 +8231,7 @@ export const vocabList = [
   {
     "id": 754,
     "word": "disappear",
-    "ipa": "/disappear/",
+    "ipa": "/ˌdɪsəˈpiɹ/",
     "pos": "v",
     "meaning": "từ 'disappear' (v)",
     "example": "Practice speaking 'disappear' clearly.",
@@ -8320,7 +8242,7 @@ export const vocabList = [
   {
     "id": 755,
     "word": "disappointed",
-    "ipa": "/disappointed/",
+    "ipa": "/ˌdɪsəˈpɔɪnɪd/",
     "pos": "adj",
     "meaning": "từ 'disappointed' (adj)",
     "example": "Practice speaking 'disappointed' clearly.",
@@ -8331,7 +8253,7 @@ export const vocabList = [
   {
     "id": 756,
     "word": "disappointing",
-    "ipa": "/disappointing/",
+    "ipa": "/ˌdɪsəˈpɔɪnɪŋ/",
     "pos": "adj",
     "meaning": "từ 'disappointing' (adj)",
     "example": "Practice speaking 'disappointing' clearly.",
@@ -8342,7 +8264,7 @@ export const vocabList = [
   {
     "id": 757,
     "word": "disaster",
-    "ipa": "/disaster/",
+    "ipa": "/dɪˈzæstɝ/",
     "pos": "n",
     "meaning": "từ 'disaster' (n)",
     "example": "Practice speaking 'disaster' clearly.",
@@ -8353,7 +8275,7 @@ export const vocabList = [
   {
     "id": 758,
     "word": "disc",
-    "ipa": "/disc/",
+    "ipa": "/ˈdɪsk/",
     "pos": "n",
     "meaning": "từ 'disc' (n)",
     "example": "Practice speaking 'disc' clearly.",
@@ -8364,7 +8286,7 @@ export const vocabList = [
   {
     "id": 759,
     "word": "discipline",
-    "ipa": "/discipline/",
+    "ipa": "/ˈdɪsəpɫən/",
     "pos": "n",
     "meaning": "từ 'discipline' (n)",
     "example": "Practice speaking 'discipline' clearly.",
@@ -8375,7 +8297,7 @@ export const vocabList = [
   {
     "id": 760,
     "word": "discount",
-    "ipa": "/discount/",
+    "ipa": "/ˈdɪskaʊnt/",
     "pos": "n",
     "meaning": "từ 'discount' (n)",
     "example": "Practice speaking 'discount' clearly.",
@@ -8386,7 +8308,7 @@ export const vocabList = [
   {
     "id": 761,
     "word": "discover",
-    "ipa": "/discover/",
+    "ipa": "/dɪˈskəvɝ/",
     "pos": "v",
     "meaning": "từ 'discover' (v)",
     "example": "Practice speaking 'discover' clearly.",
@@ -8397,7 +8319,7 @@ export const vocabList = [
   {
     "id": 762,
     "word": "discovery",
-    "ipa": "/discovery/",
+    "ipa": "/ˌdɪsˈkəvɹi/",
     "pos": "n",
     "meaning": "từ 'discovery' (n)",
     "example": "Practice speaking 'discovery' clearly.",
@@ -8408,7 +8330,7 @@ export const vocabList = [
   {
     "id": 763,
     "word": "discuss",
-    "ipa": "/discuss/",
+    "ipa": "/dɪˈskəs/",
     "pos": "v",
     "meaning": "từ 'discuss' (v)",
     "example": "Practice speaking 'discuss' clearly.",
@@ -8419,7 +8341,7 @@ export const vocabList = [
   {
     "id": 764,
     "word": "discussion",
-    "ipa": "/discussion/",
+    "ipa": "/dɪˈskəʃən/",
     "pos": "n",
     "meaning": "từ 'discussion' (n)",
     "example": "Practice speaking 'discussion' clearly.",
@@ -8430,7 +8352,7 @@ export const vocabList = [
   {
     "id": 765,
     "word": "disease",
-    "ipa": "/disease/",
+    "ipa": "/dɪˈziz/",
     "pos": "n",
     "meaning": "từ 'disease' (n)",
     "example": "Practice speaking 'disease' clearly.",
@@ -8463,7 +8385,7 @@ export const vocabList = [
   {
     "id": 768,
     "word": "dislike",
-    "ipa": "/dislike/",
+    "ipa": "/dɪˈsɫaɪk/",
     "pos": "v",
     "meaning": "từ 'dislike' (v)",
     "example": "Practice speaking 'dislike' clearly.",
@@ -8474,7 +8396,7 @@ export const vocabList = [
   {
     "id": 769,
     "word": "dismiss",
-    "ipa": "/dismiss/",
+    "ipa": "/dɪsˈmɪs/",
     "pos": "v",
     "meaning": "từ 'dismiss' (v)",
     "example": "Practice speaking 'dismiss' clearly.",
@@ -8485,7 +8407,7 @@ export const vocabList = [
   {
     "id": 770,
     "word": "display",
-    "ipa": "/display/",
+    "ipa": "/dɪsˈpɫeɪ/",
     "pos": "v",
     "meaning": "từ 'display' (v)",
     "example": "Practice speaking 'display' clearly.",
@@ -8496,7 +8418,7 @@ export const vocabList = [
   {
     "id": 771,
     "word": "distance",
-    "ipa": "/distance/",
+    "ipa": "/ˈdɪstəns/",
     "pos": "n",
     "meaning": "từ 'distance' (n)",
     "example": "Practice speaking 'distance' clearly.",
@@ -8507,7 +8429,7 @@ export const vocabList = [
   {
     "id": 772,
     "word": "distribute",
-    "ipa": "/distribute/",
+    "ipa": "/dɪˈstɹɪbjut/",
     "pos": "v",
     "meaning": "từ 'distribute' (v)",
     "example": "Practice speaking 'distribute' clearly.",
@@ -8518,7 +8440,7 @@ export const vocabList = [
   {
     "id": 773,
     "word": "distribution",
-    "ipa": "/distribution/",
+    "ipa": "/ˌdɪstɹəbˈjuʃən/",
     "pos": "n",
     "meaning": "từ 'distribution' (n)",
     "example": "Practice speaking 'distribution' clearly.",
@@ -8529,7 +8451,7 @@ export const vocabList = [
   {
     "id": 774,
     "word": "district",
-    "ipa": "/district/",
+    "ipa": "/ˈdɪstɹɪkt/",
     "pos": "n",
     "meaning": "từ 'district' (n)",
     "example": "Practice speaking 'district' clearly.",
@@ -8540,7 +8462,7 @@ export const vocabList = [
   {
     "id": 775,
     "word": "divide",
-    "ipa": "/divide/",
+    "ipa": "/dɪˈvaɪd/",
     "pos": "v",
     "meaning": "từ 'divide' (v)",
     "example": "Practice speaking 'divide' clearly.",
@@ -8551,7 +8473,7 @@ export const vocabList = [
   {
     "id": 776,
     "word": "division",
-    "ipa": "/division/",
+    "ipa": "/dɪˈvɪʒən/",
     "pos": "n",
     "meaning": "từ 'division' (n)",
     "example": "Practice speaking 'division' clearly.",
@@ -8562,7 +8484,7 @@ export const vocabList = [
   {
     "id": 777,
     "word": "divorced",
-    "ipa": "/divorced/",
+    "ipa": "/dɪˈvɔɹst/",
     "pos": "adj",
     "meaning": "từ 'divorced' (adj)",
     "example": "Practice speaking 'divorced' clearly.",
@@ -8571,20 +8493,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 778,
-    "word": "do1",
-    "ipa": "/do1/",
-    "pos": "v",
-    "meaning": "từ 'do1' (v)",
-    "example": "Practice speaking 'do1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'do1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 779,
     "word": "doctor",
-    "ipa": "/doctor/",
+    "ipa": "/ˈdɑktɝ/",
     "pos": "n",
     "meaning": "từ 'doctor' (n)",
     "example": "Practice speaking 'doctor' clearly.",
@@ -8595,7 +8506,7 @@ export const vocabList = [
   {
     "id": 780,
     "word": "document",
-    "ipa": "/document/",
+    "ipa": "/ˈdɑkjəmɛnt/",
     "pos": "n",
     "meaning": "từ 'document' (n)",
     "example": "Practice speaking 'document' clearly.",
@@ -8606,7 +8517,7 @@ export const vocabList = [
   {
     "id": 781,
     "word": "documentary",
-    "ipa": "/documentary/",
+    "ipa": "/ˌdɑkjəˈmɛnɝi/",
     "pos": "n",
     "meaning": "từ 'documentary' (n)",
     "example": "Practice speaking 'documentary' clearly.",
@@ -8617,7 +8528,7 @@ export const vocabList = [
   {
     "id": 782,
     "word": "dog",
-    "ipa": "/dog/",
+    "ipa": "/ˈdɔɡ/",
     "pos": "n",
     "meaning": "từ 'dog' (n)",
     "example": "Practice speaking 'dog' clearly.",
@@ -8628,7 +8539,7 @@ export const vocabList = [
   {
     "id": 783,
     "word": "dollar",
-    "ipa": "/dollar/",
+    "ipa": "/ˈdɑɫɝ/",
     "pos": "n",
     "meaning": "từ 'dollar' (n)",
     "example": "Practice speaking 'dollar' clearly.",
@@ -8639,7 +8550,7 @@ export const vocabList = [
   {
     "id": 784,
     "word": "domestic",
-    "ipa": "/domestic/",
+    "ipa": "/dəˈmɛstɪk/",
     "pos": "adj",
     "meaning": "từ 'domestic' (adj)",
     "example": "Practice speaking 'domestic' clearly.",
@@ -8650,7 +8561,7 @@ export const vocabList = [
   {
     "id": 785,
     "word": "dominate",
-    "ipa": "/dominate/",
+    "ipa": "/ˈdɑməˌneɪt/",
     "pos": "v",
     "meaning": "từ 'dominate' (v)",
     "example": "Practice speaking 'dominate' clearly.",
@@ -8661,7 +8572,7 @@ export const vocabList = [
   {
     "id": 786,
     "word": "donate",
-    "ipa": "/donate/",
+    "ipa": "/ˈdoʊˌneɪt/",
     "pos": "v",
     "meaning": "từ 'donate' (v)",
     "example": "Practice speaking 'donate' clearly.",
@@ -8683,7 +8594,7 @@ export const vocabList = [
   {
     "id": 788,
     "word": "double",
-    "ipa": "/double/",
+    "ipa": "/ˈdəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'double' (adj)",
     "example": "Practice speaking 'double' clearly.",
@@ -8694,7 +8605,7 @@ export const vocabList = [
   {
     "id": 789,
     "word": "doubt",
-    "ipa": "/doubt/",
+    "ipa": "/ˈdaʊt/",
     "pos": "n",
     "meaning": "từ 'doubt' (n)",
     "example": "Practice speaking 'doubt' clearly.",
@@ -8705,7 +8616,7 @@ export const vocabList = [
   {
     "id": 790,
     "word": "down",
-    "ipa": "/down/",
+    "ipa": "/ˈdaʊn/",
     "pos": "adv",
     "meaning": "từ 'down' (adv)",
     "example": "Practice speaking 'down' clearly.",
@@ -8716,7 +8627,7 @@ export const vocabList = [
   {
     "id": 791,
     "word": "download",
-    "ipa": "/download/",
+    "ipa": "/ˈdaʊnˌɫoʊd/",
     "pos": "v",
     "meaning": "từ 'download' (v)",
     "example": "Practice speaking 'download' clearly.",
@@ -8727,7 +8638,7 @@ export const vocabList = [
   {
     "id": 792,
     "word": "downstairs",
-    "ipa": "/downstairs/",
+    "ipa": "/ˈdaʊnˈstɛɹz/",
     "pos": "adv",
     "meaning": "từ 'downstairs' (adv)",
     "example": "Practice speaking 'downstairs' clearly.",
@@ -8738,7 +8649,7 @@ export const vocabList = [
   {
     "id": 793,
     "word": "downwards",
-    "ipa": "/downwards/",
+    "ipa": "/ˈdaʊnwɝdz/",
     "pos": "adv",
     "meaning": "từ 'downwards' (adv)",
     "example": "Practice speaking 'downwards' clearly.",
@@ -8749,7 +8660,7 @@ export const vocabList = [
   {
     "id": 794,
     "word": "dozen",
-    "ipa": "/dozen/",
+    "ipa": "/ˈdəzən/",
     "pos": "n",
     "meaning": "từ 'dozen' (n)",
     "example": "Practice speaking 'dozen' clearly.",
@@ -8760,7 +8671,7 @@ export const vocabList = [
   {
     "id": 795,
     "word": "draft",
-    "ipa": "/draft/",
+    "ipa": "/ˈdɹæft/",
     "pos": "n",
     "meaning": "từ 'draft' (n)",
     "example": "Practice speaking 'draft' clearly.",
@@ -8771,7 +8682,7 @@ export const vocabList = [
   {
     "id": 796,
     "word": "drag",
-    "ipa": "/drag/",
+    "ipa": "/ˈdɹæɡ/",
     "pos": "v",
     "meaning": "từ 'drag' (v)",
     "example": "Practice speaking 'drag' clearly.",
@@ -8782,7 +8693,7 @@ export const vocabList = [
   {
     "id": 797,
     "word": "drama",
-    "ipa": "/drama/",
+    "ipa": "/ˈdɹɑmə/",
     "pos": "n",
     "meaning": "từ 'drama' (n)",
     "example": "Practice speaking 'drama' clearly.",
@@ -8793,7 +8704,7 @@ export const vocabList = [
   {
     "id": 798,
     "word": "dramatic",
-    "ipa": "/dramatic/",
+    "ipa": "/dɹəˈmætɪk/",
     "pos": "adj",
     "meaning": "từ 'dramatic' (adj)",
     "example": "Practice speaking 'dramatic' clearly.",
@@ -8804,7 +8715,7 @@ export const vocabList = [
   {
     "id": 799,
     "word": "draw",
-    "ipa": "/draw/",
+    "ipa": "/ˈdɹɔ/",
     "pos": "v",
     "meaning": "từ 'draw' (v)",
     "example": "Practice speaking 'draw' clearly.",
@@ -8815,7 +8726,7 @@ export const vocabList = [
   {
     "id": 800,
     "word": "drawing",
-    "ipa": "/drawing/",
+    "ipa": "/ˈdɹɔɪŋ/",
     "pos": "n",
     "meaning": "từ 'drawing' (n)",
     "example": "Practice speaking 'drawing' clearly.",
@@ -8826,7 +8737,7 @@ export const vocabList = [
   {
     "id": 801,
     "word": "dream",
-    "ipa": "/dream/",
+    "ipa": "/ˈdɹim/",
     "pos": "n",
     "meaning": "từ 'dream' (n)",
     "example": "Practice speaking 'dream' clearly.",
@@ -8837,7 +8748,7 @@ export const vocabList = [
   {
     "id": 802,
     "word": "dress",
-    "ipa": "/dress/",
+    "ipa": "/ˈdɹɛs/",
     "pos": "n",
     "meaning": "từ 'dress' (n)",
     "example": "Practice speaking 'dress' clearly.",
@@ -8848,7 +8759,7 @@ export const vocabList = [
   {
     "id": 803,
     "word": "dressed",
-    "ipa": "/dressed/",
+    "ipa": "/ˈdɹɛst/",
     "pos": "adj",
     "meaning": "từ 'dressed' (adj)",
     "example": "Practice speaking 'dressed' clearly.",
@@ -8881,7 +8792,7 @@ export const vocabList = [
   {
     "id": 806,
     "word": "driver",
-    "ipa": "/driver/",
+    "ipa": "/ˈdɹaɪvɝ/",
     "pos": "n",
     "meaning": "từ 'driver' (n)",
     "example": "Practice speaking 'driver' clearly.",
@@ -8892,7 +8803,7 @@ export const vocabList = [
   {
     "id": 807,
     "word": "driving",
-    "ipa": "/driving/",
+    "ipa": "/ˈdɹaɪvɪŋ/",
     "pos": "n",
     "meaning": "từ 'driving' (n)",
     "example": "Practice speaking 'driving' clearly.",
@@ -8903,7 +8814,7 @@ export const vocabList = [
   {
     "id": 808,
     "word": "drop",
-    "ipa": "/drop/",
+    "ipa": "/ˈdɹɑp/",
     "pos": "v",
     "meaning": "từ 'drop' (v)",
     "example": "Practice speaking 'drop' clearly.",
@@ -8914,7 +8825,7 @@ export const vocabList = [
   {
     "id": 809,
     "word": "drug",
-    "ipa": "/drug/",
+    "ipa": "/ˈdɹəɡ/",
     "pos": "n",
     "meaning": "từ 'drug' (n)",
     "example": "Practice speaking 'drug' clearly.",
@@ -8925,7 +8836,7 @@ export const vocabList = [
   {
     "id": 810,
     "word": "drum",
-    "ipa": "/drum/",
+    "ipa": "/ˈdɹəm/",
     "pos": "n",
     "meaning": "từ 'drum' (n)",
     "example": "Practice speaking 'drum' clearly.",
@@ -8936,7 +8847,7 @@ export const vocabList = [
   {
     "id": 811,
     "word": "drunk",
-    "ipa": "/drunk/",
+    "ipa": "/ˈdɹəŋk/",
     "pos": "adj",
     "meaning": "từ 'drunk' (adj)",
     "example": "Practice speaking 'drunk' clearly.",
@@ -8947,7 +8858,7 @@ export const vocabList = [
   {
     "id": 812,
     "word": "dry",
-    "ipa": "/dry/",
+    "ipa": "/ˈdɹaɪ/",
     "pos": "adj",
     "meaning": "từ 'dry' (adj)",
     "example": "Practice speaking 'dry' clearly.",
@@ -8958,7 +8869,7 @@ export const vocabList = [
   {
     "id": 813,
     "word": "due",
-    "ipa": "/due/",
+    "ipa": "/ˈdju/",
     "pos": "adj",
     "meaning": "từ 'due' (adj)",
     "example": "Practice speaking 'due' clearly.",
@@ -8969,7 +8880,7 @@ export const vocabList = [
   {
     "id": 814,
     "word": "during",
-    "ipa": "/during/",
+    "ipa": "/ˈdɝɪŋ/",
     "pos": "prep",
     "meaning": "từ 'during' (prep)",
     "example": "Practice speaking 'during' clearly.",
@@ -8980,7 +8891,7 @@ export const vocabList = [
   {
     "id": 815,
     "word": "dust",
-    "ipa": "/dust/",
+    "ipa": "/ˈdəst/",
     "pos": "n",
     "meaning": "từ 'dust' (n)",
     "example": "Practice speaking 'dust' clearly.",
@@ -8991,7 +8902,7 @@ export const vocabList = [
   {
     "id": 816,
     "word": "duty",
-    "ipa": "/duty/",
+    "ipa": "/ˈdjuti/",
     "pos": "n",
     "meaning": "từ 'duty' (n)",
     "example": "Practice speaking 'duty' clearly.",
@@ -9002,7 +8913,7 @@ export const vocabList = [
   {
     "id": 817,
     "word": "dvd",
-    "ipa": "/dvd/",
+    "ipa": "/ˌdiˌviˈdi/",
     "pos": "n",
     "meaning": "từ 'dvd' (n)",
     "example": "Practice speaking 'dvd' clearly.",
@@ -9024,7 +8935,7 @@ export const vocabList = [
   {
     "id": 819,
     "word": "ear",
-    "ipa": "/ear/",
+    "ipa": "/ˈiɹ/",
     "pos": "n",
     "meaning": "từ 'ear' (n)",
     "example": "Practice speaking 'ear' clearly.",
@@ -9035,7 +8946,7 @@ export const vocabList = [
   {
     "id": 820,
     "word": "early",
-    "ipa": "/early/",
+    "ipa": "/ˈɝɫi/",
     "pos": "adj",
     "meaning": "từ 'early' (adj)",
     "example": "Practice speaking 'early' clearly.",
@@ -9046,7 +8957,7 @@ export const vocabList = [
   {
     "id": 821,
     "word": "earn",
-    "ipa": "/earn/",
+    "ipa": "/ˈɝn/",
     "pos": "v",
     "meaning": "từ 'earn' (v)",
     "example": "Practice speaking 'earn' clearly.",
@@ -9079,7 +8990,7 @@ export const vocabList = [
   {
     "id": 824,
     "word": "easily",
-    "ipa": "/easily/",
+    "ipa": "/ˈizəɫi/",
     "pos": "adv",
     "meaning": "từ 'easily' (adv)",
     "example": "Practice speaking 'easily' clearly.",
@@ -9090,7 +9001,7 @@ export const vocabList = [
   {
     "id": 825,
     "word": "east",
-    "ipa": "/east/",
+    "ipa": "/ˈist/",
     "pos": "n",
     "meaning": "từ 'east' (n)",
     "example": "Practice speaking 'east' clearly.",
@@ -9101,7 +9012,7 @@ export const vocabList = [
   {
     "id": 826,
     "word": "eastern",
-    "ipa": "/eastern/",
+    "ipa": "/ˈistɝn/",
     "pos": "adj",
     "meaning": "từ 'eastern' (adj)",
     "example": "Practice speaking 'eastern' clearly.",
@@ -9112,7 +9023,7 @@ export const vocabList = [
   {
     "id": 827,
     "word": "easy",
-    "ipa": "/easy/",
+    "ipa": "/ˈizi/",
     "pos": "adj",
     "meaning": "từ 'easy' (adj)",
     "example": "Practice speaking 'easy' clearly.",
@@ -9134,7 +9045,7 @@ export const vocabList = [
   {
     "id": 829,
     "word": "economic",
-    "ipa": "/economic/",
+    "ipa": "/ˌɛkəˈnɑmɪk/",
     "pos": "adj",
     "meaning": "từ 'economic' (adj)",
     "example": "Practice speaking 'economic' clearly.",
@@ -9145,7 +9056,7 @@ export const vocabList = [
   {
     "id": 830,
     "word": "economy",
-    "ipa": "/economy/",
+    "ipa": "/iˈkɑnəmi/",
     "pos": "n",
     "meaning": "từ 'economy' (n)",
     "example": "Practice speaking 'economy' clearly.",
@@ -9156,7 +9067,7 @@ export const vocabList = [
   {
     "id": 831,
     "word": "edge",
-    "ipa": "/edge/",
+    "ipa": "/ˈɛdʒ/",
     "pos": "n",
     "meaning": "từ 'edge' (n)",
     "example": "Practice speaking 'edge' clearly.",
@@ -9167,7 +9078,7 @@ export const vocabList = [
   {
     "id": 832,
     "word": "edit",
-    "ipa": "/edit/",
+    "ipa": "/ˈɛdət/",
     "pos": "v",
     "meaning": "từ 'edit' (v)",
     "example": "Practice speaking 'edit' clearly.",
@@ -9178,7 +9089,7 @@ export const vocabList = [
   {
     "id": 833,
     "word": "edition",
-    "ipa": "/edition/",
+    "ipa": "/əˈdɪʃən/",
     "pos": "n",
     "meaning": "từ 'edition' (n)",
     "example": "Practice speaking 'edition' clearly.",
@@ -9189,7 +9100,7 @@ export const vocabList = [
   {
     "id": 834,
     "word": "editor",
-    "ipa": "/editor/",
+    "ipa": "/ˈɛdətɝ/",
     "pos": "n",
     "meaning": "từ 'editor' (n)",
     "example": "Practice speaking 'editor' clearly.",
@@ -9200,7 +9111,7 @@ export const vocabList = [
   {
     "id": 835,
     "word": "educate",
-    "ipa": "/educate/",
+    "ipa": "/ˈɛdʒəˌkeɪt/",
     "pos": "v",
     "meaning": "từ 'educate' (v)",
     "example": "Practice speaking 'educate' clearly.",
@@ -9211,7 +9122,7 @@ export const vocabList = [
   {
     "id": 836,
     "word": "educated",
-    "ipa": "/educated/",
+    "ipa": "/ˈɛdʒəˌkeɪtɪd/",
     "pos": "adj",
     "meaning": "từ 'educated' (adj)",
     "example": "Practice speaking 'educated' clearly.",
@@ -9222,7 +9133,7 @@ export const vocabList = [
   {
     "id": 837,
     "word": "education",
-    "ipa": "/education/",
+    "ipa": "/ˌɛdʒəˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'education' (n)",
     "example": "Practice speaking 'education' clearly.",
@@ -9233,7 +9144,7 @@ export const vocabList = [
   {
     "id": 838,
     "word": "educational",
-    "ipa": "/educational/",
+    "ipa": "/ˌɛdʒəˈkeɪʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'educational' (adj)",
     "example": "Practice speaking 'educational' clearly.",
@@ -9244,7 +9155,7 @@ export const vocabList = [
   {
     "id": 839,
     "word": "effect",
-    "ipa": "/effect/",
+    "ipa": "/ˈifɛkt/",
     "pos": "n",
     "meaning": "từ 'effect' (n)",
     "example": "Practice speaking 'effect' clearly.",
@@ -9255,7 +9166,7 @@ export const vocabList = [
   {
     "id": 840,
     "word": "effective",
-    "ipa": "/effective/",
+    "ipa": "/ˈifɛktɪv/",
     "pos": "adj",
     "meaning": "từ 'effective' (adj)",
     "example": "Practice speaking 'effective' clearly.",
@@ -9266,7 +9177,7 @@ export const vocabList = [
   {
     "id": 841,
     "word": "effectively",
-    "ipa": "/effectively/",
+    "ipa": "/ˈifɛktɪvɫi/",
     "pos": "adv",
     "meaning": "từ 'effectively' (adv)",
     "example": "Practice speaking 'effectively' clearly.",
@@ -9277,7 +9188,7 @@ export const vocabList = [
   {
     "id": 842,
     "word": "efficient",
-    "ipa": "/efficient/",
+    "ipa": "/ɪˈfɪʃənt/",
     "pos": "adj",
     "meaning": "từ 'efficient' (adj)",
     "example": "Practice speaking 'efficient' clearly.",
@@ -9288,7 +9199,7 @@ export const vocabList = [
   {
     "id": 843,
     "word": "effort",
-    "ipa": "/effort/",
+    "ipa": "/ˈɛfɝt/",
     "pos": "n",
     "meaning": "từ 'effort' (n)",
     "example": "Practice speaking 'effort' clearly.",
@@ -9299,7 +9210,7 @@ export const vocabList = [
   {
     "id": 844,
     "word": "egg",
-    "ipa": "/egg/",
+    "ipa": "/ˈɛɡ/",
     "pos": "n",
     "meaning": "từ 'egg' (n)",
     "example": "Practice speaking 'egg' clearly.",
@@ -9310,7 +9221,7 @@ export const vocabList = [
   {
     "id": 845,
     "word": "eight",
-    "ipa": "/eight/",
+    "ipa": "/ˈeɪt/",
     "pos": "number",
     "meaning": "từ 'eight' (number)",
     "example": "Practice speaking 'eight' clearly.",
@@ -9332,7 +9243,7 @@ export const vocabList = [
   {
     "id": 847,
     "word": "eighty",
-    "ipa": "/eighty/",
+    "ipa": "/ˈeɪti/",
     "pos": "number",
     "meaning": "từ 'eighty' (number)",
     "example": "Practice speaking 'eighty' clearly.",
@@ -9354,7 +9265,7 @@ export const vocabList = [
   {
     "id": 849,
     "word": "elderly",
-    "ipa": "/elderly/",
+    "ipa": "/ˈɛɫdɝɫi/",
     "pos": "adj",
     "meaning": "từ 'elderly' (adj)",
     "example": "Practice speaking 'elderly' clearly.",
@@ -9365,7 +9276,7 @@ export const vocabList = [
   {
     "id": 850,
     "word": "elect",
-    "ipa": "/elect/",
+    "ipa": "/ɪˈɫɛkt/",
     "pos": "v",
     "meaning": "từ 'elect' (v)",
     "example": "Practice speaking 'elect' clearly.",
@@ -9376,7 +9287,7 @@ export const vocabList = [
   {
     "id": 851,
     "word": "election",
-    "ipa": "/election/",
+    "ipa": "/ɪˈɫɛkʃən/",
     "pos": "n",
     "meaning": "từ 'election' (n)",
     "example": "Practice speaking 'election' clearly.",
@@ -9387,7 +9298,7 @@ export const vocabList = [
   {
     "id": 852,
     "word": "electric",
-    "ipa": "/electric/",
+    "ipa": "/ɪˈɫɛktɹɪk/",
     "pos": "adj",
     "meaning": "từ 'electric' (adj)",
     "example": "Practice speaking 'electric' clearly.",
@@ -9398,7 +9309,7 @@ export const vocabList = [
   {
     "id": 853,
     "word": "electrical",
-    "ipa": "/electrical/",
+    "ipa": "/ɪˈɫɛktɹɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'electrical' (adj)",
     "example": "Practice speaking 'electrical' clearly.",
@@ -9409,7 +9320,7 @@ export const vocabList = [
   {
     "id": 854,
     "word": "electricity",
-    "ipa": "/electricity/",
+    "ipa": "/ɪˌɫɛkˈtɹɪsəti/",
     "pos": "n",
     "meaning": "từ 'electricity' (n)",
     "example": "Practice speaking 'electricity' clearly.",
@@ -9420,7 +9331,7 @@ export const vocabList = [
   {
     "id": 855,
     "word": "electronic",
-    "ipa": "/electronic/",
+    "ipa": "/ˌɪˌɫɛkˈtɹɑnɪk/",
     "pos": "adj",
     "meaning": "từ 'electronic' (adj)",
     "example": "Practice speaking 'electronic' clearly.",
@@ -9431,7 +9342,7 @@ export const vocabList = [
   {
     "id": 856,
     "word": "element",
-    "ipa": "/element/",
+    "ipa": "/ˈɛɫəmənt/",
     "pos": "n",
     "meaning": "từ 'element' (n)",
     "example": "Practice speaking 'element' clearly.",
@@ -9453,7 +9364,7 @@ export const vocabList = [
   {
     "id": 858,
     "word": "eleven",
-    "ipa": "/eleven/",
+    "ipa": "/ˈiɫɛvən/",
     "pos": "number",
     "meaning": "từ 'eleven' (number)",
     "example": "Practice speaking 'eleven' clearly.",
@@ -9464,7 +9375,7 @@ export const vocabList = [
   {
     "id": 859,
     "word": "else",
-    "ipa": "/else/",
+    "ipa": "/ˈɛɫs/",
     "pos": "adv",
     "meaning": "từ 'else' (adv)",
     "example": "Practice speaking 'else' clearly.",
@@ -9475,7 +9386,7 @@ export const vocabList = [
   {
     "id": 860,
     "word": "elsewhere",
-    "ipa": "/elsewhere/",
+    "ipa": "/ˈɛɫˌswɛɹ/",
     "pos": "adv",
     "meaning": "từ 'elsewhere' (adv)",
     "example": "Practice speaking 'elsewhere' clearly.",
@@ -9486,7 +9397,7 @@ export const vocabList = [
   {
     "id": 861,
     "word": "email",
-    "ipa": "/email/",
+    "ipa": "/iˈmeɪɫ/",
     "pos": "n",
     "meaning": "từ 'email' (n)",
     "example": "Practice speaking 'email' clearly.",
@@ -9497,7 +9408,7 @@ export const vocabList = [
   {
     "id": 862,
     "word": "embarrassed",
-    "ipa": "/embarrassed/",
+    "ipa": "/ɪmˈbɛɹəst/",
     "pos": "adj",
     "meaning": "từ 'embarrassed' (adj)",
     "example": "Practice speaking 'embarrassed' clearly.",
@@ -9508,7 +9419,7 @@ export const vocabList = [
   {
     "id": 863,
     "word": "embarrassing",
-    "ipa": "/embarrassing/",
+    "ipa": "/ɪmˈbɛɹəsɪŋ/",
     "pos": "adj",
     "meaning": "từ 'embarrassing' (adj)",
     "example": "Practice speaking 'embarrassing' clearly.",
@@ -9519,7 +9430,7 @@ export const vocabList = [
   {
     "id": 864,
     "word": "emerge",
-    "ipa": "/emerge/",
+    "ipa": "/ˈimɝdʒ/",
     "pos": "v",
     "meaning": "từ 'emerge' (v)",
     "example": "Practice speaking 'emerge' clearly.",
@@ -9530,7 +9441,7 @@ export const vocabList = [
   {
     "id": 865,
     "word": "emergency",
-    "ipa": "/emergency/",
+    "ipa": "/ˈimɝdʒənsi/",
     "pos": "n",
     "meaning": "từ 'emergency' (n)",
     "example": "Practice speaking 'emergency' clearly.",
@@ -9541,7 +9452,7 @@ export const vocabList = [
   {
     "id": 866,
     "word": "emotion",
-    "ipa": "/emotion/",
+    "ipa": "/ˈiˌmoʊʃən/",
     "pos": "n",
     "meaning": "từ 'emotion' (n)",
     "example": "Practice speaking 'emotion' clearly.",
@@ -9552,7 +9463,7 @@ export const vocabList = [
   {
     "id": 867,
     "word": "emotional",
-    "ipa": "/emotional/",
+    "ipa": "/ˈiˌmoʊʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'emotional' (adj)",
     "example": "Practice speaking 'emotional' clearly.",
@@ -9585,7 +9496,7 @@ export const vocabList = [
   {
     "id": 870,
     "word": "employ",
-    "ipa": "/employ/",
+    "ipa": "/ɛmˈpɫɔɪ/",
     "pos": "v",
     "meaning": "từ 'employ' (v)",
     "example": "Practice speaking 'employ' clearly.",
@@ -9607,7 +9518,7 @@ export const vocabList = [
   {
     "id": 872,
     "word": "employer",
-    "ipa": "/employer/",
+    "ipa": "/ɛmˈpɫɔɪɝ/",
     "pos": "n",
     "meaning": "từ 'employer' (n)",
     "example": "Practice speaking 'employer' clearly.",
@@ -9618,7 +9529,7 @@ export const vocabList = [
   {
     "id": 873,
     "word": "employment",
-    "ipa": "/employment/",
+    "ipa": "/ɛmˈpɫɔɪmənt/",
     "pos": "n",
     "meaning": "từ 'employment' (n)",
     "example": "Practice speaking 'employment' clearly.",
@@ -9629,7 +9540,7 @@ export const vocabList = [
   {
     "id": 874,
     "word": "empty",
-    "ipa": "/empty/",
+    "ipa": "/ˈɛmpti/",
     "pos": "adj",
     "meaning": "từ 'empty' (adj)",
     "example": "Practice speaking 'empty' clearly.",
@@ -9640,7 +9551,7 @@ export const vocabList = [
   {
     "id": 875,
     "word": "enable",
-    "ipa": "/enable/",
+    "ipa": "/ɛˈneɪbəɫ/",
     "pos": "v",
     "meaning": "từ 'enable' (v)",
     "example": "Practice speaking 'enable' clearly.",
@@ -9651,7 +9562,7 @@ export const vocabList = [
   {
     "id": 876,
     "word": "encounter",
-    "ipa": "/encounter/",
+    "ipa": "/ɪnˈkaʊnɝ/",
     "pos": "v",
     "meaning": "từ 'encounter' (v)",
     "example": "Practice speaking 'encounter' clearly.",
@@ -9662,7 +9573,7 @@ export const vocabList = [
   {
     "id": 877,
     "word": "encourage",
-    "ipa": "/encourage/",
+    "ipa": "/ɛnˈkɝɪdʒ/",
     "pos": "v",
     "meaning": "từ 'encourage' (v)",
     "example": "Practice speaking 'encourage' clearly.",
@@ -9673,7 +9584,7 @@ export const vocabList = [
   {
     "id": 878,
     "word": "end",
-    "ipa": "/end/",
+    "ipa": "/ˈɛnd/",
     "pos": "n",
     "meaning": "từ 'end' (n)",
     "example": "Practice speaking 'end' clearly.",
@@ -9684,7 +9595,7 @@ export const vocabList = [
   {
     "id": 879,
     "word": "ending",
-    "ipa": "/ending/",
+    "ipa": "/ˈɛndɪŋ/",
     "pos": "n",
     "meaning": "từ 'ending' (n)",
     "example": "Practice speaking 'ending' clearly.",
@@ -9695,7 +9606,7 @@ export const vocabList = [
   {
     "id": 880,
     "word": "enemy",
-    "ipa": "/enemy/",
+    "ipa": "/ˈɛnəmi/",
     "pos": "n",
     "meaning": "từ 'enemy' (n)",
     "example": "Practice speaking 'enemy' clearly.",
@@ -9706,7 +9617,7 @@ export const vocabList = [
   {
     "id": 881,
     "word": "energy",
-    "ipa": "/energy/",
+    "ipa": "/ˈɛnɝdʒi/",
     "pos": "n",
     "meaning": "từ 'energy' (n)",
     "example": "Practice speaking 'energy' clearly.",
@@ -9717,7 +9628,7 @@ export const vocabList = [
   {
     "id": 882,
     "word": "engage",
-    "ipa": "/engage/",
+    "ipa": "/ɛnˈɡeɪdʒ/",
     "pos": "v",
     "meaning": "từ 'engage' (v)",
     "example": "Practice speaking 'engage' clearly.",
@@ -9728,7 +9639,7 @@ export const vocabList = [
   {
     "id": 883,
     "word": "engaged",
-    "ipa": "/engaged/",
+    "ipa": "/ɛnˈɡeɪdʒd/",
     "pos": "adj",
     "meaning": "từ 'engaged' (adj)",
     "example": "Practice speaking 'engaged' clearly.",
@@ -9739,7 +9650,7 @@ export const vocabList = [
   {
     "id": 884,
     "word": "engine",
-    "ipa": "/engine/",
+    "ipa": "/ˈɛndʒən/",
     "pos": "n",
     "meaning": "từ 'engine' (n)",
     "example": "Practice speaking 'engine' clearly.",
@@ -9772,7 +9683,7 @@ export const vocabList = [
   {
     "id": 887,
     "word": "enhance",
-    "ipa": "/enhance/",
+    "ipa": "/ɛnˈhæns/",
     "pos": "v",
     "meaning": "từ 'enhance' (v)",
     "example": "Practice speaking 'enhance' clearly.",
@@ -9783,7 +9694,7 @@ export const vocabList = [
   {
     "id": 888,
     "word": "enjoy",
-    "ipa": "/enjoy/",
+    "ipa": "/ˌɛnˈdʒɔɪ/",
     "pos": "v",
     "meaning": "từ 'enjoy' (v)",
     "example": "Practice speaking 'enjoy' clearly.",
@@ -9794,7 +9705,7 @@ export const vocabList = [
   {
     "id": 889,
     "word": "enormous",
-    "ipa": "/enormous/",
+    "ipa": "/iˈnɔɹməs/",
     "pos": "adj",
     "meaning": "từ 'enormous' (adj)",
     "example": "Practice speaking 'enormous' clearly.",
@@ -9805,7 +9716,7 @@ export const vocabList = [
   {
     "id": 890,
     "word": "enough",
-    "ipa": "/enough/",
+    "ipa": "/iˈnəf/",
     "pos": "det",
     "meaning": "từ 'enough' (det)",
     "example": "Practice speaking 'enough' clearly.",
@@ -9816,7 +9727,7 @@ export const vocabList = [
   {
     "id": 891,
     "word": "enquiry",
-    "ipa": "/enquiry/",
+    "ipa": "/ɪnˈkwaɪˌɹi/",
     "pos": "n",
     "meaning": "từ 'enquiry' (n)",
     "example": "Practice speaking 'enquiry' clearly.",
@@ -9827,7 +9738,7 @@ export const vocabList = [
   {
     "id": 892,
     "word": "ensure",
-    "ipa": "/ensure/",
+    "ipa": "/ɛnˈʃʊɹ/",
     "pos": "v",
     "meaning": "từ 'ensure' (v)",
     "example": "Practice speaking 'ensure' clearly.",
@@ -9838,7 +9749,7 @@ export const vocabList = [
   {
     "id": 893,
     "word": "enter",
-    "ipa": "/enter/",
+    "ipa": "/ˈɛnɝ/",
     "pos": "v",
     "meaning": "từ 'enter' (v)",
     "example": "Practice speaking 'enter' clearly.",
@@ -9849,7 +9760,7 @@ export const vocabList = [
   {
     "id": 894,
     "word": "entertain",
-    "ipa": "/entertain/",
+    "ipa": "/ˌɛnɝˈteɪn/",
     "pos": "v",
     "meaning": "từ 'entertain' (v)",
     "example": "Practice speaking 'entertain' clearly.",
@@ -9860,7 +9771,7 @@ export const vocabList = [
   {
     "id": 895,
     "word": "entertainment",
-    "ipa": "/entertainment/",
+    "ipa": "/ˌɛnɝˈteɪnmənt/",
     "pos": "n",
     "meaning": "từ 'entertainment' (n)",
     "example": "Practice speaking 'entertainment' clearly.",
@@ -9893,7 +9804,7 @@ export const vocabList = [
   {
     "id": 898,
     "word": "entire",
-    "ipa": "/entire/",
+    "ipa": "/ɪnˈtaɪɝ/",
     "pos": "adj",
     "meaning": "từ 'entire' (adj)",
     "example": "Practice speaking 'entire' clearly.",
@@ -9904,7 +9815,7 @@ export const vocabList = [
   {
     "id": 899,
     "word": "entirely",
-    "ipa": "/entirely/",
+    "ipa": "/ɪnˈtaɪɝɫi/",
     "pos": "adv",
     "meaning": "từ 'entirely' (adv)",
     "example": "Practice speaking 'entirely' clearly.",
@@ -9915,7 +9826,7 @@ export const vocabList = [
   {
     "id": 900,
     "word": "entrance",
-    "ipa": "/entrance/",
+    "ipa": "/ˈɛntɹəns/",
     "pos": "n",
     "meaning": "từ 'entrance' (n)",
     "example": "Practice speaking 'entrance' clearly.",
@@ -9926,7 +9837,7 @@ export const vocabList = [
   {
     "id": 901,
     "word": "entry",
-    "ipa": "/entry/",
+    "ipa": "/ˈɛntɹi/",
     "pos": "n",
     "meaning": "từ 'entry' (n)",
     "example": "Practice speaking 'entry' clearly.",
@@ -9937,7 +9848,7 @@ export const vocabList = [
   {
     "id": 902,
     "word": "environment",
-    "ipa": "/environment/",
+    "ipa": "/ɪnˈvaɪɹənmənt/",
     "pos": "n",
     "meaning": "từ 'environment' (n)",
     "example": "Practice speaking 'environment' clearly.",
@@ -9948,7 +9859,7 @@ export const vocabList = [
   {
     "id": 903,
     "word": "environmental",
-    "ipa": "/environmental/",
+    "ipa": "/ɪnˌvaɪɹənˈmɛnəɫ/",
     "pos": "adj",
     "meaning": "từ 'environmental' (adj)",
     "example": "Practice speaking 'environmental' clearly.",
@@ -9959,7 +9870,7 @@ export const vocabList = [
   {
     "id": 904,
     "word": "episode",
-    "ipa": "/episode/",
+    "ipa": "/ˈɛpəˌsoʊd/",
     "pos": "n",
     "meaning": "từ 'episode' (n)",
     "example": "Practice speaking 'episode' clearly.",
@@ -9970,7 +9881,7 @@ export const vocabList = [
   {
     "id": 905,
     "word": "equal",
-    "ipa": "/equal/",
+    "ipa": "/ˈikwəɫ/",
     "pos": "adj",
     "meaning": "từ 'equal' (adj)",
     "example": "Practice speaking 'equal' clearly.",
@@ -9981,7 +9892,7 @@ export const vocabList = [
   {
     "id": 906,
     "word": "equally",
-    "ipa": "/equally/",
+    "ipa": "/ˈikwəɫi/",
     "pos": "adv",
     "meaning": "từ 'equally' (adv)",
     "example": "Practice speaking 'equally' clearly.",
@@ -9992,7 +9903,7 @@ export const vocabList = [
   {
     "id": 907,
     "word": "equipment",
-    "ipa": "/equipment/",
+    "ipa": "/ɪˈkwɪpmənt/",
     "pos": "n",
     "meaning": "từ 'equipment' (n)",
     "example": "Practice speaking 'equipment' clearly.",
@@ -10003,7 +9914,7 @@ export const vocabList = [
   {
     "id": 908,
     "word": "error",
-    "ipa": "/error/",
+    "ipa": "/ˈɛɹɝ/",
     "pos": "n",
     "meaning": "từ 'error' (n)",
     "example": "Practice speaking 'error' clearly.",
@@ -10014,7 +9925,7 @@ export const vocabList = [
   {
     "id": 909,
     "word": "escape",
-    "ipa": "/escape/",
+    "ipa": "/ɪˈskeɪp/",
     "pos": "v",
     "meaning": "từ 'escape' (v)",
     "example": "Practice speaking 'escape' clearly.",
@@ -10025,7 +9936,7 @@ export const vocabList = [
   {
     "id": 910,
     "word": "especially",
-    "ipa": "/especially/",
+    "ipa": "/əˈspɛʃəɫi/",
     "pos": "adv",
     "meaning": "từ 'especially' (adv)",
     "example": "Practice speaking 'especially' clearly.",
@@ -10036,7 +9947,7 @@ export const vocabList = [
   {
     "id": 911,
     "word": "essay",
-    "ipa": "/essay/",
+    "ipa": "/ˈɛˌseɪ/",
     "pos": "n",
     "meaning": "từ 'essay' (n)",
     "example": "Practice speaking 'essay' clearly.",
@@ -10047,7 +9958,7 @@ export const vocabList = [
   {
     "id": 912,
     "word": "essential",
-    "ipa": "/essential/",
+    "ipa": "/ɛˈsɛnʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'essential' (adj)",
     "example": "Practice speaking 'essential' clearly.",
@@ -10069,7 +9980,7 @@ export const vocabList = [
   {
     "id": 914,
     "word": "estate",
-    "ipa": "/estate/",
+    "ipa": "/ɪˈsteɪt/",
     "pos": "n",
     "meaning": "từ 'estate' (n)",
     "example": "Practice speaking 'estate' clearly.",
@@ -10080,7 +9991,7 @@ export const vocabList = [
   {
     "id": 915,
     "word": "estimate",
-    "ipa": "/estimate/",
+    "ipa": "/ˈɛstəˌmeɪt/",
     "pos": "v",
     "meaning": "từ 'estimate' (v)",
     "example": "Practice speaking 'estimate' clearly.",
@@ -10102,7 +10013,7 @@ export const vocabList = [
   {
     "id": 917,
     "word": "euro",
-    "ipa": "/euro/",
+    "ipa": "/ˈjuɹoʊ/",
     "pos": "n",
     "meaning": "từ 'euro' (n)",
     "example": "Practice speaking 'euro' clearly.",
@@ -10113,7 +10024,7 @@ export const vocabList = [
   {
     "id": 918,
     "word": "evaluate",
-    "ipa": "/evaluate/",
+    "ipa": "/iˈvæɫjuˌeɪt/",
     "pos": "v",
     "meaning": "từ 'evaluate' (v)",
     "example": "Practice speaking 'evaluate' clearly.",
@@ -10124,7 +10035,7 @@ export const vocabList = [
   {
     "id": 919,
     "word": "even",
-    "ipa": "/even/",
+    "ipa": "/ˈivɪn/",
     "pos": "adv",
     "meaning": "từ 'even' (adv)",
     "example": "Practice speaking 'even' clearly.",
@@ -10135,7 +10046,7 @@ export const vocabList = [
   {
     "id": 920,
     "word": "evening",
-    "ipa": "/evening/",
+    "ipa": "/ˈivnɪŋ/",
     "pos": "n",
     "meaning": "từ 'evening' (n)",
     "example": "Practice speaking 'evening' clearly.",
@@ -10146,7 +10057,7 @@ export const vocabList = [
   {
     "id": 921,
     "word": "event",
-    "ipa": "/event/",
+    "ipa": "/iˈvɛnt/",
     "pos": "n",
     "meaning": "từ 'event' (n)",
     "example": "Practice speaking 'event' clearly.",
@@ -10157,7 +10068,7 @@ export const vocabList = [
   {
     "id": 922,
     "word": "eventually",
-    "ipa": "/eventually/",
+    "ipa": "/iˈvɛnʃəɫi/",
     "pos": "adv",
     "meaning": "từ 'eventually' (adv)",
     "example": "Practice speaking 'eventually' clearly.",
@@ -10168,7 +10079,7 @@ export const vocabList = [
   {
     "id": 923,
     "word": "ever",
-    "ipa": "/ever/",
+    "ipa": "/ˈɛvɝ/",
     "pos": "adv",
     "meaning": "từ 'ever' (adv)",
     "example": "Practice speaking 'ever' clearly.",
@@ -10179,7 +10090,7 @@ export const vocabList = [
   {
     "id": 924,
     "word": "every",
-    "ipa": "/every/",
+    "ipa": "/ˈɛvɝi/",
     "pos": "det",
     "meaning": "từ 'every' (det)",
     "example": "Practice speaking 'every' clearly.",
@@ -10190,7 +10101,7 @@ export const vocabList = [
   {
     "id": 925,
     "word": "everybody",
-    "ipa": "/everybody/",
+    "ipa": "/ˈɛvɹiˌbɑdi/",
     "pos": "pron",
     "meaning": "từ 'everybody' (pron)",
     "example": "Practice speaking 'everybody' clearly.",
@@ -10201,7 +10112,7 @@ export const vocabList = [
   {
     "id": 926,
     "word": "everyday",
-    "ipa": "/everyday/",
+    "ipa": "/ˈɛvɹiˈdeɪ/",
     "pos": "adj",
     "meaning": "từ 'everyday' (adj)",
     "example": "Practice speaking 'everyday' clearly.",
@@ -10212,7 +10123,7 @@ export const vocabList = [
   {
     "id": 927,
     "word": "everyone",
-    "ipa": "/everyone/",
+    "ipa": "/ˈɛvɹiˌwən/",
     "pos": "pron",
     "meaning": "từ 'everyone' (pron)",
     "example": "Practice speaking 'everyone' clearly.",
@@ -10234,7 +10145,7 @@ export const vocabList = [
   {
     "id": 929,
     "word": "everywhere",
-    "ipa": "/everywhere/",
+    "ipa": "/ˈɛvɹiˌwɛɹ/",
     "pos": "adv",
     "meaning": "từ 'everywhere' (adv)",
     "example": "Practice speaking 'everywhere' clearly.",
@@ -10245,7 +10156,7 @@ export const vocabList = [
   {
     "id": 930,
     "word": "evidence",
-    "ipa": "/evidence/",
+    "ipa": "/ˈɛvədəns/",
     "pos": "n",
     "meaning": "từ 'evidence' (n)",
     "example": "Practice speaking 'evidence' clearly.",
@@ -10256,7 +10167,7 @@ export const vocabList = [
   {
     "id": 931,
     "word": "evil",
-    "ipa": "/evil/",
+    "ipa": "/ˈivəɫ/",
     "pos": "adj",
     "meaning": "từ 'evil' (adj)",
     "example": "Practice speaking 'evil' clearly.",
@@ -10267,7 +10178,7 @@ export const vocabList = [
   {
     "id": 932,
     "word": "exact",
-    "ipa": "/exact/",
+    "ipa": "/ɪɡˈzækt/",
     "pos": "adj",
     "meaning": "từ 'exact' (adj)",
     "example": "Practice speaking 'exact' clearly.",
@@ -10278,7 +10189,7 @@ export const vocabList = [
   {
     "id": 933,
     "word": "exactly",
-    "ipa": "/exactly/",
+    "ipa": "/ɪɡˈzæktɫi/",
     "pos": "adv",
     "meaning": "từ 'exactly' (adv)",
     "example": "Practice speaking 'exactly' clearly.",
@@ -10289,7 +10200,7 @@ export const vocabList = [
   {
     "id": 934,
     "word": "exam",
-    "ipa": "/exam/",
+    "ipa": "/ɪɡˈzæm/",
     "pos": "n",
     "meaning": "từ 'exam' (n)",
     "example": "Practice speaking 'exam' clearly.",
@@ -10300,7 +10211,7 @@ export const vocabList = [
   {
     "id": 935,
     "word": "examination",
-    "ipa": "/examination/",
+    "ipa": "/ɪɡˌzæməˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'examination' (n)",
     "example": "Practice speaking 'examination' clearly.",
@@ -10311,7 +10222,7 @@ export const vocabList = [
   {
     "id": 936,
     "word": "examine",
-    "ipa": "/examine/",
+    "ipa": "/ɪɡˈzæmɪn/",
     "pos": "v",
     "meaning": "từ 'examine' (v)",
     "example": "Practice speaking 'examine' clearly.",
@@ -10322,7 +10233,7 @@ export const vocabList = [
   {
     "id": 937,
     "word": "example",
-    "ipa": "/example/",
+    "ipa": "/ɪɡˈzæmpəɫ/",
     "pos": "n",
     "meaning": "từ 'example' (n)",
     "example": "Practice speaking 'example' clearly.",
@@ -10333,7 +10244,7 @@ export const vocabList = [
   {
     "id": 938,
     "word": "excellent",
-    "ipa": "/excellent/",
+    "ipa": "/ˈɛksəɫənt/",
     "pos": "adj",
     "meaning": "từ 'excellent' (adj)",
     "example": "Practice speaking 'excellent' clearly.",
@@ -10344,7 +10255,7 @@ export const vocabList = [
   {
     "id": 939,
     "word": "except",
-    "ipa": "/except/",
+    "ipa": "/ɪkˈsɛpt/",
     "pos": "prep",
     "meaning": "từ 'except' (prep)",
     "example": "Practice speaking 'except' clearly.",
@@ -10366,7 +10277,7 @@ export const vocabList = [
   {
     "id": 941,
     "word": "excited",
-    "ipa": "/excited/",
+    "ipa": "/ɪkˈsaɪtəd/",
     "pos": "adj",
     "meaning": "từ 'excited' (adj)",
     "example": "Practice speaking 'excited' clearly.",
@@ -10377,7 +10288,7 @@ export const vocabList = [
   {
     "id": 942,
     "word": "excitement",
-    "ipa": "/excitement/",
+    "ipa": "/ɪkˈsaɪtmənt/",
     "pos": "n",
     "meaning": "từ 'excitement' (n)",
     "example": "Practice speaking 'excitement' clearly.",
@@ -10388,7 +10299,7 @@ export const vocabList = [
   {
     "id": 943,
     "word": "exciting",
-    "ipa": "/exciting/",
+    "ipa": "/ɪkˈsaɪtɪŋ/",
     "pos": "adj",
     "meaning": "từ 'exciting' (adj)",
     "example": "Practice speaking 'exciting' clearly.",
@@ -10410,7 +10321,7 @@ export const vocabList = [
   {
     "id": 945,
     "word": "executive",
-    "ipa": "/executive/",
+    "ipa": "/ɪɡˈzɛkjətɪv/",
     "pos": "n",
     "meaning": "từ 'executive' (n)",
     "example": "Practice speaking 'executive' clearly.",
@@ -10421,7 +10332,7 @@ export const vocabList = [
   {
     "id": 946,
     "word": "exercise",
-    "ipa": "/exercise/",
+    "ipa": "/ˈɛksɝˌsaɪz/",
     "pos": "n",
     "meaning": "từ 'exercise' (n)",
     "example": "Practice speaking 'exercise' clearly.",
@@ -10432,7 +10343,7 @@ export const vocabList = [
   {
     "id": 947,
     "word": "exhibition",
-    "ipa": "/exhibition/",
+    "ipa": "/ˌɛksəˈbɪʃən/",
     "pos": "n",
     "meaning": "từ 'exhibition' (n)",
     "example": "Practice speaking 'exhibition' clearly.",
@@ -10443,7 +10354,7 @@ export const vocabList = [
   {
     "id": 948,
     "word": "exist",
-    "ipa": "/exist/",
+    "ipa": "/ɪɡˈzɪst/",
     "pos": "v",
     "meaning": "từ 'exist' (v)",
     "example": "Practice speaking 'exist' clearly.",
@@ -10454,7 +10365,7 @@ export const vocabList = [
   {
     "id": 949,
     "word": "existence",
-    "ipa": "/existence/",
+    "ipa": "/ɛɡˈzɪstəns/",
     "pos": "n",
     "meaning": "từ 'existence' (n)",
     "example": "Practice speaking 'existence' clearly.",
@@ -10465,7 +10376,7 @@ export const vocabList = [
   {
     "id": 950,
     "word": "expand",
-    "ipa": "/expand/",
+    "ipa": "/ɪkˈspænd/",
     "pos": "v",
     "meaning": "từ 'expand' (v)",
     "example": "Practice speaking 'expand' clearly.",
@@ -10476,7 +10387,7 @@ export const vocabList = [
   {
     "id": 951,
     "word": "expect",
-    "ipa": "/expect/",
+    "ipa": "/ɪkˈspɛkt/",
     "pos": "v",
     "meaning": "từ 'expect' (v)",
     "example": "Practice speaking 'expect' clearly.",
@@ -10487,7 +10398,7 @@ export const vocabList = [
   {
     "id": 952,
     "word": "expectation",
-    "ipa": "/expectation/",
+    "ipa": "/ˌɛkspɛkˈteɪʃən/",
     "pos": "n",
     "meaning": "từ 'expectation' (n)",
     "example": "Practice speaking 'expectation' clearly.",
@@ -10498,7 +10409,7 @@ export const vocabList = [
   {
     "id": 953,
     "word": "expected",
-    "ipa": "/expected/",
+    "ipa": "/ɪkˈspɛktəd/",
     "pos": "adj",
     "meaning": "từ 'expected' (adj)",
     "example": "Practice speaking 'expected' clearly.",
@@ -10509,7 +10420,7 @@ export const vocabList = [
   {
     "id": 954,
     "word": "expedition",
-    "ipa": "/expedition/",
+    "ipa": "/ˌɛkspəˈdɪʃən/",
     "pos": "n",
     "meaning": "từ 'expedition' (n)",
     "example": "Practice speaking 'expedition' clearly.",
@@ -10520,7 +10431,7 @@ export const vocabList = [
   {
     "id": 955,
     "word": "expense",
-    "ipa": "/expense/",
+    "ipa": "/ɪkˈspɛns/",
     "pos": "n",
     "meaning": "từ 'expense' (n)",
     "example": "Practice speaking 'expense' clearly.",
@@ -10531,7 +10442,7 @@ export const vocabList = [
   {
     "id": 956,
     "word": "expensive",
-    "ipa": "/expensive/",
+    "ipa": "/ɪkˈspɛnsɪv/",
     "pos": "adj",
     "meaning": "từ 'expensive' (adj)",
     "example": "Practice speaking 'expensive' clearly.",
@@ -10542,7 +10453,7 @@ export const vocabList = [
   {
     "id": 957,
     "word": "experience",
-    "ipa": "/experience/",
+    "ipa": "/ɪkˈspɪɹiəns/",
     "pos": "n",
     "meaning": "từ 'experience' (n)",
     "example": "Practice speaking 'experience' clearly.",
@@ -10553,7 +10464,7 @@ export const vocabList = [
   {
     "id": 958,
     "word": "experienced",
-    "ipa": "/experienced/",
+    "ipa": "/ɪkˈspɪɹiənst/",
     "pos": "adj",
     "meaning": "từ 'experienced' (adj)",
     "example": "Practice speaking 'experienced' clearly.",
@@ -10564,7 +10475,7 @@ export const vocabList = [
   {
     "id": 959,
     "word": "experiment",
-    "ipa": "/experiment/",
+    "ipa": "/ɪkˈspɛɹəmənt/",
     "pos": "n",
     "meaning": "từ 'experiment' (n)",
     "example": "Practice speaking 'experiment' clearly.",
@@ -10575,7 +10486,7 @@ export const vocabList = [
   {
     "id": 960,
     "word": "expert",
-    "ipa": "/expert/",
+    "ipa": "/ˈɛkspɝt/",
     "pos": "n",
     "meaning": "từ 'expert' (n)",
     "example": "Practice speaking 'expert' clearly.",
@@ -10597,7 +10508,7 @@ export const vocabList = [
   {
     "id": 962,
     "word": "explanation",
-    "ipa": "/explanation/",
+    "ipa": "/ˌɛkspɫəˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'explanation' (n)",
     "example": "Practice speaking 'explanation' clearly.",
@@ -10608,7 +10519,7 @@ export const vocabList = [
   {
     "id": 963,
     "word": "explode",
-    "ipa": "/explode/",
+    "ipa": "/ɪksˈpɫoʊd/",
     "pos": "v",
     "meaning": "từ 'explode' (v)",
     "example": "Practice speaking 'explode' clearly.",
@@ -10619,7 +10530,7 @@ export const vocabList = [
   {
     "id": 964,
     "word": "exploration",
-    "ipa": "/exploration/",
+    "ipa": "/ˌɛkspɫɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'exploration' (n)",
     "example": "Practice speaking 'exploration' clearly.",
@@ -10630,7 +10541,7 @@ export const vocabList = [
   {
     "id": 965,
     "word": "explore",
-    "ipa": "/explore/",
+    "ipa": "/ɪksˈpɫɔɹ/",
     "pos": "v",
     "meaning": "từ 'explore' (v)",
     "example": "Practice speaking 'explore' clearly.",
@@ -10641,7 +10552,7 @@ export const vocabList = [
   {
     "id": 966,
     "word": "explosion",
-    "ipa": "/explosion/",
+    "ipa": "/ɪksˈpɫoʊʒən/",
     "pos": "n",
     "meaning": "từ 'explosion' (n)",
     "example": "Practice speaking 'explosion' clearly.",
@@ -10652,7 +10563,7 @@ export const vocabList = [
   {
     "id": 967,
     "word": "export",
-    "ipa": "/export/",
+    "ipa": "/ˈɛkspɔɹt/",
     "pos": "n",
     "meaning": "từ 'export' (n)",
     "example": "Practice speaking 'export' clearly.",
@@ -10663,7 +10574,7 @@ export const vocabList = [
   {
     "id": 968,
     "word": "expose",
-    "ipa": "/expose/",
+    "ipa": "/ɪkˈspoʊz/",
     "pos": "v",
     "meaning": "từ 'expose' (v)",
     "example": "Practice speaking 'expose' clearly.",
@@ -10674,7 +10585,7 @@ export const vocabList = [
   {
     "id": 969,
     "word": "express",
-    "ipa": "/express/",
+    "ipa": "/ɪksˈpɹɛs/",
     "pos": "v",
     "meaning": "từ 'express' (v)",
     "example": "Practice speaking 'express' clearly.",
@@ -10685,7 +10596,7 @@ export const vocabList = [
   {
     "id": 970,
     "word": "expression",
-    "ipa": "/expression/",
+    "ipa": "/ɪksˈpɹɛʃən/",
     "pos": "n",
     "meaning": "từ 'expression' (n)",
     "example": "Practice speaking 'expression' clearly.",
@@ -10696,7 +10607,7 @@ export const vocabList = [
   {
     "id": 971,
     "word": "extend",
-    "ipa": "/extend/",
+    "ipa": "/ɪkˈstɛnd/",
     "pos": "v",
     "meaning": "từ 'extend' (v)",
     "example": "Practice speaking 'extend' clearly.",
@@ -10707,7 +10618,7 @@ export const vocabList = [
   {
     "id": 972,
     "word": "extent",
-    "ipa": "/extent/",
+    "ipa": "/ɪkˈstɛnt/",
     "pos": "n",
     "meaning": "từ 'extent' (n)",
     "example": "Practice speaking 'extent' clearly.",
@@ -10718,7 +10629,7 @@ export const vocabList = [
   {
     "id": 973,
     "word": "external",
-    "ipa": "/external/",
+    "ipa": "/ɪkˈstɝnəɫ/",
     "pos": "adj",
     "meaning": "từ 'external' (adj)",
     "example": "Practice speaking 'external' clearly.",
@@ -10729,7 +10640,7 @@ export const vocabList = [
   {
     "id": 974,
     "word": "extra",
-    "ipa": "/extra/",
+    "ipa": "/ˈɛkstɹə/",
     "pos": "adj",
     "meaning": "từ 'extra' (adj)",
     "example": "Practice speaking 'extra' clearly.",
@@ -10740,7 +10651,7 @@ export const vocabList = [
   {
     "id": 975,
     "word": "extraordinary",
-    "ipa": "/extraordinary/",
+    "ipa": "/ˌɛkstɹəˈɔɹdəˌnɛɹi/",
     "pos": "adj",
     "meaning": "từ 'extraordinary' (adj)",
     "example": "Practice speaking 'extraordinary' clearly.",
@@ -10751,7 +10662,7 @@ export const vocabList = [
   {
     "id": 976,
     "word": "extreme",
-    "ipa": "/extreme/",
+    "ipa": "/ɛkˈstɹim/",
     "pos": "adj",
     "meaning": "từ 'extreme' (adj)",
     "example": "Practice speaking 'extreme' clearly.",
@@ -10762,7 +10673,7 @@ export const vocabList = [
   {
     "id": 977,
     "word": "extremely",
-    "ipa": "/extremely/",
+    "ipa": "/ɛkˈstɹimɫi/",
     "pos": "adv",
     "meaning": "từ 'extremely' (adv)",
     "example": "Practice speaking 'extremely' clearly.",
@@ -10773,7 +10684,7 @@ export const vocabList = [
   {
     "id": 978,
     "word": "eye",
-    "ipa": "/eye/",
+    "ipa": "/ˈaɪ/",
     "pos": "n",
     "meaning": "từ 'eye' (n)",
     "example": "Practice speaking 'eye' clearly.",
@@ -10784,7 +10695,7 @@ export const vocabList = [
   {
     "id": 979,
     "word": "face",
-    "ipa": "/face/",
+    "ipa": "/ˈfeɪs/",
     "pos": "n",
     "meaning": "từ 'face' (n)",
     "example": "Practice speaking 'face' clearly.",
@@ -10795,7 +10706,7 @@ export const vocabList = [
   {
     "id": 980,
     "word": "facility",
-    "ipa": "/facility/",
+    "ipa": "/fəˈsɪɫɪti/",
     "pos": "n",
     "meaning": "từ 'facility' (n)",
     "example": "Practice speaking 'facility' clearly.",
@@ -10806,7 +10717,7 @@ export const vocabList = [
   {
     "id": 981,
     "word": "fact",
-    "ipa": "/fact/",
+    "ipa": "/ˈfækt/",
     "pos": "n",
     "meaning": "từ 'fact' (n)",
     "example": "Practice speaking 'fact' clearly.",
@@ -10817,7 +10728,7 @@ export const vocabList = [
   {
     "id": 982,
     "word": "factor",
-    "ipa": "/factor/",
+    "ipa": "/ˈfæktɝ/",
     "pos": "n",
     "meaning": "từ 'factor' (n)",
     "example": "Practice speaking 'factor' clearly.",
@@ -10828,7 +10739,7 @@ export const vocabList = [
   {
     "id": 983,
     "word": "factory",
-    "ipa": "/factory/",
+    "ipa": "/ˈfæktɝi/",
     "pos": "n",
     "meaning": "từ 'factory' (n)",
     "example": "Practice speaking 'factory' clearly.",
@@ -10839,7 +10750,7 @@ export const vocabList = [
   {
     "id": 984,
     "word": "fail",
-    "ipa": "/fail/",
+    "ipa": "/ˈfeɪɫ/",
     "pos": "v",
     "meaning": "từ 'fail' (v)",
     "example": "Practice speaking 'fail' clearly.",
@@ -10850,7 +10761,7 @@ export const vocabList = [
   {
     "id": 985,
     "word": "failure",
-    "ipa": "/failure/",
+    "ipa": "/ˈfeɪɫjɝ/",
     "pos": "n",
     "meaning": "từ 'failure' (n)",
     "example": "Practice speaking 'failure' clearly.",
@@ -10861,7 +10772,7 @@ export const vocabList = [
   {
     "id": 986,
     "word": "fair",
-    "ipa": "/fair/",
+    "ipa": "/ˈfɛɹ/",
     "pos": "adj",
     "meaning": "từ 'fair' (adj)",
     "example": "Practice speaking 'fair' clearly.",
@@ -10872,7 +10783,7 @@ export const vocabList = [
   {
     "id": 987,
     "word": "fairly",
-    "ipa": "/fairly/",
+    "ipa": "/ˈfɛɹɫi/",
     "pos": "adv",
     "meaning": "từ 'fairly' (adv)",
     "example": "Practice speaking 'fairly' clearly.",
@@ -10894,7 +10805,7 @@ export const vocabList = [
   {
     "id": 989,
     "word": "fall",
-    "ipa": "/fall/",
+    "ipa": "/ˈfɑɫ/",
     "pos": "v",
     "meaning": "từ 'fall' (v)",
     "example": "Practice speaking 'fall' clearly.",
@@ -10905,7 +10816,7 @@ export const vocabList = [
   {
     "id": 990,
     "word": "false",
-    "ipa": "/false/",
+    "ipa": "/ˈfɔɫs/",
     "pos": "adj",
     "meaning": "từ 'false' (adj)",
     "example": "Practice speaking 'false' clearly.",
@@ -10916,7 +10827,7 @@ export const vocabList = [
   {
     "id": 991,
     "word": "familiar",
-    "ipa": "/familiar/",
+    "ipa": "/fəˈmɪɫjɝ/",
     "pos": "adj",
     "meaning": "từ 'familiar' (adj)",
     "example": "Practice speaking 'familiar' clearly.",
@@ -10927,7 +10838,7 @@ export const vocabList = [
   {
     "id": 992,
     "word": "family",
-    "ipa": "/family/",
+    "ipa": "/ˈfæməɫi/",
     "pos": "n",
     "meaning": "từ 'family' (n)",
     "example": "Practice speaking 'family' clearly.",
@@ -10938,7 +10849,7 @@ export const vocabList = [
   {
     "id": 993,
     "word": "famous",
-    "ipa": "/famous/",
+    "ipa": "/ˈfeɪməs/",
     "pos": "adj",
     "meaning": "từ 'famous' (adj)",
     "example": "Practice speaking 'famous' clearly.",
@@ -10949,7 +10860,7 @@ export const vocabList = [
   {
     "id": 994,
     "word": "fan",
-    "ipa": "/fan/",
+    "ipa": "/ˈfæn/",
     "pos": "n",
     "meaning": "từ 'fan' (n)",
     "example": "Practice speaking 'fan' clearly.",
@@ -10960,7 +10871,7 @@ export const vocabList = [
   {
     "id": 995,
     "word": "fancy",
-    "ipa": "/fancy/",
+    "ipa": "/ˈfænsi/",
     "pos": "v",
     "meaning": "từ 'fancy' (v)",
     "example": "Practice speaking 'fancy' clearly.",
@@ -10971,7 +10882,7 @@ export const vocabList = [
   {
     "id": 996,
     "word": "fantastic",
-    "ipa": "/fantastic/",
+    "ipa": "/fænˈtæstɪk/",
     "pos": "adj",
     "meaning": "từ 'fantastic' (adj)",
     "example": "Practice speaking 'fantastic' clearly.",
@@ -10982,7 +10893,7 @@ export const vocabList = [
   {
     "id": 997,
     "word": "far",
-    "ipa": "/far/",
+    "ipa": "/ˈfɑɹ/",
     "pos": "adv",
     "meaning": "từ 'far' (adv)",
     "example": "Practice speaking 'far' clearly.",
@@ -10993,7 +10904,7 @@ export const vocabList = [
   {
     "id": 998,
     "word": "farm",
-    "ipa": "/farm/",
+    "ipa": "/ˈfɑɹm/",
     "pos": "n",
     "meaning": "từ 'farm' (n)",
     "example": "Practice speaking 'farm' clearly.",
@@ -11004,7 +10915,7 @@ export const vocabList = [
   {
     "id": 999,
     "word": "farmer",
-    "ipa": "/farmer/",
+    "ipa": "/ˈfɑɹmɝ/",
     "pos": "n",
     "meaning": "từ 'farmer' (n)",
     "example": "Practice speaking 'farmer' clearly.",
@@ -11015,7 +10926,7 @@ export const vocabList = [
   {
     "id": 1000,
     "word": "farming",
-    "ipa": "/farming/",
+    "ipa": "/ˈfɑɹmɪŋ/",
     "pos": "n",
     "meaning": "từ 'farming' (n)",
     "example": "Practice speaking 'farming' clearly.",
@@ -11026,7 +10937,7 @@ export const vocabList = [
   {
     "id": 1001,
     "word": "fascinating",
-    "ipa": "/fascinating/",
+    "ipa": "/ˈfæsəˌneɪtɪŋ/",
     "pos": "adj",
     "meaning": "từ 'fascinating' (adj)",
     "example": "Practice speaking 'fascinating' clearly.",
@@ -11059,7 +10970,7 @@ export const vocabList = [
   {
     "id": 1004,
     "word": "fast",
-    "ipa": "/fast/",
+    "ipa": "/ˈfæst/",
     "pos": "adj",
     "meaning": "từ 'fast' (adj)",
     "example": "Practice speaking 'fast' clearly.",
@@ -11070,7 +10981,7 @@ export const vocabList = [
   {
     "id": 1005,
     "word": "fasten",
-    "ipa": "/fasten/",
+    "ipa": "/ˈfæsən/",
     "pos": "v",
     "meaning": "từ 'fasten' (v)",
     "example": "Practice speaking 'fasten' clearly.",
@@ -11081,7 +10992,7 @@ export const vocabList = [
   {
     "id": 1006,
     "word": "fat",
-    "ipa": "/fat/",
+    "ipa": "/ˈfæt/",
     "pos": "adj",
     "meaning": "từ 'fat' (adj)",
     "example": "Practice speaking 'fat' clearly.",
@@ -11103,7 +11014,7 @@ export const vocabList = [
   {
     "id": 1008,
     "word": "fault",
-    "ipa": "/fault/",
+    "ipa": "/ˈfɔɫt/",
     "pos": "n",
     "meaning": "từ 'fault' (n)",
     "example": "Practice speaking 'fault' clearly.",
@@ -11114,7 +11025,7 @@ export const vocabList = [
   {
     "id": 1009,
     "word": "favour",
-    "ipa": "/favour/",
+    "ipa": "/ˈfeɪvɝ/",
     "pos": "n",
     "meaning": "từ 'favour' (n)",
     "example": "Practice speaking 'favour' clearly.",
@@ -11125,7 +11036,7 @@ export const vocabList = [
   {
     "id": 1010,
     "word": "favourite",
-    "ipa": "/favourite/",
+    "ipa": "/ˈfeɪvɝɪt/",
     "pos": "adj",
     "meaning": "từ 'favourite' (adj)",
     "example": "Practice speaking 'favourite' clearly.",
@@ -11136,7 +11047,7 @@ export const vocabList = [
   {
     "id": 1011,
     "word": "fear",
-    "ipa": "/fear/",
+    "ipa": "/ˈfɪɹ/",
     "pos": "n",
     "meaning": "từ 'fear' (n)",
     "example": "Practice speaking 'fear' clearly.",
@@ -11158,7 +11069,7 @@ export const vocabList = [
   {
     "id": 1013,
     "word": "feature",
-    "ipa": "/feature/",
+    "ipa": "/ˈfitʃɝ/",
     "pos": "n",
     "meaning": "từ 'feature' (n)",
     "example": "Practice speaking 'feature' clearly.",
@@ -11169,7 +11080,7 @@ export const vocabList = [
   {
     "id": 1014,
     "word": "february",
-    "ipa": "/february/",
+    "ipa": "/ˈfɛbjəˌwɛɹi/",
     "pos": "n",
     "meaning": "từ 'february' (n)",
     "example": "Practice speaking 'february' clearly.",
@@ -11235,7 +11146,7 @@ export const vocabList = [
   {
     "id": 1020,
     "word": "fellow",
-    "ipa": "/fellow/",
+    "ipa": "/ˈfɛɫoʊ/",
     "pos": "adj",
     "meaning": "từ 'fellow' (adj)",
     "example": "Practice speaking 'fellow' clearly.",
@@ -11246,7 +11157,7 @@ export const vocabList = [
   {
     "id": 1021,
     "word": "female",
-    "ipa": "/female/",
+    "ipa": "/ˈfiˌmeɪɫ/",
     "pos": "adj",
     "meaning": "từ 'female' (adj)",
     "example": "Practice speaking 'female' clearly.",
@@ -11257,7 +11168,7 @@ export const vocabList = [
   {
     "id": 1022,
     "word": "fence",
-    "ipa": "/fence/",
+    "ipa": "/ˈfɛns/",
     "pos": "n",
     "meaning": "từ 'fence' (n)",
     "example": "Practice speaking 'fence' clearly.",
@@ -11268,7 +11179,7 @@ export const vocabList = [
   {
     "id": 1023,
     "word": "festival",
-    "ipa": "/festival/",
+    "ipa": "/ˈfɛstəvəɫ/",
     "pos": "n",
     "meaning": "từ 'festival' (n)",
     "example": "Practice speaking 'festival' clearly.",
@@ -11279,7 +11190,7 @@ export const vocabList = [
   {
     "id": 1024,
     "word": "few",
-    "ipa": "/few/",
+    "ipa": "/ˈfju/",
     "pos": "det/adj",
     "meaning": "từ 'few' (det/adj)",
     "example": "Practice speaking 'few' clearly.",
@@ -11290,7 +11201,7 @@ export const vocabList = [
   {
     "id": 1025,
     "word": "fiction",
-    "ipa": "/fiction/",
+    "ipa": "/ˈfɪkʃən/",
     "pos": "n",
     "meaning": "từ 'fiction' (n)",
     "example": "Practice speaking 'fiction' clearly.",
@@ -11301,7 +11212,7 @@ export const vocabList = [
   {
     "id": 1026,
     "word": "field",
-    "ipa": "/field/",
+    "ipa": "/ˈfiɫd/",
     "pos": "n",
     "meaning": "từ 'field' (n)",
     "example": "Practice speaking 'field' clearly.",
@@ -11334,7 +11245,7 @@ export const vocabList = [
   {
     "id": 1029,
     "word": "fifty",
-    "ipa": "/fifty/",
+    "ipa": "/ˈfɪfti/",
     "pos": "number",
     "meaning": "từ 'fifty' (number)",
     "example": "Practice speaking 'fifty' clearly.",
@@ -11345,7 +11256,7 @@ export const vocabList = [
   {
     "id": 1030,
     "word": "fight",
-    "ipa": "/fight/",
+    "ipa": "/ˈfaɪt/",
     "pos": "v",
     "meaning": "từ 'fight' (v)",
     "example": "Practice speaking 'fight' clearly.",
@@ -11356,7 +11267,7 @@ export const vocabList = [
   {
     "id": 1031,
     "word": "fighting",
-    "ipa": "/fighting/",
+    "ipa": "/ˈfaɪtɪŋ/",
     "pos": "n",
     "meaning": "từ 'fighting' (n)",
     "example": "Practice speaking 'fighting' clearly.",
@@ -11367,7 +11278,7 @@ export const vocabList = [
   {
     "id": 1032,
     "word": "figure",
-    "ipa": "/figure/",
+    "ipa": "/ˈfɪɡjɝ/",
     "pos": "n",
     "meaning": "từ 'figure' (n)",
     "example": "Practice speaking 'figure' clearly.",
@@ -11378,7 +11289,7 @@ export const vocabList = [
   {
     "id": 1033,
     "word": "file",
-    "ipa": "/file/",
+    "ipa": "/ˈfaɪɫ/",
     "pos": "n",
     "meaning": "từ 'file' (n)",
     "example": "Practice speaking 'file' clearly.",
@@ -11389,7 +11300,7 @@ export const vocabList = [
   {
     "id": 1034,
     "word": "fill",
-    "ipa": "/fill/",
+    "ipa": "/ˈfɪɫ/",
     "pos": "v",
     "meaning": "từ 'fill' (v)",
     "example": "Practice speaking 'fill' clearly.",
@@ -11400,7 +11311,7 @@ export const vocabList = [
   {
     "id": 1035,
     "word": "film",
-    "ipa": "/film/",
+    "ipa": "/ˈfɪɫm/",
     "pos": "n",
     "meaning": "từ 'film' (n)",
     "example": "Practice speaking 'film' clearly.",
@@ -11411,7 +11322,7 @@ export const vocabList = [
   {
     "id": 1036,
     "word": "final",
-    "ipa": "/final/",
+    "ipa": "/ˈfaɪnəɫ/",
     "pos": "adj",
     "meaning": "từ 'final' (adj)",
     "example": "Practice speaking 'final' clearly.",
@@ -11422,7 +11333,7 @@ export const vocabList = [
   {
     "id": 1037,
     "word": "finally",
-    "ipa": "/finally/",
+    "ipa": "/ˈfaɪnəɫi/",
     "pos": "adv",
     "meaning": "từ 'finally' (adv)",
     "example": "Practice speaking 'finally' clearly.",
@@ -11433,7 +11344,7 @@ export const vocabList = [
   {
     "id": 1038,
     "word": "finance",
-    "ipa": "/finance/",
+    "ipa": "/ˈfaɪˌnæns/",
     "pos": "n",
     "meaning": "từ 'finance' (n)",
     "example": "Practice speaking 'finance' clearly.",
@@ -11444,7 +11355,7 @@ export const vocabList = [
   {
     "id": 1039,
     "word": "financial",
-    "ipa": "/financial/",
+    "ipa": "/ˌfaɪˈnænʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'financial' (adj)",
     "example": "Practice speaking 'financial' clearly.",
@@ -11466,7 +11377,7 @@ export const vocabList = [
   {
     "id": 1041,
     "word": "finding",
-    "ipa": "/finding/",
+    "ipa": "/ˈfaɪndɪŋ/",
     "pos": "n",
     "meaning": "từ 'finding' (n)",
     "example": "Practice speaking 'finding' clearly.",
@@ -11477,7 +11388,7 @@ export const vocabList = [
   {
     "id": 1042,
     "word": "fine",
-    "ipa": "/fine/",
+    "ipa": "/ˈfaɪn/",
     "pos": "adj",
     "meaning": "từ 'fine' (adj)",
     "example": "Practice speaking 'fine' clearly.",
@@ -11488,7 +11399,7 @@ export const vocabList = [
   {
     "id": 1043,
     "word": "finger",
-    "ipa": "/finger/",
+    "ipa": "/ˈfɪŋɡɝ/",
     "pos": "n",
     "meaning": "từ 'finger' (n)",
     "example": "Practice speaking 'finger' clearly.",
@@ -11510,7 +11421,7 @@ export const vocabList = [
   {
     "id": 1045,
     "word": "fire",
-    "ipa": "/fire/",
+    "ipa": "/ˈfaɪɝ/",
     "pos": "n",
     "meaning": "từ 'fire' (n)",
     "example": "Practice speaking 'fire' clearly.",
@@ -11521,7 +11432,7 @@ export const vocabList = [
   {
     "id": 1046,
     "word": "firm",
-    "ipa": "/firm/",
+    "ipa": "/ˈfɝm/",
     "pos": "n",
     "meaning": "từ 'firm' (n)",
     "example": "Practice speaking 'firm' clearly.",
@@ -11532,7 +11443,7 @@ export const vocabList = [
   {
     "id": 1047,
     "word": "first",
-    "ipa": "/first/",
+    "ipa": "/ˈfɝst/",
     "pos": "det/number",
     "meaning": "từ 'first' (det/number)",
     "example": "Practice speaking 'first' clearly.",
@@ -11543,7 +11454,7 @@ export const vocabList = [
   {
     "id": 1048,
     "word": "firstly",
-    "ipa": "/firstly/",
+    "ipa": "/ˈfɝstɫi/",
     "pos": "adv",
     "meaning": "từ 'firstly' (adv)",
     "example": "Practice speaking 'firstly' clearly.",
@@ -11576,7 +11487,7 @@ export const vocabList = [
   {
     "id": 1051,
     "word": "fit",
-    "ipa": "/fit/",
+    "ipa": "/ˈfɪt/",
     "pos": "v",
     "meaning": "từ 'fit' (v)",
     "example": "Practice speaking 'fit' clearly.",
@@ -11587,7 +11498,7 @@ export const vocabList = [
   {
     "id": 1052,
     "word": "fitness",
-    "ipa": "/fitness/",
+    "ipa": "/ˈfɪtnəs/",
     "pos": "n",
     "meaning": "từ 'fitness' (n)",
     "example": "Practice speaking 'fitness' clearly.",
@@ -11598,7 +11509,7 @@ export const vocabList = [
   {
     "id": 1053,
     "word": "five",
-    "ipa": "/five/",
+    "ipa": "/ˈfaɪv/",
     "pos": "number",
     "meaning": "từ 'five' (number)",
     "example": "Practice speaking 'five' clearly.",
@@ -11609,7 +11520,7 @@ export const vocabList = [
   {
     "id": 1054,
     "word": "fix",
-    "ipa": "/fix/",
+    "ipa": "/ˈfɪks/",
     "pos": "v",
     "meaning": "từ 'fix' (v)",
     "example": "Practice speaking 'fix' clearly.",
@@ -11620,7 +11531,7 @@ export const vocabList = [
   {
     "id": 1055,
     "word": "fixed",
-    "ipa": "/fixed/",
+    "ipa": "/ˈfɪkst/",
     "pos": "adj",
     "meaning": "từ 'fixed' (adj)",
     "example": "Practice speaking 'fixed' clearly.",
@@ -11631,7 +11542,7 @@ export const vocabList = [
   {
     "id": 1056,
     "word": "flag",
-    "ipa": "/flag/",
+    "ipa": "/ˈfɫæɡ/",
     "pos": "n",
     "meaning": "từ 'flag' (n)",
     "example": "Practice speaking 'flag' clearly.",
@@ -11642,7 +11553,7 @@ export const vocabList = [
   {
     "id": 1057,
     "word": "flame",
-    "ipa": "/flame/",
+    "ipa": "/ˈfɫeɪm/",
     "pos": "n",
     "meaning": "từ 'flame' (n)",
     "example": "Practice speaking 'flame' clearly.",
@@ -11664,7 +11575,7 @@ export const vocabList = [
   {
     "id": 1059,
     "word": "flat",
-    "ipa": "/flat/",
+    "ipa": "/ˈfɫæt/",
     "pos": "n",
     "meaning": "từ 'flat' (n)",
     "example": "Practice speaking 'flat' clearly.",
@@ -11675,7 +11586,7 @@ export const vocabList = [
   {
     "id": 1060,
     "word": "flexible",
-    "ipa": "/flexible/",
+    "ipa": "/ˈfɫɛksəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'flexible' (adj)",
     "example": "Practice speaking 'flexible' clearly.",
@@ -11686,7 +11597,7 @@ export const vocabList = [
   {
     "id": 1061,
     "word": "flight",
-    "ipa": "/flight/",
+    "ipa": "/ˈfɫaɪt/",
     "pos": "n",
     "meaning": "từ 'flight' (n)",
     "example": "Practice speaking 'flight' clearly.",
@@ -11697,7 +11608,7 @@ export const vocabList = [
   {
     "id": 1062,
     "word": "float",
-    "ipa": "/float/",
+    "ipa": "/ˈfɫoʊt/",
     "pos": "v",
     "meaning": "từ 'float' (v)",
     "example": "Practice speaking 'float' clearly.",
@@ -11730,7 +11641,7 @@ export const vocabList = [
   {
     "id": 1065,
     "word": "flour",
-    "ipa": "/flour/",
+    "ipa": "/ˈfɫaʊɝ/",
     "pos": "n",
     "meaning": "từ 'flour' (n)",
     "example": "Practice speaking 'flour' clearly.",
@@ -11741,7 +11652,7 @@ export const vocabList = [
   {
     "id": 1066,
     "word": "flow",
-    "ipa": "/flow/",
+    "ipa": "/ˈfɫoʊ/",
     "pos": "v",
     "meaning": "từ 'flow' (v)",
     "example": "Practice speaking 'flow' clearly.",
@@ -11752,7 +11663,7 @@ export const vocabList = [
   {
     "id": 1067,
     "word": "flower",
-    "ipa": "/flower/",
+    "ipa": "/ˈfɫaʊɝ/",
     "pos": "n",
     "meaning": "từ 'flower' (n)",
     "example": "Practice speaking 'flower' clearly.",
@@ -11763,7 +11674,7 @@ export const vocabList = [
   {
     "id": 1068,
     "word": "flu",
-    "ipa": "/flu/",
+    "ipa": "/ˈfɫu/",
     "pos": "n",
     "meaning": "từ 'flu' (n)",
     "example": "Practice speaking 'flu' clearly.",
@@ -11785,7 +11696,7 @@ export const vocabList = [
   {
     "id": 1070,
     "word": "flying",
-    "ipa": "/flying/",
+    "ipa": "/ˈfɫaɪɪŋ/",
     "pos": "n",
     "meaning": "từ 'flying' (n)",
     "example": "Practice speaking 'flying' clearly.",
@@ -11796,7 +11707,7 @@ export const vocabList = [
   {
     "id": 1071,
     "word": "focus",
-    "ipa": "/focus/",
+    "ipa": "/ˈfoʊkəs/",
     "pos": "v",
     "meaning": "từ 'focus' (v)",
     "example": "Practice speaking 'focus' clearly.",
@@ -11807,7 +11718,7 @@ export const vocabList = [
   {
     "id": 1072,
     "word": "fold",
-    "ipa": "/fold/",
+    "ipa": "/ˈfoʊɫd/",
     "pos": "v",
     "meaning": "từ 'fold' (v)",
     "example": "Practice speaking 'fold' clearly.",
@@ -11818,7 +11729,7 @@ export const vocabList = [
   {
     "id": 1073,
     "word": "folding",
-    "ipa": "/folding/",
+    "ipa": "/ˈfoʊɫdɪŋ/",
     "pos": "adj",
     "meaning": "từ 'folding' (adj)",
     "example": "Practice speaking 'folding' clearly.",
@@ -11829,7 +11740,7 @@ export const vocabList = [
   {
     "id": 1074,
     "word": "folk",
-    "ipa": "/folk/",
+    "ipa": "/ˈfoʊk/",
     "pos": "n",
     "meaning": "từ 'folk' (n)",
     "example": "Practice speaking 'folk' clearly.",
@@ -11840,7 +11751,7 @@ export const vocabList = [
   {
     "id": 1075,
     "word": "follow",
-    "ipa": "/follow/",
+    "ipa": "/ˈfɑɫoʊ/",
     "pos": "v",
     "meaning": "từ 'follow' (v)",
     "example": "Practice speaking 'follow' clearly.",
@@ -11851,7 +11762,7 @@ export const vocabList = [
   {
     "id": 1076,
     "word": "following",
-    "ipa": "/following/",
+    "ipa": "/ˈfɑɫoʊɪŋ/",
     "pos": "adj",
     "meaning": "từ 'following' (adj)",
     "example": "Practice speaking 'following' clearly.",
@@ -11895,7 +11806,7 @@ export const vocabList = [
   {
     "id": 1080,
     "word": "for",
-    "ipa": "/for/",
+    "ipa": "/ˈfɔɹ/",
     "pos": "prep",
     "meaning": "từ 'for' (prep)",
     "example": "Practice speaking 'for' clearly.",
@@ -11906,7 +11817,7 @@ export const vocabList = [
   {
     "id": 1081,
     "word": "force",
-    "ipa": "/force/",
+    "ipa": "/ˈfɔɹs/",
     "pos": "n",
     "meaning": "từ 'force' (n)",
     "example": "Practice speaking 'force' clearly.",
@@ -11917,7 +11828,7 @@ export const vocabList = [
   {
     "id": 1082,
     "word": "foreign",
-    "ipa": "/foreign/",
+    "ipa": "/ˈfɑɹən/",
     "pos": "adj",
     "meaning": "từ 'foreign' (adj)",
     "example": "Practice speaking 'foreign' clearly.",
@@ -11928,7 +11839,7 @@ export const vocabList = [
   {
     "id": 1083,
     "word": "forest",
-    "ipa": "/forest/",
+    "ipa": "/ˈfɔɹəst/",
     "pos": "n",
     "meaning": "từ 'forest' (n)",
     "example": "Practice speaking 'forest' clearly.",
@@ -11939,7 +11850,7 @@ export const vocabList = [
   {
     "id": 1084,
     "word": "forever",
-    "ipa": "/forever/",
+    "ipa": "/fɝˈɛvɝ/",
     "pos": "adv",
     "meaning": "từ 'forever' (adv)",
     "example": "Practice speaking 'forever' clearly.",
@@ -11961,7 +11872,7 @@ export const vocabList = [
   {
     "id": 1086,
     "word": "forgive",
-    "ipa": "/forgive/",
+    "ipa": "/fɝˈɡɪv/",
     "pos": "v",
     "meaning": "từ 'forgive' (v)",
     "example": "Practice speaking 'forgive' clearly.",
@@ -11972,7 +11883,7 @@ export const vocabList = [
   {
     "id": 1087,
     "word": "fork",
-    "ipa": "/fork/",
+    "ipa": "/ˈfɔɹk/",
     "pos": "n",
     "meaning": "từ 'fork' (n)",
     "example": "Practice speaking 'fork' clearly.",
@@ -11983,7 +11894,7 @@ export const vocabList = [
   {
     "id": 1088,
     "word": "form",
-    "ipa": "/form/",
+    "ipa": "/ˈfɔɹm/",
     "pos": "n",
     "meaning": "từ 'form' (n)",
     "example": "Practice speaking 'form' clearly.",
@@ -11994,7 +11905,7 @@ export const vocabList = [
   {
     "id": 1089,
     "word": "formal",
-    "ipa": "/formal/",
+    "ipa": "/ˈfɔɹməɫ/",
     "pos": "adj",
     "meaning": "từ 'formal' (adj)",
     "example": "Practice speaking 'formal' clearly.",
@@ -12005,7 +11916,7 @@ export const vocabList = [
   {
     "id": 1090,
     "word": "former",
-    "ipa": "/former/",
+    "ipa": "/ˈfɔɹmɝ/",
     "pos": "adj",
     "meaning": "từ 'former' (adj)",
     "example": "Practice speaking 'former' clearly.",
@@ -12016,7 +11927,7 @@ export const vocabList = [
   {
     "id": 1091,
     "word": "fortunately",
-    "ipa": "/fortunately/",
+    "ipa": "/ˈfɔɹtʃənətɫi/",
     "pos": "adv",
     "meaning": "từ 'fortunately' (adv)",
     "example": "Practice speaking 'fortunately' clearly.",
@@ -12027,7 +11938,7 @@ export const vocabList = [
   {
     "id": 1092,
     "word": "fortune",
-    "ipa": "/fortune/",
+    "ipa": "/ˈfɔɹtʃən/",
     "pos": "n",
     "meaning": "từ 'fortune' (n)",
     "example": "Practice speaking 'fortune' clearly.",
@@ -12038,7 +11949,7 @@ export const vocabList = [
   {
     "id": 1093,
     "word": "forty",
-    "ipa": "/forty/",
+    "ipa": "/ˈfɔɹti/",
     "pos": "number",
     "meaning": "từ 'forty' (number)",
     "example": "Practice speaking 'forty' clearly.",
@@ -12049,7 +11960,7 @@ export const vocabList = [
   {
     "id": 1094,
     "word": "forward",
-    "ipa": "/forward/",
+    "ipa": "/ˈfɔɹwɝd/",
     "pos": "adv",
     "meaning": "từ 'forward' (adv)",
     "example": "Practice speaking 'forward' clearly.",
@@ -12060,7 +11971,7 @@ export const vocabList = [
   {
     "id": 1095,
     "word": "found",
-    "ipa": "/found/",
+    "ipa": "/ˈfaʊnd/",
     "pos": "v",
     "meaning": "từ 'found' (v)",
     "example": "Practice speaking 'found' clearly.",
@@ -12071,7 +11982,7 @@ export const vocabList = [
   {
     "id": 1096,
     "word": "four",
-    "ipa": "/four/",
+    "ipa": "/ˈfɔɹ/",
     "pos": "number",
     "meaning": "từ 'four' (number)",
     "example": "Practice speaking 'four' clearly.",
@@ -12104,7 +12015,7 @@ export const vocabList = [
   {
     "id": 1099,
     "word": "frame",
-    "ipa": "/frame/",
+    "ipa": "/ˈfɹeɪm/",
     "pos": "n",
     "meaning": "từ 'frame' (n)",
     "example": "Practice speaking 'frame' clearly.",
@@ -12148,7 +12059,7 @@ export const vocabList = [
   {
     "id": 1103,
     "word": "frequency",
-    "ipa": "/frequency/",
+    "ipa": "/ˈfɹikwənsi/",
     "pos": "n",
     "meaning": "từ 'frequency' (n)",
     "example": "Practice speaking 'frequency' clearly.",
@@ -12159,7 +12070,7 @@ export const vocabList = [
   {
     "id": 1104,
     "word": "frequently",
-    "ipa": "/frequently/",
+    "ipa": "/ˈfɹikwəntɫi/",
     "pos": "adv",
     "meaning": "từ 'frequently' (adv)",
     "example": "Practice speaking 'frequently' clearly.",
@@ -12181,7 +12092,7 @@ export const vocabList = [
   {
     "id": 1106,
     "word": "friday",
-    "ipa": "/friday/",
+    "ipa": "/ˈfɹaɪˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'friday' (n)",
     "example": "Practice speaking 'friday' clearly.",
@@ -12192,7 +12103,7 @@ export const vocabList = [
   {
     "id": 1107,
     "word": "fridge",
-    "ipa": "/fridge/",
+    "ipa": "/ˈfɹɪdʒ/",
     "pos": "n",
     "meaning": "từ 'fridge' (n)",
     "example": "Practice speaking 'fridge' clearly.",
@@ -12203,7 +12114,7 @@ export const vocabList = [
   {
     "id": 1108,
     "word": "friend",
-    "ipa": "/friend/",
+    "ipa": "/ˈfɹɛnd/",
     "pos": "n",
     "meaning": "từ 'friend' (n)",
     "example": "Practice speaking 'friend' clearly.",
@@ -12214,7 +12125,7 @@ export const vocabList = [
   {
     "id": 1109,
     "word": "friendly",
-    "ipa": "/friendly/",
+    "ipa": "/ˈfɹɛndɫi/",
     "pos": "adj",
     "meaning": "từ 'friendly' (adj)",
     "example": "Practice speaking 'friendly' clearly.",
@@ -12236,7 +12147,7 @@ export const vocabList = [
   {
     "id": 1111,
     "word": "frighten",
-    "ipa": "/frighten/",
+    "ipa": "/ˈfɹaɪtən/",
     "pos": "v",
     "meaning": "từ 'frighten' (v)",
     "example": "Practice speaking 'frighten' clearly.",
@@ -12247,7 +12158,7 @@ export const vocabList = [
   {
     "id": 1112,
     "word": "frightened",
-    "ipa": "/frightened/",
+    "ipa": "/ˈfɹaɪtənd/",
     "pos": "adj",
     "meaning": "từ 'frightened' (adj)",
     "example": "Practice speaking 'frightened' clearly.",
@@ -12258,7 +12169,7 @@ export const vocabList = [
   {
     "id": 1113,
     "word": "frightening",
-    "ipa": "/frightening/",
+    "ipa": "/ˈfɹaɪtənɪŋ/",
     "pos": "adj",
     "meaning": "từ 'frightening' (adj)",
     "example": "Practice speaking 'frightening' clearly.",
@@ -12269,7 +12180,7 @@ export const vocabList = [
   {
     "id": 1114,
     "word": "frog",
-    "ipa": "/frog/",
+    "ipa": "/ˈfɹɑɡ/",
     "pos": "n",
     "meaning": "từ 'frog' (n)",
     "example": "Practice speaking 'frog' clearly.",
@@ -12280,7 +12191,7 @@ export const vocabList = [
   {
     "id": 1115,
     "word": "from",
-    "ipa": "/from/",
+    "ipa": "/ˈfɹəm/",
     "pos": "prep",
     "meaning": "từ 'from' (prep)",
     "example": "Practice speaking 'from' clearly.",
@@ -12291,7 +12202,7 @@ export const vocabList = [
   {
     "id": 1116,
     "word": "front",
-    "ipa": "/front/",
+    "ipa": "/ˈfɹənt/",
     "pos": "n",
     "meaning": "từ 'front' (n)",
     "example": "Practice speaking 'front' clearly.",
@@ -12302,7 +12213,7 @@ export const vocabList = [
   {
     "id": 1117,
     "word": "frozen",
-    "ipa": "/frozen/",
+    "ipa": "/ˈfɹoʊzən/",
     "pos": "adj",
     "meaning": "từ 'frozen' (adj)",
     "example": "Practice speaking 'frozen' clearly.",
@@ -12313,7 +12224,7 @@ export const vocabList = [
   {
     "id": 1118,
     "word": "fruit",
-    "ipa": "/fruit/",
+    "ipa": "/ˈfɹut/",
     "pos": "n",
     "meaning": "từ 'fruit' (n)",
     "example": "Practice speaking 'fruit' clearly.",
@@ -12324,7 +12235,7 @@ export const vocabList = [
   {
     "id": 1119,
     "word": "fry",
-    "ipa": "/fry/",
+    "ipa": "/ˈfɹaɪ/",
     "pos": "v",
     "meaning": "từ 'fry' (v)",
     "example": "Practice speaking 'fry' clearly.",
@@ -12335,7 +12246,7 @@ export const vocabList = [
   {
     "id": 1120,
     "word": "fuel",
-    "ipa": "/fuel/",
+    "ipa": "/ˈfjuəɫ/",
     "pos": "n",
     "meaning": "từ 'fuel' (n)",
     "example": "Practice speaking 'fuel' clearly.",
@@ -12346,7 +12257,7 @@ export const vocabList = [
   {
     "id": 1121,
     "word": "full",
-    "ipa": "/full/",
+    "ipa": "/ˈfʊɫ/",
     "pos": "adj",
     "meaning": "từ 'full' (adj)",
     "example": "Practice speaking 'full' clearly.",
@@ -12357,7 +12268,7 @@ export const vocabList = [
   {
     "id": 1122,
     "word": "fully",
-    "ipa": "/fully/",
+    "ipa": "/ˈfʊɫi/",
     "pos": "adv",
     "meaning": "từ 'fully' (adv)",
     "example": "Practice speaking 'fully' clearly.",
@@ -12368,7 +12279,7 @@ export const vocabList = [
   {
     "id": 1123,
     "word": "fun",
-    "ipa": "/fun/",
+    "ipa": "/ˈfən/",
     "pos": "n",
     "meaning": "từ 'fun' (n)",
     "example": "Practice speaking 'fun' clearly.",
@@ -12379,7 +12290,7 @@ export const vocabList = [
   {
     "id": 1124,
     "word": "function",
-    "ipa": "/function/",
+    "ipa": "/ˈfəŋkʃən/",
     "pos": "n",
     "meaning": "từ 'function' (n)",
     "example": "Practice speaking 'function' clearly.",
@@ -12390,7 +12301,7 @@ export const vocabList = [
   {
     "id": 1125,
     "word": "fund",
-    "ipa": "/fund/",
+    "ipa": "/ˈfənd/",
     "pos": "n",
     "meaning": "từ 'fund' (n)",
     "example": "Practice speaking 'fund' clearly.",
@@ -12401,7 +12312,7 @@ export const vocabList = [
   {
     "id": 1126,
     "word": "fundamental",
-    "ipa": "/fundamental/",
+    "ipa": "/ˌfəndəˈmɛnəɫ/",
     "pos": "adj",
     "meaning": "từ 'fundamental' (adj)",
     "example": "Practice speaking 'fundamental' clearly.",
@@ -12412,7 +12323,7 @@ export const vocabList = [
   {
     "id": 1127,
     "word": "funding",
-    "ipa": "/funding/",
+    "ipa": "/ˈfəndɪŋ/",
     "pos": "n",
     "meaning": "từ 'funding' (n)",
     "example": "Practice speaking 'funding' clearly.",
@@ -12423,7 +12334,7 @@ export const vocabList = [
   {
     "id": 1128,
     "word": "funny",
-    "ipa": "/funny/",
+    "ipa": "/ˈfəni/",
     "pos": "adj",
     "meaning": "từ 'funny' (adj)",
     "example": "Practice speaking 'funny' clearly.",
@@ -12434,7 +12345,7 @@ export const vocabList = [
   {
     "id": 1129,
     "word": "fur",
-    "ipa": "/fur/",
+    "ipa": "/ˈfɝ/",
     "pos": "n",
     "meaning": "từ 'fur' (n)",
     "example": "Practice speaking 'fur' clearly.",
@@ -12445,7 +12356,7 @@ export const vocabList = [
   {
     "id": 1130,
     "word": "furniture",
-    "ipa": "/furniture/",
+    "ipa": "/ˈfɝnɪtʃɝ/",
     "pos": "n",
     "meaning": "từ 'furniture' (n)",
     "example": "Practice speaking 'furniture' clearly.",
@@ -12478,7 +12389,7 @@ export const vocabList = [
   {
     "id": 1133,
     "word": "future",
-    "ipa": "/future/",
+    "ipa": "/ˈfjutʃɝ/",
     "pos": "n",
     "meaning": "từ 'future' (n)",
     "example": "Practice speaking 'future' clearly.",
@@ -12489,7 +12400,7 @@ export const vocabList = [
   {
     "id": 1134,
     "word": "gain",
-    "ipa": "/gain/",
+    "ipa": "/ˈɡeɪn/",
     "pos": "v",
     "meaning": "từ 'gain' (v)",
     "example": "Practice speaking 'gain' clearly.",
@@ -12500,7 +12411,7 @@ export const vocabList = [
   {
     "id": 1135,
     "word": "gallery",
-    "ipa": "/gallery/",
+    "ipa": "/ˈɡæɫɝi/",
     "pos": "n",
     "meaning": "từ 'gallery' (n)",
     "example": "Practice speaking 'gallery' clearly.",
@@ -12511,7 +12422,7 @@ export const vocabList = [
   {
     "id": 1136,
     "word": "game",
-    "ipa": "/game/",
+    "ipa": "/ˈɡeɪm/",
     "pos": "n",
     "meaning": "từ 'game' (n)",
     "example": "Practice speaking 'game' clearly.",
@@ -12522,7 +12433,7 @@ export const vocabList = [
   {
     "id": 1137,
     "word": "gang",
-    "ipa": "/gang/",
+    "ipa": "/ˈɡæŋ/",
     "pos": "n",
     "meaning": "từ 'gang' (n)",
     "example": "Practice speaking 'gang' clearly.",
@@ -12533,7 +12444,7 @@ export const vocabList = [
   {
     "id": 1138,
     "word": "gap",
-    "ipa": "/gap/",
+    "ipa": "/ˈɡæp/",
     "pos": "n",
     "meaning": "từ 'gap' (n)",
     "example": "Practice speaking 'gap' clearly.",
@@ -12544,7 +12455,7 @@ export const vocabList = [
   {
     "id": 1139,
     "word": "garage",
-    "ipa": "/garage/",
+    "ipa": "/ɡɝˈɑʒ/",
     "pos": "n",
     "meaning": "từ 'garage' (n)",
     "example": "Practice speaking 'garage' clearly.",
@@ -12555,7 +12466,7 @@ export const vocabList = [
   {
     "id": 1140,
     "word": "garden",
-    "ipa": "/garden/",
+    "ipa": "/ˈɡɑɹdən/",
     "pos": "n",
     "meaning": "từ 'garden' (n)",
     "example": "Practice speaking 'garden' clearly.",
@@ -12566,7 +12477,7 @@ export const vocabList = [
   {
     "id": 1141,
     "word": "gas",
-    "ipa": "/gas/",
+    "ipa": "/ˈɡæs/",
     "pos": "n",
     "meaning": "từ 'gas' (n)",
     "example": "Practice speaking 'gas' clearly.",
@@ -12577,7 +12488,7 @@ export const vocabList = [
   {
     "id": 1142,
     "word": "gate",
-    "ipa": "/gate/",
+    "ipa": "/ˈɡeɪt/",
     "pos": "n",
     "meaning": "từ 'gate' (n)",
     "example": "Practice speaking 'gate' clearly.",
@@ -12599,7 +12510,7 @@ export const vocabList = [
   {
     "id": 1144,
     "word": "general",
-    "ipa": "/general/",
+    "ipa": "/ˈdʒɛnɝəɫ/",
     "pos": "adj",
     "meaning": "từ 'general' (adj)",
     "example": "Practice speaking 'general' clearly.",
@@ -12610,7 +12521,7 @@ export const vocabList = [
   {
     "id": 1145,
     "word": "generally",
-    "ipa": "/generally/",
+    "ipa": "/ˈdʒɛnɝəɫi/",
     "pos": "adv",
     "meaning": "từ 'generally' (adv)",
     "example": "Practice speaking 'generally' clearly.",
@@ -12621,7 +12532,7 @@ export const vocabList = [
   {
     "id": 1146,
     "word": "generate",
-    "ipa": "/generate/",
+    "ipa": "/ˈdʒɛnɝˌeɪt/",
     "pos": "v",
     "meaning": "từ 'generate' (v)",
     "example": "Practice speaking 'generate' clearly.",
@@ -12632,7 +12543,7 @@ export const vocabList = [
   {
     "id": 1147,
     "word": "generation",
-    "ipa": "/generation/",
+    "ipa": "/ˌdʒɛnɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'generation' (n)",
     "example": "Practice speaking 'generation' clearly.",
@@ -12643,7 +12554,7 @@ export const vocabList = [
   {
     "id": 1148,
     "word": "generous",
-    "ipa": "/generous/",
+    "ipa": "/ˈdʒɛnɝəs/",
     "pos": "adj",
     "meaning": "từ 'generous' (adj)",
     "example": "Practice speaking 'generous' clearly.",
@@ -12654,7 +12565,7 @@ export const vocabList = [
   {
     "id": 1149,
     "word": "genre",
-    "ipa": "/genre/",
+    "ipa": "/ˈʒɑnɹə/",
     "pos": "n",
     "meaning": "từ 'genre' (n)",
     "example": "Practice speaking 'genre' clearly.",
@@ -12665,7 +12576,7 @@ export const vocabList = [
   {
     "id": 1150,
     "word": "gentle",
-    "ipa": "/gentle/",
+    "ipa": "/ˈdʒɛnəɫ/",
     "pos": "adj",
     "meaning": "từ 'gentle' (adj)",
     "example": "Practice speaking 'gentle' clearly.",
@@ -12676,7 +12587,7 @@ export const vocabList = [
   {
     "id": 1151,
     "word": "gentleman",
-    "ipa": "/gentleman/",
+    "ipa": "/ˈdʒɛnəɫmən/",
     "pos": "n",
     "meaning": "từ 'gentleman' (n)",
     "example": "Practice speaking 'gentleman' clearly.",
@@ -12709,7 +12620,7 @@ export const vocabList = [
   {
     "id": 1154,
     "word": "ghost",
-    "ipa": "/ghost/",
+    "ipa": "/ˈɡoʊst/",
     "pos": "n",
     "meaning": "từ 'ghost' (n)",
     "example": "Practice speaking 'ghost' clearly.",
@@ -12720,7 +12631,7 @@ export const vocabList = [
   {
     "id": 1155,
     "word": "giant",
-    "ipa": "/giant/",
+    "ipa": "/ˈdʒaɪənt/",
     "pos": "adj",
     "meaning": "từ 'giant' (adj)",
     "example": "Practice speaking 'giant' clearly.",
@@ -12731,7 +12642,7 @@ export const vocabList = [
   {
     "id": 1156,
     "word": "gift",
-    "ipa": "/gift/",
+    "ipa": "/ˈɡɪft/",
     "pos": "n",
     "meaning": "từ 'gift' (n)",
     "example": "Practice speaking 'gift' clearly.",
@@ -12742,7 +12653,7 @@ export const vocabList = [
   {
     "id": 1157,
     "word": "girl",
-    "ipa": "/girl/",
+    "ipa": "/ˈɡɝɫ/",
     "pos": "n",
     "meaning": "từ 'girl' (n)",
     "example": "Practice speaking 'girl' clearly.",
@@ -12753,7 +12664,7 @@ export const vocabList = [
   {
     "id": 1158,
     "word": "girlfriend",
-    "ipa": "/girlfriend/",
+    "ipa": "/ˈɡɝɫˌfɹɛnd/",
     "pos": "n",
     "meaning": "từ 'girlfriend' (n)",
     "example": "Practice speaking 'girlfriend' clearly.",
@@ -12775,7 +12686,7 @@ export const vocabList = [
   {
     "id": 1160,
     "word": "glad",
-    "ipa": "/glad/",
+    "ipa": "/ˈɡɫæd/",
     "pos": "adj",
     "meaning": "từ 'glad' (adj)",
     "example": "Practice speaking 'glad' clearly.",
@@ -12786,7 +12697,7 @@ export const vocabList = [
   {
     "id": 1161,
     "word": "glass",
-    "ipa": "/glass/",
+    "ipa": "/ˈɡɫæs/",
     "pos": "n",
     "meaning": "từ 'glass' (n)",
     "example": "Practice speaking 'glass' clearly.",
@@ -12797,7 +12708,7 @@ export const vocabList = [
   {
     "id": 1162,
     "word": "global",
-    "ipa": "/global/",
+    "ipa": "/ˈɡɫoʊbəɫ/",
     "pos": "adj",
     "meaning": "từ 'global' (adj)",
     "example": "Practice speaking 'global' clearly.",
@@ -12808,7 +12719,7 @@ export const vocabList = [
   {
     "id": 1163,
     "word": "glove",
-    "ipa": "/glove/",
+    "ipa": "/ˈɡɫəv/",
     "pos": "n",
     "meaning": "từ 'glove' (n)",
     "example": "Practice speaking 'glove' clearly.",
@@ -12830,7 +12741,7 @@ export const vocabList = [
   {
     "id": 1165,
     "word": "goal",
-    "ipa": "/goal/",
+    "ipa": "/ˈɡoʊɫ/",
     "pos": "n",
     "meaning": "từ 'goal' (n)",
     "example": "Practice speaking 'goal' clearly.",
@@ -12841,7 +12752,7 @@ export const vocabList = [
   {
     "id": 1166,
     "word": "god",
-    "ipa": "/god/",
+    "ipa": "/ˈɡɑd/",
     "pos": "n",
     "meaning": "từ 'god' (n)",
     "example": "Practice speaking 'god' clearly.",
@@ -12852,7 +12763,7 @@ export const vocabList = [
   {
     "id": 1167,
     "word": "gold",
-    "ipa": "/gold/",
+    "ipa": "/ˈɡoʊɫd/",
     "pos": "n",
     "meaning": "từ 'gold' (n)",
     "example": "Practice speaking 'gold' clearly.",
@@ -12863,7 +12774,7 @@ export const vocabList = [
   {
     "id": 1168,
     "word": "golf",
-    "ipa": "/golf/",
+    "ipa": "/ˈɡɑɫf/",
     "pos": "n",
     "meaning": "từ 'golf' (n)",
     "example": "Practice speaking 'golf' clearly.",
@@ -12907,7 +12818,7 @@ export const vocabList = [
   {
     "id": 1172,
     "word": "govern",
-    "ipa": "/govern/",
+    "ipa": "/ˈɡəvɝn/",
     "pos": "v",
     "meaning": "từ 'govern' (v)",
     "example": "Practice speaking 'govern' clearly.",
@@ -12918,7 +12829,7 @@ export const vocabList = [
   {
     "id": 1173,
     "word": "government",
-    "ipa": "/government/",
+    "ipa": "/ˈɡəvɝmənt/",
     "pos": "n",
     "meaning": "từ 'government' (n)",
     "example": "Practice speaking 'government' clearly.",
@@ -12929,7 +12840,7 @@ export const vocabList = [
   {
     "id": 1174,
     "word": "grab",
-    "ipa": "/grab/",
+    "ipa": "/ˈɡɹæb/",
     "pos": "v",
     "meaning": "từ 'grab' (v)",
     "example": "Practice speaking 'grab' clearly.",
@@ -12940,7 +12851,7 @@ export const vocabList = [
   {
     "id": 1175,
     "word": "grade",
-    "ipa": "/grade/",
+    "ipa": "/ˈɡɹeɪd/",
     "pos": "n",
     "meaning": "từ 'grade' (n)",
     "example": "Practice speaking 'grade' clearly.",
@@ -12951,7 +12862,7 @@ export const vocabList = [
   {
     "id": 1176,
     "word": "gradually",
-    "ipa": "/gradually/",
+    "ipa": "/ˈɡɹædʒuəɫi/",
     "pos": "adv",
     "meaning": "từ 'gradually' (adv)",
     "example": "Practice speaking 'gradually' clearly.",
@@ -12962,7 +12873,7 @@ export const vocabList = [
   {
     "id": 1177,
     "word": "graduate",
-    "ipa": "/graduate/",
+    "ipa": "/ˈɡɹædʒəˌweɪt/",
     "pos": "n",
     "meaning": "từ 'graduate' (n)",
     "example": "Practice speaking 'graduate' clearly.",
@@ -12973,7 +12884,7 @@ export const vocabList = [
   {
     "id": 1178,
     "word": "grain",
-    "ipa": "/grain/",
+    "ipa": "/ˈɡɹeɪn/",
     "pos": "n",
     "meaning": "từ 'grain' (n)",
     "example": "Practice speaking 'grain' clearly.",
@@ -12984,7 +12895,7 @@ export const vocabList = [
   {
     "id": 1179,
     "word": "grand",
-    "ipa": "/grand/",
+    "ipa": "/ˈɡɹænd/",
     "pos": "adj",
     "meaning": "từ 'grand' (adj)",
     "example": "Practice speaking 'grand' clearly.",
@@ -13017,7 +12928,7 @@ export const vocabList = [
   {
     "id": 1182,
     "word": "grandparent",
-    "ipa": "/grandparent/",
+    "ipa": "/ˈɡɹændˌpɛɹənt/",
     "pos": "n",
     "meaning": "từ 'grandparent' (n)",
     "example": "Practice speaking 'grandparent' clearly.",
@@ -13028,7 +12939,7 @@ export const vocabList = [
   {
     "id": 1183,
     "word": "grant",
-    "ipa": "/grant/",
+    "ipa": "/ˈɡɹænt/",
     "pos": "v",
     "meaning": "từ 'grant' (v)",
     "example": "Practice speaking 'grant' clearly.",
@@ -13039,7 +12950,7 @@ export const vocabList = [
   {
     "id": 1184,
     "word": "grass",
-    "ipa": "/grass/",
+    "ipa": "/ˈɡɹæs/",
     "pos": "n",
     "meaning": "từ 'grass' (n)",
     "example": "Practice speaking 'grass' clearly.",
@@ -13050,7 +12961,7 @@ export const vocabList = [
   {
     "id": 1185,
     "word": "grateful",
-    "ipa": "/grateful/",
+    "ipa": "/ˈɡɹeɪtfəɫ/",
     "pos": "adj",
     "meaning": "từ 'grateful' (adj)",
     "example": "Practice speaking 'grateful' clearly.",
@@ -13061,7 +12972,7 @@ export const vocabList = [
   {
     "id": 1186,
     "word": "great",
-    "ipa": "/great/",
+    "ipa": "/ˈɡɹeɪt/",
     "pos": "adj",
     "meaning": "từ 'great' (adj)",
     "example": "Practice speaking 'great' clearly.",
@@ -13094,7 +13005,7 @@ export const vocabList = [
   {
     "id": 1189,
     "word": "grey",
-    "ipa": "/grey/",
+    "ipa": "/ˈɡɹeɪ/",
     "pos": "adj",
     "meaning": "từ 'grey' (adj)",
     "example": "Practice speaking 'grey' clearly.",
@@ -13105,7 +13016,7 @@ export const vocabList = [
   {
     "id": 1190,
     "word": "ground",
-    "ipa": "/ground/",
+    "ipa": "/ˈɡɹaʊnd/",
     "pos": "n",
     "meaning": "từ 'ground' (n)",
     "example": "Practice speaking 'ground' clearly.",
@@ -13116,7 +13027,7 @@ export const vocabList = [
   {
     "id": 1191,
     "word": "group",
-    "ipa": "/group/",
+    "ipa": "/ˈɡɹup/",
     "pos": "n",
     "meaning": "từ 'group' (n)",
     "example": "Practice speaking 'group' clearly.",
@@ -13127,7 +13038,7 @@ export const vocabList = [
   {
     "id": 1192,
     "word": "grow",
-    "ipa": "/grow/",
+    "ipa": "/ˈɡɹoʊ/",
     "pos": "v",
     "meaning": "từ 'grow' (v)",
     "example": "Practice speaking 'grow' clearly.",
@@ -13160,7 +13071,7 @@ export const vocabList = [
   {
     "id": 1195,
     "word": "guard",
-    "ipa": "/guard/",
+    "ipa": "/ˈɡɑɹd/",
     "pos": "n",
     "meaning": "từ 'guard' (n)",
     "example": "Practice speaking 'guard' clearly.",
@@ -13171,7 +13082,7 @@ export const vocabList = [
   {
     "id": 1196,
     "word": "guess",
-    "ipa": "/guess/",
+    "ipa": "/ˈɡɛs/",
     "pos": "v",
     "meaning": "từ 'guess' (v)",
     "example": "Practice speaking 'guess' clearly.",
@@ -13182,7 +13093,7 @@ export const vocabList = [
   {
     "id": 1197,
     "word": "guest",
-    "ipa": "/guest/",
+    "ipa": "/ˈɡɛst/",
     "pos": "n",
     "meaning": "từ 'guest' (n)",
     "example": "Practice speaking 'guest' clearly.",
@@ -13193,7 +13104,7 @@ export const vocabList = [
   {
     "id": 1198,
     "word": "guide",
-    "ipa": "/guide/",
+    "ipa": "/ˈɡaɪd/",
     "pos": "n",
     "meaning": "từ 'guide' (n)",
     "example": "Practice speaking 'guide' clearly.",
@@ -13204,7 +13115,7 @@ export const vocabList = [
   {
     "id": 1199,
     "word": "guilty",
-    "ipa": "/guilty/",
+    "ipa": "/ˈɡɪɫti/",
     "pos": "adj",
     "meaning": "từ 'guilty' (adj)",
     "example": "Practice speaking 'guilty' clearly.",
@@ -13215,7 +13126,7 @@ export const vocabList = [
   {
     "id": 1200,
     "word": "guitar",
-    "ipa": "/guitar/",
+    "ipa": "/ɡɪˈtɑɹ/",
     "pos": "n",
     "meaning": "từ 'guitar' (n)",
     "example": "Practice speaking 'guitar' clearly.",
@@ -13226,7 +13137,7 @@ export const vocabList = [
   {
     "id": 1201,
     "word": "gun",
-    "ipa": "/gun/",
+    "ipa": "/ˈɡən/",
     "pos": "n",
     "meaning": "từ 'gun' (n)",
     "example": "Practice speaking 'gun' clearly.",
@@ -13237,7 +13148,7 @@ export const vocabList = [
   {
     "id": 1202,
     "word": "guy",
-    "ipa": "/guy/",
+    "ipa": "/ˈɡaɪ/",
     "pos": "n",
     "meaning": "từ 'guy' (n)",
     "example": "Practice speaking 'guy' clearly.",
@@ -13248,7 +13159,7 @@ export const vocabList = [
   {
     "id": 1203,
     "word": "gym",
-    "ipa": "/gym/",
+    "ipa": "/ˈdʒɪm/",
     "pos": "n",
     "meaning": "từ 'gym' (n)",
     "example": "Practice speaking 'gym' clearly.",
@@ -13259,7 +13170,7 @@ export const vocabList = [
   {
     "id": 1204,
     "word": "habit",
-    "ipa": "/habit/",
+    "ipa": "/ˈhæbət/",
     "pos": "n",
     "meaning": "từ 'habit' (n)",
     "example": "Practice speaking 'habit' clearly.",
@@ -13270,7 +13181,7 @@ export const vocabList = [
   {
     "id": 1205,
     "word": "hair",
-    "ipa": "/hair/",
+    "ipa": "/ˈhɛɹ/",
     "pos": "n",
     "meaning": "từ 'hair' (n)",
     "example": "Practice speaking 'hair' clearly.",
@@ -13281,7 +13192,7 @@ export const vocabList = [
   {
     "id": 1206,
     "word": "half",
-    "ipa": "/half/",
+    "ipa": "/ˈhæf/",
     "pos": "n",
     "meaning": "từ 'half' (n)",
     "example": "Practice speaking 'half' clearly.",
@@ -13292,7 +13203,7 @@ export const vocabList = [
   {
     "id": 1207,
     "word": "hall",
-    "ipa": "/hall/",
+    "ipa": "/ˈhɔɫ/",
     "pos": "n",
     "meaning": "từ 'hall' (n)",
     "example": "Practice speaking 'hall' clearly.",
@@ -13303,7 +13214,7 @@ export const vocabList = [
   {
     "id": 1208,
     "word": "hand",
-    "ipa": "/hand/",
+    "ipa": "/ˈhænd/",
     "pos": "n",
     "meaning": "từ 'hand' (n)",
     "example": "Practice speaking 'hand' clearly.",
@@ -13314,7 +13225,7 @@ export const vocabList = [
   {
     "id": 1209,
     "word": "handle",
-    "ipa": "/handle/",
+    "ipa": "/ˈhændəɫ/",
     "pos": "v",
     "meaning": "từ 'handle' (v)",
     "example": "Practice speaking 'handle' clearly.",
@@ -13325,7 +13236,7 @@ export const vocabList = [
   {
     "id": 1210,
     "word": "hang",
-    "ipa": "/hang/",
+    "ipa": "/ˈhæŋ/",
     "pos": "v",
     "meaning": "từ 'hang' (v)",
     "example": "Practice speaking 'hang' clearly.",
@@ -13347,7 +13258,7 @@ export const vocabList = [
   {
     "id": 1212,
     "word": "happily",
-    "ipa": "/happily/",
+    "ipa": "/ˈhæpəɫi/",
     "pos": "adv",
     "meaning": "từ 'happily' (adv)",
     "example": "Practice speaking 'happily' clearly.",
@@ -13358,7 +13269,7 @@ export const vocabList = [
   {
     "id": 1213,
     "word": "happiness",
-    "ipa": "/happiness/",
+    "ipa": "/ˈhæpinəs/",
     "pos": "n",
     "meaning": "từ 'happiness' (n)",
     "example": "Practice speaking 'happiness' clearly.",
@@ -13369,7 +13280,7 @@ export const vocabList = [
   {
     "id": 1214,
     "word": "happy",
-    "ipa": "/happy/",
+    "ipa": "/ˈhæpi/",
     "pos": "adj",
     "meaning": "từ 'happy' (adj)",
     "example": "Practice speaking 'happy' clearly.",
@@ -13380,7 +13291,7 @@ export const vocabList = [
   {
     "id": 1215,
     "word": "hard",
-    "ipa": "/hard/",
+    "ipa": "/ˈhɑɹd/",
     "pos": "adj",
     "meaning": "từ 'hard' (adj)",
     "example": "Practice speaking 'hard' clearly.",
@@ -13391,7 +13302,7 @@ export const vocabList = [
   {
     "id": 1216,
     "word": "hardly",
-    "ipa": "/hardly/",
+    "ipa": "/ˈhɑɹdɫi/",
     "pos": "adv",
     "meaning": "từ 'hardly' (adv)",
     "example": "Practice speaking 'hardly' clearly.",
@@ -13402,7 +13313,7 @@ export const vocabList = [
   {
     "id": 1217,
     "word": "harm",
-    "ipa": "/harm/",
+    "ipa": "/ˈhɑɹm/",
     "pos": "n",
     "meaning": "từ 'harm' (n)",
     "example": "Practice speaking 'harm' clearly.",
@@ -13413,7 +13324,7 @@ export const vocabList = [
   {
     "id": 1218,
     "word": "harmful",
-    "ipa": "/harmful/",
+    "ipa": "/ˈhɑɹmfəɫ/",
     "pos": "adj",
     "meaning": "từ 'harmful' (adj)",
     "example": "Practice speaking 'harmful' clearly.",
@@ -13424,7 +13335,7 @@ export const vocabList = [
   {
     "id": 1219,
     "word": "hat",
-    "ipa": "/hat/",
+    "ipa": "/ˈhæt/",
     "pos": "n",
     "meaning": "từ 'hat' (n)",
     "example": "Practice speaking 'hat' clearly.",
@@ -13457,7 +13368,7 @@ export const vocabList = [
   {
     "id": 1222,
     "word": "have to",
-    "ipa": "/have to/",
+    "ipa": "/ˈhæv ˈtu/",
     "pos": "modal v",
     "meaning": "từ 'have to' (modal v)",
     "example": "Practice speaking 'have to' clearly.",
@@ -13479,7 +13390,7 @@ export const vocabList = [
   {
     "id": 1224,
     "word": "head",
-    "ipa": "/head/",
+    "ipa": "/ˈhɛd/",
     "pos": "n",
     "meaning": "từ 'head' (n)",
     "example": "Practice speaking 'head' clearly.",
@@ -13501,7 +13412,7 @@ export const vocabList = [
   {
     "id": 1226,
     "word": "headline",
-    "ipa": "/headline/",
+    "ipa": "/ˈhɛdˌɫaɪn/",
     "pos": "n",
     "meaning": "từ 'headline' (n)",
     "example": "Practice speaking 'headline' clearly.",
@@ -13545,7 +13456,7 @@ export const vocabList = [
   {
     "id": 1230,
     "word": "hearing",
-    "ipa": "/hearing/",
+    "ipa": "/ˈhiɹɪŋ/",
     "pos": "n",
     "meaning": "từ 'hearing' (n)",
     "example": "Practice speaking 'hearing' clearly.",
@@ -13556,7 +13467,7 @@ export const vocabList = [
   {
     "id": 1231,
     "word": "heart",
-    "ipa": "/heart/",
+    "ipa": "/ˈhɑɹt/",
     "pos": "n",
     "meaning": "từ 'heart' (n)",
     "example": "Practice speaking 'heart' clearly.",
@@ -13567,7 +13478,7 @@ export const vocabList = [
   {
     "id": 1232,
     "word": "heat",
-    "ipa": "/heat/",
+    "ipa": "/ˈhit/",
     "pos": "n",
     "meaning": "từ 'heat' (n)",
     "example": "Practice speaking 'heat' clearly.",
@@ -13578,7 +13489,7 @@ export const vocabList = [
   {
     "id": 1233,
     "word": "heating",
-    "ipa": "/heating/",
+    "ipa": "/ˈhitɪŋ/",
     "pos": "n",
     "meaning": "từ 'heating' (n)",
     "example": "Practice speaking 'heating' clearly.",
@@ -13589,7 +13500,7 @@ export const vocabList = [
   {
     "id": 1234,
     "word": "heaven",
-    "ipa": "/heaven/",
+    "ipa": "/ˈhɛvən/",
     "pos": "n",
     "meaning": "từ 'heaven' (n)",
     "example": "Practice speaking 'heaven' clearly.",
@@ -13600,7 +13511,7 @@ export const vocabList = [
   {
     "id": 1235,
     "word": "heavily",
-    "ipa": "/heavily/",
+    "ipa": "/ˈhɛvəɫi/",
     "pos": "adv",
     "meaning": "từ 'heavily' (adv)",
     "example": "Practice speaking 'heavily' clearly.",
@@ -13611,7 +13522,7 @@ export const vocabList = [
   {
     "id": 1236,
     "word": "heavy",
-    "ipa": "/heavy/",
+    "ipa": "/ˈhɛvi/",
     "pos": "adj",
     "meaning": "từ 'heavy' (adj)",
     "example": "Practice speaking 'heavy' clearly.",
@@ -13633,7 +13544,7 @@ export const vocabList = [
   {
     "id": 1238,
     "word": "height",
-    "ipa": "/height/",
+    "ipa": "/ˈhaɪt/",
     "pos": "n",
     "meaning": "từ 'height' (n)",
     "example": "Practice speaking 'height' clearly.",
@@ -13644,7 +13555,7 @@ export const vocabList = [
   {
     "id": 1239,
     "word": "helicopter",
-    "ipa": "/helicopter/",
+    "ipa": "/ˈhɛɫɪˌkɑptɝ/",
     "pos": "n",
     "meaning": "từ 'helicopter' (n)",
     "example": "Practice speaking 'helicopter' clearly.",
@@ -13655,7 +13566,7 @@ export const vocabList = [
   {
     "id": 1240,
     "word": "hell",
-    "ipa": "/hell/",
+    "ipa": "/ˈhɛɫ/",
     "pos": "n",
     "meaning": "từ 'hell' (n)",
     "example": "Practice speaking 'hell' clearly.",
@@ -13677,7 +13588,7 @@ export const vocabList = [
   {
     "id": 1242,
     "word": "help",
-    "ipa": "/help/",
+    "ipa": "/ˈhɛɫp/",
     "pos": "v, n",
     "meaning": "giúp đỡ",
     "example": "Could you help me with this?",
@@ -13688,7 +13599,7 @@ export const vocabList = [
   {
     "id": 1243,
     "word": "helpful",
-    "ipa": "/helpful/",
+    "ipa": "/ˈhɛɫpfəɫ/",
     "pos": "adj",
     "meaning": "từ 'helpful' (adj)",
     "example": "Practice speaking 'helpful' clearly.",
@@ -13710,7 +13621,7 @@ export const vocabList = [
   {
     "id": 1245,
     "word": "here",
-    "ipa": "/here/",
+    "ipa": "/ˈhiɹ/",
     "pos": "adv",
     "meaning": "từ 'here' (adv)",
     "example": "Practice speaking 'here' clearly.",
@@ -13721,7 +13632,7 @@ export const vocabList = [
   {
     "id": 1246,
     "word": "hero",
-    "ipa": "/hero/",
+    "ipa": "/ˈhiɹoʊ/",
     "pos": "n",
     "meaning": "từ 'hero' (n)",
     "example": "Practice speaking 'hero' clearly.",
@@ -13732,7 +13643,7 @@ export const vocabList = [
   {
     "id": 1247,
     "word": "hers",
-    "ipa": "/hers/",
+    "ipa": "/ˈhɝz/",
     "pos": "pron",
     "meaning": "từ 'hers' (pron)",
     "example": "Practice speaking 'hers' clearly.",
@@ -13743,7 +13654,7 @@ export const vocabList = [
   {
     "id": 1248,
     "word": "herself",
-    "ipa": "/herself/",
+    "ipa": "/hɝˈsɛɫf/",
     "pos": "pron",
     "meaning": "từ 'herself' (pron)",
     "example": "Practice speaking 'herself' clearly.",
@@ -13754,7 +13665,7 @@ export const vocabList = [
   {
     "id": 1249,
     "word": "hesitate",
-    "ipa": "/hesitate/",
+    "ipa": "/ˈhɛzəˌteɪt/",
     "pos": "v",
     "meaning": "từ 'hesitate' (v)",
     "example": "Practice speaking 'hesitate' clearly.",
@@ -13765,7 +13676,7 @@ export const vocabList = [
   {
     "id": 1250,
     "word": "hey",
-    "ipa": "/hey/",
+    "ipa": "/ˈheɪ/",
     "pos": "exclam",
     "meaning": "từ 'hey' (exclam)",
     "example": "Practice speaking 'hey' clearly.",
@@ -13787,7 +13698,7 @@ export const vocabList = [
   {
     "id": 1252,
     "word": "hide",
-    "ipa": "/hide/",
+    "ipa": "/ˈhaɪd/",
     "pos": "v",
     "meaning": "từ 'hide' (v)",
     "example": "Practice speaking 'hide' clearly.",
@@ -13798,7 +13709,7 @@ export const vocabList = [
   {
     "id": 1253,
     "word": "high",
-    "ipa": "/high/",
+    "ipa": "/ˈhaɪ/",
     "pos": "adj",
     "meaning": "từ 'high' (adj)",
     "example": "Practice speaking 'high' clearly.",
@@ -13809,7 +13720,7 @@ export const vocabList = [
   {
     "id": 1254,
     "word": "highlight",
-    "ipa": "/highlight/",
+    "ipa": "/ˈhaɪˌɫaɪt/",
     "pos": "v",
     "meaning": "từ 'highlight' (v)",
     "example": "Practice speaking 'highlight' clearly.",
@@ -13820,7 +13731,7 @@ export const vocabList = [
   {
     "id": 1255,
     "word": "highly",
-    "ipa": "/highly/",
+    "ipa": "/ˈhaɪɫi/",
     "pos": "adv",
     "meaning": "từ 'highly' (adv)",
     "example": "Practice speaking 'highly' clearly.",
@@ -13831,7 +13742,7 @@ export const vocabList = [
   {
     "id": 1256,
     "word": "hill",
-    "ipa": "/hill/",
+    "ipa": "/ˈhɪɫ/",
     "pos": "n",
     "meaning": "từ 'hill' (n)",
     "example": "Practice speaking 'hill' clearly.",
@@ -13853,7 +13764,7 @@ export const vocabList = [
   {
     "id": 1258,
     "word": "himself",
-    "ipa": "/himself/",
+    "ipa": "/hɪmˈsɛɫf/",
     "pos": "pron",
     "meaning": "từ 'himself' (pron)",
     "example": "Practice speaking 'himself' clearly.",
@@ -13864,7 +13775,7 @@ export const vocabList = [
   {
     "id": 1259,
     "word": "hire",
-    "ipa": "/hire/",
+    "ipa": "/ˈhaɪɝ/",
     "pos": "v",
     "meaning": "từ 'hire' (v)",
     "example": "Practice speaking 'hire' clearly.",
@@ -13886,7 +13797,7 @@ export const vocabList = [
   {
     "id": 1261,
     "word": "historic",
-    "ipa": "/historic/",
+    "ipa": "/hɪˈstɔɹɪk/",
     "pos": "adj",
     "meaning": "từ 'historic' (adj)",
     "example": "Practice speaking 'historic' clearly.",
@@ -13897,7 +13808,7 @@ export const vocabList = [
   {
     "id": 1262,
     "word": "historical",
-    "ipa": "/historical/",
+    "ipa": "/hɪˈstɔɹɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'historical' (adj)",
     "example": "Practice speaking 'historical' clearly.",
@@ -13908,7 +13819,7 @@ export const vocabList = [
   {
     "id": 1263,
     "word": "history",
-    "ipa": "/history/",
+    "ipa": "/ˈhɪstɝi/",
     "pos": "n",
     "meaning": "từ 'history' (n)",
     "example": "Practice speaking 'history' clearly.",
@@ -13919,7 +13830,7 @@ export const vocabList = [
   {
     "id": 1264,
     "word": "hit",
-    "ipa": "/hit/",
+    "ipa": "/ˈhɪt/",
     "pos": "v",
     "meaning": "từ 'hit' (v)",
     "example": "Practice speaking 'hit' clearly.",
@@ -13930,7 +13841,7 @@ export const vocabList = [
   {
     "id": 1265,
     "word": "hobby",
-    "ipa": "/hobby/",
+    "ipa": "/ˈhɑbi/",
     "pos": "n",
     "meaning": "từ 'hobby' (n)",
     "example": "Practice speaking 'hobby' clearly.",
@@ -13941,7 +13852,7 @@ export const vocabList = [
   {
     "id": 1266,
     "word": "hockey",
-    "ipa": "/hockey/",
+    "ipa": "/ˈhɑki/",
     "pos": "n",
     "meaning": "từ 'hockey' (n)",
     "example": "Practice speaking 'hockey' clearly.",
@@ -13963,7 +13874,7 @@ export const vocabList = [
   {
     "id": 1268,
     "word": "hole",
-    "ipa": "/hole/",
+    "ipa": "/ˈhoʊɫ/",
     "pos": "n",
     "meaning": "từ 'hole' (n)",
     "example": "Practice speaking 'hole' clearly.",
@@ -13974,7 +13885,7 @@ export const vocabList = [
   {
     "id": 1269,
     "word": "holiday",
-    "ipa": "/holiday/",
+    "ipa": "/ˈhɑɫəˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'holiday' (n)",
     "example": "Practice speaking 'holiday' clearly.",
@@ -13985,7 +13896,7 @@ export const vocabList = [
   {
     "id": 1270,
     "word": "hollow",
-    "ipa": "/hollow/",
+    "ipa": "/ˈhɑɫoʊ/",
     "pos": "adj",
     "meaning": "từ 'hollow' (adj)",
     "example": "Practice speaking 'hollow' clearly.",
@@ -13996,7 +13907,7 @@ export const vocabList = [
   {
     "id": 1271,
     "word": "holy",
-    "ipa": "/holy/",
+    "ipa": "/ˈhoʊɫi/",
     "pos": "adj",
     "meaning": "từ 'holy' (adj)",
     "example": "Practice speaking 'holy' clearly.",
@@ -14007,7 +13918,7 @@ export const vocabList = [
   {
     "id": 1272,
     "word": "home",
-    "ipa": "/home/",
+    "ipa": "/ˈhoʊm/",
     "pos": "n",
     "meaning": "từ 'home' (n)",
     "example": "Practice speaking 'home' clearly.",
@@ -14018,7 +13929,7 @@ export const vocabList = [
   {
     "id": 1273,
     "word": "homework",
-    "ipa": "/homework/",
+    "ipa": "/ˈhoʊmˌwɝk/",
     "pos": "n",
     "meaning": "từ 'homework' (n)",
     "example": "Practice speaking 'homework' clearly.",
@@ -14029,7 +13940,7 @@ export const vocabList = [
   {
     "id": 1274,
     "word": "honest",
-    "ipa": "/honest/",
+    "ipa": "/ˈɑnəst/",
     "pos": "adj",
     "meaning": "từ 'honest' (adj)",
     "example": "Practice speaking 'honest' clearly.",
@@ -14040,7 +13951,7 @@ export const vocabList = [
   {
     "id": 1275,
     "word": "honour",
-    "ipa": "/honour/",
+    "ipa": "/ˈɑnɝ/",
     "pos": "n",
     "meaning": "từ 'honour' (n)",
     "example": "Practice speaking 'honour' clearly.",
@@ -14062,7 +13973,7 @@ export const vocabList = [
   {
     "id": 1277,
     "word": "horrible",
-    "ipa": "/horrible/",
+    "ipa": "/ˈhɔɹəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'horrible' (adj)",
     "example": "Practice speaking 'horrible' clearly.",
@@ -14073,7 +13984,7 @@ export const vocabList = [
   {
     "id": 1278,
     "word": "horror",
-    "ipa": "/horror/",
+    "ipa": "/ˈhɔɹɝ/",
     "pos": "n",
     "meaning": "từ 'horror' (n)",
     "example": "Practice speaking 'horror' clearly.",
@@ -14084,7 +13995,7 @@ export const vocabList = [
   {
     "id": 1279,
     "word": "horse",
-    "ipa": "/horse/",
+    "ipa": "/ˈhɔɹs/",
     "pos": "n",
     "meaning": "từ 'horse' (n)",
     "example": "Practice speaking 'horse' clearly.",
@@ -14095,7 +14006,7 @@ export const vocabList = [
   {
     "id": 1280,
     "word": "hospital",
-    "ipa": "/hospital/",
+    "ipa": "/ˈhɑˌspɪtəɫ/",
     "pos": "n",
     "meaning": "từ 'hospital' (n)",
     "example": "Practice speaking 'hospital' clearly.",
@@ -14106,7 +14017,7 @@ export const vocabList = [
   {
     "id": 1281,
     "word": "host",
-    "ipa": "/host/",
+    "ipa": "/ˈhoʊst/",
     "pos": "n",
     "meaning": "từ 'host' (n)",
     "example": "Practice speaking 'host' clearly.",
@@ -14117,7 +14028,7 @@ export const vocabList = [
   {
     "id": 1282,
     "word": "hot",
-    "ipa": "/hot/",
+    "ipa": "/ˈhɑt/",
     "pos": "adj",
     "meaning": "từ 'hot' (adj)",
     "example": "Practice speaking 'hot' clearly.",
@@ -14128,7 +14039,7 @@ export const vocabList = [
   {
     "id": 1283,
     "word": "hotel",
-    "ipa": "/hotel/",
+    "ipa": "/hoʊˈtɛɫ/",
     "pos": "n",
     "meaning": "từ 'hotel' (n)",
     "example": "Practice speaking 'hotel' clearly.",
@@ -14139,7 +14050,7 @@ export const vocabList = [
   {
     "id": 1284,
     "word": "hour",
-    "ipa": "/hour/",
+    "ipa": "/ˈaʊɝ/",
     "pos": "n",
     "meaning": "từ 'hour' (n)",
     "example": "Practice speaking 'hour' clearly.",
@@ -14150,7 +14061,7 @@ export const vocabList = [
   {
     "id": 1285,
     "word": "house",
-    "ipa": "/house/",
+    "ipa": "/ˈhaʊs/",
     "pos": "n",
     "meaning": "từ 'house' (n)",
     "example": "Practice speaking 'house' clearly.",
@@ -14161,7 +14072,7 @@ export const vocabList = [
   {
     "id": 1286,
     "word": "household",
-    "ipa": "/household/",
+    "ipa": "/ˈhaʊsˌhoʊɫd/",
     "pos": "n",
     "meaning": "từ 'household' (n)",
     "example": "Practice speaking 'household' clearly.",
@@ -14172,7 +14083,7 @@ export const vocabList = [
   {
     "id": 1287,
     "word": "housing",
-    "ipa": "/housing/",
+    "ipa": "/ˈhaʊzɪŋ/",
     "pos": "n",
     "meaning": "từ 'housing' (n)",
     "example": "Practice speaking 'housing' clearly.",
@@ -14194,7 +14105,7 @@ export const vocabList = [
   {
     "id": 1289,
     "word": "however",
-    "ipa": "/however/",
+    "ipa": "/ˌhaʊˈɛvɝ/",
     "pos": "adv",
     "meaning": "từ 'however' (adv)",
     "example": "Practice speaking 'however' clearly.",
@@ -14205,7 +14116,7 @@ export const vocabList = [
   {
     "id": 1290,
     "word": "huge",
-    "ipa": "/huge/",
+    "ipa": "/ˈhjudʒ/",
     "pos": "adj",
     "meaning": "từ 'huge' (adj)",
     "example": "Practice speaking 'huge' clearly.",
@@ -14216,7 +14127,7 @@ export const vocabList = [
   {
     "id": 1291,
     "word": "human",
-    "ipa": "/human/",
+    "ipa": "/ˈhjumən/",
     "pos": "adj",
     "meaning": "từ 'human' (adj)",
     "example": "Practice speaking 'human' clearly.",
@@ -14227,7 +14138,7 @@ export const vocabList = [
   {
     "id": 1292,
     "word": "humorous",
-    "ipa": "/humorous/",
+    "ipa": "/ˈhjumɝəs/",
     "pos": "adj",
     "meaning": "từ 'humorous' (adj)",
     "example": "Practice speaking 'humorous' clearly.",
@@ -14238,7 +14149,7 @@ export const vocabList = [
   {
     "id": 1293,
     "word": "humour",
-    "ipa": "/humour/",
+    "ipa": "/ˈhjumɝ/",
     "pos": "n",
     "meaning": "từ 'humour' (n)",
     "example": "Practice speaking 'humour' clearly.",
@@ -14249,7 +14160,7 @@ export const vocabList = [
   {
     "id": 1294,
     "word": "hundred",
-    "ipa": "/hundred/",
+    "ipa": "/ˈhəndɝd/",
     "pos": "number",
     "meaning": "từ 'hundred' (number)",
     "example": "Practice speaking 'hundred' clearly.",
@@ -14260,7 +14171,7 @@ export const vocabList = [
   {
     "id": 1295,
     "word": "hungry",
-    "ipa": "/hungry/",
+    "ipa": "/ˈhəŋɡɹi/",
     "pos": "adj",
     "meaning": "từ 'hungry' (adj)",
     "example": "Practice speaking 'hungry' clearly.",
@@ -14271,7 +14182,7 @@ export const vocabList = [
   {
     "id": 1296,
     "word": "hunt",
-    "ipa": "/hunt/",
+    "ipa": "/ˈhənt/",
     "pos": "v",
     "meaning": "từ 'hunt' (v)",
     "example": "Practice speaking 'hunt' clearly.",
@@ -14282,7 +14193,7 @@ export const vocabList = [
   {
     "id": 1297,
     "word": "hunting",
-    "ipa": "/hunting/",
+    "ipa": "/ˈhəntɪŋ/",
     "pos": "n",
     "meaning": "từ 'hunting' (n)",
     "example": "Practice speaking 'hunting' clearly.",
@@ -14293,7 +14204,7 @@ export const vocabList = [
   {
     "id": 1298,
     "word": "hurricane",
-    "ipa": "/hurricane/",
+    "ipa": "/ˈhəɹəˌkeɪnz/",
     "pos": "n",
     "meaning": "từ 'hurricane' (n)",
     "example": "Practice speaking 'hurricane' clearly.",
@@ -14304,7 +14215,7 @@ export const vocabList = [
   {
     "id": 1299,
     "word": "hurry",
-    "ipa": "/hurry/",
+    "ipa": "/ˈhɝi/",
     "pos": "n",
     "meaning": "từ 'hurry' (n)",
     "example": "Practice speaking 'hurry' clearly.",
@@ -14315,7 +14226,7 @@ export const vocabList = [
   {
     "id": 1300,
     "word": "hurt",
-    "ipa": "/hurt/",
+    "ipa": "/ˈhɝt/",
     "pos": "v",
     "meaning": "từ 'hurt' (v)",
     "example": "Practice speaking 'hurt' clearly.",
@@ -14326,7 +14237,7 @@ export const vocabList = [
   {
     "id": 1301,
     "word": "husband",
-    "ipa": "/husband/",
+    "ipa": "/ˈhəzbənd/",
     "pos": "n",
     "meaning": "từ 'husband' (n)",
     "example": "Practice speaking 'husband' clearly.",
@@ -14348,7 +14259,7 @@ export const vocabList = [
   {
     "id": 1303,
     "word": "ice",
-    "ipa": "/ice/",
+    "ipa": "/ˈaɪs/",
     "pos": "n",
     "meaning": "từ 'ice' (n)",
     "example": "Practice speaking 'ice' clearly.",
@@ -14359,7 +14270,7 @@ export const vocabList = [
   {
     "id": 1304,
     "word": "ice cream",
-    "ipa": "/ice cream/",
+    "ipa": "/ˈaɪs ˈkɹim/",
     "pos": "n",
     "meaning": "từ 'ice cream' (n)",
     "example": "Practice speaking 'ice cream' clearly.",
@@ -14370,7 +14281,7 @@ export const vocabList = [
   {
     "id": 1305,
     "word": "idea",
-    "ipa": "/idea/",
+    "ipa": "/aɪˈdiə/",
     "pos": "n",
     "meaning": "từ 'idea' (n)",
     "example": "Practice speaking 'idea' clearly.",
@@ -14381,7 +14292,7 @@ export const vocabList = [
   {
     "id": 1306,
     "word": "ideal",
-    "ipa": "/ideal/",
+    "ipa": "/aɪˈdiɫ/",
     "pos": "adj",
     "meaning": "từ 'ideal' (adj)",
     "example": "Practice speaking 'ideal' clearly.",
@@ -14392,7 +14303,7 @@ export const vocabList = [
   {
     "id": 1307,
     "word": "identify",
-    "ipa": "/identify/",
+    "ipa": "/aɪˈdɛntəˌfaɪ/",
     "pos": "v",
     "meaning": "từ 'identify' (v)",
     "example": "Practice speaking 'identify' clearly.",
@@ -14403,7 +14314,7 @@ export const vocabList = [
   {
     "id": 1308,
     "word": "identity",
-    "ipa": "/identity/",
+    "ipa": "/aɪˈdɛntɪˌti/",
     "pos": "n",
     "meaning": "từ 'identity' (n)",
     "example": "Practice speaking 'identity' clearly.",
@@ -14414,7 +14325,7 @@ export const vocabList = [
   {
     "id": 1309,
     "word": "if",
-    "ipa": "/if/",
+    "ipa": "/ˈɪf/",
     "pos": "conj",
     "meaning": "từ 'if' (conj)",
     "example": "Practice speaking 'if' clearly.",
@@ -14425,7 +14336,7 @@ export const vocabList = [
   {
     "id": 1310,
     "word": "ignore",
-    "ipa": "/ignore/",
+    "ipa": "/ˌɪɡˈnɔɹ/",
     "pos": "v",
     "meaning": "từ 'ignore' (v)",
     "example": "Practice speaking 'ignore' clearly.",
@@ -14436,7 +14347,7 @@ export const vocabList = [
   {
     "id": 1311,
     "word": "ill",
-    "ipa": "/ill/",
+    "ipa": "/ˈɪɫ/",
     "pos": "adj",
     "meaning": "từ 'ill' (adj)",
     "example": "Practice speaking 'ill' clearly.",
@@ -14447,7 +14358,7 @@ export const vocabList = [
   {
     "id": 1312,
     "word": "illegal",
-    "ipa": "/illegal/",
+    "ipa": "/ˌɪˈɫiɡəɫ/",
     "pos": "adj",
     "meaning": "từ 'illegal' (adj)",
     "example": "Practice speaking 'illegal' clearly.",
@@ -14458,7 +14369,7 @@ export const vocabList = [
   {
     "id": 1313,
     "word": "illness",
-    "ipa": "/illness/",
+    "ipa": "/ˈɪɫnəs/",
     "pos": "n",
     "meaning": "từ 'illness' (n)",
     "example": "Practice speaking 'illness' clearly.",
@@ -14469,7 +14380,7 @@ export const vocabList = [
   {
     "id": 1314,
     "word": "illustrate",
-    "ipa": "/illustrate/",
+    "ipa": "/ˈɪɫəˌstɹeɪt/",
     "pos": "v",
     "meaning": "từ 'illustrate' (v)",
     "example": "Practice speaking 'illustrate' clearly.",
@@ -14480,7 +14391,7 @@ export const vocabList = [
   {
     "id": 1315,
     "word": "illustration",
-    "ipa": "/illustration/",
+    "ipa": "/ˌɪɫəˈstɹeɪʃən/",
     "pos": "n",
     "meaning": "từ 'illustration' (n)",
     "example": "Practice speaking 'illustration' clearly.",
@@ -14491,7 +14402,7 @@ export const vocabList = [
   {
     "id": 1316,
     "word": "image",
-    "ipa": "/image/",
+    "ipa": "/ˈɪmədʒ/",
     "pos": "n",
     "meaning": "từ 'image' (n)",
     "example": "Practice speaking 'image' clearly.",
@@ -14502,7 +14413,7 @@ export const vocabList = [
   {
     "id": 1317,
     "word": "imaginary",
-    "ipa": "/imaginary/",
+    "ipa": "/ˌɪˈmædʒəˌnɛɹi/",
     "pos": "adj",
     "meaning": "từ 'imaginary' (adj)",
     "example": "Practice speaking 'imaginary' clearly.",
@@ -14513,7 +14424,7 @@ export const vocabList = [
   {
     "id": 1318,
     "word": "imagination",
-    "ipa": "/imagination/",
+    "ipa": "/ˌɪˌmædʒəˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'imagination' (n)",
     "example": "Practice speaking 'imagination' clearly.",
@@ -14524,7 +14435,7 @@ export const vocabList = [
   {
     "id": 1319,
     "word": "imagine",
-    "ipa": "/imagine/",
+    "ipa": "/ˌɪˈmædʒən/",
     "pos": "v",
     "meaning": "từ 'imagine' (v)",
     "example": "Practice speaking 'imagine' clearly.",
@@ -14535,7 +14446,7 @@ export const vocabList = [
   {
     "id": 1320,
     "word": "immediate",
-    "ipa": "/immediate/",
+    "ipa": "/ˌɪˈmiˌdiət/",
     "pos": "adj",
     "meaning": "từ 'immediate' (adj)",
     "example": "Practice speaking 'immediate' clearly.",
@@ -14546,7 +14457,7 @@ export const vocabList = [
   {
     "id": 1321,
     "word": "immediately",
-    "ipa": "/immediately/",
+    "ipa": "/ˌɪˈmiˌdiətɫi/",
     "pos": "adv",
     "meaning": "từ 'immediately' (adv)",
     "example": "Practice speaking 'immediately' clearly.",
@@ -14557,7 +14468,7 @@ export const vocabList = [
   {
     "id": 1322,
     "word": "immigrant",
-    "ipa": "/immigrant/",
+    "ipa": "/ˈɪməɡɹənt/",
     "pos": "n",
     "meaning": "từ 'immigrant' (n)",
     "example": "Practice speaking 'immigrant' clearly.",
@@ -14568,7 +14479,7 @@ export const vocabList = [
   {
     "id": 1323,
     "word": "impact",
-    "ipa": "/impact/",
+    "ipa": "/ˈɪmpækt/",
     "pos": "n",
     "meaning": "từ 'impact' (n)",
     "example": "Practice speaking 'impact' clearly.",
@@ -14579,7 +14490,7 @@ export const vocabList = [
   {
     "id": 1324,
     "word": "impatient",
-    "ipa": "/impatient/",
+    "ipa": "/ˌɪmˈpeɪʃənt/",
     "pos": "adj",
     "meaning": "từ 'impatient' (adj)",
     "example": "Practice speaking 'impatient' clearly.",
@@ -14590,7 +14501,7 @@ export const vocabList = [
   {
     "id": 1325,
     "word": "imply",
-    "ipa": "/imply/",
+    "ipa": "/ˌɪmˈpɫaɪ/",
     "pos": "v",
     "meaning": "từ 'imply' (v)",
     "example": "Practice speaking 'imply' clearly.",
@@ -14601,7 +14512,7 @@ export const vocabList = [
   {
     "id": 1326,
     "word": "import",
-    "ipa": "/import/",
+    "ipa": "/ˈɪmˌpɔɹt/",
     "pos": "n",
     "meaning": "từ 'import' (n)",
     "example": "Practice speaking 'import' clearly.",
@@ -14612,7 +14523,7 @@ export const vocabList = [
   {
     "id": 1327,
     "word": "importance",
-    "ipa": "/importance/",
+    "ipa": "/ˌɪmˈpɔɹtəns/",
     "pos": "n",
     "meaning": "từ 'importance' (n)",
     "example": "Practice speaking 'importance' clearly.",
@@ -14623,7 +14534,7 @@ export const vocabList = [
   {
     "id": 1328,
     "word": "important",
-    "ipa": "/important/",
+    "ipa": "/ˌɪmˈpɔɹtənt/",
     "pos": "adj",
     "meaning": "từ 'important' (adj)",
     "example": "Practice speaking 'important' clearly.",
@@ -14634,7 +14545,7 @@ export const vocabList = [
   {
     "id": 1329,
     "word": "impose",
-    "ipa": "/impose/",
+    "ipa": "/ˌɪmˈpoʊz/",
     "pos": "v",
     "meaning": "từ 'impose' (v)",
     "example": "Practice speaking 'impose' clearly.",
@@ -14645,7 +14556,7 @@ export const vocabList = [
   {
     "id": 1330,
     "word": "impossible",
-    "ipa": "/impossible/",
+    "ipa": "/ˌɪmˈpɑsəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'impossible' (adj)",
     "example": "Practice speaking 'impossible' clearly.",
@@ -14656,7 +14567,7 @@ export const vocabList = [
   {
     "id": 1331,
     "word": "impress",
-    "ipa": "/impress/",
+    "ipa": "/ˈɪmˌpɹɛs/",
     "pos": "v",
     "meaning": "từ 'impress' (v)",
     "example": "Practice speaking 'impress' clearly.",
@@ -14667,7 +14578,7 @@ export const vocabList = [
   {
     "id": 1332,
     "word": "impressed",
-    "ipa": "/impressed/",
+    "ipa": "/ˌɪmˈpɹɛst/",
     "pos": "adj",
     "meaning": "từ 'impressed' (adj)",
     "example": "Practice speaking 'impressed' clearly.",
@@ -14678,7 +14589,7 @@ export const vocabList = [
   {
     "id": 1333,
     "word": "impression",
-    "ipa": "/impression/",
+    "ipa": "/ˌɪmˈpɹɛʃən/",
     "pos": "n",
     "meaning": "từ 'impression' (n)",
     "example": "Practice speaking 'impression' clearly.",
@@ -14689,7 +14600,7 @@ export const vocabList = [
   {
     "id": 1334,
     "word": "impressive",
-    "ipa": "/impressive/",
+    "ipa": "/ˌɪmˈpɹɛsɪv/",
     "pos": "adj",
     "meaning": "từ 'impressive' (adj)",
     "example": "Practice speaking 'impressive' clearly.",
@@ -14700,7 +14611,7 @@ export const vocabList = [
   {
     "id": 1335,
     "word": "improve",
-    "ipa": "/improve/",
+    "ipa": "/ˌɪmˈpɹuv/",
     "pos": "v",
     "meaning": "từ 'improve' (v)",
     "example": "Practice speaking 'improve' clearly.",
@@ -14711,7 +14622,7 @@ export const vocabList = [
   {
     "id": 1336,
     "word": "improvement",
-    "ipa": "/improvement/",
+    "ipa": "/ˌɪmˈpɹuvmənt/",
     "pos": "n",
     "meaning": "từ 'improvement' (n)",
     "example": "Practice speaking 'improvement' clearly.",
@@ -14722,7 +14633,7 @@ export const vocabList = [
   {
     "id": 1337,
     "word": "in",
-    "ipa": "/in/",
+    "ipa": "/ˈɪn/",
     "pos": "prep",
     "meaning": "từ 'in' (prep)",
     "example": "Practice speaking 'in' clearly.",
@@ -14744,7 +14655,7 @@ export const vocabList = [
   {
     "id": 1339,
     "word": "incident",
-    "ipa": "/incident/",
+    "ipa": "/ˈɪnsədənt/",
     "pos": "n",
     "meaning": "từ 'incident' (n)",
     "example": "Practice speaking 'incident' clearly.",
@@ -14755,7 +14666,7 @@ export const vocabList = [
   {
     "id": 1340,
     "word": "include",
-    "ipa": "/include/",
+    "ipa": "/ˌɪnˈkɫud/",
     "pos": "v",
     "meaning": "từ 'include' (v)",
     "example": "Practice speaking 'include' clearly.",
@@ -14766,7 +14677,7 @@ export const vocabList = [
   {
     "id": 1341,
     "word": "included",
-    "ipa": "/included/",
+    "ipa": "/ˌɪnˈkɫudəd/",
     "pos": "adj",
     "meaning": "từ 'included' (adj)",
     "example": "Practice speaking 'included' clearly.",
@@ -14777,7 +14688,7 @@ export const vocabList = [
   {
     "id": 1342,
     "word": "including",
-    "ipa": "/including/",
+    "ipa": "/ˌɪnˈkɫudɪŋ/",
     "pos": "prep",
     "meaning": "từ 'including' (prep)",
     "example": "Practice speaking 'including' clearly.",
@@ -14788,7 +14699,7 @@ export const vocabList = [
   {
     "id": 1343,
     "word": "income",
-    "ipa": "/income/",
+    "ipa": "/ˈɪnˌkəm/",
     "pos": "n",
     "meaning": "từ 'income' (n)",
     "example": "Practice speaking 'income' clearly.",
@@ -14799,7 +14710,7 @@ export const vocabList = [
   {
     "id": 1344,
     "word": "increase",
-    "ipa": "/increase/",
+    "ipa": "/ˈɪnˌkɹis/",
     "pos": "v",
     "meaning": "từ 'increase' (v)",
     "example": "Practice speaking 'increase' clearly.",
@@ -14810,7 +14721,7 @@ export const vocabList = [
   {
     "id": 1345,
     "word": "increasingly",
-    "ipa": "/increasingly/",
+    "ipa": "/ɪnˈkɹisɪŋɡɫi/",
     "pos": "adv",
     "meaning": "từ 'increasingly' (adv)",
     "example": "Practice speaking 'increasingly' clearly.",
@@ -14821,7 +14732,7 @@ export const vocabList = [
   {
     "id": 1346,
     "word": "incredible",
-    "ipa": "/incredible/",
+    "ipa": "/ˌɪnˈkɹɛdəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'incredible' (adj)",
     "example": "Practice speaking 'incredible' clearly.",
@@ -14832,7 +14743,7 @@ export const vocabList = [
   {
     "id": 1347,
     "word": "incredibly",
-    "ipa": "/incredibly/",
+    "ipa": "/ˌɪnˈkɹɛdəbɫi/",
     "pos": "adv",
     "meaning": "từ 'incredibly' (adv)",
     "example": "Practice speaking 'incredibly' clearly.",
@@ -14854,7 +14765,7 @@ export const vocabList = [
   {
     "id": 1349,
     "word": "independent",
-    "ipa": "/independent/",
+    "ipa": "/ˌɪndɪˈpɛndənt/",
     "pos": "adj",
     "meaning": "từ 'independent' (adj)",
     "example": "Practice speaking 'independent' clearly.",
@@ -14865,7 +14776,7 @@ export const vocabList = [
   {
     "id": 1350,
     "word": "indicate",
-    "ipa": "/indicate/",
+    "ipa": "/ˈɪndəˌkeɪt/",
     "pos": "v",
     "meaning": "từ 'indicate' (v)",
     "example": "Practice speaking 'indicate' clearly.",
@@ -14876,7 +14787,7 @@ export const vocabList = [
   {
     "id": 1351,
     "word": "indirect",
-    "ipa": "/indirect/",
+    "ipa": "/ˌɪndɝˈɛkt/",
     "pos": "adj",
     "meaning": "từ 'indirect' (adj)",
     "example": "Practice speaking 'indirect' clearly.",
@@ -14887,7 +14798,7 @@ export const vocabList = [
   {
     "id": 1352,
     "word": "individual",
-    "ipa": "/individual/",
+    "ipa": "/ˌɪndəˈvɪdʒəwəɫ/",
     "pos": "n",
     "meaning": "từ 'individual' (n)",
     "example": "Practice speaking 'individual' clearly.",
@@ -14920,7 +14831,7 @@ export const vocabList = [
   {
     "id": 1355,
     "word": "industrial",
-    "ipa": "/industrial/",
+    "ipa": "/ˌɪnˈdəstɹiəɫ/",
     "pos": "adj",
     "meaning": "từ 'industrial' (adj)",
     "example": "Practice speaking 'industrial' clearly.",
@@ -14931,7 +14842,7 @@ export const vocabList = [
   {
     "id": 1356,
     "word": "industry",
-    "ipa": "/industry/",
+    "ipa": "/ˈɪndəstɹi/",
     "pos": "n",
     "meaning": "từ 'industry' (n)",
     "example": "Practice speaking 'industry' clearly.",
@@ -14942,7 +14853,7 @@ export const vocabList = [
   {
     "id": 1357,
     "word": "infection",
-    "ipa": "/infection/",
+    "ipa": "/ˌɪnˈfɛkʃən/",
     "pos": "n",
     "meaning": "từ 'infection' (n)",
     "example": "Practice speaking 'infection' clearly.",
@@ -14953,7 +14864,7 @@ export const vocabList = [
   {
     "id": 1358,
     "word": "influence",
-    "ipa": "/influence/",
+    "ipa": "/ˈɪnfɫuəns/",
     "pos": "n",
     "meaning": "từ 'influence' (n)",
     "example": "Practice speaking 'influence' clearly.",
@@ -14964,7 +14875,7 @@ export const vocabList = [
   {
     "id": 1359,
     "word": "inform",
-    "ipa": "/inform/",
+    "ipa": "/ˌɪnˈfɔɹm/",
     "pos": "v",
     "meaning": "từ 'inform' (v)",
     "example": "Practice speaking 'inform' clearly.",
@@ -14975,7 +14886,7 @@ export const vocabList = [
   {
     "id": 1360,
     "word": "informal",
-    "ipa": "/informal/",
+    "ipa": "/ˌɪnˈfɔɹməɫ/",
     "pos": "adj",
     "meaning": "từ 'informal' (adj)",
     "example": "Practice speaking 'informal' clearly.",
@@ -14986,7 +14897,7 @@ export const vocabList = [
   {
     "id": 1361,
     "word": "information",
-    "ipa": "/information/",
+    "ipa": "/ˌɪnfɝˈmeɪʃən/",
     "pos": "n",
     "meaning": "từ 'information' (n)",
     "example": "Practice speaking 'information' clearly.",
@@ -14997,7 +14908,7 @@ export const vocabList = [
   {
     "id": 1362,
     "word": "ingredient",
-    "ipa": "/ingredient/",
+    "ipa": "/ˌɪnˈɡɹidiənt/",
     "pos": "n",
     "meaning": "từ 'ingredient' (n)",
     "example": "Practice speaking 'ingredient' clearly.",
@@ -15008,7 +14919,7 @@ export const vocabList = [
   {
     "id": 1363,
     "word": "initial",
-    "ipa": "/initial/",
+    "ipa": "/ˌɪˈnɪʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'initial' (adj)",
     "example": "Practice speaking 'initial' clearly.",
@@ -15019,7 +14930,7 @@ export const vocabList = [
   {
     "id": 1364,
     "word": "initially",
-    "ipa": "/initially/",
+    "ipa": "/ˌɪˈnɪʃəɫi/",
     "pos": "adv",
     "meaning": "từ 'initially' (adv)",
     "example": "Practice speaking 'initially' clearly.",
@@ -15030,7 +14941,7 @@ export const vocabList = [
   {
     "id": 1365,
     "word": "initiative",
-    "ipa": "/initiative/",
+    "ipa": "/ˌɪˈnɪʃətɪv/",
     "pos": "n",
     "meaning": "từ 'initiative' (n)",
     "example": "Practice speaking 'initiative' clearly.",
@@ -15041,7 +14952,7 @@ export const vocabList = [
   {
     "id": 1366,
     "word": "injure",
-    "ipa": "/injure/",
+    "ipa": "/ˈɪndʒɝ/",
     "pos": "v",
     "meaning": "từ 'injure' (v)",
     "example": "Practice speaking 'injure' clearly.",
@@ -15052,7 +14963,7 @@ export const vocabList = [
   {
     "id": 1367,
     "word": "injured",
-    "ipa": "/injured/",
+    "ipa": "/ˈɪndʒɝd/",
     "pos": "adj",
     "meaning": "từ 'injured' (adj)",
     "example": "Practice speaking 'injured' clearly.",
@@ -15063,7 +14974,7 @@ export const vocabList = [
   {
     "id": 1368,
     "word": "injury",
-    "ipa": "/injury/",
+    "ipa": "/ˈɪndʒɝi/",
     "pos": "n",
     "meaning": "từ 'injury' (n)",
     "example": "Practice speaking 'injury' clearly.",
@@ -15074,7 +14985,7 @@ export const vocabList = [
   {
     "id": 1369,
     "word": "inner",
-    "ipa": "/inner/",
+    "ipa": "/ˈɪnɝ/",
     "pos": "adj",
     "meaning": "từ 'inner' (adj)",
     "example": "Practice speaking 'inner' clearly.",
@@ -15085,7 +14996,7 @@ export const vocabList = [
   {
     "id": 1370,
     "word": "innocent",
-    "ipa": "/innocent/",
+    "ipa": "/ˈɪnəsənt/",
     "pos": "adj",
     "meaning": "từ 'innocent' (adj)",
     "example": "Practice speaking 'innocent' clearly.",
@@ -15096,7 +15007,7 @@ export const vocabList = [
   {
     "id": 1371,
     "word": "insect",
-    "ipa": "/insect/",
+    "ipa": "/ˈɪnˌsɛkt/",
     "pos": "n",
     "meaning": "từ 'insect' (n)",
     "example": "Practice speaking 'insect' clearly.",
@@ -15107,7 +15018,7 @@ export const vocabList = [
   {
     "id": 1372,
     "word": "inside",
-    "ipa": "/inside/",
+    "ipa": "/ˈɪnˌsaɪd/",
     "pos": "prep",
     "meaning": "từ 'inside' (prep)",
     "example": "Practice speaking 'inside' clearly.",
@@ -15118,7 +15029,7 @@ export const vocabList = [
   {
     "id": 1373,
     "word": "insight",
-    "ipa": "/insight/",
+    "ipa": "/ˈɪnˌsaɪt/",
     "pos": "n",
     "meaning": "từ 'insight' (n)",
     "example": "Practice speaking 'insight' clearly.",
@@ -15129,7 +15040,7 @@ export const vocabList = [
   {
     "id": 1374,
     "word": "insist",
-    "ipa": "/insist/",
+    "ipa": "/ˌɪnˈsɪst/",
     "pos": "v",
     "meaning": "từ 'insist' (v)",
     "example": "Practice speaking 'insist' clearly.",
@@ -15140,7 +15051,7 @@ export const vocabList = [
   {
     "id": 1375,
     "word": "inspire",
-    "ipa": "/inspire/",
+    "ipa": "/ˌɪnˈspaɪɹ/",
     "pos": "v",
     "meaning": "từ 'inspire' (v)",
     "example": "Practice speaking 'inspire' clearly.",
@@ -15151,7 +15062,7 @@ export const vocabList = [
   {
     "id": 1376,
     "word": "install",
-    "ipa": "/install/",
+    "ipa": "/ˌɪnˈstɔɫ/",
     "pos": "v",
     "meaning": "từ 'install' (v)",
     "example": "Practice speaking 'install' clearly.",
@@ -15162,7 +15073,7 @@ export const vocabList = [
   {
     "id": 1377,
     "word": "instance",
-    "ipa": "/instance/",
+    "ipa": "/ˈɪnstəns/",
     "pos": "n",
     "meaning": "từ 'instance' (n)",
     "example": "Practice speaking 'instance' clearly.",
@@ -15173,7 +15084,7 @@ export const vocabList = [
   {
     "id": 1378,
     "word": "instead",
-    "ipa": "/instead/",
+    "ipa": "/ˌɪnˈstɛd/",
     "pos": "adv",
     "meaning": "từ 'instead' (adv)",
     "example": "Practice speaking 'instead' clearly.",
@@ -15184,7 +15095,7 @@ export const vocabList = [
   {
     "id": 1379,
     "word": "institute",
-    "ipa": "/institute/",
+    "ipa": "/ˈɪnstəˌtut/",
     "pos": "n",
     "meaning": "từ 'institute' (n)",
     "example": "Practice speaking 'institute' clearly.",
@@ -15195,7 +15106,7 @@ export const vocabList = [
   {
     "id": 1380,
     "word": "institution",
-    "ipa": "/institution/",
+    "ipa": "/ˌɪnstɪˈtuʃən/",
     "pos": "n",
     "meaning": "từ 'institution' (n)",
     "example": "Practice speaking 'institution' clearly.",
@@ -15206,7 +15117,7 @@ export const vocabList = [
   {
     "id": 1381,
     "word": "instruction",
-    "ipa": "/instruction/",
+    "ipa": "/ˌɪnˈstɹəkʃən/",
     "pos": "n",
     "meaning": "từ 'instruction' (n)",
     "example": "Practice speaking 'instruction' clearly.",
@@ -15217,7 +15128,7 @@ export const vocabList = [
   {
     "id": 1382,
     "word": "instructor",
-    "ipa": "/instructor/",
+    "ipa": "/ˌɪnˈstɹəktɝ/",
     "pos": "n",
     "meaning": "từ 'instructor' (n)",
     "example": "Practice speaking 'instructor' clearly.",
@@ -15228,7 +15139,7 @@ export const vocabList = [
   {
     "id": 1383,
     "word": "instrument",
-    "ipa": "/instrument/",
+    "ipa": "/ˈɪnstɹəmənt/",
     "pos": "n",
     "meaning": "từ 'instrument' (n)",
     "example": "Practice speaking 'instrument' clearly.",
@@ -15239,7 +15150,7 @@ export const vocabList = [
   {
     "id": 1384,
     "word": "insurance",
-    "ipa": "/insurance/",
+    "ipa": "/ˌɪnˈʃʊɹəns/",
     "pos": "n",
     "meaning": "từ 'insurance' (n)",
     "example": "Practice speaking 'insurance' clearly.",
@@ -15250,7 +15161,7 @@ export const vocabList = [
   {
     "id": 1385,
     "word": "intelligence",
-    "ipa": "/intelligence/",
+    "ipa": "/ˌɪnˈtɛɫədʒəns/",
     "pos": "n",
     "meaning": "từ 'intelligence' (n)",
     "example": "Practice speaking 'intelligence' clearly.",
@@ -15261,7 +15172,7 @@ export const vocabList = [
   {
     "id": 1386,
     "word": "intelligent",
-    "ipa": "/intelligent/",
+    "ipa": "/ˌɪnˈtɛɫədʒənt/",
     "pos": "adj",
     "meaning": "từ 'intelligent' (adj)",
     "example": "Practice speaking 'intelligent' clearly.",
@@ -15272,7 +15183,7 @@ export const vocabList = [
   {
     "id": 1387,
     "word": "intend",
-    "ipa": "/intend/",
+    "ipa": "/ˌɪnˈtɛnd/",
     "pos": "v",
     "meaning": "từ 'intend' (v)",
     "example": "Practice speaking 'intend' clearly.",
@@ -15283,7 +15194,7 @@ export const vocabList = [
   {
     "id": 1388,
     "word": "intended",
-    "ipa": "/intended/",
+    "ipa": "/ˌɪnˈtɛndɪd/",
     "pos": "adj",
     "meaning": "từ 'intended' (adj)",
     "example": "Practice speaking 'intended' clearly.",
@@ -15294,7 +15205,7 @@ export const vocabList = [
   {
     "id": 1389,
     "word": "intense",
-    "ipa": "/intense/",
+    "ipa": "/ˌɪnˈtɛns/",
     "pos": "adj",
     "meaning": "từ 'intense' (adj)",
     "example": "Practice speaking 'intense' clearly.",
@@ -15305,7 +15216,7 @@ export const vocabList = [
   {
     "id": 1390,
     "word": "intention",
-    "ipa": "/intention/",
+    "ipa": "/ˌɪnˈtɛntʃən/",
     "pos": "n",
     "meaning": "từ 'intention' (n)",
     "example": "Practice speaking 'intention' clearly.",
@@ -15316,7 +15227,7 @@ export const vocabList = [
   {
     "id": 1391,
     "word": "interest",
-    "ipa": "/interest/",
+    "ipa": "/ˈɪntɝəst/",
     "pos": "n",
     "meaning": "từ 'interest' (n)",
     "example": "Practice speaking 'interest' clearly.",
@@ -15327,7 +15238,7 @@ export const vocabList = [
   {
     "id": 1392,
     "word": "interested",
-    "ipa": "/interested/",
+    "ipa": "/ˈɪntɝəstəd/",
     "pos": "adj",
     "meaning": "từ 'interested' (adj)",
     "example": "Practice speaking 'interested' clearly.",
@@ -15338,7 +15249,7 @@ export const vocabList = [
   {
     "id": 1393,
     "word": "interesting",
-    "ipa": "/interesting/",
+    "ipa": "/ˈɪntɝəstɪŋ/",
     "pos": "adj",
     "meaning": "từ 'interesting' (adj)",
     "example": "Practice speaking 'interesting' clearly.",
@@ -15349,7 +15260,7 @@ export const vocabList = [
   {
     "id": 1394,
     "word": "internal",
-    "ipa": "/internal/",
+    "ipa": "/ˌɪnˈtɝnəɫ/",
     "pos": "adj",
     "meaning": "từ 'internal' (adj)",
     "example": "Practice speaking 'internal' clearly.",
@@ -15360,7 +15271,7 @@ export const vocabList = [
   {
     "id": 1395,
     "word": "international",
-    "ipa": "/international/",
+    "ipa": "/ˌɪnɝˈnæʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'international' (adj)",
     "example": "Practice speaking 'international' clearly.",
@@ -15371,7 +15282,7 @@ export const vocabList = [
   {
     "id": 1396,
     "word": "internet",
-    "ipa": "/internet/",
+    "ipa": "/ˈɪntɝˌnɛt/",
     "pos": "n",
     "meaning": "từ 'internet' (n)",
     "example": "Practice speaking 'internet' clearly.",
@@ -15382,7 +15293,7 @@ export const vocabList = [
   {
     "id": 1397,
     "word": "interpret",
-    "ipa": "/interpret/",
+    "ipa": "/ˌɪnˈtɝpɹət/",
     "pos": "v",
     "meaning": "từ 'interpret' (v)",
     "example": "Practice speaking 'interpret' clearly.",
@@ -15393,7 +15304,7 @@ export const vocabList = [
   {
     "id": 1398,
     "word": "interrupt",
-    "ipa": "/interrupt/",
+    "ipa": "/ˌɪntɝˈəpt/",
     "pos": "v",
     "meaning": "từ 'interrupt' (v)",
     "example": "Practice speaking 'interrupt' clearly.",
@@ -15404,7 +15315,7 @@ export const vocabList = [
   {
     "id": 1399,
     "word": "interview",
-    "ipa": "/interview/",
+    "ipa": "/ˈɪntɝvˌju/",
     "pos": "n",
     "meaning": "từ 'interview' (n)",
     "example": "Practice speaking 'interview' clearly.",
@@ -15415,7 +15326,7 @@ export const vocabList = [
   {
     "id": 1400,
     "word": "into",
-    "ipa": "/into/",
+    "ipa": "/ˈɪntu/",
     "pos": "prep",
     "meaning": "từ 'into' (prep)",
     "example": "Practice speaking 'into' clearly.",
@@ -15426,7 +15337,7 @@ export const vocabList = [
   {
     "id": 1401,
     "word": "introduce",
-    "ipa": "/introduce/",
+    "ipa": "/ˌɪntɹəˈdus/",
     "pos": "v",
     "meaning": "từ 'introduce' (v)",
     "example": "Practice speaking 'introduce' clearly.",
@@ -15437,7 +15348,7 @@ export const vocabList = [
   {
     "id": 1402,
     "word": "introduction",
-    "ipa": "/introduction/",
+    "ipa": "/ˌɪntɹəˈdəkʃən/",
     "pos": "n",
     "meaning": "từ 'introduction' (n)",
     "example": "Practice speaking 'introduction' clearly.",
@@ -15448,7 +15359,7 @@ export const vocabList = [
   {
     "id": 1403,
     "word": "invent",
-    "ipa": "/invent/",
+    "ipa": "/ˌɪnˈvɛnt/",
     "pos": "v",
     "meaning": "từ 'invent' (v)",
     "example": "Practice speaking 'invent' clearly.",
@@ -15459,7 +15370,7 @@ export const vocabList = [
   {
     "id": 1404,
     "word": "invention",
-    "ipa": "/invention/",
+    "ipa": "/ˌɪnˈvɛnʃən/",
     "pos": "n",
     "meaning": "từ 'invention' (n)",
     "example": "Practice speaking 'invention' clearly.",
@@ -15470,7 +15381,7 @@ export const vocabList = [
   {
     "id": 1405,
     "word": "invest",
-    "ipa": "/invest/",
+    "ipa": "/ˌɪnˈvɛst/",
     "pos": "v",
     "meaning": "từ 'invest' (v)",
     "example": "Practice speaking 'invest' clearly.",
@@ -15481,7 +15392,7 @@ export const vocabList = [
   {
     "id": 1406,
     "word": "investigate",
-    "ipa": "/investigate/",
+    "ipa": "/ˌɪnˈvɛstəˌɡeɪt/",
     "pos": "v",
     "meaning": "từ 'investigate' (v)",
     "example": "Practice speaking 'investigate' clearly.",
@@ -15492,7 +15403,7 @@ export const vocabList = [
   {
     "id": 1407,
     "word": "investigation",
-    "ipa": "/investigation/",
+    "ipa": "/ˌɪnˌvɛstəˈɡeɪʃən/",
     "pos": "n",
     "meaning": "từ 'investigation' (n)",
     "example": "Practice speaking 'investigation' clearly.",
@@ -15503,7 +15414,7 @@ export const vocabList = [
   {
     "id": 1408,
     "word": "investment",
-    "ipa": "/investment/",
+    "ipa": "/ˌɪnˈvɛsmənt/",
     "pos": "n",
     "meaning": "từ 'investment' (n)",
     "example": "Practice speaking 'investment' clearly.",
@@ -15514,7 +15425,7 @@ export const vocabList = [
   {
     "id": 1409,
     "word": "invitation",
-    "ipa": "/invitation/",
+    "ipa": "/ˌɪnvɪˈteɪʃən/",
     "pos": "n",
     "meaning": "từ 'invitation' (n)",
     "example": "Practice speaking 'invitation' clearly.",
@@ -15525,7 +15436,7 @@ export const vocabList = [
   {
     "id": 1410,
     "word": "invite",
-    "ipa": "/invite/",
+    "ipa": "/ˌɪnˈvaɪt/",
     "pos": "v",
     "meaning": "từ 'invite' (v)",
     "example": "Practice speaking 'invite' clearly.",
@@ -15536,7 +15447,7 @@ export const vocabList = [
   {
     "id": 1411,
     "word": "involve",
-    "ipa": "/involve/",
+    "ipa": "/ˌɪnˈvɑɫv/",
     "pos": "v",
     "meaning": "từ 'involve' (v)",
     "example": "Practice speaking 'involve' clearly.",
@@ -15547,7 +15458,7 @@ export const vocabList = [
   {
     "id": 1412,
     "word": "involved",
-    "ipa": "/involved/",
+    "ipa": "/ˌɪnˈvɑɫvd/",
     "pos": "adj",
     "meaning": "từ 'involved' (adj)",
     "example": "Practice speaking 'involved' clearly.",
@@ -15558,7 +15469,7 @@ export const vocabList = [
   {
     "id": 1413,
     "word": "iron",
-    "ipa": "/iron/",
+    "ipa": "/ˈaɪɝn/",
     "pos": "n",
     "meaning": "từ 'iron' (n)",
     "example": "Practice speaking 'iron' clearly.",
@@ -15569,7 +15480,7 @@ export const vocabList = [
   {
     "id": 1414,
     "word": "island",
-    "ipa": "/island/",
+    "ipa": "/ˈaɪɫənd/",
     "pos": "n",
     "meaning": "từ 'island' (n)",
     "example": "Practice speaking 'island' clearly.",
@@ -15580,7 +15491,7 @@ export const vocabList = [
   {
     "id": 1415,
     "word": "issue",
-    "ipa": "/issue/",
+    "ipa": "/ˈɪʃu/",
     "pos": "n",
     "meaning": "từ 'issue' (n)",
     "example": "Practice speaking 'issue' clearly.",
@@ -15600,20 +15511,9 @@ export const vocabList = [
     "topic": "Thời tiết & Thiên nhiên"
   },
   {
-    "id": 1417,
-    "word": "it",
-    "ipa": "/ɪt/",
-    "pos": "pron",
-    "meaning": "nó (sự vật)",
-    "example": "It is a sunny day.",
-    "exampleVi": "Đó là một ngày nắng đẹp.",
-    "level": "A1",
-    "topic": "Thời tiết & Thiên nhiên"
-  },
-  {
     "id": 1418,
     "word": "item",
-    "ipa": "/item/",
+    "ipa": "/ˈaɪtəm/",
     "pos": "n",
     "meaning": "từ 'item' (n)",
     "example": "Practice speaking 'item' clearly.",
@@ -15635,7 +15535,7 @@ export const vocabList = [
   {
     "id": 1420,
     "word": "itself",
-    "ipa": "/itself/",
+    "ipa": "/ˌɪtˈsɛɫf/",
     "pos": "pron",
     "meaning": "từ 'itself' (pron)",
     "example": "Practice speaking 'itself' clearly.",
@@ -15646,7 +15546,7 @@ export const vocabList = [
   {
     "id": 1421,
     "word": "jacket",
-    "ipa": "/jacket/",
+    "ipa": "/ˈdʒækət/",
     "pos": "n",
     "meaning": "từ 'jacket' (n)",
     "example": "Practice speaking 'jacket' clearly.",
@@ -15657,7 +15557,7 @@ export const vocabList = [
   {
     "id": 1422,
     "word": "jam",
-    "ipa": "/jam/",
+    "ipa": "/ˈdʒæm/",
     "pos": "n",
     "meaning": "từ 'jam' (n)",
     "example": "Practice speaking 'jam' clearly.",
@@ -15668,7 +15568,7 @@ export const vocabList = [
   {
     "id": 1423,
     "word": "january",
-    "ipa": "/january/",
+    "ipa": "/ˈdʒænjuˌɛɹi/",
     "pos": "n",
     "meaning": "từ 'january' (n)",
     "example": "Practice speaking 'january' clearly.",
@@ -15679,7 +15579,7 @@ export const vocabList = [
   {
     "id": 1424,
     "word": "jazz",
-    "ipa": "/jazz/",
+    "ipa": "/ˈdʒæz/",
     "pos": "n",
     "meaning": "từ 'jazz' (n)",
     "example": "Practice speaking 'jazz' clearly.",
@@ -15690,7 +15590,7 @@ export const vocabList = [
   {
     "id": 1425,
     "word": "jeans",
-    "ipa": "/jeans/",
+    "ipa": "/ˈdʒinz/",
     "pos": "n",
     "meaning": "từ 'jeans' (n)",
     "example": "Practice speaking 'jeans' clearly.",
@@ -15701,7 +15601,7 @@ export const vocabList = [
   {
     "id": 1426,
     "word": "jewellery",
-    "ipa": "/jewellery/",
+    "ipa": "/dʒˈuːələɹi/",
     "pos": "n",
     "meaning": "từ 'jewellery' (n)",
     "example": "Practice speaking 'jewellery' clearly.",
@@ -15712,7 +15612,7 @@ export const vocabList = [
   {
     "id": 1427,
     "word": "job",
-    "ipa": "/job/",
+    "ipa": "/ˈdʒɑb/",
     "pos": "n",
     "meaning": "từ 'job' (n)",
     "example": "Practice speaking 'job' clearly.",
@@ -15723,7 +15623,7 @@ export const vocabList = [
   {
     "id": 1428,
     "word": "join",
-    "ipa": "/join/",
+    "ipa": "/ˈdʒɔɪn/",
     "pos": "v",
     "meaning": "từ 'join' (v)",
     "example": "Practice speaking 'join' clearly.",
@@ -15734,7 +15634,7 @@ export const vocabList = [
   {
     "id": 1429,
     "word": "joke",
-    "ipa": "/joke/",
+    "ipa": "/ˈdʒoʊk/",
     "pos": "n",
     "meaning": "từ 'joke' (n)",
     "example": "Practice speaking 'joke' clearly.",
@@ -15745,7 +15645,7 @@ export const vocabList = [
   {
     "id": 1430,
     "word": "journal",
-    "ipa": "/journal/",
+    "ipa": "/ˈdʒɝnəɫ/",
     "pos": "n",
     "meaning": "từ 'journal' (n)",
     "example": "Practice speaking 'journal' clearly.",
@@ -15756,7 +15656,7 @@ export const vocabList = [
   {
     "id": 1431,
     "word": "journalist",
-    "ipa": "/journalist/",
+    "ipa": "/ˈdʒɝnəɫəst/",
     "pos": "n",
     "meaning": "từ 'journalist' (n)",
     "example": "Practice speaking 'journalist' clearly.",
@@ -15767,7 +15667,7 @@ export const vocabList = [
   {
     "id": 1432,
     "word": "journey",
-    "ipa": "/journey/",
+    "ipa": "/ˈdʒɝni/",
     "pos": "n",
     "meaning": "từ 'journey' (n)",
     "example": "Practice speaking 'journey' clearly.",
@@ -15778,7 +15678,7 @@ export const vocabList = [
   {
     "id": 1433,
     "word": "joy",
-    "ipa": "/joy/",
+    "ipa": "/ˈdʒɔɪ/",
     "pos": "n",
     "meaning": "từ 'joy' (n)",
     "example": "Practice speaking 'joy' clearly.",
@@ -15789,7 +15689,7 @@ export const vocabList = [
   {
     "id": 1434,
     "word": "judge",
-    "ipa": "/judge/",
+    "ipa": "/ˈdʒədʒ/",
     "pos": "n",
     "meaning": "từ 'judge' (n)",
     "example": "Practice speaking 'judge' clearly.",
@@ -15800,7 +15700,7 @@ export const vocabList = [
   {
     "id": 1435,
     "word": "judgement",
-    "ipa": "/judgement/",
+    "ipa": "/ˈdʒədʒmənt/",
     "pos": "n",
     "meaning": "từ 'judgement' (n)",
     "example": "Practice speaking 'judgement' clearly.",
@@ -15811,7 +15711,7 @@ export const vocabList = [
   {
     "id": 1436,
     "word": "juice",
-    "ipa": "/juice/",
+    "ipa": "/ˈdʒus/",
     "pos": "n",
     "meaning": "từ 'juice' (n)",
     "example": "Practice speaking 'juice' clearly.",
@@ -15822,7 +15722,7 @@ export const vocabList = [
   {
     "id": 1437,
     "word": "july",
-    "ipa": "/july/",
+    "ipa": "/ˌdʒuˈɫaɪ/",
     "pos": "n",
     "meaning": "từ 'july' (n)",
     "example": "Practice speaking 'july' clearly.",
@@ -15833,7 +15733,7 @@ export const vocabList = [
   {
     "id": 1438,
     "word": "jump",
-    "ipa": "/jump/",
+    "ipa": "/ˈdʒəmp/",
     "pos": "v",
     "meaning": "từ 'jump' (v)",
     "example": "Practice speaking 'jump' clearly.",
@@ -15844,7 +15744,7 @@ export const vocabList = [
   {
     "id": 1439,
     "word": "june",
-    "ipa": "/june/",
+    "ipa": "/ˈdʒun/",
     "pos": "n",
     "meaning": "từ 'june' (n)",
     "example": "Practice speaking 'june' clearly.",
@@ -15855,7 +15755,7 @@ export const vocabList = [
   {
     "id": 1440,
     "word": "junior",
-    "ipa": "/junior/",
+    "ipa": "/ˈdʒunjɝ/",
     "pos": "adj",
     "meaning": "từ 'junior' (adj)",
     "example": "Practice speaking 'junior' clearly.",
@@ -15866,7 +15766,7 @@ export const vocabList = [
   {
     "id": 1441,
     "word": "just",
-    "ipa": "/just/",
+    "ipa": "/ˈdʒəst/",
     "pos": "adv",
     "meaning": "từ 'just' (adv)",
     "example": "Practice speaking 'just' clearly.",
@@ -15877,7 +15777,7 @@ export const vocabList = [
   {
     "id": 1442,
     "word": "justice",
-    "ipa": "/justice/",
+    "ipa": "/ˈdʒəstəs/",
     "pos": "n",
     "meaning": "từ 'justice' (n)",
     "example": "Practice speaking 'justice' clearly.",
@@ -15888,7 +15788,7 @@ export const vocabList = [
   {
     "id": 1443,
     "word": "justify",
-    "ipa": "/justify/",
+    "ipa": "/ˈdʒəstəˌfaɪ/",
     "pos": "v",
     "meaning": "từ 'justify' (v)",
     "example": "Practice speaking 'justify' clearly.",
@@ -15921,7 +15821,7 @@ export const vocabList = [
   {
     "id": 1446,
     "word": "key",
-    "ipa": "/key/",
+    "ipa": "/ˈki/",
     "pos": "n",
     "meaning": "từ 'key' (n)",
     "example": "Practice speaking 'key' clearly.",
@@ -15932,7 +15832,7 @@ export const vocabList = [
   {
     "id": 1447,
     "word": "keyboard",
-    "ipa": "/keyboard/",
+    "ipa": "/ˈkiˌbɔɹd/",
     "pos": "n",
     "meaning": "từ 'keyboard' (n)",
     "example": "Practice speaking 'keyboard' clearly.",
@@ -15943,7 +15843,7 @@ export const vocabList = [
   {
     "id": 1448,
     "word": "kick",
-    "ipa": "/kick/",
+    "ipa": "/ˈkɪk/",
     "pos": "v",
     "meaning": "từ 'kick' (v)",
     "example": "Practice speaking 'kick' clearly.",
@@ -15954,7 +15854,7 @@ export const vocabList = [
   {
     "id": 1449,
     "word": "kid",
-    "ipa": "/kid/",
+    "ipa": "/ˈkɪd/",
     "pos": "n",
     "meaning": "từ 'kid' (n)",
     "example": "Practice speaking 'kid' clearly.",
@@ -15965,7 +15865,7 @@ export const vocabList = [
   {
     "id": 1450,
     "word": "kill",
-    "ipa": "/kill/",
+    "ipa": "/ˈkɪɫ/",
     "pos": "v",
     "meaning": "từ 'kill' (v)",
     "example": "Practice speaking 'kill' clearly.",
@@ -15976,7 +15876,7 @@ export const vocabList = [
   {
     "id": 1451,
     "word": "killing",
-    "ipa": "/killing/",
+    "ipa": "/ˈkɪɫɪŋ/",
     "pos": "n",
     "meaning": "từ 'killing' (n)",
     "example": "Practice speaking 'killing' clearly.",
@@ -15987,7 +15887,7 @@ export const vocabList = [
   {
     "id": 1452,
     "word": "kilometre",
-    "ipa": "/kilometre/",
+    "ipa": "/ˌkɪˈɫɔˌmətɝ/",
     "pos": "n",
     "meaning": "từ 'kilometre' (n)",
     "example": "Practice speaking 'kilometre' clearly.",
@@ -15998,7 +15898,7 @@ export const vocabList = [
   {
     "id": 1453,
     "word": "kind",
-    "ipa": "/kind/",
+    "ipa": "/ˈkaɪnd/",
     "pos": "context",
     "meaning": "từ 'kind' (context)",
     "example": "Practice speaking 'kind' clearly.",
@@ -16009,7 +15909,7 @@ export const vocabList = [
   {
     "id": 1454,
     "word": "king",
-    "ipa": "/king/",
+    "ipa": "/ˈkɪŋ/",
     "pos": "n",
     "meaning": "từ 'king' (n)",
     "example": "Practice speaking 'king' clearly.",
@@ -16020,7 +15920,7 @@ export const vocabList = [
   {
     "id": 1455,
     "word": "kiss",
-    "ipa": "/kiss/",
+    "ipa": "/ˈkɪs/",
     "pos": "v",
     "meaning": "từ 'kiss' (v)",
     "example": "Practice speaking 'kiss' clearly.",
@@ -16053,7 +15953,7 @@ export const vocabList = [
   {
     "id": 1458,
     "word": "knife",
-    "ipa": "/knife/",
+    "ipa": "/ˈnaɪf/",
     "pos": "n",
     "meaning": "từ 'knife' (n)",
     "example": "Practice speaking 'knife' clearly.",
@@ -16064,7 +15964,7 @@ export const vocabList = [
   {
     "id": 1459,
     "word": "knock",
-    "ipa": "/knock/",
+    "ipa": "/ˈnɑk/",
     "pos": "v",
     "meaning": "từ 'knock' (v)",
     "example": "Practice speaking 'knock' clearly.",
@@ -16086,7 +15986,7 @@ export const vocabList = [
   {
     "id": 1461,
     "word": "knowledge",
-    "ipa": "/knowledge/",
+    "ipa": "/ˈnɑɫədʒ/",
     "pos": "n",
     "meaning": "từ 'knowledge' (n)",
     "example": "Practice speaking 'knowledge' clearly.",
@@ -16097,7 +15997,7 @@ export const vocabList = [
   {
     "id": 1462,
     "word": "lab",
-    "ipa": "/lab/",
+    "ipa": "/ˈɫæb/",
     "pos": "n",
     "meaning": "từ 'lab' (n)",
     "example": "Practice speaking 'lab' clearly.",
@@ -16108,7 +16008,7 @@ export const vocabList = [
   {
     "id": 1463,
     "word": "label",
-    "ipa": "/label/",
+    "ipa": "/ˈɫeɪbəɫ/",
     "pos": "n",
     "meaning": "từ 'label' (n)",
     "example": "Practice speaking 'label' clearly.",
@@ -16119,7 +16019,7 @@ export const vocabList = [
   {
     "id": 1464,
     "word": "laboratory",
-    "ipa": "/laboratory/",
+    "ipa": "/ˈɫæbɹəˌtɔɹi/",
     "pos": "n",
     "meaning": "từ 'laboratory' (n)",
     "example": "Practice speaking 'laboratory' clearly.",
@@ -16130,7 +16030,7 @@ export const vocabList = [
   {
     "id": 1465,
     "word": "labour",
-    "ipa": "/labour/",
+    "ipa": "/ˈɫeɪbɝ/",
     "pos": "n",
     "meaning": "từ 'labour' (n)",
     "example": "Practice speaking 'labour' clearly.",
@@ -16141,7 +16041,7 @@ export const vocabList = [
   {
     "id": 1466,
     "word": "lack",
-    "ipa": "/lack/",
+    "ipa": "/ˈɫæk/",
     "pos": "n",
     "meaning": "từ 'lack' (n)",
     "example": "Practice speaking 'lack' clearly.",
@@ -16152,7 +16052,7 @@ export const vocabList = [
   {
     "id": 1467,
     "word": "lady",
-    "ipa": "/lady/",
+    "ipa": "/ˈɫeɪdi/",
     "pos": "n",
     "meaning": "từ 'lady' (n)",
     "example": "Practice speaking 'lady' clearly.",
@@ -16163,7 +16063,7 @@ export const vocabList = [
   {
     "id": 1468,
     "word": "lake",
-    "ipa": "/lake/",
+    "ipa": "/ˈɫeɪk/",
     "pos": "n",
     "meaning": "từ 'lake' (n)",
     "example": "Practice speaking 'lake' clearly.",
@@ -16174,7 +16074,7 @@ export const vocabList = [
   {
     "id": 1469,
     "word": "lamp",
-    "ipa": "/lamp/",
+    "ipa": "/ˈɫæmp/",
     "pos": "n",
     "meaning": "từ 'lamp' (n)",
     "example": "Practice speaking 'lamp' clearly.",
@@ -16185,7 +16085,7 @@ export const vocabList = [
   {
     "id": 1470,
     "word": "land",
-    "ipa": "/land/",
+    "ipa": "/ˈɫænd/",
     "pos": "n",
     "meaning": "từ 'land' (n)",
     "example": "Practice speaking 'land' clearly.",
@@ -16196,7 +16096,7 @@ export const vocabList = [
   {
     "id": 1471,
     "word": "landscape",
-    "ipa": "/landscape/",
+    "ipa": "/ˈɫænˌskeɪp/",
     "pos": "n",
     "meaning": "từ 'landscape' (n)",
     "example": "Practice speaking 'landscape' clearly.",
@@ -16207,7 +16107,7 @@ export const vocabList = [
   {
     "id": 1472,
     "word": "language",
-    "ipa": "/language/",
+    "ipa": "/ˈɫæŋɡwədʒ/",
     "pos": "n",
     "meaning": "từ 'language' (n)",
     "example": "Practice speaking 'language' clearly.",
@@ -16218,7 +16118,7 @@ export const vocabList = [
   {
     "id": 1473,
     "word": "laptop",
-    "ipa": "/laptop/",
+    "ipa": "/ˈɫæpˌtɑp/",
     "pos": "n",
     "meaning": "từ 'laptop' (n)",
     "example": "Practice speaking 'laptop' clearly.",
@@ -16229,7 +16129,7 @@ export const vocabList = [
   {
     "id": 1474,
     "word": "large",
-    "ipa": "/large/",
+    "ipa": "/ˈɫɑɹdʒ/",
     "pos": "adj",
     "meaning": "từ 'large' (adj)",
     "example": "Practice speaking 'large' clearly.",
@@ -16240,7 +16140,7 @@ export const vocabList = [
   {
     "id": 1475,
     "word": "largely",
-    "ipa": "/largely/",
+    "ipa": "/ˈɫɑɹdʒɫi/",
     "pos": "adv",
     "meaning": "từ 'largely' (adv)",
     "example": "Practice speaking 'largely' clearly.",
@@ -16249,20 +16149,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1476,
-    "word": "last1",
-    "ipa": "/last1/",
-    "pos": "context",
-    "meaning": "từ 'last1' (context)",
-    "example": "Practice speaking 'last1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'last1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1477,
     "word": "late",
-    "ipa": "/late/",
+    "ipa": "/ˈɫeɪt/",
     "pos": "adj",
     "meaning": "từ 'late' (adj)",
     "example": "Practice speaking 'late' clearly.",
@@ -16273,7 +16162,7 @@ export const vocabList = [
   {
     "id": 1478,
     "word": "later",
-    "ipa": "/later/",
+    "ipa": "/ˈɫeɪtɝ/",
     "pos": "adv",
     "meaning": "từ 'later' (adv)",
     "example": "Practice speaking 'later' clearly.",
@@ -16284,7 +16173,7 @@ export const vocabList = [
   {
     "id": 1479,
     "word": "latest",
-    "ipa": "/latest/",
+    "ipa": "/ˈɫeɪtəst/",
     "pos": "adj",
     "meaning": "từ 'latest' (adj)",
     "example": "Practice speaking 'latest' clearly.",
@@ -16306,7 +16195,7 @@ export const vocabList = [
   {
     "id": 1481,
     "word": "laughter",
-    "ipa": "/laughter/",
+    "ipa": "/ˈɫæftɝ/",
     "pos": "n",
     "meaning": "từ 'laughter' (n)",
     "example": "Practice speaking 'laughter' clearly.",
@@ -16328,7 +16217,7 @@ export const vocabList = [
   {
     "id": 1483,
     "word": "law",
-    "ipa": "/law/",
+    "ipa": "/ˈɫɑ/",
     "pos": "n",
     "meaning": "từ 'law' (n)",
     "example": "Practice speaking 'law' clearly.",
@@ -16339,7 +16228,7 @@ export const vocabList = [
   {
     "id": 1484,
     "word": "lawyer",
-    "ipa": "/lawyer/",
+    "ipa": "/ˈɫɔɪɝ/",
     "pos": "n",
     "meaning": "từ 'lawyer' (n)",
     "example": "Practice speaking 'lawyer' clearly.",
@@ -16350,7 +16239,7 @@ export const vocabList = [
   {
     "id": 1485,
     "word": "lay",
-    "ipa": "/lay/",
+    "ipa": "/ˈɫeɪ/",
     "pos": "v",
     "meaning": "từ 'lay' (v)",
     "example": "Practice speaking 'lay' clearly.",
@@ -16361,7 +16250,7 @@ export const vocabList = [
   {
     "id": 1486,
     "word": "layer",
-    "ipa": "/layer/",
+    "ipa": "/ˈɫeɪɝ/",
     "pos": "n",
     "meaning": "từ 'layer' (n)",
     "example": "Practice speaking 'layer' clearly.",
@@ -16372,7 +16261,7 @@ export const vocabList = [
   {
     "id": 1487,
     "word": "lazy",
-    "ipa": "/lazy/",
+    "ipa": "/ˈɫeɪzi/",
     "pos": "adj",
     "meaning": "từ 'lazy' (adj)",
     "example": "Practice speaking 'lazy' clearly.",
@@ -16381,20 +16270,9 @@ export const vocabList = [
     "topic": "Cảm xúc & Tính cách"
   },
   {
-    "id": 1488,
-    "word": "lead1",
-    "ipa": "/lead1/",
-    "pos": "v",
-    "meaning": "từ 'lead1' (v)",
-    "example": "Practice speaking 'lead1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'lead1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1489,
     "word": "leader",
-    "ipa": "/leader/",
+    "ipa": "/ˈɫidɝ/",
     "pos": "n",
     "meaning": "từ 'leader' (n)",
     "example": "Practice speaking 'leader' clearly.",
@@ -16416,7 +16294,7 @@ export const vocabList = [
   {
     "id": 1491,
     "word": "leading",
-    "ipa": "/leading/",
+    "ipa": "/ˈɫidɪŋ/",
     "pos": "adj",
     "meaning": "từ 'leading' (adj)",
     "example": "Practice speaking 'leading' clearly.",
@@ -16427,7 +16305,7 @@ export const vocabList = [
   {
     "id": 1492,
     "word": "leaf",
-    "ipa": "/leaf/",
+    "ipa": "/ˈɫif/",
     "pos": "n",
     "meaning": "từ 'leaf' (n)",
     "example": "Practice speaking 'leaf' clearly.",
@@ -16438,7 +16316,7 @@ export const vocabList = [
   {
     "id": 1493,
     "word": "league",
-    "ipa": "/league/",
+    "ipa": "/ˈɫiɡ/",
     "pos": "n",
     "meaning": "từ 'league' (n)",
     "example": "Practice speaking 'league' clearly.",
@@ -16449,7 +16327,7 @@ export const vocabList = [
   {
     "id": 1494,
     "word": "lean",
-    "ipa": "/lean/",
+    "ipa": "/ˈɫin/",
     "pos": "v",
     "meaning": "từ 'lean' (v)",
     "example": "Practice speaking 'lean' clearly.",
@@ -16471,7 +16349,7 @@ export const vocabList = [
   {
     "id": 1496,
     "word": "learning",
-    "ipa": "/learning/",
+    "ipa": "/ˈɫɝnɪŋ/",
     "pos": "n",
     "meaning": "từ 'learning' (n)",
     "example": "Practice speaking 'learning' clearly.",
@@ -16482,7 +16360,7 @@ export const vocabList = [
   {
     "id": 1497,
     "word": "least",
-    "ipa": "/least/",
+    "ipa": "/ˈɫist/",
     "pos": "det/pron",
     "meaning": "từ 'least' (det/pron)",
     "example": "Practice speaking 'least' clearly.",
@@ -16515,7 +16393,7 @@ export const vocabList = [
   {
     "id": 1500,
     "word": "lecture",
-    "ipa": "/lecture/",
+    "ipa": "/ˈɫɛktʃɝ/",
     "pos": "n",
     "meaning": "từ 'lecture' (n)",
     "example": "Practice speaking 'lecture' clearly.",
@@ -16526,7 +16404,7 @@ export const vocabList = [
   {
     "id": 1501,
     "word": "left",
-    "ipa": "/left/",
+    "ipa": "/ˈɫɛft/",
     "pos": "adj",
     "meaning": "từ 'left' (adj)",
     "example": "Practice speaking 'left' clearly.",
@@ -16537,7 +16415,7 @@ export const vocabList = [
   {
     "id": 1502,
     "word": "leg",
-    "ipa": "/leg/",
+    "ipa": "/ˈɫɛɡ/",
     "pos": "n",
     "meaning": "từ 'leg' (n)",
     "example": "Practice speaking 'leg' clearly.",
@@ -16548,7 +16426,7 @@ export const vocabList = [
   {
     "id": 1503,
     "word": "legal",
-    "ipa": "/legal/",
+    "ipa": "/ˈɫiɡəɫ/",
     "pos": "adj",
     "meaning": "từ 'legal' (adj)",
     "example": "Practice speaking 'legal' clearly.",
@@ -16559,7 +16437,7 @@ export const vocabList = [
   {
     "id": 1504,
     "word": "leisure",
-    "ipa": "/leisure/",
+    "ipa": "/ˈɫɛʒɝ/",
     "pos": "n",
     "meaning": "từ 'leisure' (n)",
     "example": "Practice speaking 'leisure' clearly.",
@@ -16570,7 +16448,7 @@ export const vocabList = [
   {
     "id": 1505,
     "word": "lemon",
-    "ipa": "/lemon/",
+    "ipa": "/ˈɫɛmən/",
     "pos": "n",
     "meaning": "từ 'lemon' (n)",
     "example": "Practice speaking 'lemon' clearly.",
@@ -16581,7 +16459,7 @@ export const vocabList = [
   {
     "id": 1506,
     "word": "lend",
-    "ipa": "/lend/",
+    "ipa": "/ˈɫɛnd/",
     "pos": "v",
     "meaning": "từ 'lend' (v)",
     "example": "Practice speaking 'lend' clearly.",
@@ -16603,7 +16481,7 @@ export const vocabList = [
   {
     "id": 1508,
     "word": "less",
-    "ipa": "/less/",
+    "ipa": "/ˈɫɛs/",
     "pos": "det/pron",
     "meaning": "từ 'less' (det/pron)",
     "example": "Practice speaking 'less' clearly.",
@@ -16614,7 +16492,7 @@ export const vocabList = [
   {
     "id": 1509,
     "word": "lesson",
-    "ipa": "/lesson/",
+    "ipa": "/ˈɫɛsən/",
     "pos": "n",
     "meaning": "từ 'lesson' (n)",
     "example": "Practice speaking 'lesson' clearly.",
@@ -16625,7 +16503,7 @@ export const vocabList = [
   {
     "id": 1510,
     "word": "let",
-    "ipa": "/let/",
+    "ipa": "/ˈɫɛt/",
     "pos": "v",
     "meaning": "để cho, cho phép",
     "example": "Let's start our lesson now.",
@@ -16636,7 +16514,7 @@ export const vocabList = [
   {
     "id": 1511,
     "word": "letter",
-    "ipa": "/letter/",
+    "ipa": "/ˈɫɛtɝ/",
     "pos": "n",
     "meaning": "từ 'letter' (n)",
     "example": "Practice speaking 'letter' clearly.",
@@ -16647,7 +16525,7 @@ export const vocabList = [
   {
     "id": 1512,
     "word": "level",
-    "ipa": "/level/",
+    "ipa": "/ˈɫɛvəɫ/",
     "pos": "n",
     "meaning": "từ 'level' (n)",
     "example": "Practice speaking 'level' clearly.",
@@ -16658,7 +16536,7 @@ export const vocabList = [
   {
     "id": 1513,
     "word": "library",
-    "ipa": "/library/",
+    "ipa": "/ˈɫaɪbɹɛˌɹi/",
     "pos": "n",
     "meaning": "từ 'library' (n)",
     "example": "Practice speaking 'library' clearly.",
@@ -16669,7 +16547,7 @@ export const vocabList = [
   {
     "id": 1514,
     "word": "licence",
-    "ipa": "/licence/",
+    "ipa": "/ˈɫaɪsəns/",
     "pos": "n",
     "meaning": "từ 'licence' (n)",
     "example": "Practice speaking 'licence' clearly.",
@@ -16678,31 +16556,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1515,
-    "word": "lie1",
-    "ipa": "/lie1/",
-    "pos": "v",
-    "meaning": "từ 'lie1' (v)",
-    "example": "Practice speaking 'lie1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'lie1' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 1516,
-    "word": "lie2",
-    "ipa": "/lie2/",
-    "pos": "context",
-    "meaning": "từ 'lie2' (context)",
-    "example": "Practice speaking 'lie2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'lie2' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1517,
     "word": "life",
-    "ipa": "/life/",
+    "ipa": "/ˈɫaɪf/",
     "pos": "n",
     "meaning": "từ 'life' (n)",
     "example": "Practice speaking 'life' clearly.",
@@ -16713,7 +16569,7 @@ export const vocabList = [
   {
     "id": 1518,
     "word": "lifestyle",
-    "ipa": "/lifestyle/",
+    "ipa": "/ˈɫaɪfˌstaɪɫ/",
     "pos": "n",
     "meaning": "từ 'lifestyle' (n)",
     "example": "Practice speaking 'lifestyle' clearly.",
@@ -16724,7 +16580,7 @@ export const vocabList = [
   {
     "id": 1519,
     "word": "lift",
-    "ipa": "/lift/",
+    "ipa": "/ˈɫɪft/",
     "pos": "v",
     "meaning": "từ 'lift' (v)",
     "example": "Practice speaking 'lift' clearly.",
@@ -16735,7 +16591,7 @@ export const vocabList = [
   {
     "id": 1520,
     "word": "light",
-    "ipa": "/light/",
+    "ipa": "/ˈɫaɪt/",
     "pos": "context",
     "meaning": "từ 'light' (context)",
     "example": "Practice speaking 'light' clearly.",
@@ -16757,7 +16613,7 @@ export const vocabList = [
   {
     "id": 1522,
     "word": "likely",
-    "ipa": "/likely/",
+    "ipa": "/ˈɫaɪkɫi/",
     "pos": "adj",
     "meaning": "từ 'likely' (adj)",
     "example": "Practice speaking 'likely' clearly.",
@@ -16768,7 +16624,7 @@ export const vocabList = [
   {
     "id": 1523,
     "word": "limit",
-    "ipa": "/limit/",
+    "ipa": "/ˈɫɪmət/",
     "pos": "n",
     "meaning": "từ 'limit' (n)",
     "example": "Practice speaking 'limit' clearly.",
@@ -16779,7 +16635,7 @@ export const vocabList = [
   {
     "id": 1524,
     "word": "limited",
-    "ipa": "/limited/",
+    "ipa": "/ˈɫɪmətəd/",
     "pos": "adj",
     "meaning": "từ 'limited' (adj)",
     "example": "Practice speaking 'limited' clearly.",
@@ -16790,7 +16646,7 @@ export const vocabList = [
   {
     "id": 1525,
     "word": "line",
-    "ipa": "/line/",
+    "ipa": "/ˈɫaɪn/",
     "pos": "n",
     "meaning": "từ 'line' (n)",
     "example": "Practice speaking 'line' clearly.",
@@ -16801,7 +16657,7 @@ export const vocabList = [
   {
     "id": 1526,
     "word": "link",
-    "ipa": "/link/",
+    "ipa": "/ˈɫɪŋk/",
     "pos": "n",
     "meaning": "từ 'link' (n)",
     "example": "Practice speaking 'link' clearly.",
@@ -16812,7 +16668,7 @@ export const vocabList = [
   {
     "id": 1527,
     "word": "lion",
-    "ipa": "/lion/",
+    "ipa": "/ˈɫaɪən/",
     "pos": "n",
     "meaning": "từ 'lion' (n)",
     "example": "Practice speaking 'lion' clearly.",
@@ -16823,7 +16679,7 @@ export const vocabList = [
   {
     "id": 1528,
     "word": "lip",
-    "ipa": "/lip/",
+    "ipa": "/ˈɫɪp/",
     "pos": "n",
     "meaning": "từ 'lip' (n)",
     "example": "Practice speaking 'lip' clearly.",
@@ -16834,7 +16690,7 @@ export const vocabList = [
   {
     "id": 1529,
     "word": "liquid",
-    "ipa": "/liquid/",
+    "ipa": "/ˈɫɪkwəd/",
     "pos": "n",
     "meaning": "từ 'liquid' (n)",
     "example": "Practice speaking 'liquid' clearly.",
@@ -16845,7 +16701,7 @@ export const vocabList = [
   {
     "id": 1530,
     "word": "list",
-    "ipa": "/list/",
+    "ipa": "/ˈɫɪst/",
     "pos": "n",
     "meaning": "từ 'list' (n)",
     "example": "Practice speaking 'list' clearly.",
@@ -16867,7 +16723,7 @@ export const vocabList = [
   {
     "id": 1532,
     "word": "listener",
-    "ipa": "/listener/",
+    "ipa": "/ˈɫɪsənɝ/",
     "pos": "n",
     "meaning": "từ 'listener' (n)",
     "example": "Practice speaking 'listener' clearly.",
@@ -16878,7 +16734,7 @@ export const vocabList = [
   {
     "id": 1533,
     "word": "literature",
-    "ipa": "/literature/",
+    "ipa": "/ˈɫɪtɝətʃɝ/",
     "pos": "n",
     "meaning": "từ 'literature' (n)",
     "example": "Practice speaking 'literature' clearly.",
@@ -16889,7 +16745,7 @@ export const vocabList = [
   {
     "id": 1534,
     "word": "little",
-    "ipa": "/little/",
+    "ipa": "/ˈɫɪtəɫ/",
     "pos": "adj",
     "meaning": "từ 'little' (adj)",
     "example": "Practice speaking 'little' clearly.",
@@ -16898,31 +16754,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1535,
-    "word": "live1",
-    "ipa": "/live1/",
-    "pos": "v",
-    "meaning": "từ 'live1' (v)",
-    "example": "Practice speaking 'live1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'live1' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 1536,
-    "word": "live2",
-    "ipa": "/live2/",
-    "pos": "adj",
-    "meaning": "từ 'live2' (adj)",
-    "example": "Practice speaking 'live2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'live2' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1537,
     "word": "lively",
-    "ipa": "/lively/",
+    "ipa": "/ˈɫaɪvɫi/",
     "pos": "adj",
     "meaning": "từ 'lively' (adj)",
     "example": "Practice speaking 'lively' clearly.",
@@ -16933,7 +16767,7 @@ export const vocabList = [
   {
     "id": 1538,
     "word": "living",
-    "ipa": "/living/",
+    "ipa": "/ˈɫɪvɪŋ/",
     "pos": "adj",
     "meaning": "từ 'living' (adj)",
     "example": "Practice speaking 'living' clearly.",
@@ -16944,7 +16778,7 @@ export const vocabList = [
   {
     "id": 1539,
     "word": "load",
-    "ipa": "/load/",
+    "ipa": "/ˈɫoʊd/",
     "pos": "n",
     "meaning": "từ 'load' (n)",
     "example": "Practice speaking 'load' clearly.",
@@ -16955,7 +16789,7 @@ export const vocabList = [
   {
     "id": 1540,
     "word": "loan",
-    "ipa": "/loan/",
+    "ipa": "/ˈɫoʊn/",
     "pos": "n",
     "meaning": "từ 'loan' (n)",
     "example": "Practice speaking 'loan' clearly.",
@@ -16966,7 +16800,7 @@ export const vocabList = [
   {
     "id": 1541,
     "word": "local",
-    "ipa": "/local/",
+    "ipa": "/ˈɫoʊkəɫ/",
     "pos": "adj",
     "meaning": "từ 'local' (adj)",
     "example": "Practice speaking 'local' clearly.",
@@ -16977,7 +16811,7 @@ export const vocabList = [
   {
     "id": 1542,
     "word": "locate",
-    "ipa": "/locate/",
+    "ipa": "/ˈɫoʊˌkeɪt/",
     "pos": "v",
     "meaning": "từ 'locate' (v)",
     "example": "Practice speaking 'locate' clearly.",
@@ -16988,7 +16822,7 @@ export const vocabList = [
   {
     "id": 1543,
     "word": "located",
-    "ipa": "/located/",
+    "ipa": "/ˈɫoʊˌkeɪd/",
     "pos": "adj",
     "meaning": "từ 'located' (adj)",
     "example": "Practice speaking 'located' clearly.",
@@ -16999,7 +16833,7 @@ export const vocabList = [
   {
     "id": 1544,
     "word": "location",
-    "ipa": "/location/",
+    "ipa": "/ɫoʊˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'location' (n)",
     "example": "Practice speaking 'location' clearly.",
@@ -17010,7 +16844,7 @@ export const vocabList = [
   {
     "id": 1545,
     "word": "lock",
-    "ipa": "/lock/",
+    "ipa": "/ˈɫɑk/",
     "pos": "v",
     "meaning": "từ 'lock' (v)",
     "example": "Practice speaking 'lock' clearly.",
@@ -17021,7 +16855,7 @@ export const vocabList = [
   {
     "id": 1546,
     "word": "logical",
-    "ipa": "/logical/",
+    "ipa": "/ˈɫɑdʒɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'logical' (adj)",
     "example": "Practice speaking 'logical' clearly.",
@@ -17032,7 +16866,7 @@ export const vocabList = [
   {
     "id": 1547,
     "word": "lonely",
-    "ipa": "/lonely/",
+    "ipa": "/ˈɫoʊnɫi/",
     "pos": "adj",
     "meaning": "từ 'lonely' (adj)",
     "example": "Practice speaking 'lonely' clearly.",
@@ -17041,20 +16875,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1548,
-    "word": "long1",
-    "ipa": "/long1/",
-    "pos": "adj",
-    "meaning": "từ 'long1' (adj)",
-    "example": "Practice speaking 'long1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'long1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1549,
     "word": "long-term",
-    "ipa": "/long-term/",
+    "ipa": "/ˈɫɔŋˈtɝm/",
     "pos": "adj",
     "meaning": "từ 'long-term' (adj)",
     "example": "Practice speaking 'long-term' clearly.",
@@ -17087,7 +16910,7 @@ export const vocabList = [
   {
     "id": 1552,
     "word": "lord",
-    "ipa": "/lord/",
+    "ipa": "/ˈɫɔɹd/",
     "pos": "n",
     "meaning": "từ 'lord' (n)",
     "example": "Practice speaking 'lord' clearly.",
@@ -17098,7 +16921,7 @@ export const vocabList = [
   {
     "id": 1553,
     "word": "lorry",
-    "ipa": "/lorry/",
+    "ipa": "/ˈɫɔɹi/",
     "pos": "n",
     "meaning": "từ 'lorry' (n)",
     "example": "Practice speaking 'lorry' clearly.",
@@ -17109,7 +16932,7 @@ export const vocabList = [
   {
     "id": 1554,
     "word": "lose",
-    "ipa": "/lose/",
+    "ipa": "/ˈɫuz/",
     "pos": "v",
     "meaning": "từ 'lose' (v)",
     "example": "Practice speaking 'lose' clearly.",
@@ -17120,7 +16943,7 @@ export const vocabList = [
   {
     "id": 1555,
     "word": "loss",
-    "ipa": "/loss/",
+    "ipa": "/ˈɫɔs/",
     "pos": "n",
     "meaning": "từ 'loss' (n)",
     "example": "Practice speaking 'loss' clearly.",
@@ -17131,7 +16954,7 @@ export const vocabList = [
   {
     "id": 1556,
     "word": "lost",
-    "ipa": "/lost/",
+    "ipa": "/ˈɫɔst/",
     "pos": "adj",
     "meaning": "từ 'lost' (adj)",
     "example": "Practice speaking 'lost' clearly.",
@@ -17142,7 +16965,7 @@ export const vocabList = [
   {
     "id": 1557,
     "word": "lot",
-    "ipa": "/lot/",
+    "ipa": "/ˈɫɑt/",
     "pos": "pron",
     "meaning": "từ 'lot' (pron)",
     "example": "Practice speaking 'lot' clearly.",
@@ -17153,7 +16976,7 @@ export const vocabList = [
   {
     "id": 1558,
     "word": "loud",
-    "ipa": "/loud/",
+    "ipa": "/ˈɫaʊd/",
     "pos": "adj",
     "meaning": "từ 'loud' (adj)",
     "example": "Practice speaking 'loud' clearly.",
@@ -17164,7 +16987,7 @@ export const vocabList = [
   {
     "id": 1559,
     "word": "loudly",
-    "ipa": "/loudly/",
+    "ipa": "/ˈɫaʊdɫi/",
     "pos": "adv",
     "meaning": "từ 'loudly' (adv)",
     "example": "Practice speaking 'loudly' clearly.",
@@ -17186,7 +17009,7 @@ export const vocabList = [
   {
     "id": 1561,
     "word": "lovely",
-    "ipa": "/lovely/",
+    "ipa": "/ˈɫəvɫi/",
     "pos": "adj",
     "meaning": "từ 'lovely' (adj)",
     "example": "Practice speaking 'lovely' clearly.",
@@ -17197,7 +17020,7 @@ export const vocabList = [
   {
     "id": 1562,
     "word": "low",
-    "ipa": "/low/",
+    "ipa": "/ˈɫoʊ/",
     "pos": "adj",
     "meaning": "từ 'low' (adj)",
     "example": "Practice speaking 'low' clearly.",
@@ -17208,7 +17031,7 @@ export const vocabList = [
   {
     "id": 1563,
     "word": "lower",
-    "ipa": "/lower/",
+    "ipa": "/ˈɫoʊɝ/",
     "pos": "v",
     "meaning": "từ 'lower' (v)",
     "example": "Practice speaking 'lower' clearly.",
@@ -17219,7 +17042,7 @@ export const vocabList = [
   {
     "id": 1564,
     "word": "luck",
-    "ipa": "/luck/",
+    "ipa": "/ˈɫək/",
     "pos": "n",
     "meaning": "từ 'luck' (n)",
     "example": "Practice speaking 'luck' clearly.",
@@ -17230,7 +17053,7 @@ export const vocabList = [
   {
     "id": 1565,
     "word": "lucky",
-    "ipa": "/lucky/",
+    "ipa": "/ˈɫəki/",
     "pos": "adj",
     "meaning": "từ 'lucky' (adj)",
     "example": "Practice speaking 'lucky' clearly.",
@@ -17252,7 +17075,7 @@ export const vocabList = [
   {
     "id": 1567,
     "word": "lung",
-    "ipa": "/lung/",
+    "ipa": "/ˈɫəŋ/",
     "pos": "n",
     "meaning": "từ 'lung' (n)",
     "example": "Practice speaking 'lung' clearly.",
@@ -17263,7 +17086,7 @@ export const vocabList = [
   {
     "id": 1568,
     "word": "luxury",
-    "ipa": "/luxury/",
+    "ipa": "/ˈɫəɡʒɝi/",
     "pos": "n",
     "meaning": "từ 'luxury' (n)",
     "example": "Practice speaking 'luxury' clearly.",
@@ -17285,7 +17108,7 @@ export const vocabList = [
   {
     "id": 1570,
     "word": "mad",
-    "ipa": "/mad/",
+    "ipa": "/ˈmæd/",
     "pos": "adj",
     "meaning": "từ 'mad' (adj)",
     "example": "Practice speaking 'mad' clearly.",
@@ -17296,7 +17119,7 @@ export const vocabList = [
   {
     "id": 1571,
     "word": "magazine",
-    "ipa": "/magazine/",
+    "ipa": "/ˈmæɡəˌzin/",
     "pos": "n",
     "meaning": "từ 'magazine' (n)",
     "example": "Practice speaking 'magazine' clearly.",
@@ -17307,7 +17130,7 @@ export const vocabList = [
   {
     "id": 1572,
     "word": "magic",
-    "ipa": "/magic/",
+    "ipa": "/ˈmædʒɪk/",
     "pos": "n",
     "meaning": "từ 'magic' (n)",
     "example": "Practice speaking 'magic' clearly.",
@@ -17318,7 +17141,7 @@ export const vocabList = [
   {
     "id": 1573,
     "word": "mail",
-    "ipa": "/mail/",
+    "ipa": "/ˈmeɪɫ/",
     "pos": "n",
     "meaning": "từ 'mail' (n)",
     "example": "Practice speaking 'mail' clearly.",
@@ -17329,7 +17152,7 @@ export const vocabList = [
   {
     "id": 1574,
     "word": "main",
-    "ipa": "/main/",
+    "ipa": "/ˈmeɪn/",
     "pos": "adj",
     "meaning": "từ 'main' (adj)",
     "example": "Practice speaking 'main' clearly.",
@@ -17340,7 +17163,7 @@ export const vocabList = [
   {
     "id": 1575,
     "word": "mainly",
-    "ipa": "/mainly/",
+    "ipa": "/ˈmeɪnɫi/",
     "pos": "adv",
     "meaning": "từ 'mainly' (adv)",
     "example": "Practice speaking 'mainly' clearly.",
@@ -17351,7 +17174,7 @@ export const vocabList = [
   {
     "id": 1576,
     "word": "maintain",
-    "ipa": "/maintain/",
+    "ipa": "/meɪnˈteɪn/",
     "pos": "v",
     "meaning": "từ 'maintain' (v)",
     "example": "Practice speaking 'maintain' clearly.",
@@ -17362,7 +17185,7 @@ export const vocabList = [
   {
     "id": 1577,
     "word": "major",
-    "ipa": "/major/",
+    "ipa": "/ˈmeɪdʒɝ/",
     "pos": "adj",
     "meaning": "từ 'major' (adj)",
     "example": "Practice speaking 'major' clearly.",
@@ -17373,7 +17196,7 @@ export const vocabList = [
   {
     "id": 1578,
     "word": "majority",
-    "ipa": "/majority/",
+    "ipa": "/məˈdʒɔɹəti/",
     "pos": "n",
     "meaning": "từ 'majority' (n)",
     "example": "Practice speaking 'majority' clearly.",
@@ -17395,7 +17218,7 @@ export const vocabList = [
   {
     "id": 1580,
     "word": "male",
-    "ipa": "/male/",
+    "ipa": "/ˈmeɪɫ/",
     "pos": "adj",
     "meaning": "từ 'male' (adj)",
     "example": "Practice speaking 'male' clearly.",
@@ -17406,7 +17229,7 @@ export const vocabList = [
   {
     "id": 1581,
     "word": "mall",
-    "ipa": "/mall/",
+    "ipa": "/ˈmɔɫ/",
     "pos": "n",
     "meaning": "từ 'mall' (n)",
     "example": "Practice speaking 'mall' clearly.",
@@ -17417,7 +17240,7 @@ export const vocabList = [
   {
     "id": 1582,
     "word": "man",
-    "ipa": "/man/",
+    "ipa": "/ˈmæn/",
     "pos": "n",
     "meaning": "từ 'man' (n)",
     "example": "Practice speaking 'man' clearly.",
@@ -17428,7 +17251,7 @@ export const vocabList = [
   {
     "id": 1583,
     "word": "manage",
-    "ipa": "/manage/",
+    "ipa": "/ˈmænədʒ/",
     "pos": "v",
     "meaning": "từ 'manage' (v)",
     "example": "Practice speaking 'manage' clearly.",
@@ -17439,7 +17262,7 @@ export const vocabList = [
   {
     "id": 1584,
     "word": "management",
-    "ipa": "/management/",
+    "ipa": "/ˈmænədʒmənt/",
     "pos": "n",
     "meaning": "từ 'management' (n)",
     "example": "Practice speaking 'management' clearly.",
@@ -17450,7 +17273,7 @@ export const vocabList = [
   {
     "id": 1585,
     "word": "manager",
-    "ipa": "/manager/",
+    "ipa": "/ˈmænədʒɝ/",
     "pos": "n",
     "meaning": "từ 'manager' (n)",
     "example": "Practice speaking 'manager' clearly.",
@@ -17461,7 +17284,7 @@ export const vocabList = [
   {
     "id": 1586,
     "word": "manner",
-    "ipa": "/manner/",
+    "ipa": "/ˈmænɝ/",
     "pos": "n",
     "meaning": "từ 'manner' (n)",
     "example": "Practice speaking 'manner' clearly.",
@@ -17472,7 +17295,7 @@ export const vocabList = [
   {
     "id": 1587,
     "word": "many",
-    "ipa": "/many/",
+    "ipa": "/ˈmɛni/",
     "pos": "det/pron",
     "meaning": "từ 'many' (det/pron)",
     "example": "Practice speaking 'many' clearly.",
@@ -17483,7 +17306,7 @@ export const vocabList = [
   {
     "id": 1588,
     "word": "map",
-    "ipa": "/map/",
+    "ipa": "/ˈmæp/",
     "pos": "n",
     "meaning": "từ 'map' (n)",
     "example": "Practice speaking 'map' clearly.",
@@ -17505,7 +17328,7 @@ export const vocabList = [
   {
     "id": 1590,
     "word": "mark",
-    "ipa": "/mark/",
+    "ipa": "/ˈmɑɹk/",
     "pos": "v",
     "meaning": "từ 'mark' (v)",
     "example": "Practice speaking 'mark' clearly.",
@@ -17516,7 +17339,7 @@ export const vocabList = [
   {
     "id": 1591,
     "word": "market",
-    "ipa": "/market/",
+    "ipa": "/ˈmɑɹkət/",
     "pos": "n",
     "meaning": "từ 'market' (n)",
     "example": "Practice speaking 'market' clearly.",
@@ -17527,7 +17350,7 @@ export const vocabList = [
   {
     "id": 1592,
     "word": "marketing",
-    "ipa": "/marketing/",
+    "ipa": "/ˈmɑɹkətɪŋ/",
     "pos": "n",
     "meaning": "từ 'marketing' (n)",
     "example": "Practice speaking 'marketing' clearly.",
@@ -17538,7 +17361,7 @@ export const vocabList = [
   {
     "id": 1593,
     "word": "marriage",
-    "ipa": "/marriage/",
+    "ipa": "/ˈmɛɹɪdʒ/",
     "pos": "n",
     "meaning": "từ 'marriage' (n)",
     "example": "Practice speaking 'marriage' clearly.",
@@ -17549,7 +17372,7 @@ export const vocabList = [
   {
     "id": 1594,
     "word": "married",
-    "ipa": "/married/",
+    "ipa": "/ˈmɛɹid/",
     "pos": "adj",
     "meaning": "từ 'married' (adj)",
     "example": "Practice speaking 'married' clearly.",
@@ -17560,7 +17383,7 @@ export const vocabList = [
   {
     "id": 1595,
     "word": "marry",
-    "ipa": "/marry/",
+    "ipa": "/ˈmɛɹi/",
     "pos": "v",
     "meaning": "từ 'marry' (v)",
     "example": "Practice speaking 'marry' clearly.",
@@ -17571,7 +17394,7 @@ export const vocabList = [
   {
     "id": 1596,
     "word": "mass",
-    "ipa": "/mass/",
+    "ipa": "/ˈmæs/",
     "pos": "n",
     "meaning": "từ 'mass' (n)",
     "example": "Practice speaking 'mass' clearly.",
@@ -17582,7 +17405,7 @@ export const vocabList = [
   {
     "id": 1597,
     "word": "massive",
-    "ipa": "/massive/",
+    "ipa": "/ˈmæsɪv/",
     "pos": "adj",
     "meaning": "từ 'massive' (adj)",
     "example": "Practice speaking 'massive' clearly.",
@@ -17593,7 +17416,7 @@ export const vocabList = [
   {
     "id": 1598,
     "word": "master",
-    "ipa": "/master/",
+    "ipa": "/ˈmæstɝ/",
     "pos": "n",
     "meaning": "từ 'master' (n)",
     "example": "Practice speaking 'master' clearly.",
@@ -17626,7 +17449,7 @@ export const vocabList = [
   {
     "id": 1601,
     "word": "material",
-    "ipa": "/material/",
+    "ipa": "/məˈtɪɹiəɫ/",
     "pos": "n",
     "meaning": "từ 'material' (n)",
     "example": "Practice speaking 'material' clearly.",
@@ -17659,7 +17482,7 @@ export const vocabList = [
   {
     "id": 1604,
     "word": "matter",
-    "ipa": "/matter/",
+    "ipa": "/ˈmætɝ/",
     "pos": "n",
     "meaning": "từ 'matter' (n)",
     "example": "Practice speaking 'matter' clearly.",
@@ -17670,7 +17493,7 @@ export const vocabList = [
   {
     "id": 1605,
     "word": "maximum",
-    "ipa": "/maximum/",
+    "ipa": "/ˈmæksəməm/",
     "pos": "adj",
     "meaning": "từ 'maximum' (adj)",
     "example": "Practice speaking 'maximum' clearly.",
@@ -17681,7 +17504,7 @@ export const vocabList = [
   {
     "id": 1606,
     "word": "may",
-    "ipa": "/may/",
+    "ipa": "/ˈmeɪ/",
     "pos": "n",
     "meaning": "từ 'may' (n)",
     "example": "Practice speaking 'may' clearly.",
@@ -17690,20 +17513,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1607,
-    "word": "may",
-    "ipa": "/may/",
-    "pos": "modal v",
-    "meaning": "từ 'may' (modal v)",
-    "example": "Practice speaking 'may' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'may' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1608,
     "word": "maybe",
-    "ipa": "/maybe/",
+    "ipa": "/ˈmeɪbi/",
     "pos": "adv",
     "meaning": "từ 'maybe' (adv)",
     "example": "Practice speaking 'maybe' clearly.",
@@ -17725,7 +17537,7 @@ export const vocabList = [
   {
     "id": 1610,
     "word": "meal",
-    "ipa": "/meal/",
+    "ipa": "/ˈmiɫ/",
     "pos": "n",
     "meaning": "từ 'meal' (n)",
     "example": "Practice speaking 'meal' clearly.",
@@ -17747,7 +17559,7 @@ export const vocabList = [
   {
     "id": 1612,
     "word": "meaning",
-    "ipa": "/meaning/",
+    "ipa": "/ˈminɪŋ/",
     "pos": "n",
     "meaning": "từ 'meaning' (n)",
     "example": "Practice speaking 'meaning' clearly.",
@@ -17758,7 +17570,7 @@ export const vocabList = [
   {
     "id": 1613,
     "word": "means",
-    "ipa": "/means/",
+    "ipa": "/ˈminz/",
     "pos": "n",
     "meaning": "từ 'means' (n)",
     "example": "Practice speaking 'means' clearly.",
@@ -17769,7 +17581,7 @@ export const vocabList = [
   {
     "id": 1614,
     "word": "meanwhile",
-    "ipa": "/meanwhile/",
+    "ipa": "/ˈminˌwaɪɫ/",
     "pos": "adv",
     "meaning": "từ 'meanwhile' (adv)",
     "example": "Practice speaking 'meanwhile' clearly.",
@@ -17780,7 +17592,7 @@ export const vocabList = [
   {
     "id": 1615,
     "word": "measure",
-    "ipa": "/measure/",
+    "ipa": "/ˈmɛʒɝ/",
     "pos": "v",
     "meaning": "từ 'measure' (v)",
     "example": "Practice speaking 'measure' clearly.",
@@ -17791,7 +17603,7 @@ export const vocabList = [
   {
     "id": 1616,
     "word": "measurement",
-    "ipa": "/measurement/",
+    "ipa": "/ˈmɛʒɝmənt/",
     "pos": "n",
     "meaning": "từ 'measurement' (n)",
     "example": "Practice speaking 'measurement' clearly.",
@@ -17802,7 +17614,7 @@ export const vocabList = [
   {
     "id": 1617,
     "word": "meat",
-    "ipa": "/meat/",
+    "ipa": "/ˈmit/",
     "pos": "n",
     "meaning": "từ 'meat' (n)",
     "example": "Practice speaking 'meat' clearly.",
@@ -17813,7 +17625,7 @@ export const vocabList = [
   {
     "id": 1618,
     "word": "media",
-    "ipa": "/media/",
+    "ipa": "/ˈmidiə/",
     "pos": "n",
     "meaning": "từ 'media' (n)",
     "example": "Practice speaking 'media' clearly.",
@@ -17824,7 +17636,7 @@ export const vocabList = [
   {
     "id": 1619,
     "word": "medical",
-    "ipa": "/medical/",
+    "ipa": "/ˈmɛdəkəɫ/",
     "pos": "adj",
     "meaning": "từ 'medical' (adj)",
     "example": "Practice speaking 'medical' clearly.",
@@ -17835,7 +17647,7 @@ export const vocabList = [
   {
     "id": 1620,
     "word": "medicine",
-    "ipa": "/medicine/",
+    "ipa": "/ˈmɛdəsən/",
     "pos": "n",
     "meaning": "từ 'medicine' (n)",
     "example": "Practice speaking 'medicine' clearly.",
@@ -17846,7 +17658,7 @@ export const vocabList = [
   {
     "id": 1621,
     "word": "medium",
-    "ipa": "/medium/",
+    "ipa": "/ˈmidiəm/",
     "pos": "adj",
     "meaning": "từ 'medium' (adj)",
     "example": "Practice speaking 'medium' clearly.",
@@ -17879,7 +17691,7 @@ export const vocabList = [
   {
     "id": 1624,
     "word": "melt",
-    "ipa": "/melt/",
+    "ipa": "/ˈmɛɫt/",
     "pos": "v",
     "meaning": "từ 'melt' (v)",
     "example": "Practice speaking 'melt' clearly.",
@@ -17890,7 +17702,7 @@ export const vocabList = [
   {
     "id": 1625,
     "word": "member",
-    "ipa": "/member/",
+    "ipa": "/ˈmɛmbɝ/",
     "pos": "n",
     "meaning": "từ 'member' (n)",
     "example": "Practice speaking 'member' clearly.",
@@ -17901,7 +17713,7 @@ export const vocabList = [
   {
     "id": 1626,
     "word": "memory",
-    "ipa": "/memory/",
+    "ipa": "/ˈmɛmɝi/",
     "pos": "n",
     "meaning": "từ 'memory' (n)",
     "example": "Practice speaking 'memory' clearly.",
@@ -17912,7 +17724,7 @@ export const vocabList = [
   {
     "id": 1627,
     "word": "mental",
-    "ipa": "/mental/",
+    "ipa": "/ˈmɛntəɫ/",
     "pos": "adj",
     "meaning": "từ 'mental' (adj)",
     "example": "Practice speaking 'mental' clearly.",
@@ -17923,7 +17735,7 @@ export const vocabList = [
   {
     "id": 1628,
     "word": "mention",
-    "ipa": "/mention/",
+    "ipa": "/ˈmɛnʃən/",
     "pos": "v",
     "meaning": "từ 'mention' (v)",
     "example": "Practice speaking 'mention' clearly.",
@@ -17934,7 +17746,7 @@ export const vocabList = [
   {
     "id": 1629,
     "word": "menu",
-    "ipa": "/menu/",
+    "ipa": "/ˈmɛnju/",
     "pos": "n",
     "meaning": "từ 'menu' (n)",
     "example": "Practice speaking 'menu' clearly.",
@@ -17945,7 +17757,7 @@ export const vocabList = [
   {
     "id": 1630,
     "word": "mess",
-    "ipa": "/mess/",
+    "ipa": "/ˈmɛs/",
     "pos": "n",
     "meaning": "từ 'mess' (n)",
     "example": "Practice speaking 'mess' clearly.",
@@ -17956,7 +17768,7 @@ export const vocabList = [
   {
     "id": 1631,
     "word": "message",
-    "ipa": "/message/",
+    "ipa": "/ˈmɛsədʒ/",
     "pos": "n",
     "meaning": "từ 'message' (n)",
     "example": "Practice speaking 'message' clearly.",
@@ -17967,7 +17779,7 @@ export const vocabList = [
   {
     "id": 1632,
     "word": "metal",
-    "ipa": "/metal/",
+    "ipa": "/ˈmɛtəɫ/",
     "pos": "n",
     "meaning": "từ 'metal' (n)",
     "example": "Practice speaking 'metal' clearly.",
@@ -17989,7 +17801,7 @@ export const vocabList = [
   {
     "id": 1634,
     "word": "metre",
-    "ipa": "/metre/",
+    "ipa": "/ˈmitɝ/",
     "pos": "n",
     "meaning": "từ 'metre' (n)",
     "example": "Practice speaking 'metre' clearly.",
@@ -18000,7 +17812,7 @@ export const vocabList = [
   {
     "id": 1635,
     "word": "middle",
-    "ipa": "/middle/",
+    "ipa": "/ˈmɪdəɫ/",
     "pos": "n",
     "meaning": "từ 'middle' (n)",
     "example": "Practice speaking 'middle' clearly.",
@@ -18011,7 +17823,7 @@ export const vocabList = [
   {
     "id": 1636,
     "word": "midnight",
-    "ipa": "/midnight/",
+    "ipa": "/ˈmɪdˌnaɪt/",
     "pos": "n",
     "meaning": "từ 'midnight' (n)",
     "example": "Practice speaking 'midnight' clearly.",
@@ -18022,7 +17834,7 @@ export const vocabList = [
   {
     "id": 1637,
     "word": "might",
-    "ipa": "/might/",
+    "ipa": "/ˈmaɪt/",
     "pos": "modal v",
     "meaning": "từ 'might' (modal v)",
     "example": "Practice speaking 'might' clearly.",
@@ -18033,7 +17845,7 @@ export const vocabList = [
   {
     "id": 1638,
     "word": "mild",
-    "ipa": "/mild/",
+    "ipa": "/ˈmaɪɫd/",
     "pos": "adj",
     "meaning": "từ 'mild' (adj)",
     "example": "Practice speaking 'mild' clearly.",
@@ -18044,7 +17856,7 @@ export const vocabList = [
   {
     "id": 1639,
     "word": "mile",
-    "ipa": "/mile/",
+    "ipa": "/ˈmaɪɫ/",
     "pos": "n",
     "meaning": "từ 'mile' (n)",
     "example": "Practice speaking 'mile' clearly.",
@@ -18055,7 +17867,7 @@ export const vocabList = [
   {
     "id": 1640,
     "word": "military",
-    "ipa": "/military/",
+    "ipa": "/ˈmɪɫəˌtɛɹi/",
     "pos": "adj",
     "meaning": "từ 'military' (adj)",
     "example": "Practice speaking 'military' clearly.",
@@ -18066,7 +17878,7 @@ export const vocabList = [
   {
     "id": 1641,
     "word": "milk",
-    "ipa": "/milk/",
+    "ipa": "/ˈmɪɫk/",
     "pos": "n",
     "meaning": "từ 'milk' (n)",
     "example": "Practice speaking 'milk' clearly.",
@@ -18077,7 +17889,7 @@ export const vocabList = [
   {
     "id": 1642,
     "word": "million",
-    "ipa": "/million/",
+    "ipa": "/ˈmɪɫjən/",
     "pos": "number",
     "meaning": "từ 'million' (number)",
     "example": "Practice speaking 'million' clearly.",
@@ -18088,7 +17900,7 @@ export const vocabList = [
   {
     "id": 1643,
     "word": "mind",
-    "ipa": "/mind/",
+    "ipa": "/ˈmaɪnd/",
     "pos": "n",
     "meaning": "từ 'mind' (n)",
     "example": "Practice speaking 'mind' clearly.",
@@ -18099,7 +17911,7 @@ export const vocabList = [
   {
     "id": 1644,
     "word": "mine",
-    "ipa": "/mine/",
+    "ipa": "/ˈmaɪn/",
     "pos": "context",
     "meaning": "từ 'mine' (context)",
     "example": "Practice speaking 'mine' clearly.",
@@ -18110,7 +17922,7 @@ export const vocabList = [
   {
     "id": 1645,
     "word": "mineral",
-    "ipa": "/mineral/",
+    "ipa": "/ˈmɪnɝəɫ/",
     "pos": "n",
     "meaning": "từ 'mineral' (n)",
     "example": "Practice speaking 'mineral' clearly.",
@@ -18121,7 +17933,7 @@ export const vocabList = [
   {
     "id": 1646,
     "word": "minimum",
-    "ipa": "/minimum/",
+    "ipa": "/ˈmɪnəməm/",
     "pos": "adj",
     "meaning": "từ 'minimum' (adj)",
     "example": "Practice speaking 'minimum' clearly.",
@@ -18132,7 +17944,7 @@ export const vocabList = [
   {
     "id": 1647,
     "word": "minister",
-    "ipa": "/minister/",
+    "ipa": "/ˈmɪnəstɝ/",
     "pos": "n",
     "meaning": "từ 'minister' (n)",
     "example": "Practice speaking 'minister' clearly.",
@@ -18143,7 +17955,7 @@ export const vocabList = [
   {
     "id": 1648,
     "word": "minor",
-    "ipa": "/minor/",
+    "ipa": "/ˈmaɪnɝ/",
     "pos": "adj",
     "meaning": "từ 'minor' (adj)",
     "example": "Practice speaking 'minor' clearly.",
@@ -18154,7 +17966,7 @@ export const vocabList = [
   {
     "id": 1649,
     "word": "minority",
-    "ipa": "/minority/",
+    "ipa": "/maɪˈnɔɹəti/",
     "pos": "n",
     "meaning": "từ 'minority' (n)",
     "example": "Practice speaking 'minority' clearly.",
@@ -18163,20 +17975,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1650,
-    "word": "minute1",
-    "ipa": "/minute1/",
-    "pos": "n",
-    "meaning": "từ 'minute1' (n)",
-    "example": "Practice speaking 'minute1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'minute1' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Thời gian & Ngày tháng"
-  },
-  {
     "id": 1651,
     "word": "mirror",
-    "ipa": "/mirror/",
+    "ipa": "/ˈmɪɹɝ/",
     "pos": "n",
     "meaning": "từ 'mirror' (n)",
     "example": "Practice speaking 'mirror' clearly.",
@@ -18187,7 +17988,7 @@ export const vocabList = [
   {
     "id": 1652,
     "word": "miss",
-    "ipa": "/miss/",
+    "ipa": "/ˈmɪs/",
     "pos": "v",
     "meaning": "từ 'miss' (v)",
     "example": "Practice speaking 'miss' clearly.",
@@ -18198,7 +17999,7 @@ export const vocabList = [
   {
     "id": 1653,
     "word": "missing",
-    "ipa": "/missing/",
+    "ipa": "/ˈmɪsɪŋ/",
     "pos": "adj",
     "meaning": "từ 'missing' (adj)",
     "example": "Practice speaking 'missing' clearly.",
@@ -18209,7 +18010,7 @@ export const vocabList = [
   {
     "id": 1654,
     "word": "mission",
-    "ipa": "/mission/",
+    "ipa": "/ˈmɪʃən/",
     "pos": "n",
     "meaning": "từ 'mission' (n)",
     "example": "Practice speaking 'mission' clearly.",
@@ -18220,7 +18021,7 @@ export const vocabList = [
   {
     "id": 1655,
     "word": "mistake",
-    "ipa": "/mistake/",
+    "ipa": "/mɪˈsteɪk/",
     "pos": "n",
     "meaning": "từ 'mistake' (n)",
     "example": "Practice speaking 'mistake' clearly.",
@@ -18231,7 +18032,7 @@ export const vocabList = [
   {
     "id": 1656,
     "word": "mix",
-    "ipa": "/mix/",
+    "ipa": "/ˈmɪks/",
     "pos": "v",
     "meaning": "từ 'mix' (v)",
     "example": "Practice speaking 'mix' clearly.",
@@ -18242,7 +18043,7 @@ export const vocabList = [
   {
     "id": 1657,
     "word": "mixed",
-    "ipa": "/mixed/",
+    "ipa": "/ˈmɪkst/",
     "pos": "adj",
     "meaning": "từ 'mixed' (adj)",
     "example": "Practice speaking 'mixed' clearly.",
@@ -18253,7 +18054,7 @@ export const vocabList = [
   {
     "id": 1658,
     "word": "mixture",
-    "ipa": "/mixture/",
+    "ipa": "/ˈmɪkstʃɝ/",
     "pos": "n",
     "meaning": "từ 'mixture' (n)",
     "example": "Practice speaking 'mixture' clearly.",
@@ -18264,7 +18065,7 @@ export const vocabList = [
   {
     "id": 1659,
     "word": "mobile",
-    "ipa": "/mobile/",
+    "ipa": "/ˈmoʊbəɫ/",
     "pos": "adj",
     "meaning": "từ 'mobile' (adj)",
     "example": "Practice speaking 'mobile' clearly.",
@@ -18275,7 +18076,7 @@ export const vocabList = [
   {
     "id": 1660,
     "word": "model",
-    "ipa": "/model/",
+    "ipa": "/ˈmɑdəɫ/",
     "pos": "n",
     "meaning": "từ 'model' (n)",
     "example": "Practice speaking 'model' clearly.",
@@ -18286,7 +18087,7 @@ export const vocabList = [
   {
     "id": 1661,
     "word": "modern",
-    "ipa": "/modern/",
+    "ipa": "/ˈmɑdɝn/",
     "pos": "adj",
     "meaning": "từ 'modern' (adj)",
     "example": "Practice speaking 'modern' clearly.",
@@ -18297,7 +18098,7 @@ export const vocabList = [
   {
     "id": 1662,
     "word": "modify",
-    "ipa": "/modify/",
+    "ipa": "/ˈmɑdəˌfaɪ/",
     "pos": "v",
     "meaning": "từ 'modify' (v)",
     "example": "Practice speaking 'modify' clearly.",
@@ -18308,7 +18109,7 @@ export const vocabList = [
   {
     "id": 1663,
     "word": "moment",
-    "ipa": "/moment/",
+    "ipa": "/ˈmoʊmənt/",
     "pos": "n",
     "meaning": "từ 'moment' (n)",
     "example": "Practice speaking 'moment' clearly.",
@@ -18319,7 +18120,7 @@ export const vocabList = [
   {
     "id": 1664,
     "word": "monday",
-    "ipa": "/monday/",
+    "ipa": "/ˈmənˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'monday' (n)",
     "example": "Practice speaking 'monday' clearly.",
@@ -18330,7 +18131,7 @@ export const vocabList = [
   {
     "id": 1665,
     "word": "money",
-    "ipa": "/money/",
+    "ipa": "/ˈməni/",
     "pos": "n",
     "meaning": "từ 'money' (n)",
     "example": "Practice speaking 'money' clearly.",
@@ -18341,7 +18142,7 @@ export const vocabList = [
   {
     "id": 1666,
     "word": "monitor",
-    "ipa": "/monitor/",
+    "ipa": "/ˈmɑnətɝ/",
     "pos": "n",
     "meaning": "từ 'monitor' (n)",
     "example": "Practice speaking 'monitor' clearly.",
@@ -18352,7 +18153,7 @@ export const vocabList = [
   {
     "id": 1667,
     "word": "monkey",
-    "ipa": "/monkey/",
+    "ipa": "/ˈməŋki/",
     "pos": "n",
     "meaning": "từ 'monkey' (n)",
     "example": "Practice speaking 'monkey' clearly.",
@@ -18396,7 +18197,7 @@ export const vocabList = [
   {
     "id": 1671,
     "word": "moral",
-    "ipa": "/moral/",
+    "ipa": "/ˈmɔɹəɫ/",
     "pos": "adj",
     "meaning": "từ 'moral' (adj)",
     "example": "Practice speaking 'moral' clearly.",
@@ -18407,7 +18208,7 @@ export const vocabList = [
   {
     "id": 1672,
     "word": "more",
-    "ipa": "/more/",
+    "ipa": "/ˈmɔɹ/",
     "pos": "det/pron",
     "meaning": "từ 'more' (det/pron)",
     "example": "Practice speaking 'more' clearly.",
@@ -18418,7 +18219,7 @@ export const vocabList = [
   {
     "id": 1673,
     "word": "morning",
-    "ipa": "/morning/",
+    "ipa": "/ˈmɔɹnɪŋ/",
     "pos": "n",
     "meaning": "từ 'morning' (n)",
     "example": "Practice speaking 'morning' clearly.",
@@ -18429,7 +18230,7 @@ export const vocabList = [
   {
     "id": 1674,
     "word": "most",
-    "ipa": "/most/",
+    "ipa": "/ˈmoʊs/",
     "pos": "det/pron",
     "meaning": "từ 'most' (det/pron)",
     "example": "Practice speaking 'most' clearly.",
@@ -18440,7 +18241,7 @@ export const vocabList = [
   {
     "id": 1675,
     "word": "mostly",
-    "ipa": "/mostly/",
+    "ipa": "/ˈmoʊsɫi/",
     "pos": "adv",
     "meaning": "từ 'mostly' (adv)",
     "example": "Practice speaking 'mostly' clearly.",
@@ -18462,7 +18263,7 @@ export const vocabList = [
   {
     "id": 1677,
     "word": "motor",
-    "ipa": "/motor/",
+    "ipa": "/ˈmoʊtɝ/",
     "pos": "n",
     "meaning": "từ 'motor' (n)",
     "example": "Practice speaking 'motor' clearly.",
@@ -18473,7 +18274,7 @@ export const vocabList = [
   {
     "id": 1678,
     "word": "motorcycle",
-    "ipa": "/motorcycle/",
+    "ipa": "/ˈmoʊtɝˌsaɪkəɫ/",
     "pos": "n",
     "meaning": "từ 'motorcycle' (n)",
     "example": "Practice speaking 'motorcycle' clearly.",
@@ -18484,7 +18285,7 @@ export const vocabList = [
   {
     "id": 1679,
     "word": "mount",
-    "ipa": "/mount/",
+    "ipa": "/ˈmaʊnt/",
     "pos": "v",
     "meaning": "từ 'mount' (v)",
     "example": "Practice speaking 'mount' clearly.",
@@ -18495,7 +18296,7 @@ export const vocabList = [
   {
     "id": 1680,
     "word": "mountain",
-    "ipa": "/mountain/",
+    "ipa": "/ˈmaʊntən/",
     "pos": "n",
     "meaning": "từ 'mountain' (n)",
     "example": "Practice speaking 'mountain' clearly.",
@@ -18506,7 +18307,7 @@ export const vocabList = [
   {
     "id": 1681,
     "word": "mouse",
-    "ipa": "/mouse/",
+    "ipa": "/ˈmaʊs/",
     "pos": "n",
     "meaning": "từ 'mouse' (n)",
     "example": "Practice speaking 'mouse' clearly.",
@@ -18539,7 +18340,7 @@ export const vocabList = [
   {
     "id": 1684,
     "word": "movement",
-    "ipa": "/movement/",
+    "ipa": "/ˈmuvmənt/",
     "pos": "n",
     "meaning": "từ 'movement' (n)",
     "example": "Practice speaking 'movement' clearly.",
@@ -18550,7 +18351,7 @@ export const vocabList = [
   {
     "id": 1685,
     "word": "movie",
-    "ipa": "/movie/",
+    "ipa": "/ˈmuvi/",
     "pos": "n",
     "meaning": "từ 'movie' (n)",
     "example": "Practice speaking 'movie' clearly.",
@@ -18572,7 +18373,7 @@ export const vocabList = [
   {
     "id": 1687,
     "word": "mud",
-    "ipa": "/mud/",
+    "ipa": "/ˈməd/",
     "pos": "n",
     "meaning": "từ 'mud' (n)",
     "example": "Practice speaking 'mud' clearly.",
@@ -18583,7 +18384,7 @@ export const vocabList = [
   {
     "id": 1688,
     "word": "multiple",
-    "ipa": "/multiple/",
+    "ipa": "/ˈməɫtəpəɫ/",
     "pos": "adj",
     "meaning": "từ 'multiple' (adj)",
     "example": "Practice speaking 'multiple' clearly.",
@@ -18594,7 +18395,7 @@ export const vocabList = [
   {
     "id": 1689,
     "word": "multiply",
-    "ipa": "/multiply/",
+    "ipa": "/ˈməɫtəˌpɫaɪ/",
     "pos": "v",
     "meaning": "từ 'multiply' (v)",
     "example": "Practice speaking 'multiply' clearly.",
@@ -18605,7 +18406,7 @@ export const vocabList = [
   {
     "id": 1690,
     "word": "mum",
-    "ipa": "/mum/",
+    "ipa": "/ˈməm/",
     "pos": "n",
     "meaning": "từ 'mum' (n)",
     "example": "Practice speaking 'mum' clearly.",
@@ -18616,7 +18417,7 @@ export const vocabList = [
   {
     "id": 1691,
     "word": "murder",
-    "ipa": "/murder/",
+    "ipa": "/ˈmɝdɝ/",
     "pos": "n",
     "meaning": "từ 'murder' (n)",
     "example": "Practice speaking 'murder' clearly.",
@@ -18627,7 +18428,7 @@ export const vocabList = [
   {
     "id": 1692,
     "word": "muscle",
-    "ipa": "/muscle/",
+    "ipa": "/ˈməsəɫ/",
     "pos": "n",
     "meaning": "từ 'muscle' (n)",
     "example": "Practice speaking 'muscle' clearly.",
@@ -18638,7 +18439,7 @@ export const vocabList = [
   {
     "id": 1693,
     "word": "museum",
-    "ipa": "/museum/",
+    "ipa": "/ˈmjuziəm/",
     "pos": "n",
     "meaning": "từ 'museum' (n)",
     "example": "Practice speaking 'museum' clearly.",
@@ -18649,7 +18450,7 @@ export const vocabList = [
   {
     "id": 1694,
     "word": "music",
-    "ipa": "/music/",
+    "ipa": "/ˈmjuzɪk/",
     "pos": "n",
     "meaning": "từ 'music' (n)",
     "example": "Practice speaking 'music' clearly.",
@@ -18660,7 +18461,7 @@ export const vocabList = [
   {
     "id": 1695,
     "word": "musical",
-    "ipa": "/musical/",
+    "ipa": "/ˈmjuzɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'musical' (adj)",
     "example": "Practice speaking 'musical' clearly.",
@@ -18671,7 +18472,7 @@ export const vocabList = [
   {
     "id": 1696,
     "word": "musician",
-    "ipa": "/musician/",
+    "ipa": "/mjuˈzɪʃən/",
     "pos": "n",
     "meaning": "từ 'musician' (n)",
     "example": "Practice speaking 'musician' clearly.",
@@ -18704,7 +18505,7 @@ export const vocabList = [
   {
     "id": 1699,
     "word": "myself",
-    "ipa": "/myself/",
+    "ipa": "/ˌmaɪˈsɛɫf/",
     "pos": "pron",
     "meaning": "từ 'myself' (pron)",
     "example": "Practice speaking 'myself' clearly.",
@@ -18715,7 +18516,7 @@ export const vocabList = [
   {
     "id": 1700,
     "word": "mysterious",
-    "ipa": "/mysterious/",
+    "ipa": "/mɪˈstɪɹiəs/",
     "pos": "adj",
     "meaning": "từ 'mysterious' (adj)",
     "example": "Practice speaking 'mysterious' clearly.",
@@ -18726,7 +18527,7 @@ export const vocabList = [
   {
     "id": 1701,
     "word": "mystery",
-    "ipa": "/mystery/",
+    "ipa": "/ˈmɪstɝi/",
     "pos": "n",
     "meaning": "từ 'mystery' (n)",
     "example": "Practice speaking 'mystery' clearly.",
@@ -18737,7 +18538,7 @@ export const vocabList = [
   {
     "id": 1702,
     "word": "nail",
-    "ipa": "/nail/",
+    "ipa": "/ˈneɪɫ/",
     "pos": "n",
     "meaning": "từ 'nail' (n)",
     "example": "Practice speaking 'nail' clearly.",
@@ -18748,7 +18549,7 @@ export const vocabList = [
   {
     "id": 1703,
     "word": "name",
-    "ipa": "/name/",
+    "ipa": "/ˈneɪm/",
     "pos": "n",
     "meaning": "từ 'name' (n)",
     "example": "Practice speaking 'name' clearly.",
@@ -18759,7 +18560,7 @@ export const vocabList = [
   {
     "id": 1704,
     "word": "narrative",
-    "ipa": "/narrative/",
+    "ipa": "/ˈnæɹətɪv/",
     "pos": "n",
     "meaning": "từ 'narrative' (n)",
     "example": "Practice speaking 'narrative' clearly.",
@@ -18770,7 +18571,7 @@ export const vocabList = [
   {
     "id": 1705,
     "word": "narrow",
-    "ipa": "/narrow/",
+    "ipa": "/ˈnæɹoʊ/",
     "pos": "adj",
     "meaning": "từ 'narrow' (adj)",
     "example": "Practice speaking 'narrow' clearly.",
@@ -18781,7 +18582,7 @@ export const vocabList = [
   {
     "id": 1706,
     "word": "nation",
-    "ipa": "/nation/",
+    "ipa": "/ˈneɪʃən/",
     "pos": "n",
     "meaning": "từ 'nation' (n)",
     "example": "Practice speaking 'nation' clearly.",
@@ -18792,7 +18593,7 @@ export const vocabList = [
   {
     "id": 1707,
     "word": "national",
-    "ipa": "/national/",
+    "ipa": "/ˈnæʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'national' (adj)",
     "example": "Practice speaking 'national' clearly.",
@@ -18803,7 +18604,7 @@ export const vocabList = [
   {
     "id": 1708,
     "word": "native",
-    "ipa": "/native/",
+    "ipa": "/ˈneɪtɪv/",
     "pos": "adj",
     "meaning": "từ 'native' (adj)",
     "example": "Practice speaking 'native' clearly.",
@@ -18814,7 +18615,7 @@ export const vocabList = [
   {
     "id": 1709,
     "word": "natural",
-    "ipa": "/natural/",
+    "ipa": "/ˈnætʃɝəɫ/",
     "pos": "adj",
     "meaning": "từ 'natural' (adj)",
     "example": "Practice speaking 'natural' clearly.",
@@ -18825,7 +18626,7 @@ export const vocabList = [
   {
     "id": 1710,
     "word": "naturally",
-    "ipa": "/naturally/",
+    "ipa": "/ˈnætʃɝəɫi/",
     "pos": "adv",
     "meaning": "từ 'naturally' (adv)",
     "example": "Practice speaking 'naturally' clearly.",
@@ -18836,7 +18637,7 @@ export const vocabList = [
   {
     "id": 1711,
     "word": "nature",
-    "ipa": "/nature/",
+    "ipa": "/ˈneɪtʃɝ/",
     "pos": "n",
     "meaning": "từ 'nature' (n)",
     "example": "Practice speaking 'nature' clearly.",
@@ -18847,7 +18648,7 @@ export const vocabList = [
   {
     "id": 1712,
     "word": "near",
-    "ipa": "/near/",
+    "ipa": "/ˈnɪɹ/",
     "pos": "prep",
     "meaning": "từ 'near' (prep)",
     "example": "Practice speaking 'near' clearly.",
@@ -18858,7 +18659,7 @@ export const vocabList = [
   {
     "id": 1713,
     "word": "nearly",
-    "ipa": "/nearly/",
+    "ipa": "/ˈnɪɹɫi/",
     "pos": "adv",
     "meaning": "từ 'nearly' (adv)",
     "example": "Practice speaking 'nearly' clearly.",
@@ -18869,7 +18670,7 @@ export const vocabList = [
   {
     "id": 1714,
     "word": "neat",
-    "ipa": "/neat/",
+    "ipa": "/ˈnit/",
     "pos": "adj",
     "meaning": "từ 'neat' (adj)",
     "example": "Practice speaking 'neat' clearly.",
@@ -18880,7 +18681,7 @@ export const vocabList = [
   {
     "id": 1715,
     "word": "necessarily",
-    "ipa": "/necessarily/",
+    "ipa": "/ˌnɛsəˈsɛɹəɫi/",
     "pos": "adv",
     "meaning": "từ 'necessarily' (adv)",
     "example": "Practice speaking 'necessarily' clearly.",
@@ -18891,7 +18692,7 @@ export const vocabList = [
   {
     "id": 1716,
     "word": "necessary",
-    "ipa": "/necessary/",
+    "ipa": "/ˈnɛsəˌsɛɹi/",
     "pos": "adj",
     "meaning": "từ 'necessary' (adj)",
     "example": "Practice speaking 'necessary' clearly.",
@@ -18902,7 +18703,7 @@ export const vocabList = [
   {
     "id": 1717,
     "word": "neck",
-    "ipa": "/neck/",
+    "ipa": "/ˈnɛk/",
     "pos": "n",
     "meaning": "từ 'neck' (n)",
     "example": "Practice speaking 'neck' clearly.",
@@ -18935,7 +18736,7 @@ export const vocabList = [
   {
     "id": 1720,
     "word": "negative",
-    "ipa": "/negative/",
+    "ipa": "/ˈnɛɡətɪv/",
     "pos": "adj",
     "meaning": "từ 'negative' (adj)",
     "example": "Practice speaking 'negative' clearly.",
@@ -18946,7 +18747,7 @@ export const vocabList = [
   {
     "id": 1721,
     "word": "neighbour",
-    "ipa": "/neighbour/",
+    "ipa": "/ˈneɪbɝ/",
     "pos": "n",
     "meaning": "từ 'neighbour' (n)",
     "example": "Practice speaking 'neighbour' clearly.",
@@ -18979,7 +18780,7 @@ export const vocabList = [
   {
     "id": 1724,
     "word": "nerve",
-    "ipa": "/nerve/",
+    "ipa": "/ˈnɝv/",
     "pos": "n",
     "meaning": "từ 'nerve' (n)",
     "example": "Practice speaking 'nerve' clearly.",
@@ -18990,7 +18791,7 @@ export const vocabList = [
   {
     "id": 1725,
     "word": "nervous",
-    "ipa": "/nervous/",
+    "ipa": "/ˈnɝvəs/",
     "pos": "adj",
     "meaning": "từ 'nervous' (adj)",
     "example": "Practice speaking 'nervous' clearly.",
@@ -19001,7 +18802,7 @@ export const vocabList = [
   {
     "id": 1726,
     "word": "net",
-    "ipa": "/net/",
+    "ipa": "/ˈnɛt/",
     "pos": "n",
     "meaning": "từ 'net' (n)",
     "example": "Practice speaking 'net' clearly.",
@@ -19012,7 +18813,7 @@ export const vocabList = [
   {
     "id": 1727,
     "word": "network",
-    "ipa": "/network/",
+    "ipa": "/ˈnɛtˌwɝk/",
     "pos": "n",
     "meaning": "từ 'network' (n)",
     "example": "Practice speaking 'network' clearly.",
@@ -19023,7 +18824,7 @@ export const vocabList = [
   {
     "id": 1728,
     "word": "never",
-    "ipa": "/never/",
+    "ipa": "/ˈnɛvɝ/",
     "pos": "adv",
     "meaning": "từ 'never' (adv)",
     "example": "Practice speaking 'never' clearly.",
@@ -19045,7 +18846,7 @@ export const vocabList = [
   {
     "id": 1730,
     "word": "new",
-    "ipa": "/new/",
+    "ipa": "/ˈnju/",
     "pos": "adj",
     "meaning": "từ 'new' (adj)",
     "example": "Practice speaking 'new' clearly.",
@@ -19056,7 +18857,7 @@ export const vocabList = [
   {
     "id": 1731,
     "word": "news",
-    "ipa": "/news/",
+    "ipa": "/ˈnjuz/",
     "pos": "n",
     "meaning": "từ 'news' (n)",
     "example": "Practice speaking 'news' clearly.",
@@ -19067,7 +18868,7 @@ export const vocabList = [
   {
     "id": 1732,
     "word": "newspaper",
-    "ipa": "/newspaper/",
+    "ipa": "/ˈnuzˌpeɪpɝ/",
     "pos": "n",
     "meaning": "từ 'newspaper' (n)",
     "example": "Practice speaking 'newspaper' clearly.",
@@ -19078,7 +18879,7 @@ export const vocabList = [
   {
     "id": 1733,
     "word": "next",
-    "ipa": "/next/",
+    "ipa": "/ˈnɛks/",
     "pos": "adj",
     "meaning": "từ 'next' (adj)",
     "example": "Practice speaking 'next' clearly.",
@@ -19089,7 +18890,7 @@ export const vocabList = [
   {
     "id": 1734,
     "word": "next to",
-    "ipa": "/next to/",
+    "ipa": "/ˈnɛks ˈtu/",
     "pos": "prep",
     "meaning": "từ 'next to' (prep)",
     "example": "Practice speaking 'next to' clearly.",
@@ -19100,7 +18901,7 @@ export const vocabList = [
   {
     "id": 1735,
     "word": "nice",
-    "ipa": "/nice/",
+    "ipa": "/ˈnaɪs/",
     "pos": "adj",
     "meaning": "từ 'nice' (adj)",
     "example": "Practice speaking 'nice' clearly.",
@@ -19111,7 +18912,7 @@ export const vocabList = [
   {
     "id": 1736,
     "word": "night",
-    "ipa": "/night/",
+    "ipa": "/ˈnaɪt/",
     "pos": "n",
     "meaning": "từ 'night' (n)",
     "example": "Practice speaking 'night' clearly.",
@@ -19122,7 +18923,7 @@ export const vocabList = [
   {
     "id": 1737,
     "word": "nightmare",
-    "ipa": "/nightmare/",
+    "ipa": "/ˈnaɪtˌmɛɹ/",
     "pos": "n",
     "meaning": "từ 'nightmare' (n)",
     "example": "Practice speaking 'nightmare' clearly.",
@@ -19133,7 +18934,7 @@ export const vocabList = [
   {
     "id": 1738,
     "word": "nine",
-    "ipa": "/nine/",
+    "ipa": "/ˈnaɪn/",
     "pos": "number",
     "meaning": "từ 'nine' (number)",
     "example": "Practice speaking 'nine' clearly.",
@@ -19155,7 +18956,7 @@ export const vocabList = [
   {
     "id": 1740,
     "word": "ninety",
-    "ipa": "/ninety/",
+    "ipa": "/ˈnaɪnti/",
     "pos": "number",
     "meaning": "từ 'ninety' (number)",
     "example": "Practice speaking 'ninety' clearly.",
@@ -19166,7 +18967,7 @@ export const vocabList = [
   {
     "id": 1741,
     "word": "no",
-    "ipa": "/no/",
+    "ipa": "/ˈnoʊ/",
     "pos": "exclam",
     "meaning": "từ 'no' (exclam)",
     "example": "Practice speaking 'no' clearly.",
@@ -19177,7 +18978,7 @@ export const vocabList = [
   {
     "id": 1742,
     "word": "no one",
-    "ipa": "/no one/",
+    "ipa": "/ˈnoʊ ˈwən/",
     "pos": "pron",
     "meaning": "từ 'no one' (pron)",
     "example": "Practice speaking 'no one' clearly.",
@@ -19188,7 +18989,7 @@ export const vocabList = [
   {
     "id": 1743,
     "word": "nobody",
-    "ipa": "/nobody/",
+    "ipa": "/ˈnoʊˌbɑˌdi/",
     "pos": "pron",
     "meaning": "từ 'nobody' (pron)",
     "example": "Practice speaking 'nobody' clearly.",
@@ -19199,7 +19000,7 @@ export const vocabList = [
   {
     "id": 1744,
     "word": "noise",
-    "ipa": "/noise/",
+    "ipa": "/ˈnɔɪz/",
     "pos": "n",
     "meaning": "từ 'noise' (n)",
     "example": "Practice speaking 'noise' clearly.",
@@ -19210,7 +19011,7 @@ export const vocabList = [
   {
     "id": 1745,
     "word": "noisy",
-    "ipa": "/noisy/",
+    "ipa": "/ˈnɔɪzi/",
     "pos": "adj",
     "meaning": "từ 'noisy' (adj)",
     "example": "Practice speaking 'noisy' clearly.",
@@ -19221,7 +19022,7 @@ export const vocabList = [
   {
     "id": 1746,
     "word": "none",
-    "ipa": "/none/",
+    "ipa": "/ˈnən/",
     "pos": "pron",
     "meaning": "từ 'none' (pron)",
     "example": "Practice speaking 'none' clearly.",
@@ -19232,7 +19033,7 @@ export const vocabList = [
   {
     "id": 1747,
     "word": "nor",
-    "ipa": "/nor/",
+    "ipa": "/ˈnɔɹ/",
     "pos": "conj/adv",
     "meaning": "từ 'nor' (conj/adv)",
     "example": "Practice speaking 'nor' clearly.",
@@ -19243,7 +19044,7 @@ export const vocabList = [
   {
     "id": 1748,
     "word": "normal",
-    "ipa": "/normal/",
+    "ipa": "/ˈnɔɹməɫ/",
     "pos": "adj",
     "meaning": "từ 'normal' (adj)",
     "example": "Practice speaking 'normal' clearly.",
@@ -19254,7 +19055,7 @@ export const vocabList = [
   {
     "id": 1749,
     "word": "normally",
-    "ipa": "/normally/",
+    "ipa": "/ˈnɔɹməɫi/",
     "pos": "adv",
     "meaning": "từ 'normally' (adv)",
     "example": "Practice speaking 'normally' clearly.",
@@ -19287,7 +19088,7 @@ export const vocabList = [
   {
     "id": 1752,
     "word": "nose",
-    "ipa": "/nose/",
+    "ipa": "/ˈnoʊz/",
     "pos": "n",
     "meaning": "từ 'nose' (n)",
     "example": "Practice speaking 'nose' clearly.",
@@ -19298,7 +19099,7 @@ export const vocabList = [
   {
     "id": 1753,
     "word": "not",
-    "ipa": "/not/",
+    "ipa": "/ˈnɑt/",
     "pos": "adv",
     "meaning": "từ 'not' (adv)",
     "example": "Practice speaking 'not' clearly.",
@@ -19309,7 +19110,7 @@ export const vocabList = [
   {
     "id": 1754,
     "word": "note",
-    "ipa": "/note/",
+    "ipa": "/ˈnoʊt/",
     "pos": "n",
     "meaning": "từ 'note' (n)",
     "example": "Practice speaking 'note' clearly.",
@@ -19331,7 +19132,7 @@ export const vocabList = [
   {
     "id": 1756,
     "word": "notice",
-    "ipa": "/notice/",
+    "ipa": "/ˈnoʊtəs/",
     "pos": "v",
     "meaning": "từ 'notice' (v)",
     "example": "Practice speaking 'notice' clearly.",
@@ -19342,7 +19143,7 @@ export const vocabList = [
   {
     "id": 1757,
     "word": "notion",
-    "ipa": "/notion/",
+    "ipa": "/ˈnoʊʃən/",
     "pos": "n",
     "meaning": "từ 'notion' (n)",
     "example": "Practice speaking 'notion' clearly.",
@@ -19353,7 +19154,7 @@ export const vocabList = [
   {
     "id": 1758,
     "word": "novel",
-    "ipa": "/novel/",
+    "ipa": "/ˈnɑvəɫ/",
     "pos": "n",
     "meaning": "từ 'novel' (n)",
     "example": "Practice speaking 'novel' clearly.",
@@ -19364,7 +19165,7 @@ export const vocabList = [
   {
     "id": 1759,
     "word": "november",
-    "ipa": "/november/",
+    "ipa": "/noʊˈvɛmbɝ/",
     "pos": "n",
     "meaning": "từ 'november' (n)",
     "example": "Practice speaking 'november' clearly.",
@@ -19375,7 +19176,7 @@ export const vocabList = [
   {
     "id": 1760,
     "word": "now",
-    "ipa": "/now/",
+    "ipa": "/ˈnaʊ/",
     "pos": "adv",
     "meaning": "từ 'now' (adv)",
     "example": "Practice speaking 'now' clearly.",
@@ -19386,7 +19187,7 @@ export const vocabList = [
   {
     "id": 1761,
     "word": "nowhere",
-    "ipa": "/nowhere/",
+    "ipa": "/ˈnoʊˌwɛɹ/",
     "pos": "adv",
     "meaning": "từ 'nowhere' (adv)",
     "example": "Practice speaking 'nowhere' clearly.",
@@ -19397,7 +19198,7 @@ export const vocabList = [
   {
     "id": 1762,
     "word": "nuclear",
-    "ipa": "/nuclear/",
+    "ipa": "/ˈnukɫiɝ/",
     "pos": "adj",
     "meaning": "từ 'nuclear' (adj)",
     "example": "Practice speaking 'nuclear' clearly.",
@@ -19408,7 +19209,7 @@ export const vocabList = [
   {
     "id": 1763,
     "word": "number",
-    "ipa": "/number/",
+    "ipa": "/ˈnəmbɝ/",
     "pos": "n",
     "meaning": "từ 'number' (n)",
     "example": "Practice speaking 'number' clearly.",
@@ -19419,7 +19220,7 @@ export const vocabList = [
   {
     "id": 1764,
     "word": "numerous",
-    "ipa": "/numerous/",
+    "ipa": "/ˈnumɝəs/",
     "pos": "adj",
     "meaning": "từ 'numerous' (adj)",
     "example": "Practice speaking 'numerous' clearly.",
@@ -19430,7 +19231,7 @@ export const vocabList = [
   {
     "id": 1765,
     "word": "nurse",
-    "ipa": "/nurse/",
+    "ipa": "/ˈnɝs/",
     "pos": "n",
     "meaning": "từ 'nurse' (n)",
     "example": "Practice speaking 'nurse' clearly.",
@@ -19441,7 +19242,7 @@ export const vocabList = [
   {
     "id": 1766,
     "word": "nut",
-    "ipa": "/nut/",
+    "ipa": "/ˈnət/",
     "pos": "n",
     "meaning": "từ 'nut' (n)",
     "example": "Practice speaking 'nut' clearly.",
@@ -19452,7 +19253,7 @@ export const vocabList = [
   {
     "id": 1767,
     "word": "obey",
-    "ipa": "/obey/",
+    "ipa": "/oʊˈbeɪ/",
     "pos": "v",
     "meaning": "từ 'obey' (v)",
     "example": "Practice speaking 'obey' clearly.",
@@ -19463,7 +19264,7 @@ export const vocabList = [
   {
     "id": 1768,
     "word": "object",
-    "ipa": "/object/",
+    "ipa": "/ˈɑbdʒɛkt/",
     "pos": "n",
     "meaning": "từ 'object' (n)",
     "example": "Practice speaking 'object' clearly.",
@@ -19474,7 +19275,7 @@ export const vocabList = [
   {
     "id": 1769,
     "word": "objective",
-    "ipa": "/objective/",
+    "ipa": "/əbˈdʒɛktɪv/",
     "pos": "n",
     "meaning": "từ 'objective' (n)",
     "example": "Practice speaking 'objective' clearly.",
@@ -19485,7 +19286,7 @@ export const vocabList = [
   {
     "id": 1770,
     "word": "obligation",
-    "ipa": "/obligation/",
+    "ipa": "/ˌɑbɫəˈɡeɪʃən/",
     "pos": "n",
     "meaning": "từ 'obligation' (n)",
     "example": "Practice speaking 'obligation' clearly.",
@@ -19496,7 +19297,7 @@ export const vocabList = [
   {
     "id": 1771,
     "word": "observation",
-    "ipa": "/observation/",
+    "ipa": "/ˌɑbzɝˈveɪʃən/",
     "pos": "n",
     "meaning": "từ 'observation' (n)",
     "example": "Practice speaking 'observation' clearly.",
@@ -19507,7 +19308,7 @@ export const vocabList = [
   {
     "id": 1772,
     "word": "observe",
-    "ipa": "/observe/",
+    "ipa": "/əbˈzɝv/",
     "pos": "v",
     "meaning": "từ 'observe' (v)",
     "example": "Practice speaking 'observe' clearly.",
@@ -19518,7 +19319,7 @@ export const vocabList = [
   {
     "id": 1773,
     "word": "obtain",
-    "ipa": "/obtain/",
+    "ipa": "/əbˈteɪn/",
     "pos": "v",
     "meaning": "từ 'obtain' (v)",
     "example": "Practice speaking 'obtain' clearly.",
@@ -19529,7 +19330,7 @@ export const vocabList = [
   {
     "id": 1774,
     "word": "obvious",
-    "ipa": "/obvious/",
+    "ipa": "/ˈɑbviəs/",
     "pos": "adj",
     "meaning": "từ 'obvious' (adj)",
     "example": "Practice speaking 'obvious' clearly.",
@@ -19540,7 +19341,7 @@ export const vocabList = [
   {
     "id": 1775,
     "word": "obviously",
-    "ipa": "/obviously/",
+    "ipa": "/ˈɑbviəsɫi/",
     "pos": "adv",
     "meaning": "từ 'obviously' (adv)",
     "example": "Practice speaking 'obviously' clearly.",
@@ -19551,7 +19352,7 @@ export const vocabList = [
   {
     "id": 1776,
     "word": "occasion",
-    "ipa": "/occasion/",
+    "ipa": "/əˈkeɪʒən/",
     "pos": "n",
     "meaning": "từ 'occasion' (n)",
     "example": "Practice speaking 'occasion' clearly.",
@@ -19562,7 +19363,7 @@ export const vocabList = [
   {
     "id": 1777,
     "word": "occasionally",
-    "ipa": "/occasionally/",
+    "ipa": "/əˈkeɪʒənəɫi/",
     "pos": "adv",
     "meaning": "từ 'occasionally' (adv)",
     "example": "Practice speaking 'occasionally' clearly.",
@@ -19573,7 +19374,7 @@ export const vocabList = [
   {
     "id": 1778,
     "word": "occur",
-    "ipa": "/occur/",
+    "ipa": "/əˈkɝ/",
     "pos": "v",
     "meaning": "từ 'occur' (v)",
     "example": "Practice speaking 'occur' clearly.",
@@ -19584,7 +19385,7 @@ export const vocabList = [
   {
     "id": 1779,
     "word": "ocean",
-    "ipa": "/ocean/",
+    "ipa": "/ˈoʊʃən/",
     "pos": "n",
     "meaning": "từ 'ocean' (n)",
     "example": "Practice speaking 'ocean' clearly.",
@@ -19593,20 +19394,9 @@ export const vocabList = [
     "topic": "Thời tiết & Thiên nhiên"
   },
   {
-    "id": 1780,
-    "word": "oâ€™clock",
-    "ipa": "/oâ€™clock/",
-    "pos": "adv",
-    "meaning": "từ 'oâ€™clock' (adv)",
-    "example": "Practice speaking 'oâ€™clock' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'oâ€™clock' thật rõ ràng.",
-    "level": "A1",
-    "topic": "Thời gian & Ngày tháng"
-  },
-  {
     "id": 1781,
     "word": "october",
-    "ipa": "/october/",
+    "ipa": "/ɑkˈtoʊbɝ/",
     "pos": "n",
     "meaning": "từ 'october' (n)",
     "example": "Practice speaking 'october' clearly.",
@@ -19617,7 +19407,7 @@ export const vocabList = [
   {
     "id": 1782,
     "word": "odd",
-    "ipa": "/odd/",
+    "ipa": "/ˈɑd/",
     "pos": "adj",
     "meaning": "từ 'odd' (adj)",
     "example": "Practice speaking 'odd' clearly.",
@@ -19628,7 +19418,7 @@ export const vocabList = [
   {
     "id": 1783,
     "word": "of",
-    "ipa": "/of/",
+    "ipa": "/ˈəv/",
     "pos": "prep",
     "meaning": "từ 'of' (prep)",
     "example": "Practice speaking 'of' clearly.",
@@ -19639,7 +19429,7 @@ export const vocabList = [
   {
     "id": 1784,
     "word": "off",
-    "ipa": "/off/",
+    "ipa": "/ˈɔf/",
     "pos": "adv",
     "meaning": "từ 'off' (adv)",
     "example": "Practice speaking 'off' clearly.",
@@ -19650,7 +19440,7 @@ export const vocabList = [
   {
     "id": 1785,
     "word": "offence",
-    "ipa": "/offence/",
+    "ipa": "/əˈfɛns/",
     "pos": "n",
     "meaning": "từ 'offence' (n)",
     "example": "Practice speaking 'offence' clearly.",
@@ -19661,7 +19451,7 @@ export const vocabList = [
   {
     "id": 1786,
     "word": "offend",
-    "ipa": "/offend/",
+    "ipa": "/əˈfɛnd/",
     "pos": "v",
     "meaning": "từ 'offend' (v)",
     "example": "Practice speaking 'offend' clearly.",
@@ -19672,7 +19462,7 @@ export const vocabList = [
   {
     "id": 1787,
     "word": "offensive",
-    "ipa": "/offensive/",
+    "ipa": "/əˈfɛnsɪv/",
     "pos": "adj",
     "meaning": "từ 'offensive' (adj)",
     "example": "Practice speaking 'offensive' clearly.",
@@ -19683,7 +19473,7 @@ export const vocabList = [
   {
     "id": 1788,
     "word": "offer",
-    "ipa": "/offer/",
+    "ipa": "/ˈɔfɝ/",
     "pos": "v",
     "meaning": "từ 'offer' (v)",
     "example": "Practice speaking 'offer' clearly.",
@@ -19694,7 +19484,7 @@ export const vocabList = [
   {
     "id": 1789,
     "word": "office",
-    "ipa": "/office/",
+    "ipa": "/ˈɔfɪs/",
     "pos": "n",
     "meaning": "từ 'office' (n)",
     "example": "Practice speaking 'office' clearly.",
@@ -19705,7 +19495,7 @@ export const vocabList = [
   {
     "id": 1790,
     "word": "officer",
-    "ipa": "/officer/",
+    "ipa": "/ˈɔfəsɝ/",
     "pos": "n",
     "meaning": "từ 'officer' (n)",
     "example": "Practice speaking 'officer' clearly.",
@@ -19716,7 +19506,7 @@ export const vocabList = [
   {
     "id": 1791,
     "word": "official",
-    "ipa": "/official/",
+    "ipa": "/əˈfɪʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'official' (adj)",
     "example": "Practice speaking 'official' clearly.",
@@ -19727,7 +19517,7 @@ export const vocabList = [
   {
     "id": 1792,
     "word": "often",
-    "ipa": "/often/",
+    "ipa": "/ˈɔfən/",
     "pos": "adv",
     "meaning": "từ 'often' (adv)",
     "example": "Practice speaking 'often' clearly.",
@@ -19738,7 +19528,7 @@ export const vocabList = [
   {
     "id": 1793,
     "word": "oh",
-    "ipa": "/oh/",
+    "ipa": "/ˈoʊ/",
     "pos": "exclam",
     "meaning": "từ 'oh' (exclam)",
     "example": "Practice speaking 'oh' clearly.",
@@ -19749,7 +19539,7 @@ export const vocabList = [
   {
     "id": 1794,
     "word": "oil",
-    "ipa": "/oil/",
+    "ipa": "/ˈɔɪɫ/",
     "pos": "n",
     "meaning": "từ 'oil' (n)",
     "example": "Practice speaking 'oil' clearly.",
@@ -19760,7 +19550,7 @@ export const vocabList = [
   {
     "id": 1795,
     "word": "ok",
-    "ipa": "/ok/",
+    "ipa": "/ˈoʊˈkeɪ/",
     "pos": "exclam",
     "meaning": "từ 'ok' (exclam)",
     "example": "Practice speaking 'ok' clearly.",
@@ -19771,7 +19561,7 @@ export const vocabList = [
   {
     "id": 1796,
     "word": "old",
-    "ipa": "/old/",
+    "ipa": "/ˈoʊɫd/",
     "pos": "adj",
     "meaning": "từ 'old' (adj)",
     "example": "Practice speaking 'old' clearly.",
@@ -19793,7 +19583,7 @@ export const vocabList = [
   {
     "id": 1798,
     "word": "on",
-    "ipa": "/on/",
+    "ipa": "/ˈɑn/",
     "pos": "prep",
     "meaning": "từ 'on' (prep)",
     "example": "Practice speaking 'on' clearly.",
@@ -19804,7 +19594,7 @@ export const vocabList = [
   {
     "id": 1799,
     "word": "once",
-    "ipa": "/once/",
+    "ipa": "/ˈwəns/",
     "pos": "adv",
     "meaning": "từ 'once' (adv)",
     "example": "Practice speaking 'once' clearly.",
@@ -19815,7 +19605,7 @@ export const vocabList = [
   {
     "id": 1800,
     "word": "one",
-    "ipa": "/one/",
+    "ipa": "/ˈwən/",
     "pos": "number/det",
     "meaning": "từ 'one' (number/det)",
     "example": "Practice speaking 'one' clearly.",
@@ -19826,7 +19616,7 @@ export const vocabList = [
   {
     "id": 1801,
     "word": "onion",
-    "ipa": "/onion/",
+    "ipa": "/ˈənjən/",
     "pos": "n",
     "meaning": "từ 'onion' (n)",
     "example": "Practice speaking 'onion' clearly.",
@@ -19837,7 +19627,7 @@ export const vocabList = [
   {
     "id": 1802,
     "word": "online",
-    "ipa": "/online/",
+    "ipa": "/ˈɔnˌɫaɪn/",
     "pos": "adj",
     "meaning": "từ 'online' (adj)",
     "example": "Practice speaking 'online' clearly.",
@@ -19848,7 +19638,7 @@ export const vocabList = [
   {
     "id": 1803,
     "word": "only",
-    "ipa": "/only/",
+    "ipa": "/ˈoʊnɫi/",
     "pos": "adj",
     "meaning": "từ 'only' (adj)",
     "example": "Practice speaking 'only' clearly.",
@@ -19859,7 +19649,7 @@ export const vocabList = [
   {
     "id": 1804,
     "word": "onto",
-    "ipa": "/onto/",
+    "ipa": "/ˈɑntu/",
     "pos": "prep",
     "meaning": "từ 'onto' (prep)",
     "example": "Practice speaking 'onto' clearly.",
@@ -19881,7 +19671,7 @@ export const vocabList = [
   {
     "id": 1806,
     "word": "opening",
-    "ipa": "/opening/",
+    "ipa": "/ˈoʊpənɪŋ/",
     "pos": "n",
     "meaning": "từ 'opening' (n)",
     "example": "Practice speaking 'opening' clearly.",
@@ -19892,7 +19682,7 @@ export const vocabList = [
   {
     "id": 1807,
     "word": "operate",
-    "ipa": "/operate/",
+    "ipa": "/ˈɑpɝˌeɪt/",
     "pos": "v",
     "meaning": "từ 'operate' (v)",
     "example": "Practice speaking 'operate' clearly.",
@@ -19903,7 +19693,7 @@ export const vocabList = [
   {
     "id": 1808,
     "word": "operation",
-    "ipa": "/operation/",
+    "ipa": "/ˌɑpɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'operation' (n)",
     "example": "Practice speaking 'operation' clearly.",
@@ -19914,7 +19704,7 @@ export const vocabList = [
   {
     "id": 1809,
     "word": "opinion",
-    "ipa": "/opinion/",
+    "ipa": "/əˈpɪnjən/",
     "pos": "n",
     "meaning": "từ 'opinion' (n)",
     "example": "Practice speaking 'opinion' clearly.",
@@ -19925,7 +19715,7 @@ export const vocabList = [
   {
     "id": 1810,
     "word": "opponent",
-    "ipa": "/opponent/",
+    "ipa": "/əˈpoʊnənt/",
     "pos": "n",
     "meaning": "từ 'opponent' (n)",
     "example": "Practice speaking 'opponent' clearly.",
@@ -19936,7 +19726,7 @@ export const vocabList = [
   {
     "id": 1811,
     "word": "opportunity",
-    "ipa": "/opportunity/",
+    "ipa": "/ˌɑpɝˈtunəti/",
     "pos": "n",
     "meaning": "từ 'opportunity' (n)",
     "example": "Practice speaking 'opportunity' clearly.",
@@ -19947,7 +19737,7 @@ export const vocabList = [
   {
     "id": 1812,
     "word": "oppose",
-    "ipa": "/oppose/",
+    "ipa": "/əˈpoʊz/",
     "pos": "v",
     "meaning": "từ 'oppose' (v)",
     "example": "Practice speaking 'oppose' clearly.",
@@ -19958,7 +19748,7 @@ export const vocabList = [
   {
     "id": 1813,
     "word": "opposed",
-    "ipa": "/opposed/",
+    "ipa": "/əˈpoʊzd/",
     "pos": "adj",
     "meaning": "từ 'opposed' (adj)",
     "example": "Practice speaking 'opposed' clearly.",
@@ -19969,7 +19759,7 @@ export const vocabList = [
   {
     "id": 1814,
     "word": "opposite",
-    "ipa": "/opposite/",
+    "ipa": "/ˈɑpəzət/",
     "pos": "adj",
     "meaning": "từ 'opposite' (adj)",
     "example": "Practice speaking 'opposite' clearly.",
@@ -19980,7 +19770,7 @@ export const vocabList = [
   {
     "id": 1815,
     "word": "opposition",
-    "ipa": "/opposition/",
+    "ipa": "/ˌɑpəˈzɪʃən/",
     "pos": "n",
     "meaning": "từ 'opposition' (n)",
     "example": "Practice speaking 'opposition' clearly.",
@@ -19991,7 +19781,7 @@ export const vocabList = [
   {
     "id": 1816,
     "word": "option",
-    "ipa": "/option/",
+    "ipa": "/ˈɑpʃən/",
     "pos": "n",
     "meaning": "từ 'option' (n)",
     "example": "Practice speaking 'option' clearly.",
@@ -20002,7 +19792,7 @@ export const vocabList = [
   {
     "id": 1817,
     "word": "or",
-    "ipa": "/or/",
+    "ipa": "/ˈɔɹ/",
     "pos": "conj",
     "meaning": "từ 'or' (conj)",
     "example": "Practice speaking 'or' clearly.",
@@ -20013,7 +19803,7 @@ export const vocabList = [
   {
     "id": 1818,
     "word": "orange",
-    "ipa": "/orange/",
+    "ipa": "/ˈɔɹəndʒ/",
     "pos": "n",
     "meaning": "từ 'orange' (n)",
     "example": "Practice speaking 'orange' clearly.",
@@ -20024,7 +19814,7 @@ export const vocabList = [
   {
     "id": 1819,
     "word": "order",
-    "ipa": "/order/",
+    "ipa": "/ˈɔɹdɝ/",
     "pos": "n",
     "meaning": "từ 'order' (n)",
     "example": "Practice speaking 'order' clearly.",
@@ -20035,7 +19825,7 @@ export const vocabList = [
   {
     "id": 1820,
     "word": "ordinary",
-    "ipa": "/ordinary/",
+    "ipa": "/ˈɔɹdəˌnɛɹi/",
     "pos": "adj",
     "meaning": "từ 'ordinary' (adj)",
     "example": "Practice speaking 'ordinary' clearly.",
@@ -20046,7 +19836,7 @@ export const vocabList = [
   {
     "id": 1821,
     "word": "organ",
-    "ipa": "/organ/",
+    "ipa": "/ˈɔɹɡən/",
     "pos": "n",
     "meaning": "từ 'organ' (n)",
     "example": "Practice speaking 'organ' clearly.",
@@ -20057,7 +19847,7 @@ export const vocabList = [
   {
     "id": 1822,
     "word": "organization",
-    "ipa": "/organization/",
+    "ipa": "/ˌɔɹɡənəˈzeɪʃən/",
     "pos": "n",
     "meaning": "từ 'organization' (n)",
     "example": "Practice speaking 'organization' clearly.",
@@ -20068,7 +19858,7 @@ export const vocabList = [
   {
     "id": 1823,
     "word": "organize",
-    "ipa": "/organize/",
+    "ipa": "/ˈɔɹɡəˌnaɪz/",
     "pos": "v",
     "meaning": "từ 'organize' (v)",
     "example": "Practice speaking 'organize' clearly.",
@@ -20079,7 +19869,7 @@ export const vocabList = [
   {
     "id": 1824,
     "word": "organized",
-    "ipa": "/organized/",
+    "ipa": "/ˈɔɹɡəˌnaɪzd/",
     "pos": "adj",
     "meaning": "từ 'organized' (adj)",
     "example": "Practice speaking 'organized' clearly.",
@@ -20090,7 +19880,7 @@ export const vocabList = [
   {
     "id": 1825,
     "word": "organizer",
-    "ipa": "/organizer/",
+    "ipa": "/ˈɔɹɡəˌnaɪzɝ/",
     "pos": "n",
     "meaning": "từ 'organizer' (n)",
     "example": "Practice speaking 'organizer' clearly.",
@@ -20101,7 +19891,7 @@ export const vocabList = [
   {
     "id": 1826,
     "word": "origin",
-    "ipa": "/origin/",
+    "ipa": "/ˈɔɹədʒən/",
     "pos": "n",
     "meaning": "từ 'origin' (n)",
     "example": "Practice speaking 'origin' clearly.",
@@ -20112,7 +19902,7 @@ export const vocabList = [
   {
     "id": 1827,
     "word": "original",
-    "ipa": "/original/",
+    "ipa": "/ɝˈɪdʒənəɫ/",
     "pos": "adj",
     "meaning": "từ 'original' (adj)",
     "example": "Practice speaking 'original' clearly.",
@@ -20123,7 +19913,7 @@ export const vocabList = [
   {
     "id": 1828,
     "word": "originally",
-    "ipa": "/originally/",
+    "ipa": "/ɝˈɪdʒənəɫi/",
     "pos": "adv",
     "meaning": "từ 'originally' (adv)",
     "example": "Practice speaking 'originally' clearly.",
@@ -20156,7 +19946,7 @@ export const vocabList = [
   {
     "id": 1831,
     "word": "ought",
-    "ipa": "/ought/",
+    "ipa": "/ˈɔt/",
     "pos": "modal v",
     "meaning": "từ 'ought' (modal v)",
     "example": "Practice speaking 'ought' clearly.",
@@ -20178,7 +19968,7 @@ export const vocabList = [
   {
     "id": 1833,
     "word": "ours",
-    "ipa": "/ours/",
+    "ipa": "/ˈaʊɝz/",
     "pos": "pron",
     "meaning": "từ 'ours' (pron)",
     "example": "Practice speaking 'ours' clearly.",
@@ -20189,7 +19979,7 @@ export const vocabList = [
   {
     "id": 1834,
     "word": "ourselves",
-    "ipa": "/ourselves/",
+    "ipa": "/aʊɝˈsɛɫvz/",
     "pos": "pron",
     "meaning": "từ 'ourselves' (pron)",
     "example": "Practice speaking 'ourselves' clearly.",
@@ -20200,7 +19990,7 @@ export const vocabList = [
   {
     "id": 1835,
     "word": "out",
-    "ipa": "/out/",
+    "ipa": "/ˈaʊt/",
     "pos": "adv/prep",
     "meaning": "từ 'out' (adv/prep)",
     "example": "Practice speaking 'out' clearly.",
@@ -20211,7 +20001,7 @@ export const vocabList = [
   {
     "id": 1836,
     "word": "outcome",
-    "ipa": "/outcome/",
+    "ipa": "/ˈaʊtˌkəm/",
     "pos": "n",
     "meaning": "từ 'outcome' (n)",
     "example": "Practice speaking 'outcome' clearly.",
@@ -20244,7 +20034,7 @@ export const vocabList = [
   {
     "id": 1839,
     "word": "outer",
-    "ipa": "/outer/",
+    "ipa": "/ˈaʊtɝ/",
     "pos": "adj",
     "meaning": "từ 'outer' (adj)",
     "example": "Practice speaking 'outer' clearly.",
@@ -20255,7 +20045,7 @@ export const vocabList = [
   {
     "id": 1840,
     "word": "outline",
-    "ipa": "/outline/",
+    "ipa": "/ˈaʊtˌɫaɪn/",
     "pos": "n",
     "meaning": "từ 'outline' (n)",
     "example": "Practice speaking 'outline' clearly.",
@@ -20266,7 +20056,7 @@ export const vocabList = [
   {
     "id": 1841,
     "word": "outside",
-    "ipa": "/outside/",
+    "ipa": "/ˈaʊtˈsaɪd/",
     "pos": "adv",
     "meaning": "từ 'outside' (adv)",
     "example": "Practice speaking 'outside' clearly.",
@@ -20277,7 +20067,7 @@ export const vocabList = [
   {
     "id": 1842,
     "word": "oven",
-    "ipa": "/oven/",
+    "ipa": "/ˈəvən/",
     "pos": "n",
     "meaning": "từ 'oven' (n)",
     "example": "Practice speaking 'oven' clearly.",
@@ -20288,7 +20078,7 @@ export const vocabList = [
   {
     "id": 1843,
     "word": "over",
-    "ipa": "/over/",
+    "ipa": "/ˈoʊvɝ/",
     "pos": "prep",
     "meaning": "từ 'over' (prep)",
     "example": "Practice speaking 'over' clearly.",
@@ -20299,7 +20089,7 @@ export const vocabList = [
   {
     "id": 1844,
     "word": "overall",
-    "ipa": "/overall/",
+    "ipa": "/ˈoʊvɝˌɔɫ/",
     "pos": "adj",
     "meaning": "từ 'overall' (adj)",
     "example": "Practice speaking 'overall' clearly.",
@@ -20310,7 +20100,7 @@ export const vocabList = [
   {
     "id": 1845,
     "word": "owe",
-    "ipa": "/owe/",
+    "ipa": "/ˈoʊ/",
     "pos": "v",
     "meaning": "từ 'owe' (v)",
     "example": "Practice speaking 'owe' clearly.",
@@ -20321,7 +20111,7 @@ export const vocabList = [
   {
     "id": 1846,
     "word": "own",
-    "ipa": "/own/",
+    "ipa": "/ˈoʊn/",
     "pos": "adj/pron",
     "meaning": "từ 'own' (adj/pron)",
     "example": "Practice speaking 'own' clearly.",
@@ -20332,7 +20122,7 @@ export const vocabList = [
   {
     "id": 1847,
     "word": "owner",
-    "ipa": "/owner/",
+    "ipa": "/ˈoʊnɝ/",
     "pos": "n",
     "meaning": "từ 'owner' (n)",
     "example": "Practice speaking 'owner' clearly.",
@@ -20343,7 +20133,7 @@ export const vocabList = [
   {
     "id": 1848,
     "word": "pace",
-    "ipa": "/pace/",
+    "ipa": "/ˈpeɪs/",
     "pos": "n",
     "meaning": "từ 'pace' (n)",
     "example": "Practice speaking 'pace' clearly.",
@@ -20354,7 +20144,7 @@ export const vocabList = [
   {
     "id": 1849,
     "word": "pack",
-    "ipa": "/pack/",
+    "ipa": "/ˈpæk/",
     "pos": "v",
     "meaning": "từ 'pack' (v)",
     "example": "Practice speaking 'pack' clearly.",
@@ -20365,7 +20155,7 @@ export const vocabList = [
   {
     "id": 1850,
     "word": "package",
-    "ipa": "/package/",
+    "ipa": "/ˈpækədʒ/",
     "pos": "n",
     "meaning": "từ 'package' (n)",
     "example": "Practice speaking 'package' clearly.",
@@ -20376,7 +20166,7 @@ export const vocabList = [
   {
     "id": 1851,
     "word": "page",
-    "ipa": "/page/",
+    "ipa": "/ˈpeɪdʒ/",
     "pos": "n",
     "meaning": "từ 'page' (n)",
     "example": "Practice speaking 'page' clearly.",
@@ -20387,7 +20177,7 @@ export const vocabList = [
   {
     "id": 1852,
     "word": "pain",
-    "ipa": "/pain/",
+    "ipa": "/ˈpeɪn/",
     "pos": "n",
     "meaning": "từ 'pain' (n)",
     "example": "Practice speaking 'pain' clearly.",
@@ -20398,7 +20188,7 @@ export const vocabList = [
   {
     "id": 1853,
     "word": "painful",
-    "ipa": "/painful/",
+    "ipa": "/ˈpeɪnfəɫ/",
     "pos": "adj",
     "meaning": "từ 'painful' (adj)",
     "example": "Practice speaking 'painful' clearly.",
@@ -20409,7 +20199,7 @@ export const vocabList = [
   {
     "id": 1854,
     "word": "paint",
-    "ipa": "/paint/",
+    "ipa": "/ˈpeɪnt/",
     "pos": "v",
     "meaning": "từ 'paint' (v)",
     "example": "Practice speaking 'paint' clearly.",
@@ -20420,7 +20210,7 @@ export const vocabList = [
   {
     "id": 1855,
     "word": "painter",
-    "ipa": "/painter/",
+    "ipa": "/ˈpeɪntɝ/",
     "pos": "n",
     "meaning": "từ 'painter' (n)",
     "example": "Practice speaking 'painter' clearly.",
@@ -20431,7 +20221,7 @@ export const vocabList = [
   {
     "id": 1856,
     "word": "painting",
-    "ipa": "/painting/",
+    "ipa": "/ˈpeɪntɪŋ/",
     "pos": "n",
     "meaning": "từ 'painting' (n)",
     "example": "Practice speaking 'painting' clearly.",
@@ -20442,7 +20232,7 @@ export const vocabList = [
   {
     "id": 1857,
     "word": "pair",
-    "ipa": "/pair/",
+    "ipa": "/ˈpɛɹ/",
     "pos": "n",
     "meaning": "từ 'pair' (n)",
     "example": "Practice speaking 'pair' clearly.",
@@ -20453,7 +20243,7 @@ export const vocabList = [
   {
     "id": 1858,
     "word": "palace",
-    "ipa": "/palace/",
+    "ipa": "/ˈpæɫəs/",
     "pos": "n",
     "meaning": "từ 'palace' (n)",
     "example": "Practice speaking 'palace' clearly.",
@@ -20464,7 +20254,7 @@ export const vocabList = [
   {
     "id": 1859,
     "word": "pale",
-    "ipa": "/pale/",
+    "ipa": "/ˈpeɪɫ/",
     "pos": "adj",
     "meaning": "từ 'pale' (adj)",
     "example": "Practice speaking 'pale' clearly.",
@@ -20475,7 +20265,7 @@ export const vocabList = [
   {
     "id": 1860,
     "word": "pan",
-    "ipa": "/pan/",
+    "ipa": "/ˈpæn/",
     "pos": "n",
     "meaning": "từ 'pan' (n)",
     "example": "Practice speaking 'pan' clearly.",
@@ -20486,7 +20276,7 @@ export const vocabList = [
   {
     "id": 1861,
     "word": "panel",
-    "ipa": "/panel/",
+    "ipa": "/ˈpænəɫ/",
     "pos": "n",
     "meaning": "từ 'panel' (n)",
     "example": "Practice speaking 'panel' clearly.",
@@ -20497,7 +20287,7 @@ export const vocabList = [
   {
     "id": 1862,
     "word": "pants",
-    "ipa": "/pants/",
+    "ipa": "/ˈpænts/",
     "pos": "n",
     "meaning": "từ 'pants' (n)",
     "example": "Practice speaking 'pants' clearly.",
@@ -20508,7 +20298,7 @@ export const vocabList = [
   {
     "id": 1863,
     "word": "paper",
-    "ipa": "/paper/",
+    "ipa": "/ˈpeɪpɝ/",
     "pos": "n",
     "meaning": "từ 'paper' (n)",
     "example": "Practice speaking 'paper' clearly.",
@@ -20530,7 +20320,7 @@ export const vocabList = [
   {
     "id": 1865,
     "word": "parent",
-    "ipa": "/parent/",
+    "ipa": "/ˈpɛɹənt/",
     "pos": "n",
     "meaning": "từ 'parent' (n)",
     "example": "Practice speaking 'parent' clearly.",
@@ -20541,7 +20331,7 @@ export const vocabList = [
   {
     "id": 1866,
     "word": "park",
-    "ipa": "/park/",
+    "ipa": "/ˈpɑɹk/",
     "pos": "n",
     "meaning": "từ 'park' (n)",
     "example": "Practice speaking 'park' clearly.",
@@ -20552,7 +20342,7 @@ export const vocabList = [
   {
     "id": 1867,
     "word": "parking",
-    "ipa": "/parking/",
+    "ipa": "/ˈpɑɹkɪŋ/",
     "pos": "n",
     "meaning": "từ 'parking' (n)",
     "example": "Practice speaking 'parking' clearly.",
@@ -20563,7 +20353,7 @@ export const vocabList = [
   {
     "id": 1868,
     "word": "parliament",
-    "ipa": "/parliament/",
+    "ipa": "/ˈpɑɹɫəmənt/",
     "pos": "n",
     "meaning": "từ 'parliament' (n)",
     "example": "Practice speaking 'parliament' clearly.",
@@ -20574,7 +20364,7 @@ export const vocabList = [
   {
     "id": 1869,
     "word": "part",
-    "ipa": "/part/",
+    "ipa": "/ˈpɑɹt/",
     "pos": "n",
     "meaning": "từ 'part' (n)",
     "example": "Practice speaking 'part' clearly.",
@@ -20585,7 +20375,7 @@ export const vocabList = [
   {
     "id": 1870,
     "word": "participant",
-    "ipa": "/participant/",
+    "ipa": "/pɑɹˈtɪsəpənt/",
     "pos": "n",
     "meaning": "từ 'participant' (n)",
     "example": "Practice speaking 'participant' clearly.",
@@ -20596,7 +20386,7 @@ export const vocabList = [
   {
     "id": 1871,
     "word": "participate",
-    "ipa": "/participate/",
+    "ipa": "/pɑɹˈtɪsəˌpeɪt/",
     "pos": "v",
     "meaning": "từ 'participate' (v)",
     "example": "Practice speaking 'participate' clearly.",
@@ -20607,7 +20397,7 @@ export const vocabList = [
   {
     "id": 1872,
     "word": "particular",
-    "ipa": "/particular/",
+    "ipa": "/ˌpɑˈtɪkjəɫɝ/",
     "pos": "adj",
     "meaning": "từ 'particular' (adj)",
     "example": "Practice speaking 'particular' clearly.",
@@ -20618,7 +20408,7 @@ export const vocabList = [
   {
     "id": 1873,
     "word": "particularly",
-    "ipa": "/particularly/",
+    "ipa": "/ˌpɑɹˈtɪkjəɫɝɫi/",
     "pos": "adv",
     "meaning": "từ 'particularly' (adv)",
     "example": "Practice speaking 'particularly' clearly.",
@@ -20629,7 +20419,7 @@ export const vocabList = [
   {
     "id": 1874,
     "word": "partly",
-    "ipa": "/partly/",
+    "ipa": "/ˈpɑɹtɫi/",
     "pos": "adv",
     "meaning": "từ 'partly' (adv)",
     "example": "Practice speaking 'partly' clearly.",
@@ -20640,7 +20430,7 @@ export const vocabList = [
   {
     "id": 1875,
     "word": "partner",
-    "ipa": "/partner/",
+    "ipa": "/ˈpɑɹtnɝ/",
     "pos": "n",
     "meaning": "từ 'partner' (n)",
     "example": "Practice speaking 'partner' clearly.",
@@ -20651,7 +20441,7 @@ export const vocabList = [
   {
     "id": 1876,
     "word": "party",
-    "ipa": "/party/",
+    "ipa": "/ˈpɑɹti/",
     "pos": "n",
     "meaning": "từ 'party' (n)",
     "example": "Practice speaking 'party' clearly.",
@@ -20662,7 +20452,7 @@ export const vocabList = [
   {
     "id": 1877,
     "word": "pass",
-    "ipa": "/pass/",
+    "ipa": "/ˈpæs/",
     "pos": "v",
     "meaning": "từ 'pass' (v)",
     "example": "Practice speaking 'pass' clearly.",
@@ -20673,7 +20463,7 @@ export const vocabList = [
   {
     "id": 1878,
     "word": "passage",
-    "ipa": "/passage/",
+    "ipa": "/ˈpæsədʒ/",
     "pos": "n",
     "meaning": "từ 'passage' (n)",
     "example": "Practice speaking 'passage' clearly.",
@@ -20684,7 +20474,7 @@ export const vocabList = [
   {
     "id": 1879,
     "word": "passenger",
-    "ipa": "/passenger/",
+    "ipa": "/ˈpæsəndʒɝ/",
     "pos": "n",
     "meaning": "từ 'passenger' (n)",
     "example": "Practice speaking 'passenger' clearly.",
@@ -20695,7 +20485,7 @@ export const vocabList = [
   {
     "id": 1880,
     "word": "passion",
-    "ipa": "/passion/",
+    "ipa": "/ˈpæʃən/",
     "pos": "n",
     "meaning": "từ 'passion' (n)",
     "example": "Practice speaking 'passion' clearly.",
@@ -20706,7 +20496,7 @@ export const vocabList = [
   {
     "id": 1881,
     "word": "passport",
-    "ipa": "/passport/",
+    "ipa": "/ˈpæsˌpɔɹt/",
     "pos": "n",
     "meaning": "từ 'passport' (n)",
     "example": "Practice speaking 'passport' clearly.",
@@ -20717,7 +20507,7 @@ export const vocabList = [
   {
     "id": 1882,
     "word": "past",
-    "ipa": "/past/",
+    "ipa": "/ˈpæst/",
     "pos": "adj",
     "meaning": "từ 'past' (adj)",
     "example": "Practice speaking 'past' clearly.",
@@ -20739,7 +20529,7 @@ export const vocabList = [
   {
     "id": 1884,
     "word": "patient",
-    "ipa": "/patient/",
+    "ipa": "/ˈpeɪʃənt/",
     "pos": "n",
     "meaning": "từ 'patient' (n)",
     "example": "Practice speaking 'patient' clearly.",
@@ -20750,7 +20540,7 @@ export const vocabList = [
   {
     "id": 1885,
     "word": "pattern",
-    "ipa": "/pattern/",
+    "ipa": "/ˈpætɝn/",
     "pos": "n",
     "meaning": "từ 'pattern' (n)",
     "example": "Practice speaking 'pattern' clearly.",
@@ -20772,7 +20562,7 @@ export const vocabList = [
   {
     "id": 1887,
     "word": "payment",
-    "ipa": "/payment/",
+    "ipa": "/ˈpeɪmənt/",
     "pos": "n",
     "meaning": "từ 'payment' (n)",
     "example": "Practice speaking 'payment' clearly.",
@@ -20783,7 +20573,7 @@ export const vocabList = [
   {
     "id": 1888,
     "word": "peace",
-    "ipa": "/peace/",
+    "ipa": "/ˈpis/",
     "pos": "n",
     "meaning": "từ 'peace' (n)",
     "example": "Practice speaking 'peace' clearly.",
@@ -20794,7 +20584,7 @@ export const vocabList = [
   {
     "id": 1889,
     "word": "peaceful",
-    "ipa": "/peaceful/",
+    "ipa": "/ˈpisfəɫ/",
     "pos": "adj",
     "meaning": "từ 'peaceful' (adj)",
     "example": "Practice speaking 'peaceful' clearly.",
@@ -20805,7 +20595,7 @@ export const vocabList = [
   {
     "id": 1890,
     "word": "pen",
-    "ipa": "/pen/",
+    "ipa": "/ˈpɛn/",
     "pos": "n",
     "meaning": "từ 'pen' (n)",
     "example": "Practice speaking 'pen' clearly.",
@@ -20816,7 +20606,7 @@ export const vocabList = [
   {
     "id": 1891,
     "word": "pencil",
-    "ipa": "/pencil/",
+    "ipa": "/ˈpɛnsəɫ/",
     "pos": "n",
     "meaning": "từ 'pencil' (n)",
     "example": "Practice speaking 'pencil' clearly.",
@@ -20827,7 +20617,7 @@ export const vocabList = [
   {
     "id": 1892,
     "word": "penny",
-    "ipa": "/penny/",
+    "ipa": "/ˈpɛni/",
     "pos": "n",
     "meaning": "từ 'penny' (n)",
     "example": "Practice speaking 'penny' clearly.",
@@ -20836,20 +20626,9 @@ export const vocabList = [
     "topic": "Giáo dục & Học tập"
   },
   {
-    "id": 1893,
-    "word": "pension1",
-    "ipa": "/pension1/",
-    "pos": "n",
-    "meaning": "từ 'pension1' (n)",
-    "example": "Practice speaking 'pension1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'pension1' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Giáo dục & Học tập"
-  },
-  {
     "id": 1894,
     "word": "people",
-    "ipa": "/people/",
+    "ipa": "/ˈpipəɫ/",
     "pos": "n",
     "meaning": "từ 'people' (n)",
     "example": "Practice speaking 'people' clearly.",
@@ -20860,7 +20639,7 @@ export const vocabList = [
   {
     "id": 1895,
     "word": "pepper",
-    "ipa": "/pepper/",
+    "ipa": "/ˈpɛpɝ/",
     "pos": "n",
     "meaning": "từ 'pepper' (n)",
     "example": "Practice speaking 'pepper' clearly.",
@@ -20871,7 +20650,7 @@ export const vocabList = [
   {
     "id": 1896,
     "word": "per",
-    "ipa": "/per/",
+    "ipa": "/ˈpɝ/",
     "pos": "prep",
     "meaning": "từ 'per' (prep)",
     "example": "Practice speaking 'per' clearly.",
@@ -20882,7 +20661,7 @@ export const vocabList = [
   {
     "id": 1897,
     "word": "percent",
-    "ipa": "/percent/",
+    "ipa": "/pɝˈsɛnt/",
     "pos": "n",
     "meaning": "từ 'percent' (n)",
     "example": "Practice speaking 'percent' clearly.",
@@ -20893,7 +20672,7 @@ export const vocabList = [
   {
     "id": 1898,
     "word": "percentage",
-    "ipa": "/percentage/",
+    "ipa": "/pɝˈsɛnədʒ/",
     "pos": "n",
     "meaning": "từ 'percentage' (n)",
     "example": "Practice speaking 'percentage' clearly.",
@@ -20904,7 +20683,7 @@ export const vocabList = [
   {
     "id": 1899,
     "word": "perfect",
-    "ipa": "/perfect/",
+    "ipa": "/ˈpɝˌfɪkt/",
     "pos": "adj",
     "meaning": "từ 'perfect' (adj)",
     "example": "Practice speaking 'perfect' clearly.",
@@ -20915,7 +20694,7 @@ export const vocabList = [
   {
     "id": 1900,
     "word": "perfectly",
-    "ipa": "/perfectly/",
+    "ipa": "/ˈpɝfəkɫi/",
     "pos": "adv",
     "meaning": "từ 'perfectly' (adv)",
     "example": "Practice speaking 'perfectly' clearly.",
@@ -20926,7 +20705,7 @@ export const vocabList = [
   {
     "id": 1901,
     "word": "perform",
-    "ipa": "/perform/",
+    "ipa": "/pɝˈfɔɹm/",
     "pos": "v",
     "meaning": "từ 'perform' (v)",
     "example": "Practice speaking 'perform' clearly.",
@@ -20937,7 +20716,7 @@ export const vocabList = [
   {
     "id": 1902,
     "word": "performance",
-    "ipa": "/performance/",
+    "ipa": "/pɝˈfɔɹməns/",
     "pos": "n",
     "meaning": "từ 'performance' (n)",
     "example": "Practice speaking 'performance' clearly.",
@@ -20948,7 +20727,7 @@ export const vocabList = [
   {
     "id": 1903,
     "word": "perhaps",
-    "ipa": "/perhaps/",
+    "ipa": "/pɝˈhæps/",
     "pos": "adv",
     "meaning": "từ 'perhaps' (adv)",
     "example": "Practice speaking 'perhaps' clearly.",
@@ -20959,7 +20738,7 @@ export const vocabList = [
   {
     "id": 1904,
     "word": "period",
-    "ipa": "/period/",
+    "ipa": "/ˈpɪɹiəd/",
     "pos": "n",
     "meaning": "từ 'period' (n)",
     "example": "Practice speaking 'period' clearly.",
@@ -20970,7 +20749,7 @@ export const vocabList = [
   {
     "id": 1905,
     "word": "permanent",
-    "ipa": "/permanent/",
+    "ipa": "/ˈpɝmənənt/",
     "pos": "adj",
     "meaning": "từ 'permanent' (adj)",
     "example": "Practice speaking 'permanent' clearly.",
@@ -20981,7 +20760,7 @@ export const vocabList = [
   {
     "id": 1906,
     "word": "permission",
-    "ipa": "/permission/",
+    "ipa": "/pɝˈmɪʃən/",
     "pos": "n",
     "meaning": "từ 'permission' (n)",
     "example": "Practice speaking 'permission' clearly.",
@@ -20992,7 +20771,7 @@ export const vocabList = [
   {
     "id": 1907,
     "word": "permit",
-    "ipa": "/permit/",
+    "ipa": "/ˈpɝˌmɪt/",
     "pos": "v",
     "meaning": "từ 'permit' (v)",
     "example": "Practice speaking 'permit' clearly.",
@@ -21003,7 +20782,7 @@ export const vocabList = [
   {
     "id": 1908,
     "word": "person",
-    "ipa": "/person/",
+    "ipa": "/ˈpɝsən/",
     "pos": "n",
     "meaning": "từ 'person' (n)",
     "example": "Practice speaking 'person' clearly.",
@@ -21014,7 +20793,7 @@ export const vocabList = [
   {
     "id": 1909,
     "word": "personal",
-    "ipa": "/personal/",
+    "ipa": "/ˈpɝsɪnəɫ/",
     "pos": "adj",
     "meaning": "từ 'personal' (adj)",
     "example": "Practice speaking 'personal' clearly.",
@@ -21025,7 +20804,7 @@ export const vocabList = [
   {
     "id": 1910,
     "word": "personality",
-    "ipa": "/personality/",
+    "ipa": "/ˌpɝsəˈnæɫɪti/",
     "pos": "n",
     "meaning": "từ 'personality' (n)",
     "example": "Practice speaking 'personality' clearly.",
@@ -21036,7 +20815,7 @@ export const vocabList = [
   {
     "id": 1911,
     "word": "personally",
-    "ipa": "/personally/",
+    "ipa": "/ˈpɝsənəɫi/",
     "pos": "adv",
     "meaning": "từ 'personally' (adv)",
     "example": "Practice speaking 'personally' clearly.",
@@ -21047,7 +20826,7 @@ export const vocabList = [
   {
     "id": 1912,
     "word": "perspective",
-    "ipa": "/perspective/",
+    "ipa": "/pɝˈspɛktɪv/",
     "pos": "n",
     "meaning": "từ 'perspective' (n)",
     "example": "Practice speaking 'perspective' clearly.",
@@ -21058,7 +20837,7 @@ export const vocabList = [
   {
     "id": 1913,
     "word": "persuade",
-    "ipa": "/persuade/",
+    "ipa": "/pɝˈsweɪd/",
     "pos": "v",
     "meaning": "từ 'persuade' (v)",
     "example": "Practice speaking 'persuade' clearly.",
@@ -21069,7 +20848,7 @@ export const vocabList = [
   {
     "id": 1914,
     "word": "pet",
-    "ipa": "/pet/",
+    "ipa": "/ˈpɛt/",
     "pos": "n",
     "meaning": "từ 'pet' (n)",
     "example": "Practice speaking 'pet' clearly.",
@@ -21080,7 +20859,7 @@ export const vocabList = [
   {
     "id": 1915,
     "word": "petrol",
-    "ipa": "/petrol/",
+    "ipa": "/ˈpɛtɹoʊɫ/",
     "pos": "n",
     "meaning": "từ 'petrol' (n)",
     "example": "Practice speaking 'petrol' clearly.",
@@ -21212,7 +20991,7 @@ export const vocabList = [
   {
     "id": 1927,
     "word": "piano",
-    "ipa": "/piano/",
+    "ipa": "/piˈænə/",
     "pos": "n",
     "meaning": "từ 'piano' (n)",
     "example": "Practice speaking 'piano' clearly.",
@@ -21223,7 +21002,7 @@ export const vocabList = [
   {
     "id": 1928,
     "word": "pick",
-    "ipa": "/pick/",
+    "ipa": "/ˈpɪk/",
     "pos": "v",
     "meaning": "từ 'pick' (v)",
     "example": "Practice speaking 'pick' clearly.",
@@ -21234,7 +21013,7 @@ export const vocabList = [
   {
     "id": 1929,
     "word": "picture",
-    "ipa": "/picture/",
+    "ipa": "/ˈpɪktʃɝ/",
     "pos": "n",
     "meaning": "từ 'picture' (n)",
     "example": "Practice speaking 'picture' clearly.",
@@ -21245,7 +21024,7 @@ export const vocabList = [
   {
     "id": 1930,
     "word": "piece",
-    "ipa": "/piece/",
+    "ipa": "/ˈpis/",
     "pos": "n",
     "meaning": "từ 'piece' (n)",
     "example": "Practice speaking 'piece' clearly.",
@@ -21256,7 +21035,7 @@ export const vocabList = [
   {
     "id": 1931,
     "word": "pig",
-    "ipa": "/pig/",
+    "ipa": "/ˈpɪɡ/",
     "pos": "n",
     "meaning": "từ 'pig' (n)",
     "example": "Practice speaking 'pig' clearly.",
@@ -21267,7 +21046,7 @@ export const vocabList = [
   {
     "id": 1932,
     "word": "pile",
-    "ipa": "/pile/",
+    "ipa": "/ˈpaɪɫ/",
     "pos": "n",
     "meaning": "từ 'pile' (n)",
     "example": "Practice speaking 'pile' clearly.",
@@ -21278,7 +21057,7 @@ export const vocabList = [
   {
     "id": 1933,
     "word": "pilot",
-    "ipa": "/pilot/",
+    "ipa": "/ˈpaɪɫət/",
     "pos": "n",
     "meaning": "từ 'pilot' (n)",
     "example": "Practice speaking 'pilot' clearly.",
@@ -21289,7 +21068,7 @@ export const vocabList = [
   {
     "id": 1934,
     "word": "pin",
-    "ipa": "/pin/",
+    "ipa": "/ˈpɪn/",
     "pos": "n",
     "meaning": "từ 'pin' (n)",
     "example": "Practice speaking 'pin' clearly.",
@@ -21300,7 +21079,7 @@ export const vocabList = [
   {
     "id": 1935,
     "word": "pink",
-    "ipa": "/pink/",
+    "ipa": "/ˈpɪŋk/",
     "pos": "adj",
     "meaning": "từ 'pink' (adj)",
     "example": "Practice speaking 'pink' clearly.",
@@ -21311,7 +21090,7 @@ export const vocabList = [
   {
     "id": 1936,
     "word": "pipe",
-    "ipa": "/pipe/",
+    "ipa": "/ˈpaɪp/",
     "pos": "n",
     "meaning": "từ 'pipe' (n)",
     "example": "Practice speaking 'pipe' clearly.",
@@ -21333,7 +21112,7 @@ export const vocabList = [
   {
     "id": 1938,
     "word": "place",
-    "ipa": "/place/",
+    "ipa": "/ˈpɫeɪs/",
     "pos": "n",
     "meaning": "từ 'place' (n)",
     "example": "Practice speaking 'place' clearly.",
@@ -21344,7 +21123,7 @@ export const vocabList = [
   {
     "id": 1939,
     "word": "plain",
-    "ipa": "/plain/",
+    "ipa": "/ˈpɫeɪn/",
     "pos": "adj",
     "meaning": "từ 'plain' (adj)",
     "example": "Practice speaking 'plain' clearly.",
@@ -21355,7 +21134,7 @@ export const vocabList = [
   {
     "id": 1940,
     "word": "plan",
-    "ipa": "/plan/",
+    "ipa": "/ˈpɫæn/",
     "pos": "n",
     "meaning": "từ 'plan' (n)",
     "example": "Practice speaking 'plan' clearly.",
@@ -21366,7 +21145,7 @@ export const vocabList = [
   {
     "id": 1941,
     "word": "plane",
-    "ipa": "/plane/",
+    "ipa": "/ˈpɫeɪn/",
     "pos": "n",
     "meaning": "từ 'plane' (n)",
     "example": "Practice speaking 'plane' clearly.",
@@ -21377,7 +21156,7 @@ export const vocabList = [
   {
     "id": 1942,
     "word": "planet",
-    "ipa": "/planet/",
+    "ipa": "/ˈpɫænət/",
     "pos": "n",
     "meaning": "từ 'planet' (n)",
     "example": "Practice speaking 'planet' clearly.",
@@ -21388,7 +21167,7 @@ export const vocabList = [
   {
     "id": 1943,
     "word": "planning",
-    "ipa": "/planning/",
+    "ipa": "/ˈpɫænɪŋ/",
     "pos": "n",
     "meaning": "từ 'planning' (n)",
     "example": "Practice speaking 'planning' clearly.",
@@ -21399,7 +21178,7 @@ export const vocabList = [
   {
     "id": 1944,
     "word": "plant",
-    "ipa": "/plant/",
+    "ipa": "/ˈpɫænt/",
     "pos": "n",
     "meaning": "từ 'plant' (n)",
     "example": "Practice speaking 'plant' clearly.",
@@ -21410,7 +21189,7 @@ export const vocabList = [
   {
     "id": 1945,
     "word": "plastic",
-    "ipa": "/plastic/",
+    "ipa": "/ˈpɫæstɪk/",
     "pos": "n",
     "meaning": "từ 'plastic' (n)",
     "example": "Practice speaking 'plastic' clearly.",
@@ -21421,7 +21200,7 @@ export const vocabList = [
   {
     "id": 1946,
     "word": "plate",
-    "ipa": "/plate/",
+    "ipa": "/ˈpɫeɪt/",
     "pos": "n",
     "meaning": "từ 'plate' (n)",
     "example": "Practice speaking 'plate' clearly.",
@@ -21432,7 +21211,7 @@ export const vocabList = [
   {
     "id": 1947,
     "word": "platform",
-    "ipa": "/platform/",
+    "ipa": "/ˈpɫætˌfɔɹm/",
     "pos": "n",
     "meaning": "từ 'platform' (n)",
     "example": "Practice speaking 'platform' clearly.",
@@ -21454,7 +21233,7 @@ export const vocabList = [
   {
     "id": 1949,
     "word": "player",
-    "ipa": "/player/",
+    "ipa": "/ˈpɫeɪɝ/",
     "pos": "n",
     "meaning": "từ 'player' (n)",
     "example": "Practice speaking 'player' clearly.",
@@ -21465,7 +21244,7 @@ export const vocabList = [
   {
     "id": 1950,
     "word": "pleasant",
-    "ipa": "/pleasant/",
+    "ipa": "/ˈpɫɛzənt/",
     "pos": "adj",
     "meaning": "từ 'pleasant' (adj)",
     "example": "Practice speaking 'pleasant' clearly.",
@@ -21487,7 +21266,7 @@ export const vocabList = [
   {
     "id": 1952,
     "word": "pleased",
-    "ipa": "/pleased/",
+    "ipa": "/ˈpɫizd/",
     "pos": "adj",
     "meaning": "từ 'pleased' (adj)",
     "example": "Practice speaking 'pleased' clearly.",
@@ -21498,7 +21277,7 @@ export const vocabList = [
   {
     "id": 1953,
     "word": "pleasure",
-    "ipa": "/pleasure/",
+    "ipa": "/ˈpɫɛʒɝ/",
     "pos": "n",
     "meaning": "từ 'pleasure' (n)",
     "example": "Practice speaking 'pleasure' clearly.",
@@ -21509,7 +21288,7 @@ export const vocabList = [
   {
     "id": 1954,
     "word": "plenty",
-    "ipa": "/plenty/",
+    "ipa": "/ˈpɫɛni/",
     "pos": "pron",
     "meaning": "từ 'plenty' (pron)",
     "example": "Practice speaking 'plenty' clearly.",
@@ -21520,7 +21299,7 @@ export const vocabList = [
   {
     "id": 1955,
     "word": "plot",
-    "ipa": "/plot/",
+    "ipa": "/ˈpɫɑt/",
     "pos": "n",
     "meaning": "từ 'plot' (n)",
     "example": "Practice speaking 'plot' clearly.",
@@ -21529,20 +21308,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 1956,
-    "word": "plus1",
-    "ipa": "/plus1/",
-    "pos": "prep",
-    "meaning": "từ 'plus1' (prep)",
-    "example": "Practice speaking 'plus1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'plus1' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
     "id": 1957,
     "word": "pocket",
-    "ipa": "/pocket/",
+    "ipa": "/ˈpɑkət/",
     "pos": "n",
     "meaning": "từ 'pocket' (n)",
     "example": "Practice speaking 'pocket' clearly.",
@@ -21553,7 +21321,7 @@ export const vocabList = [
   {
     "id": 1958,
     "word": "poem",
-    "ipa": "/poem/",
+    "ipa": "/ˈpoʊəm/",
     "pos": "n",
     "meaning": "từ 'poem' (n)",
     "example": "Practice speaking 'poem' clearly.",
@@ -21564,7 +21332,7 @@ export const vocabList = [
   {
     "id": 1959,
     "word": "poet",
-    "ipa": "/poet/",
+    "ipa": "/ˈpoʊət/",
     "pos": "n",
     "meaning": "từ 'poet' (n)",
     "example": "Practice speaking 'poet' clearly.",
@@ -21575,7 +21343,7 @@ export const vocabList = [
   {
     "id": 1960,
     "word": "poetry",
-    "ipa": "/poetry/",
+    "ipa": "/ˈpoʊətɹi/",
     "pos": "n",
     "meaning": "từ 'poetry' (n)",
     "example": "Practice speaking 'poetry' clearly.",
@@ -21586,7 +21354,7 @@ export const vocabList = [
   {
     "id": 1961,
     "word": "point",
-    "ipa": "/point/",
+    "ipa": "/ˈpɔɪnt/",
     "pos": "n",
     "meaning": "từ 'point' (n)",
     "example": "Practice speaking 'point' clearly.",
@@ -21597,7 +21365,7 @@ export const vocabList = [
   {
     "id": 1962,
     "word": "pointed",
-    "ipa": "/pointed/",
+    "ipa": "/ˈpɔɪnəd/",
     "pos": "adj",
     "meaning": "từ 'pointed' (adj)",
     "example": "Practice speaking 'pointed' clearly.",
@@ -21608,7 +21376,7 @@ export const vocabList = [
   {
     "id": 1963,
     "word": "poison",
-    "ipa": "/poison/",
+    "ipa": "/ˈpɔɪzən/",
     "pos": "n",
     "meaning": "từ 'poison' (n)",
     "example": "Practice speaking 'poison' clearly.",
@@ -21619,7 +21387,7 @@ export const vocabList = [
   {
     "id": 1964,
     "word": "poisonous",
-    "ipa": "/poisonous/",
+    "ipa": "/ˈpɔɪzənəs/",
     "pos": "adj",
     "meaning": "từ 'poisonous' (adj)",
     "example": "Practice speaking 'poisonous' clearly.",
@@ -21630,7 +21398,7 @@ export const vocabList = [
   {
     "id": 1965,
     "word": "police",
-    "ipa": "/police/",
+    "ipa": "/pəˈɫis/",
     "pos": "n",
     "meaning": "từ 'police' (n)",
     "example": "Practice speaking 'police' clearly.",
@@ -21641,7 +21409,7 @@ export const vocabList = [
   {
     "id": 1966,
     "word": "policeman",
-    "ipa": "/policeman/",
+    "ipa": "/pəˈɫismən/",
     "pos": "n",
     "meaning": "từ 'policeman' (n)",
     "example": "Practice speaking 'policeman' clearly.",
@@ -21652,7 +21420,7 @@ export const vocabList = [
   {
     "id": 1967,
     "word": "policy",
-    "ipa": "/policy/",
+    "ipa": "/ˈpɑɫəsi/",
     "pos": "n",
     "meaning": "từ 'policy' (n)",
     "example": "Practice speaking 'policy' clearly.",
@@ -21663,7 +21431,7 @@ export const vocabList = [
   {
     "id": 1968,
     "word": "polite",
-    "ipa": "/polite/",
+    "ipa": "/pəˈɫaɪt/",
     "pos": "adj",
     "meaning": "từ 'polite' (adj)",
     "example": "Practice speaking 'polite' clearly.",
@@ -21674,7 +21442,7 @@ export const vocabList = [
   {
     "id": 1969,
     "word": "political",
-    "ipa": "/political/",
+    "ipa": "/pəˈɫɪtəkəɫ/",
     "pos": "adj",
     "meaning": "từ 'political' (adj)",
     "example": "Practice speaking 'political' clearly.",
@@ -21685,7 +21453,7 @@ export const vocabList = [
   {
     "id": 1970,
     "word": "politician",
-    "ipa": "/politician/",
+    "ipa": "/ˌpɑɫəˈtɪʃən/",
     "pos": "n",
     "meaning": "từ 'politician' (n)",
     "example": "Practice speaking 'politician' clearly.",
@@ -21696,7 +21464,7 @@ export const vocabList = [
   {
     "id": 1971,
     "word": "politics",
-    "ipa": "/politics/",
+    "ipa": "/ˈpɑɫəˌtɪks/",
     "pos": "n",
     "meaning": "từ 'politics' (n)",
     "example": "Practice speaking 'politics' clearly.",
@@ -21707,7 +21475,7 @@ export const vocabList = [
   {
     "id": 1972,
     "word": "pollution",
-    "ipa": "/pollution/",
+    "ipa": "/pəˈɫuʃən/",
     "pos": "n",
     "meaning": "từ 'pollution' (n)",
     "example": "Practice speaking 'pollution' clearly.",
@@ -21740,7 +21508,7 @@ export const vocabList = [
   {
     "id": 1975,
     "word": "pop",
-    "ipa": "/pop/",
+    "ipa": "/ˈpɑp/",
     "pos": "n",
     "meaning": "từ 'pop' (n)",
     "example": "Practice speaking 'pop' clearly.",
@@ -21751,7 +21519,7 @@ export const vocabList = [
   {
     "id": 1976,
     "word": "popular",
-    "ipa": "/popular/",
+    "ipa": "/ˈpɑpjəɫɝ/",
     "pos": "adj",
     "meaning": "từ 'popular' (adj)",
     "example": "Practice speaking 'popular' clearly.",
@@ -21762,7 +21530,7 @@ export const vocabList = [
   {
     "id": 1977,
     "word": "popularity",
-    "ipa": "/popularity/",
+    "ipa": "/ˌpɑpjəˈɫɛɹəti/",
     "pos": "n",
     "meaning": "từ 'popularity' (n)",
     "example": "Practice speaking 'popularity' clearly.",
@@ -21773,7 +21541,7 @@ export const vocabList = [
   {
     "id": 1978,
     "word": "population",
-    "ipa": "/population/",
+    "ipa": "/ˌpɑpjəˈɫeɪʃən/",
     "pos": "n",
     "meaning": "từ 'population' (n)",
     "example": "Practice speaking 'population' clearly.",
@@ -21784,7 +21552,7 @@ export const vocabList = [
   {
     "id": 1979,
     "word": "port",
-    "ipa": "/port/",
+    "ipa": "/ˈpɔɹt/",
     "pos": "n",
     "meaning": "từ 'port' (n)",
     "example": "Practice speaking 'port' clearly.",
@@ -21795,7 +21563,7 @@ export const vocabList = [
   {
     "id": 1980,
     "word": "portrait",
-    "ipa": "/portrait/",
+    "ipa": "/ˈpɔɹtɹət/",
     "pos": "n",
     "meaning": "từ 'portrait' (n)",
     "example": "Practice speaking 'portrait' clearly.",
@@ -21806,7 +21574,7 @@ export const vocabList = [
   {
     "id": 1981,
     "word": "pose",
-    "ipa": "/pose/",
+    "ipa": "/ˈpoʊz/",
     "pos": "v",
     "meaning": "từ 'pose' (v)",
     "example": "Practice speaking 'pose' clearly.",
@@ -21817,7 +21585,7 @@ export const vocabList = [
   {
     "id": 1982,
     "word": "position",
-    "ipa": "/position/",
+    "ipa": "/pəˈzɪʃən/",
     "pos": "n",
     "meaning": "từ 'position' (n)",
     "example": "Practice speaking 'position' clearly.",
@@ -21828,7 +21596,7 @@ export const vocabList = [
   {
     "id": 1983,
     "word": "positive",
-    "ipa": "/positive/",
+    "ipa": "/ˈpɑzətɪv/",
     "pos": "adj",
     "meaning": "từ 'positive' (adj)",
     "example": "Practice speaking 'positive' clearly.",
@@ -21839,7 +21607,7 @@ export const vocabList = [
   {
     "id": 1984,
     "word": "possess",
-    "ipa": "/possess/",
+    "ipa": "/pəˈzɛs/",
     "pos": "v",
     "meaning": "từ 'possess' (v)",
     "example": "Practice speaking 'possess' clearly.",
@@ -21850,7 +21618,7 @@ export const vocabList = [
   {
     "id": 1985,
     "word": "possession",
-    "ipa": "/possession/",
+    "ipa": "/pəˈzɛʃən/",
     "pos": "n",
     "meaning": "từ 'possession' (n)",
     "example": "Practice speaking 'possession' clearly.",
@@ -21861,7 +21629,7 @@ export const vocabList = [
   {
     "id": 1986,
     "word": "possibility",
-    "ipa": "/possibility/",
+    "ipa": "/ˌpɑsəˈbɪɫəˌti/",
     "pos": "n",
     "meaning": "từ 'possibility' (n)",
     "example": "Practice speaking 'possibility' clearly.",
@@ -21872,7 +21640,7 @@ export const vocabList = [
   {
     "id": 1987,
     "word": "possible",
-    "ipa": "/possible/",
+    "ipa": "/ˈpɑsəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'possible' (adj)",
     "example": "Practice speaking 'possible' clearly.",
@@ -21883,7 +21651,7 @@ export const vocabList = [
   {
     "id": 1988,
     "word": "possibly",
-    "ipa": "/possibly/",
+    "ipa": "/ˈpɑsəbɫi/",
     "pos": "adv",
     "meaning": "từ 'possibly' (adv)",
     "example": "Practice speaking 'possibly' clearly.",
@@ -21894,7 +21662,7 @@ export const vocabList = [
   {
     "id": 1989,
     "word": "post",
-    "ipa": "/post/",
+    "ipa": "/ˈpoʊst/",
     "pos": "n",
     "meaning": "từ 'post' (n)",
     "example": "Practice speaking 'post' clearly.",
@@ -21905,7 +21673,7 @@ export const vocabList = [
   {
     "id": 1990,
     "word": "poster",
-    "ipa": "/poster/",
+    "ipa": "/ˈpoʊstɝ/",
     "pos": "n",
     "meaning": "từ 'poster' (n)",
     "example": "Practice speaking 'poster' clearly.",
@@ -21916,7 +21684,7 @@ export const vocabList = [
   {
     "id": 1991,
     "word": "pot",
-    "ipa": "/pot/",
+    "ipa": "/ˈpɑt/",
     "pos": "n",
     "meaning": "từ 'pot' (n)",
     "example": "Practice speaking 'pot' clearly.",
@@ -21927,7 +21695,7 @@ export const vocabList = [
   {
     "id": 1992,
     "word": "potato",
-    "ipa": "/potato/",
+    "ipa": "/pəˈteɪˌtoʊ/",
     "pos": "n",
     "meaning": "từ 'potato' (n)",
     "example": "Practice speaking 'potato' clearly.",
@@ -21938,7 +21706,7 @@ export const vocabList = [
   {
     "id": 1993,
     "word": "potential",
-    "ipa": "/potential/",
+    "ipa": "/pəˈtɛnʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'potential' (adj)",
     "example": "Practice speaking 'potential' clearly.",
@@ -21949,7 +21717,7 @@ export const vocabList = [
   {
     "id": 1994,
     "word": "pound",
-    "ipa": "/pound/",
+    "ipa": "/ˈpaʊnd/",
     "pos": "n",
     "meaning": "từ 'pound' (n)",
     "example": "Practice speaking 'pound' clearly.",
@@ -21960,7 +21728,7 @@ export const vocabList = [
   {
     "id": 1995,
     "word": "pour",
-    "ipa": "/pour/",
+    "ipa": "/ˈpɔɹ/",
     "pos": "v",
     "meaning": "từ 'pour' (v)",
     "example": "Practice speaking 'pour' clearly.",
@@ -21971,7 +21739,7 @@ export const vocabList = [
   {
     "id": 1996,
     "word": "poverty",
-    "ipa": "/poverty/",
+    "ipa": "/ˈpɑvɝti/",
     "pos": "n",
     "meaning": "từ 'poverty' (n)",
     "example": "Practice speaking 'poverty' clearly.",
@@ -21982,7 +21750,7 @@ export const vocabList = [
   {
     "id": 1997,
     "word": "powder",
-    "ipa": "/powder/",
+    "ipa": "/ˈpaʊdɝ/",
     "pos": "n",
     "meaning": "từ 'powder' (n)",
     "example": "Practice speaking 'powder' clearly.",
@@ -21993,7 +21761,7 @@ export const vocabList = [
   {
     "id": 1998,
     "word": "power",
-    "ipa": "/power/",
+    "ipa": "/ˈpaʊɝ/",
     "pos": "n",
     "meaning": "từ 'power' (n)",
     "example": "Practice speaking 'power' clearly.",
@@ -22004,7 +21772,7 @@ export const vocabList = [
   {
     "id": 1999,
     "word": "powerful",
-    "ipa": "/powerful/",
+    "ipa": "/ˈpaʊɝfəɫ/",
     "pos": "adj",
     "meaning": "từ 'powerful' (adj)",
     "example": "Practice speaking 'powerful' clearly.",
@@ -22015,7 +21783,7 @@ export const vocabList = [
   {
     "id": 2000,
     "word": "practical",
-    "ipa": "/practical/",
+    "ipa": "/ˈpɹæktəkəɫ/",
     "pos": "adj",
     "meaning": "từ 'practical' (adj)",
     "example": "Practice speaking 'practical' clearly.",
@@ -22026,7 +21794,7 @@ export const vocabList = [
   {
     "id": 2001,
     "word": "practice",
-    "ipa": "/practice/",
+    "ipa": "/ˈpɹæktəs/",
     "pos": "n",
     "meaning": "từ 'practice' (n)",
     "example": "Practice speaking 'practice' clearly.",
@@ -22037,7 +21805,7 @@ export const vocabList = [
   {
     "id": 2002,
     "word": "practise",
-    "ipa": "/practise/",
+    "ipa": "/ˈpɹæktɪs/",
     "pos": "v",
     "meaning": "từ 'practise' (v)",
     "example": "Practice speaking 'practise' clearly.",
@@ -22048,7 +21816,7 @@ export const vocabList = [
   {
     "id": 2003,
     "word": "praise",
-    "ipa": "/praise/",
+    "ipa": "/ˈpɹeɪz/",
     "pos": "n",
     "meaning": "từ 'praise' (n)",
     "example": "Practice speaking 'praise' clearly.",
@@ -22059,7 +21827,7 @@ export const vocabList = [
   {
     "id": 2004,
     "word": "pray",
-    "ipa": "/pray/",
+    "ipa": "/ˈpɹeɪ/",
     "pos": "v",
     "meaning": "từ 'pray' (v)",
     "example": "Practice speaking 'pray' clearly.",
@@ -22070,7 +21838,7 @@ export const vocabList = [
   {
     "id": 2005,
     "word": "prayer",
-    "ipa": "/prayer/",
+    "ipa": "/ˈpɹeɪɝ/",
     "pos": "n",
     "meaning": "từ 'prayer' (n)",
     "example": "Practice speaking 'prayer' clearly.",
@@ -22081,7 +21849,7 @@ export const vocabList = [
   {
     "id": 2006,
     "word": "predict",
-    "ipa": "/predict/",
+    "ipa": "/pɹiˈdɪkt/",
     "pos": "v",
     "meaning": "từ 'predict' (v)",
     "example": "Practice speaking 'predict' clearly.",
@@ -22092,7 +21860,7 @@ export const vocabList = [
   {
     "id": 2007,
     "word": "prediction",
-    "ipa": "/prediction/",
+    "ipa": "/pɹiˈdɪkʃən/",
     "pos": "n",
     "meaning": "từ 'prediction' (n)",
     "example": "Practice speaking 'prediction' clearly.",
@@ -22103,7 +21871,7 @@ export const vocabList = [
   {
     "id": 2008,
     "word": "prefer",
-    "ipa": "/prefer/",
+    "ipa": "/pɹəˈfɝ/",
     "pos": "v",
     "meaning": "từ 'prefer' (v)",
     "example": "Practice speaking 'prefer' clearly.",
@@ -22114,7 +21882,7 @@ export const vocabList = [
   {
     "id": 2009,
     "word": "pregnant",
-    "ipa": "/pregnant/",
+    "ipa": "/ˈpɹɛɡnənt/",
     "pos": "adj",
     "meaning": "từ 'pregnant' (adj)",
     "example": "Practice speaking 'pregnant' clearly.",
@@ -22125,7 +21893,7 @@ export const vocabList = [
   {
     "id": 2010,
     "word": "preparation",
-    "ipa": "/preparation/",
+    "ipa": "/ˌpɹɛpɝˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'preparation' (n)",
     "example": "Practice speaking 'preparation' clearly.",
@@ -22136,7 +21904,7 @@ export const vocabList = [
   {
     "id": 2011,
     "word": "prepare",
-    "ipa": "/prepare/",
+    "ipa": "/pɹiˈpɛɹ/",
     "pos": "v",
     "meaning": "từ 'prepare' (v)",
     "example": "Practice speaking 'prepare' clearly.",
@@ -22147,7 +21915,7 @@ export const vocabList = [
   {
     "id": 2012,
     "word": "prepared",
-    "ipa": "/prepared/",
+    "ipa": "/pɹiˈpɛɹd/",
     "pos": "adj",
     "meaning": "từ 'prepared' (adj)",
     "example": "Practice speaking 'prepared' clearly.",
@@ -22158,7 +21926,7 @@ export const vocabList = [
   {
     "id": 2013,
     "word": "presence",
-    "ipa": "/presence/",
+    "ipa": "/ˈpɹɛzəns/",
     "pos": "n",
     "meaning": "từ 'presence' (n)",
     "example": "Practice speaking 'presence' clearly.",
@@ -22169,7 +21937,7 @@ export const vocabList = [
   {
     "id": 2014,
     "word": "present",
-    "ipa": "/present/",
+    "ipa": "/ˈpɹɛzənt/",
     "pos": "adj",
     "meaning": "từ 'present' (adj)",
     "example": "Practice speaking 'present' clearly.",
@@ -22180,7 +21948,7 @@ export const vocabList = [
   {
     "id": 2015,
     "word": "presentation",
-    "ipa": "/presentation/",
+    "ipa": "/ˌpɹɛzənˈteɪʃən/",
     "pos": "n",
     "meaning": "từ 'presentation' (n)",
     "example": "Practice speaking 'presentation' clearly.",
@@ -22191,7 +21959,7 @@ export const vocabList = [
   {
     "id": 2016,
     "word": "preserve",
-    "ipa": "/preserve/",
+    "ipa": "/pɹəˈzɝv/",
     "pos": "v",
     "meaning": "từ 'preserve' (v)",
     "example": "Practice speaking 'preserve' clearly.",
@@ -22202,7 +21970,7 @@ export const vocabList = [
   {
     "id": 2017,
     "word": "president",
-    "ipa": "/president/",
+    "ipa": "/ˈpɹɛzəˌdɛnt/",
     "pos": "n",
     "meaning": "từ 'president' (n)",
     "example": "Practice speaking 'president' clearly.",
@@ -22213,7 +21981,7 @@ export const vocabList = [
   {
     "id": 2018,
     "word": "press",
-    "ipa": "/press/",
+    "ipa": "/ˈpɹɛs/",
     "pos": "v",
     "meaning": "từ 'press' (v)",
     "example": "Practice speaking 'press' clearly.",
@@ -22224,7 +21992,7 @@ export const vocabList = [
   {
     "id": 2019,
     "word": "pressure",
-    "ipa": "/pressure/",
+    "ipa": "/ˈpɹɛʃɝ/",
     "pos": "n",
     "meaning": "từ 'pressure' (n)",
     "example": "Practice speaking 'pressure' clearly.",
@@ -22235,7 +22003,7 @@ export const vocabList = [
   {
     "id": 2020,
     "word": "pretend",
-    "ipa": "/pretend/",
+    "ipa": "/pɹiˈtɛnd/",
     "pos": "v",
     "meaning": "từ 'pretend' (v)",
     "example": "Practice speaking 'pretend' clearly.",
@@ -22246,7 +22014,7 @@ export const vocabList = [
   {
     "id": 2021,
     "word": "pretty",
-    "ipa": "/pretty/",
+    "ipa": "/ˈpɹɪti/",
     "pos": "adj",
     "meaning": "từ 'pretty' (adj)",
     "example": "Practice speaking 'pretty' clearly.",
@@ -22257,7 +22025,7 @@ export const vocabList = [
   {
     "id": 2022,
     "word": "prevent",
-    "ipa": "/prevent/",
+    "ipa": "/pɹiˈvɛnt/",
     "pos": "v",
     "meaning": "từ 'prevent' (v)",
     "example": "Practice speaking 'prevent' clearly.",
@@ -22268,7 +22036,7 @@ export const vocabList = [
   {
     "id": 2023,
     "word": "previous",
-    "ipa": "/previous/",
+    "ipa": "/ˈpɹiviəs/",
     "pos": "adj",
     "meaning": "từ 'previous' (adj)",
     "example": "Practice speaking 'previous' clearly.",
@@ -22279,7 +22047,7 @@ export const vocabList = [
   {
     "id": 2024,
     "word": "previously",
-    "ipa": "/previously/",
+    "ipa": "/ˈpɹiviəsɫi/",
     "pos": "adv",
     "meaning": "từ 'previously' (adv)",
     "example": "Practice speaking 'previously' clearly.",
@@ -22290,7 +22058,7 @@ export const vocabList = [
   {
     "id": 2025,
     "word": "price",
-    "ipa": "/price/",
+    "ipa": "/ˈpɹaɪs/",
     "pos": "n",
     "meaning": "từ 'price' (n)",
     "example": "Practice speaking 'price' clearly.",
@@ -22301,7 +22069,7 @@ export const vocabList = [
   {
     "id": 2026,
     "word": "priest",
-    "ipa": "/priest/",
+    "ipa": "/ˈpɹist/",
     "pos": "n",
     "meaning": "từ 'priest' (n)",
     "example": "Practice speaking 'priest' clearly.",
@@ -22312,7 +22080,7 @@ export const vocabList = [
   {
     "id": 2027,
     "word": "primary",
-    "ipa": "/primary/",
+    "ipa": "/ˈpɹaɪˌmɛɹi/",
     "pos": "adj",
     "meaning": "từ 'primary' (adj)",
     "example": "Practice speaking 'primary' clearly.",
@@ -22323,7 +22091,7 @@ export const vocabList = [
   {
     "id": 2028,
     "word": "prime",
-    "ipa": "/prime/",
+    "ipa": "/ˈpɹaɪm/",
     "pos": "adj",
     "meaning": "từ 'prime' (adj)",
     "example": "Practice speaking 'prime' clearly.",
@@ -22334,7 +22102,7 @@ export const vocabList = [
   {
     "id": 2029,
     "word": "prince",
-    "ipa": "/prince/",
+    "ipa": "/ˈpɹɪns/",
     "pos": "n",
     "meaning": "từ 'prince' (n)",
     "example": "Practice speaking 'prince' clearly.",
@@ -22345,7 +22113,7 @@ export const vocabList = [
   {
     "id": 2030,
     "word": "princess",
-    "ipa": "/princess/",
+    "ipa": "/ˈpɹɪnsɛs/",
     "pos": "n",
     "meaning": "từ 'princess' (n)",
     "example": "Practice speaking 'princess' clearly.",
@@ -22356,7 +22124,7 @@ export const vocabList = [
   {
     "id": 2031,
     "word": "principle",
-    "ipa": "/principle/",
+    "ipa": "/ˈpɹɪnsəpəɫ/",
     "pos": "n",
     "meaning": "từ 'principle' (n)",
     "example": "Practice speaking 'principle' clearly.",
@@ -22367,7 +22135,7 @@ export const vocabList = [
   {
     "id": 2032,
     "word": "print",
-    "ipa": "/print/",
+    "ipa": "/ˈpɹɪnt/",
     "pos": "v",
     "meaning": "từ 'print' (v)",
     "example": "Practice speaking 'print' clearly.",
@@ -22378,7 +22146,7 @@ export const vocabList = [
   {
     "id": 2033,
     "word": "printer",
-    "ipa": "/printer/",
+    "ipa": "/ˈpɹɪnɝ/",
     "pos": "n",
     "meaning": "từ 'printer' (n)",
     "example": "Practice speaking 'printer' clearly.",
@@ -22389,7 +22157,7 @@ export const vocabList = [
   {
     "id": 2034,
     "word": "printing",
-    "ipa": "/printing/",
+    "ipa": "/ˈpɹɪnɪŋ/",
     "pos": "n",
     "meaning": "từ 'printing' (n)",
     "example": "Practice speaking 'printing' clearly.",
@@ -22400,7 +22168,7 @@ export const vocabList = [
   {
     "id": 2035,
     "word": "priority",
-    "ipa": "/priority/",
+    "ipa": "/pɹaɪˈɔɹəti/",
     "pos": "n",
     "meaning": "từ 'priority' (n)",
     "example": "Practice speaking 'priority' clearly.",
@@ -22411,7 +22179,7 @@ export const vocabList = [
   {
     "id": 2036,
     "word": "prison",
-    "ipa": "/prison/",
+    "ipa": "/ˈpɹɪzən/",
     "pos": "n",
     "meaning": "từ 'prison' (n)",
     "example": "Practice speaking 'prison' clearly.",
@@ -22422,7 +22190,7 @@ export const vocabList = [
   {
     "id": 2037,
     "word": "prisoner",
-    "ipa": "/prisoner/",
+    "ipa": "/ˈpɹɪzənɝ/",
     "pos": "n",
     "meaning": "từ 'prisoner' (n)",
     "example": "Practice speaking 'prisoner' clearly.",
@@ -22433,7 +22201,7 @@ export const vocabList = [
   {
     "id": 2038,
     "word": "privacy",
-    "ipa": "/privacy/",
+    "ipa": "/ˈpɹaɪvəsi/",
     "pos": "n",
     "meaning": "từ 'privacy' (n)",
     "example": "Practice speaking 'privacy' clearly.",
@@ -22444,7 +22212,7 @@ export const vocabList = [
   {
     "id": 2039,
     "word": "private",
-    "ipa": "/private/",
+    "ipa": "/ˈpɹaɪvət/",
     "pos": "adj",
     "meaning": "từ 'private' (adj)",
     "example": "Practice speaking 'private' clearly.",
@@ -22455,7 +22223,7 @@ export const vocabList = [
   {
     "id": 2040,
     "word": "prize",
-    "ipa": "/prize/",
+    "ipa": "/ˈpɹaɪz/",
     "pos": "n",
     "meaning": "từ 'prize' (n)",
     "example": "Practice speaking 'prize' clearly.",
@@ -22466,7 +22234,7 @@ export const vocabList = [
   {
     "id": 2041,
     "word": "probably",
-    "ipa": "/probably/",
+    "ipa": "/ˈpɹɑbəˌbɫi/",
     "pos": "adv",
     "meaning": "từ 'probably' (adv)",
     "example": "Practice speaking 'probably' clearly.",
@@ -22477,7 +22245,7 @@ export const vocabList = [
   {
     "id": 2042,
     "word": "problem",
-    "ipa": "/problem/",
+    "ipa": "/ˈpɹɑbɫəm/",
     "pos": "n",
     "meaning": "từ 'problem' (n)",
     "example": "Practice speaking 'problem' clearly.",
@@ -22488,7 +22256,7 @@ export const vocabList = [
   {
     "id": 2043,
     "word": "procedure",
-    "ipa": "/procedure/",
+    "ipa": "/pɹəˈsidʒɝ/",
     "pos": "n",
     "meaning": "từ 'procedure' (n)",
     "example": "Practice speaking 'procedure' clearly.",
@@ -22499,7 +22267,7 @@ export const vocabList = [
   {
     "id": 2044,
     "word": "process",
-    "ipa": "/process/",
+    "ipa": "/ˈpɹɑˌsɛs/",
     "pos": "n",
     "meaning": "từ 'process' (n)",
     "example": "Practice speaking 'process' clearly.",
@@ -22510,7 +22278,7 @@ export const vocabList = [
   {
     "id": 2045,
     "word": "produce",
-    "ipa": "/produce/",
+    "ipa": "/ˈpɹoʊdus/",
     "pos": "v",
     "meaning": "từ 'produce' (v)",
     "example": "Practice speaking 'produce' clearly.",
@@ -22521,7 +22289,7 @@ export const vocabList = [
   {
     "id": 2046,
     "word": "producer",
-    "ipa": "/producer/",
+    "ipa": "/pɹəˈdusɝ/",
     "pos": "n",
     "meaning": "từ 'producer' (n)",
     "example": "Practice speaking 'producer' clearly.",
@@ -22532,7 +22300,7 @@ export const vocabList = [
   {
     "id": 2047,
     "word": "product",
-    "ipa": "/product/",
+    "ipa": "/ˈpɹɑdəkt/",
     "pos": "n",
     "meaning": "từ 'product' (n)",
     "example": "Practice speaking 'product' clearly.",
@@ -22543,7 +22311,7 @@ export const vocabList = [
   {
     "id": 2048,
     "word": "production",
-    "ipa": "/production/",
+    "ipa": "/pɝˈdəkʃən/",
     "pos": "n",
     "meaning": "từ 'production' (n)",
     "example": "Practice speaking 'production' clearly.",
@@ -22554,7 +22322,7 @@ export const vocabList = [
   {
     "id": 2049,
     "word": "profession",
-    "ipa": "/profession/",
+    "ipa": "/pɹəˈfɛʃən/",
     "pos": "n",
     "meaning": "từ 'profession' (n)",
     "example": "Practice speaking 'profession' clearly.",
@@ -22565,7 +22333,7 @@ export const vocabList = [
   {
     "id": 2050,
     "word": "professional",
-    "ipa": "/professional/",
+    "ipa": "/pɹəˈfɛʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'professional' (adj)",
     "example": "Practice speaking 'professional' clearly.",
@@ -22576,7 +22344,7 @@ export const vocabList = [
   {
     "id": 2051,
     "word": "professor",
-    "ipa": "/professor/",
+    "ipa": "/pɹəˈfɛsɝ/",
     "pos": "n",
     "meaning": "từ 'professor' (n)",
     "example": "Practice speaking 'professor' clearly.",
@@ -22587,7 +22355,7 @@ export const vocabList = [
   {
     "id": 2052,
     "word": "profile",
-    "ipa": "/profile/",
+    "ipa": "/ˈpɹoʊˌfaɪɫ/",
     "pos": "n",
     "meaning": "từ 'profile' (n)",
     "example": "Practice speaking 'profile' clearly.",
@@ -22598,7 +22366,7 @@ export const vocabList = [
   {
     "id": 2053,
     "word": "profit",
-    "ipa": "/profit/",
+    "ipa": "/ˈpɹɑfət/",
     "pos": "n",
     "meaning": "từ 'profit' (n)",
     "example": "Practice speaking 'profit' clearly.",
@@ -22609,7 +22377,7 @@ export const vocabList = [
   {
     "id": 2054,
     "word": "program",
-    "ipa": "/program/",
+    "ipa": "/ˈpɹoʊˌɡɹæm/",
     "pos": "n",
     "meaning": "từ 'program' (n)",
     "example": "Practice speaking 'program' clearly.",
@@ -22620,7 +22388,7 @@ export const vocabList = [
   {
     "id": 2055,
     "word": "programme",
-    "ipa": "/programme/",
+    "ipa": "/ˈpɹoʊˌɡɹæm/",
     "pos": "n",
     "meaning": "từ 'programme' (n)",
     "example": "Practice speaking 'programme' clearly.",
@@ -22631,7 +22399,7 @@ export const vocabList = [
   {
     "id": 2056,
     "word": "progress",
-    "ipa": "/progress/",
+    "ipa": "/ˈpɹɑˌɡɹɛs/",
     "pos": "n",
     "meaning": "từ 'progress' (n)",
     "example": "Practice speaking 'progress' clearly.",
@@ -22642,7 +22410,7 @@ export const vocabList = [
   {
     "id": 2057,
     "word": "project",
-    "ipa": "/project/",
+    "ipa": "/ˈpɹɑdʒɛkt/",
     "pos": "n",
     "meaning": "từ 'project' (n)",
     "example": "Practice speaking 'project' clearly.",
@@ -22653,7 +22421,7 @@ export const vocabList = [
   {
     "id": 2058,
     "word": "promise",
-    "ipa": "/promise/",
+    "ipa": "/ˈpɹɑməs/",
     "pos": "v",
     "meaning": "từ 'promise' (v)",
     "example": "Practice speaking 'promise' clearly.",
@@ -22664,7 +22432,7 @@ export const vocabList = [
   {
     "id": 2059,
     "word": "promote",
-    "ipa": "/promote/",
+    "ipa": "/pɹəˈmoʊt/",
     "pos": "v",
     "meaning": "từ 'promote' (v)",
     "example": "Practice speaking 'promote' clearly.",
@@ -22675,7 +22443,7 @@ export const vocabList = [
   {
     "id": 2060,
     "word": "pronounce",
-    "ipa": "/pronounce/",
+    "ipa": "/pɹəˈnaʊns/",
     "pos": "v",
     "meaning": "từ 'pronounce' (v)",
     "example": "Practice speaking 'pronounce' clearly.",
@@ -22697,7 +22465,7 @@ export const vocabList = [
   {
     "id": 2062,
     "word": "proper",
-    "ipa": "/proper/",
+    "ipa": "/ˈpɹɑpɝ/",
     "pos": "adj",
     "meaning": "từ 'proper' (adj)",
     "example": "Practice speaking 'proper' clearly.",
@@ -22708,7 +22476,7 @@ export const vocabList = [
   {
     "id": 2063,
     "word": "properly",
-    "ipa": "/properly/",
+    "ipa": "/ˈpɹɑpɝɫi/",
     "pos": "adv",
     "meaning": "từ 'properly' (adv)",
     "example": "Practice speaking 'properly' clearly.",
@@ -22719,7 +22487,7 @@ export const vocabList = [
   {
     "id": 2064,
     "word": "property",
-    "ipa": "/property/",
+    "ipa": "/ˈpɹɑpɝti/",
     "pos": "n",
     "meaning": "từ 'property' (n)",
     "example": "Practice speaking 'property' clearly.",
@@ -22730,7 +22498,7 @@ export const vocabList = [
   {
     "id": 2065,
     "word": "proposal",
-    "ipa": "/proposal/",
+    "ipa": "/pɹəˈpoʊzəɫ/",
     "pos": "n",
     "meaning": "từ 'proposal' (n)",
     "example": "Practice speaking 'proposal' clearly.",
@@ -22741,7 +22509,7 @@ export const vocabList = [
   {
     "id": 2066,
     "word": "propose",
-    "ipa": "/propose/",
+    "ipa": "/pɹəˈpoʊz/",
     "pos": "v",
     "meaning": "từ 'propose' (v)",
     "example": "Practice speaking 'propose' clearly.",
@@ -22752,7 +22520,7 @@ export const vocabList = [
   {
     "id": 2067,
     "word": "prospect",
-    "ipa": "/prospect/",
+    "ipa": "/ˈpɹɑspɛkt/",
     "pos": "n",
     "meaning": "từ 'prospect' (n)",
     "example": "Practice speaking 'prospect' clearly.",
@@ -22763,7 +22531,7 @@ export const vocabList = [
   {
     "id": 2068,
     "word": "protect",
-    "ipa": "/protect/",
+    "ipa": "/pɹəˈtɛkt/",
     "pos": "v",
     "meaning": "từ 'protect' (v)",
     "example": "Practice speaking 'protect' clearly.",
@@ -22774,7 +22542,7 @@ export const vocabList = [
   {
     "id": 2069,
     "word": "protection",
-    "ipa": "/protection/",
+    "ipa": "/pɹəˈtɛkʃən/",
     "pos": "n",
     "meaning": "từ 'protection' (n)",
     "example": "Practice speaking 'protection' clearly.",
@@ -22785,7 +22553,7 @@ export const vocabList = [
   {
     "id": 2070,
     "word": "protest",
-    "ipa": "/protest/",
+    "ipa": "/ˈpɹoʊˌtɛst/",
     "pos": "n",
     "meaning": "từ 'protest' (n)",
     "example": "Practice speaking 'protest' clearly.",
@@ -22796,7 +22564,7 @@ export const vocabList = [
   {
     "id": 2071,
     "word": "proud",
-    "ipa": "/proud/",
+    "ipa": "/ˈpɹaʊd/",
     "pos": "adj",
     "meaning": "từ 'proud' (adj)",
     "example": "Practice speaking 'proud' clearly.",
@@ -22807,7 +22575,7 @@ export const vocabList = [
   {
     "id": 2072,
     "word": "prove",
-    "ipa": "/prove/",
+    "ipa": "/ˈpɹuv/",
     "pos": "v",
     "meaning": "từ 'prove' (v)",
     "example": "Practice speaking 'prove' clearly.",
@@ -22818,7 +22586,7 @@ export const vocabList = [
   {
     "id": 2073,
     "word": "provide",
-    "ipa": "/provide/",
+    "ipa": "/pɹəˈvaɪd/",
     "pos": "v",
     "meaning": "từ 'provide' (v)",
     "example": "Practice speaking 'provide' clearly.",
@@ -22851,7 +22619,7 @@ export const vocabList = [
   {
     "id": 2076,
     "word": "pub",
-    "ipa": "/pub/",
+    "ipa": "/ˈpəb/",
     "pos": "n",
     "meaning": "từ 'pub' (n)",
     "example": "Practice speaking 'pub' clearly.",
@@ -22862,7 +22630,7 @@ export const vocabList = [
   {
     "id": 2077,
     "word": "public",
-    "ipa": "/public/",
+    "ipa": "/ˈpəbɫɪk/",
     "pos": "adj",
     "meaning": "từ 'public' (adj)",
     "example": "Practice speaking 'public' clearly.",
@@ -22873,7 +22641,7 @@ export const vocabList = [
   {
     "id": 2078,
     "word": "publication",
-    "ipa": "/publication/",
+    "ipa": "/ˌpəbɫɪˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'publication' (n)",
     "example": "Practice speaking 'publication' clearly.",
@@ -22895,7 +22663,7 @@ export const vocabList = [
   {
     "id": 2080,
     "word": "pull",
-    "ipa": "/pull/",
+    "ipa": "/ˈpʊɫ/",
     "pos": "v",
     "meaning": "từ 'pull' (v)",
     "example": "Practice speaking 'pull' clearly.",
@@ -22928,7 +22696,7 @@ export const vocabList = [
   {
     "id": 2083,
     "word": "pupil",
-    "ipa": "/pupil/",
+    "ipa": "/ˈpjupəɫ/",
     "pos": "n",
     "meaning": "từ 'pupil' (n)",
     "example": "Practice speaking 'pupil' clearly.",
@@ -22950,7 +22718,7 @@ export const vocabList = [
   {
     "id": 2085,
     "word": "pure",
-    "ipa": "/pure/",
+    "ipa": "/ˈpjʊɹ/",
     "pos": "adj",
     "meaning": "từ 'pure' (adj)",
     "example": "Practice speaking 'pure' clearly.",
@@ -22961,7 +22729,7 @@ export const vocabList = [
   {
     "id": 2086,
     "word": "purple",
-    "ipa": "/purple/",
+    "ipa": "/ˈpɝpəɫ/",
     "pos": "adj",
     "meaning": "từ 'purple' (adj)",
     "example": "Practice speaking 'purple' clearly.",
@@ -22972,7 +22740,7 @@ export const vocabList = [
   {
     "id": 2087,
     "word": "purpose",
-    "ipa": "/purpose/",
+    "ipa": "/ˈpɝpəs/",
     "pos": "n",
     "meaning": "từ 'purpose' (n)",
     "example": "Practice speaking 'purpose' clearly.",
@@ -22983,7 +22751,7 @@ export const vocabList = [
   {
     "id": 2088,
     "word": "pursue",
-    "ipa": "/pursue/",
+    "ipa": "/pɝˈsu/",
     "pos": "v",
     "meaning": "từ 'pursue' (v)",
     "example": "Practice speaking 'pursue' clearly.",
@@ -23016,7 +22784,7 @@ export const vocabList = [
   {
     "id": 2091,
     "word": "qualification",
-    "ipa": "/qualification/",
+    "ipa": "/ˌkwɑɫəfəˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'qualification' (n)",
     "example": "Practice speaking 'qualification' clearly.",
@@ -23027,7 +22795,7 @@ export const vocabList = [
   {
     "id": 2092,
     "word": "qualified",
-    "ipa": "/qualified/",
+    "ipa": "/ˈkwɑɫəˌfaɪd/",
     "pos": "adj",
     "meaning": "từ 'qualified' (adj)",
     "example": "Practice speaking 'qualified' clearly.",
@@ -23038,7 +22806,7 @@ export const vocabList = [
   {
     "id": 2093,
     "word": "qualify",
-    "ipa": "/qualify/",
+    "ipa": "/ˈkwɑɫəˌfaɪ/",
     "pos": "v",
     "meaning": "từ 'qualify' (v)",
     "example": "Practice speaking 'qualify' clearly.",
@@ -23049,7 +22817,7 @@ export const vocabList = [
   {
     "id": 2094,
     "word": "quality",
-    "ipa": "/quality/",
+    "ipa": "/ˈkwɑɫəti/",
     "pos": "n",
     "meaning": "từ 'quality' (n)",
     "example": "Practice speaking 'quality' clearly.",
@@ -23060,7 +22828,7 @@ export const vocabList = [
   {
     "id": 2095,
     "word": "quantity",
-    "ipa": "/quantity/",
+    "ipa": "/ˈkwɑntəti/",
     "pos": "n",
     "meaning": "từ 'quantity' (n)",
     "example": "Practice speaking 'quantity' clearly.",
@@ -23071,7 +22839,7 @@ export const vocabList = [
   {
     "id": 2096,
     "word": "quarter",
-    "ipa": "/quarter/",
+    "ipa": "/ˈkwɔɹtɝ/",
     "pos": "n",
     "meaning": "từ 'quarter' (n)",
     "example": "Practice speaking 'quarter' clearly.",
@@ -23093,7 +22861,7 @@ export const vocabList = [
   {
     "id": 2098,
     "word": "question",
-    "ipa": "/question/",
+    "ipa": "/ˈkwɛstʃən/",
     "pos": "n",
     "meaning": "từ 'question' (n)",
     "example": "Practice speaking 'question' clearly.",
@@ -23104,7 +22872,7 @@ export const vocabList = [
   {
     "id": 2099,
     "word": "queue",
-    "ipa": "/queue/",
+    "ipa": "/ˈkju/",
     "pos": "n",
     "meaning": "từ 'queue' (n)",
     "example": "Practice speaking 'queue' clearly.",
@@ -23115,7 +22883,7 @@ export const vocabList = [
   {
     "id": 2100,
     "word": "quick",
-    "ipa": "/quick/",
+    "ipa": "/ˈkwɪk/",
     "pos": "adj",
     "meaning": "từ 'quick' (adj)",
     "example": "Practice speaking 'quick' clearly.",
@@ -23126,7 +22894,7 @@ export const vocabList = [
   {
     "id": 2101,
     "word": "quickly",
-    "ipa": "/quickly/",
+    "ipa": "/ˈkwɪkɫi/",
     "pos": "adv",
     "meaning": "từ 'quickly' (adv)",
     "example": "Practice speaking 'quickly' clearly.",
@@ -23137,7 +22905,7 @@ export const vocabList = [
   {
     "id": 2102,
     "word": "quiet",
-    "ipa": "/quiet/",
+    "ipa": "/ˈkwaɪət/",
     "pos": "adj",
     "meaning": "từ 'quiet' (adj)",
     "example": "Practice speaking 'quiet' clearly.",
@@ -23148,7 +22916,7 @@ export const vocabList = [
   {
     "id": 2103,
     "word": "quietly",
-    "ipa": "/quietly/",
+    "ipa": "/ˈkwaɪətɫi/",
     "pos": "adv",
     "meaning": "từ 'quietly' (adv)",
     "example": "Practice speaking 'quietly' clearly.",
@@ -23159,7 +22927,7 @@ export const vocabList = [
   {
     "id": 2104,
     "word": "quit",
-    "ipa": "/quit/",
+    "ipa": "/ˈkwɪt/",
     "pos": "v",
     "meaning": "từ 'quit' (v)",
     "example": "Practice speaking 'quit' clearly.",
@@ -23170,7 +22938,7 @@ export const vocabList = [
   {
     "id": 2105,
     "word": "quite",
-    "ipa": "/quite/",
+    "ipa": "/ˈkwaɪt/",
     "pos": "adv",
     "meaning": "từ 'quite' (adv)",
     "example": "Practice speaking 'quite' clearly.",
@@ -23181,7 +22949,7 @@ export const vocabList = [
   {
     "id": 2106,
     "word": "quotation",
-    "ipa": "/quotation/",
+    "ipa": "/kwoʊˈteɪʃən/",
     "pos": "n",
     "meaning": "từ 'quotation' (n)",
     "example": "Practice speaking 'quotation' clearly.",
@@ -23192,7 +22960,7 @@ export const vocabList = [
   {
     "id": 2107,
     "word": "quote",
-    "ipa": "/quote/",
+    "ipa": "/ˈkwoʊt/",
     "pos": "v",
     "meaning": "từ 'quote' (v)",
     "example": "Practice speaking 'quote' clearly.",
@@ -23203,7 +22971,7 @@ export const vocabList = [
   {
     "id": 2108,
     "word": "race",
-    "ipa": "/race/",
+    "ipa": "/ˈɹeɪs/",
     "pos": "context",
     "meaning": "từ 'race' (context)",
     "example": "Practice speaking 'race' clearly.",
@@ -23214,7 +22982,7 @@ export const vocabList = [
   {
     "id": 2109,
     "word": "racing",
-    "ipa": "/racing/",
+    "ipa": "/ˈɹeɪsɪŋ/",
     "pos": "n",
     "meaning": "từ 'racing' (n)",
     "example": "Practice speaking 'racing' clearly.",
@@ -23225,7 +22993,7 @@ export const vocabList = [
   {
     "id": 2110,
     "word": "radio",
-    "ipa": "/radio/",
+    "ipa": "/ˈɹeɪdiˌoʊ/",
     "pos": "n",
     "meaning": "từ 'radio' (n)",
     "example": "Practice speaking 'radio' clearly.",
@@ -23236,7 +23004,7 @@ export const vocabList = [
   {
     "id": 2111,
     "word": "railway",
-    "ipa": "/railway/",
+    "ipa": "/ˈɹeɪɫˌweɪ/",
     "pos": "n",
     "meaning": "từ 'railway' (n)",
     "example": "Practice speaking 'railway' clearly.",
@@ -23247,7 +23015,7 @@ export const vocabList = [
   {
     "id": 2112,
     "word": "rain",
-    "ipa": "/rain/",
+    "ipa": "/ˈɹeɪn/",
     "pos": "n",
     "meaning": "từ 'rain' (n)",
     "example": "Practice speaking 'rain' clearly.",
@@ -23258,7 +23026,7 @@ export const vocabList = [
   {
     "id": 2113,
     "word": "raise",
-    "ipa": "/raise/",
+    "ipa": "/ˈɹeɪz/",
     "pos": "v",
     "meaning": "từ 'raise' (v)",
     "example": "Practice speaking 'raise' clearly.",
@@ -23269,7 +23037,7 @@ export const vocabList = [
   {
     "id": 2114,
     "word": "range",
-    "ipa": "/range/",
+    "ipa": "/ˈɹeɪndʒ/",
     "pos": "n",
     "meaning": "từ 'range' (n)",
     "example": "Practice speaking 'range' clearly.",
@@ -23280,7 +23048,7 @@ export const vocabList = [
   {
     "id": 2115,
     "word": "rank",
-    "ipa": "/rank/",
+    "ipa": "/ˈɹæŋk/",
     "pos": "n",
     "meaning": "từ 'rank' (n)",
     "example": "Practice speaking 'rank' clearly.",
@@ -23291,7 +23059,7 @@ export const vocabList = [
   {
     "id": 2116,
     "word": "rapid",
-    "ipa": "/rapid/",
+    "ipa": "/ˈɹæpəd/",
     "pos": "adj",
     "meaning": "từ 'rapid' (adj)",
     "example": "Practice speaking 'rapid' clearly.",
@@ -23302,7 +23070,7 @@ export const vocabList = [
   {
     "id": 2117,
     "word": "rapidly",
-    "ipa": "/rapidly/",
+    "ipa": "/ˈɹæpədɫi/",
     "pos": "adv",
     "meaning": "từ 'rapidly' (adv)",
     "example": "Practice speaking 'rapidly' clearly.",
@@ -23313,7 +23081,7 @@ export const vocabList = [
   {
     "id": 2118,
     "word": "rare",
-    "ipa": "/rare/",
+    "ipa": "/ˈɹɛɹ/",
     "pos": "adj",
     "meaning": "từ 'rare' (adj)",
     "example": "Practice speaking 'rare' clearly.",
@@ -23324,7 +23092,7 @@ export const vocabList = [
   {
     "id": 2119,
     "word": "rarely",
-    "ipa": "/rarely/",
+    "ipa": "/ˈɹɛɹɫi/",
     "pos": "adv",
     "meaning": "từ 'rarely' (adv)",
     "example": "Practice speaking 'rarely' clearly.",
@@ -23335,7 +23103,7 @@ export const vocabList = [
   {
     "id": 2120,
     "word": "rate",
-    "ipa": "/rate/",
+    "ipa": "/ˈɹeɪt/",
     "pos": "n",
     "meaning": "từ 'rate' (n)",
     "example": "Practice speaking 'rate' clearly.",
@@ -23357,7 +23125,7 @@ export const vocabList = [
   {
     "id": 2122,
     "word": "raw",
-    "ipa": "/raw/",
+    "ipa": "/ˈɹɑ/",
     "pos": "adj",
     "meaning": "từ 'raw' (adj)",
     "example": "Practice speaking 'raw' clearly.",
@@ -23379,7 +23147,7 @@ export const vocabList = [
   {
     "id": 2124,
     "word": "react",
-    "ipa": "/react/",
+    "ipa": "/ɹiˈækt/",
     "pos": "v",
     "meaning": "từ 'react' (v)",
     "example": "Practice speaking 'react' clearly.",
@@ -23390,7 +23158,7 @@ export const vocabList = [
   {
     "id": 2125,
     "word": "reaction",
-    "ipa": "/reaction/",
+    "ipa": "/ɹiˈækʃən/",
     "pos": "n",
     "meaning": "từ 'reaction' (n)",
     "example": "Practice speaking 'reaction' clearly.",
@@ -23412,7 +23180,7 @@ export const vocabList = [
   {
     "id": 2127,
     "word": "reader",
-    "ipa": "/reader/",
+    "ipa": "/ˈɹidɝ/",
     "pos": "n",
     "meaning": "từ 'reader' (n)",
     "example": "Practice speaking 'reader' clearly.",
@@ -23423,7 +23191,7 @@ export const vocabList = [
   {
     "id": 2128,
     "word": "reading",
-    "ipa": "/reading/",
+    "ipa": "/ˈɹɛdɪŋ/",
     "pos": "n",
     "meaning": "từ 'reading' (n)",
     "example": "Practice speaking 'reading' clearly.",
@@ -23434,7 +23202,7 @@ export const vocabList = [
   {
     "id": 2129,
     "word": "ready",
-    "ipa": "/ready/",
+    "ipa": "/ˈɹɛdi/",
     "pos": "adj",
     "meaning": "từ 'ready' (adj)",
     "example": "Practice speaking 'ready' clearly.",
@@ -23445,7 +23213,7 @@ export const vocabList = [
   {
     "id": 2130,
     "word": "real",
-    "ipa": "/real/",
+    "ipa": "/ˈɹiɫ/",
     "pos": "adj",
     "meaning": "từ 'real' (adj)",
     "example": "Practice speaking 'real' clearly.",
@@ -23456,7 +23224,7 @@ export const vocabList = [
   {
     "id": 2131,
     "word": "realistic",
-    "ipa": "/realistic/",
+    "ipa": "/ˌɹiəˈɫɪstɪk/",
     "pos": "adj",
     "meaning": "từ 'realistic' (adj)",
     "example": "Practice speaking 'realistic' clearly.",
@@ -23467,7 +23235,7 @@ export const vocabList = [
   {
     "id": 2132,
     "word": "reality",
-    "ipa": "/reality/",
+    "ipa": "/ˌɹiˈæɫəˌti/",
     "pos": "n",
     "meaning": "từ 'reality' (n)",
     "example": "Practice speaking 'reality' clearly.",
@@ -23478,7 +23246,7 @@ export const vocabList = [
   {
     "id": 2133,
     "word": "realize",
-    "ipa": "/realize/",
+    "ipa": "/ˈɹiəˌɫaɪz/",
     "pos": "v",
     "meaning": "từ 'realize' (v)",
     "example": "Practice speaking 'realize' clearly.",
@@ -23489,7 +23257,7 @@ export const vocabList = [
   {
     "id": 2134,
     "word": "really",
-    "ipa": "/really/",
+    "ipa": "/ˈɹiɫi/",
     "pos": "adv",
     "meaning": "từ 'really' (adv)",
     "example": "Practice speaking 'really' clearly.",
@@ -23500,7 +23268,7 @@ export const vocabList = [
   {
     "id": 2135,
     "word": "reason",
-    "ipa": "/reason/",
+    "ipa": "/ˈɹizən/",
     "pos": "n",
     "meaning": "từ 'reason' (n)",
     "example": "Practice speaking 'reason' clearly.",
@@ -23511,7 +23279,7 @@ export const vocabList = [
   {
     "id": 2136,
     "word": "reasonable",
-    "ipa": "/reasonable/",
+    "ipa": "/ˈɹizənəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'reasonable' (adj)",
     "example": "Practice speaking 'reasonable' clearly.",
@@ -23522,7 +23290,7 @@ export const vocabList = [
   {
     "id": 2137,
     "word": "recall",
-    "ipa": "/recall/",
+    "ipa": "/ˈɹiˌkɔɫ/",
     "pos": "v",
     "meaning": "từ 'recall' (v)",
     "example": "Practice speaking 'recall' clearly.",
@@ -23533,7 +23301,7 @@ export const vocabList = [
   {
     "id": 2138,
     "word": "receipt",
-    "ipa": "/receipt/",
+    "ipa": "/ɹiˈsit/",
     "pos": "n",
     "meaning": "từ 'receipt' (n)",
     "example": "Practice speaking 'receipt' clearly.",
@@ -23555,7 +23323,7 @@ export const vocabList = [
   {
     "id": 2140,
     "word": "recent",
-    "ipa": "/recent/",
+    "ipa": "/ˈɹisənt/",
     "pos": "adj",
     "meaning": "từ 'recent' (adj)",
     "example": "Practice speaking 'recent' clearly.",
@@ -23566,7 +23334,7 @@ export const vocabList = [
   {
     "id": 2141,
     "word": "recently",
-    "ipa": "/recently/",
+    "ipa": "/ˈɹisənɫi/",
     "pos": "adv",
     "meaning": "từ 'recently' (adv)",
     "example": "Practice speaking 'recently' clearly.",
@@ -23577,7 +23345,7 @@ export const vocabList = [
   {
     "id": 2142,
     "word": "reception",
-    "ipa": "/reception/",
+    "ipa": "/ɹiˈsɛpʃən/",
     "pos": "n",
     "meaning": "từ 'reception' (n)",
     "example": "Practice speaking 'reception' clearly.",
@@ -23588,7 +23356,7 @@ export const vocabList = [
   {
     "id": 2143,
     "word": "recipe",
-    "ipa": "/recipe/",
+    "ipa": "/ˈɹɛsəpi/",
     "pos": "n",
     "meaning": "từ 'recipe' (n)",
     "example": "Practice speaking 'recipe' clearly.",
@@ -23599,7 +23367,7 @@ export const vocabList = [
   {
     "id": 2144,
     "word": "recognize",
-    "ipa": "/recognize/",
+    "ipa": "/ˈɹɛkəɡˌnaɪz/",
     "pos": "v",
     "meaning": "từ 'recognize' (v)",
     "example": "Practice speaking 'recognize' clearly.",
@@ -23610,7 +23378,7 @@ export const vocabList = [
   {
     "id": 2145,
     "word": "recommend",
-    "ipa": "/recommend/",
+    "ipa": "/ˌɹɛkəˈmɛnd/",
     "pos": "v",
     "meaning": "từ 'recommend' (v)",
     "example": "Practice speaking 'recommend' clearly.",
@@ -23621,7 +23389,7 @@ export const vocabList = [
   {
     "id": 2146,
     "word": "recommendation",
-    "ipa": "/recommendation/",
+    "ipa": "/ˌɹɛkəmənˈdeɪʃən/",
     "pos": "n",
     "meaning": "từ 'recommendation' (n)",
     "example": "Practice speaking 'recommendation' clearly.",
@@ -23632,7 +23400,7 @@ export const vocabList = [
   {
     "id": 2147,
     "word": "record",
-    "ipa": "/record/",
+    "ipa": "/ˈɹɛkɝd/",
     "pos": "n",
     "meaning": "từ 'record' (n)",
     "example": "Practice speaking 'record' clearly.",
@@ -23643,7 +23411,7 @@ export const vocabList = [
   {
     "id": 2148,
     "word": "recording",
-    "ipa": "/recording/",
+    "ipa": "/ɹəˈkɔɹdɪŋ/",
     "pos": "n",
     "meaning": "từ 'recording' (n)",
     "example": "Practice speaking 'recording' clearly.",
@@ -23654,7 +23422,7 @@ export const vocabList = [
   {
     "id": 2149,
     "word": "recover",
-    "ipa": "/recover/",
+    "ipa": "/ɹɪˈkəvɝ/",
     "pos": "v",
     "meaning": "từ 'recover' (v)",
     "example": "Practice speaking 'recover' clearly.",
@@ -23665,7 +23433,7 @@ export const vocabList = [
   {
     "id": 2150,
     "word": "recycle",
-    "ipa": "/recycle/",
+    "ipa": "/ɹiˈsaɪkəɫ/",
     "pos": "v",
     "meaning": "từ 'recycle' (v)",
     "example": "Practice speaking 'recycle' clearly.",
@@ -23676,7 +23444,7 @@ export const vocabList = [
   {
     "id": 2151,
     "word": "red",
-    "ipa": "/red/",
+    "ipa": "/ˈɹɛd/",
     "pos": "adj",
     "meaning": "từ 'red' (adj)",
     "example": "Practice speaking 'red' clearly.",
@@ -23687,7 +23455,7 @@ export const vocabList = [
   {
     "id": 2152,
     "word": "reduce",
-    "ipa": "/reduce/",
+    "ipa": "/ɹəˈdus/",
     "pos": "v",
     "meaning": "từ 'reduce' (v)",
     "example": "Practice speaking 'reduce' clearly.",
@@ -23698,7 +23466,7 @@ export const vocabList = [
   {
     "id": 2153,
     "word": "reduction",
-    "ipa": "/reduction/",
+    "ipa": "/ɹəˈdəkʃən/",
     "pos": "n",
     "meaning": "từ 'reduction' (n)",
     "example": "Practice speaking 'reduction' clearly.",
@@ -23709,7 +23477,7 @@ export const vocabList = [
   {
     "id": 2154,
     "word": "refer",
-    "ipa": "/refer/",
+    "ipa": "/ɹəˈfɝ/",
     "pos": "v",
     "meaning": "từ 'refer' (v)",
     "example": "Practice speaking 'refer' clearly.",
@@ -23720,7 +23488,7 @@ export const vocabList = [
   {
     "id": 2155,
     "word": "reference",
-    "ipa": "/reference/",
+    "ipa": "/ˈɹɛfɝəns/",
     "pos": "n",
     "meaning": "từ 'reference' (n)",
     "example": "Practice speaking 'reference' clearly.",
@@ -23731,7 +23499,7 @@ export const vocabList = [
   {
     "id": 2156,
     "word": "reflect",
-    "ipa": "/reflect/",
+    "ipa": "/ɹɪˈfɫɛkt/",
     "pos": "v",
     "meaning": "từ 'reflect' (v)",
     "example": "Practice speaking 'reflect' clearly.",
@@ -23740,20 +23508,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 2157,
-    "word": "refuse1",
-    "ipa": "/refuse1/",
-    "pos": "v",
-    "meaning": "từ 'refuse1' (v)",
-    "example": "Practice speaking 'refuse1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'refuse1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 2158,
     "word": "regard",
-    "ipa": "/regard/",
+    "ipa": "/ɹɪˈɡɑɹd/",
     "pos": "v",
     "meaning": "từ 'regard' (v)",
     "example": "Practice speaking 'regard' clearly.",
@@ -23764,7 +23521,7 @@ export const vocabList = [
   {
     "id": 2159,
     "word": "region",
-    "ipa": "/region/",
+    "ipa": "/ˈɹidʒən/",
     "pos": "n",
     "meaning": "từ 'region' (n)",
     "example": "Practice speaking 'region' clearly.",
@@ -23775,7 +23532,7 @@ export const vocabList = [
   {
     "id": 2160,
     "word": "regional",
-    "ipa": "/regional/",
+    "ipa": "/ˈɹidʒənəɫ/",
     "pos": "adj",
     "meaning": "từ 'regional' (adj)",
     "example": "Practice speaking 'regional' clearly.",
@@ -23786,7 +23543,7 @@ export const vocabList = [
   {
     "id": 2161,
     "word": "register",
-    "ipa": "/register/",
+    "ipa": "/ˈɹɛdʒɪstɝ/",
     "pos": "v",
     "meaning": "từ 'register' (v)",
     "example": "Practice speaking 'register' clearly.",
@@ -23797,7 +23554,7 @@ export const vocabList = [
   {
     "id": 2162,
     "word": "regret",
-    "ipa": "/regret/",
+    "ipa": "/ɹəˈɡɹɛt/",
     "pos": "v",
     "meaning": "từ 'regret' (v)",
     "example": "Practice speaking 'regret' clearly.",
@@ -23808,7 +23565,7 @@ export const vocabList = [
   {
     "id": 2163,
     "word": "regular",
-    "ipa": "/regular/",
+    "ipa": "/ˈɹeɪɡjəɫɝ/",
     "pos": "adj",
     "meaning": "từ 'regular' (adj)",
     "example": "Practice speaking 'regular' clearly.",
@@ -23819,7 +23576,7 @@ export const vocabList = [
   {
     "id": 2164,
     "word": "regularly",
-    "ipa": "/regularly/",
+    "ipa": "/ˈɹɛɡjəɫɝɫi/",
     "pos": "adv",
     "meaning": "từ 'regularly' (adv)",
     "example": "Practice speaking 'regularly' clearly.",
@@ -23830,7 +23587,7 @@ export const vocabList = [
   {
     "id": 2165,
     "word": "regulation",
-    "ipa": "/regulation/",
+    "ipa": "/ˌɹɛɡjəˈɫeɪʃən/",
     "pos": "n",
     "meaning": "từ 'regulation' (n)",
     "example": "Practice speaking 'regulation' clearly.",
@@ -23841,7 +23598,7 @@ export const vocabList = [
   {
     "id": 2166,
     "word": "reject",
-    "ipa": "/reject/",
+    "ipa": "/ˈɹidʒɛkt/",
     "pos": "v",
     "meaning": "từ 'reject' (v)",
     "example": "Practice speaking 'reject' clearly.",
@@ -23852,7 +23609,7 @@ export const vocabList = [
   {
     "id": 2167,
     "word": "relate",
-    "ipa": "/relate/",
+    "ipa": "/ɹiˈɫeɪt/",
     "pos": "v",
     "meaning": "từ 'relate' (v)",
     "example": "Practice speaking 'relate' clearly.",
@@ -23863,7 +23620,7 @@ export const vocabList = [
   {
     "id": 2168,
     "word": "related",
-    "ipa": "/related/",
+    "ipa": "/ˌɹiˈɫeɪtɪd/",
     "pos": "adj",
     "meaning": "từ 'related' (adj)",
     "example": "Practice speaking 'related' clearly.",
@@ -23874,7 +23631,7 @@ export const vocabList = [
   {
     "id": 2169,
     "word": "relation",
-    "ipa": "/relation/",
+    "ipa": "/ɹiˈɫeɪʃən/",
     "pos": "n",
     "meaning": "từ 'relation' (n)",
     "example": "Practice speaking 'relation' clearly.",
@@ -23896,7 +23653,7 @@ export const vocabList = [
   {
     "id": 2171,
     "word": "relative",
-    "ipa": "/relative/",
+    "ipa": "/ˈɹɛɫətɪv/",
     "pos": "adj",
     "meaning": "từ 'relative' (adj)",
     "example": "Practice speaking 'relative' clearly.",
@@ -23907,7 +23664,7 @@ export const vocabList = [
   {
     "id": 2172,
     "word": "relatively",
-    "ipa": "/relatively/",
+    "ipa": "/ˈɹɛɫətɪvɫi/",
     "pos": "adv",
     "meaning": "từ 'relatively' (adv)",
     "example": "Practice speaking 'relatively' clearly.",
@@ -23918,7 +23675,7 @@ export const vocabList = [
   {
     "id": 2173,
     "word": "relax",
-    "ipa": "/relax/",
+    "ipa": "/ɹiˈɫæks/",
     "pos": "v",
     "meaning": "từ 'relax' (v)",
     "example": "Practice speaking 'relax' clearly.",
@@ -23929,7 +23686,7 @@ export const vocabList = [
   {
     "id": 2174,
     "word": "relaxed",
-    "ipa": "/relaxed/",
+    "ipa": "/ɹiˈɫækst/",
     "pos": "adj",
     "meaning": "từ 'relaxed' (adj)",
     "example": "Practice speaking 'relaxed' clearly.",
@@ -23940,7 +23697,7 @@ export const vocabList = [
   {
     "id": 2175,
     "word": "relaxing",
-    "ipa": "/relaxing/",
+    "ipa": "/ɹiˈɫæksɪŋ/",
     "pos": "adj",
     "meaning": "từ 'relaxing' (adj)",
     "example": "Practice speaking 'relaxing' clearly.",
@@ -23951,7 +23708,7 @@ export const vocabList = [
   {
     "id": 2176,
     "word": "release",
-    "ipa": "/release/",
+    "ipa": "/ɹiˈɫis/",
     "pos": "v",
     "meaning": "từ 'release' (v)",
     "example": "Practice speaking 'release' clearly.",
@@ -23962,7 +23719,7 @@ export const vocabList = [
   {
     "id": 2177,
     "word": "relevant",
-    "ipa": "/relevant/",
+    "ipa": "/ˈɹɛɫəvənt/",
     "pos": "adj",
     "meaning": "từ 'relevant' (adj)",
     "example": "Practice speaking 'relevant' clearly.",
@@ -23973,7 +23730,7 @@ export const vocabList = [
   {
     "id": 2178,
     "word": "reliable",
-    "ipa": "/reliable/",
+    "ipa": "/ɹiˈɫaɪəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'reliable' (adj)",
     "example": "Practice speaking 'reliable' clearly.",
@@ -23984,7 +23741,7 @@ export const vocabList = [
   {
     "id": 2179,
     "word": "relief",
-    "ipa": "/relief/",
+    "ipa": "/ɹiˈɫif/",
     "pos": "n",
     "meaning": "từ 'relief' (n)",
     "example": "Practice speaking 'relief' clearly.",
@@ -23995,7 +23752,7 @@ export const vocabList = [
   {
     "id": 2180,
     "word": "religion",
-    "ipa": "/religion/",
+    "ipa": "/ɹiˈɫɪdʒən/",
     "pos": "n",
     "meaning": "từ 'religion' (n)",
     "example": "Practice speaking 'religion' clearly.",
@@ -24006,7 +23763,7 @@ export const vocabList = [
   {
     "id": 2181,
     "word": "religious",
-    "ipa": "/religious/",
+    "ipa": "/ɹiˈɫɪdʒəs/",
     "pos": "adj",
     "meaning": "từ 'religious' (adj)",
     "example": "Practice speaking 'religious' clearly.",
@@ -24017,7 +23774,7 @@ export const vocabList = [
   {
     "id": 2182,
     "word": "rely",
-    "ipa": "/rely/",
+    "ipa": "/ɹiˈɫaɪ/",
     "pos": "v",
     "meaning": "từ 'rely' (v)",
     "example": "Practice speaking 'rely' clearly.",
@@ -24028,7 +23785,7 @@ export const vocabList = [
   {
     "id": 2183,
     "word": "remain",
-    "ipa": "/remain/",
+    "ipa": "/ɹiˈmeɪn/",
     "pos": "v",
     "meaning": "từ 'remain' (v)",
     "example": "Practice speaking 'remain' clearly.",
@@ -24039,7 +23796,7 @@ export const vocabList = [
   {
     "id": 2184,
     "word": "remark",
-    "ipa": "/remark/",
+    "ipa": "/ɹiˈmɑɹk/",
     "pos": "n",
     "meaning": "từ 'remark' (n)",
     "example": "Practice speaking 'remark' clearly.",
@@ -24061,7 +23818,7 @@ export const vocabList = [
   {
     "id": 2186,
     "word": "remind",
-    "ipa": "/remind/",
+    "ipa": "/ɹiˈmaɪnd/",
     "pos": "v",
     "meaning": "từ 'remind' (v)",
     "example": "Practice speaking 'remind' clearly.",
@@ -24072,7 +23829,7 @@ export const vocabList = [
   {
     "id": 2187,
     "word": "remote",
-    "ipa": "/remote/",
+    "ipa": "/ɹiˈmoʊt/",
     "pos": "adj",
     "meaning": "từ 'remote' (adj)",
     "example": "Practice speaking 'remote' clearly.",
@@ -24083,7 +23840,7 @@ export const vocabList = [
   {
     "id": 2188,
     "word": "remove",
-    "ipa": "/remove/",
+    "ipa": "/ɹiˈmuv/",
     "pos": "v",
     "meaning": "từ 'remove' (v)",
     "example": "Practice speaking 'remove' clearly.",
@@ -24094,7 +23851,7 @@ export const vocabList = [
   {
     "id": 2189,
     "word": "rent",
-    "ipa": "/rent/",
+    "ipa": "/ˈɹɛnt/",
     "pos": "n",
     "meaning": "từ 'rent' (n)",
     "example": "Practice speaking 'rent' clearly.",
@@ -24105,7 +23862,7 @@ export const vocabList = [
   {
     "id": 2190,
     "word": "repair",
-    "ipa": "/repair/",
+    "ipa": "/ɹɪˈpɛɹ/",
     "pos": "v",
     "meaning": "từ 'repair' (v)",
     "example": "Practice speaking 'repair' clearly.",
@@ -24116,7 +23873,7 @@ export const vocabList = [
   {
     "id": 2191,
     "word": "repeat",
-    "ipa": "/repeat/",
+    "ipa": "/ɹiˈpit/",
     "pos": "v",
     "meaning": "từ 'repeat' (v)",
     "example": "Practice speaking 'repeat' clearly.",
@@ -24127,7 +23884,7 @@ export const vocabList = [
   {
     "id": 2192,
     "word": "repeated",
-    "ipa": "/repeated/",
+    "ipa": "/ɹiˈpitɪd/",
     "pos": "adj",
     "meaning": "từ 'repeated' (adj)",
     "example": "Practice speaking 'repeated' clearly.",
@@ -24138,7 +23895,7 @@ export const vocabList = [
   {
     "id": 2193,
     "word": "replace",
-    "ipa": "/replace/",
+    "ipa": "/ˌɹiˈpɫeɪs/",
     "pos": "v",
     "meaning": "từ 'replace' (v)",
     "example": "Practice speaking 'replace' clearly.",
@@ -24149,7 +23906,7 @@ export const vocabList = [
   {
     "id": 2194,
     "word": "reply",
-    "ipa": "/reply/",
+    "ipa": "/ɹiˈpɫaɪ/",
     "pos": "v",
     "meaning": "từ 'reply' (v)",
     "example": "Practice speaking 'reply' clearly.",
@@ -24160,7 +23917,7 @@ export const vocabList = [
   {
     "id": 2195,
     "word": "report",
-    "ipa": "/report/",
+    "ipa": "/ɹiˈpɔɹt/",
     "pos": "n",
     "meaning": "từ 'report' (n)",
     "example": "Practice speaking 'report' clearly.",
@@ -24171,7 +23928,7 @@ export const vocabList = [
   {
     "id": 2196,
     "word": "reporter",
-    "ipa": "/reporter/",
+    "ipa": "/ɹɪˈpɔɹtɝ/",
     "pos": "n",
     "meaning": "từ 'reporter' (n)",
     "example": "Practice speaking 'reporter' clearly.",
@@ -24182,7 +23939,7 @@ export const vocabList = [
   {
     "id": 2197,
     "word": "represent",
-    "ipa": "/represent/",
+    "ipa": "/ˌɹɛpɹɪˈzɛnt/",
     "pos": "v",
     "meaning": "từ 'represent' (v)",
     "example": "Practice speaking 'represent' clearly.",
@@ -24193,7 +23950,7 @@ export const vocabList = [
   {
     "id": 2198,
     "word": "representative",
-    "ipa": "/representative/",
+    "ipa": "/ˌɹɛpɹəˈzɛnətɪv/",
     "pos": "n",
     "meaning": "từ 'representative' (n)",
     "example": "Practice speaking 'representative' clearly.",
@@ -24204,7 +23961,7 @@ export const vocabList = [
   {
     "id": 2199,
     "word": "reputation",
-    "ipa": "/reputation/",
+    "ipa": "/ˌɹɛpjəˈteɪʃən/",
     "pos": "n",
     "meaning": "từ 'reputation' (n)",
     "example": "Practice speaking 'reputation' clearly.",
@@ -24215,7 +23972,7 @@ export const vocabList = [
   {
     "id": 2200,
     "word": "request",
-    "ipa": "/request/",
+    "ipa": "/ɹiˈkwɛst/",
     "pos": "n",
     "meaning": "từ 'request' (n)",
     "example": "Practice speaking 'request' clearly.",
@@ -24226,7 +23983,7 @@ export const vocabList = [
   {
     "id": 2201,
     "word": "require",
-    "ipa": "/require/",
+    "ipa": "/ˌɹiˈkwaɪɝ/",
     "pos": "v",
     "meaning": "từ 'require' (v)",
     "example": "Practice speaking 'require' clearly.",
@@ -24237,7 +23994,7 @@ export const vocabList = [
   {
     "id": 2202,
     "word": "requirement",
-    "ipa": "/requirement/",
+    "ipa": "/ɹɪˈkwaɪɹmənt/",
     "pos": "n",
     "meaning": "từ 'requirement' (n)",
     "example": "Practice speaking 'requirement' clearly.",
@@ -24248,7 +24005,7 @@ export const vocabList = [
   {
     "id": 2203,
     "word": "rescue",
-    "ipa": "/rescue/",
+    "ipa": "/ˈɹɛskju/",
     "pos": "v",
     "meaning": "từ 'rescue' (v)",
     "example": "Practice speaking 'rescue' clearly.",
@@ -24281,7 +24038,7 @@ export const vocabList = [
   {
     "id": 2206,
     "word": "reservation",
-    "ipa": "/reservation/",
+    "ipa": "/ˌɹɛzɝˈveɪʃən/",
     "pos": "n",
     "meaning": "từ 'reservation' (n)",
     "example": "Practice speaking 'reservation' clearly.",
@@ -24292,7 +24049,7 @@ export const vocabList = [
   {
     "id": 2207,
     "word": "reserve",
-    "ipa": "/reserve/",
+    "ipa": "/ɹiˈzɝv/",
     "pos": "n",
     "meaning": "từ 'reserve' (n)",
     "example": "Practice speaking 'reserve' clearly.",
@@ -24303,7 +24060,7 @@ export const vocabList = [
   {
     "id": 2208,
     "word": "resident",
-    "ipa": "/resident/",
+    "ipa": "/ˈɹɛzɪdənt/",
     "pos": "n",
     "meaning": "từ 'resident' (n)",
     "example": "Practice speaking 'resident' clearly.",
@@ -24314,7 +24071,7 @@ export const vocabList = [
   {
     "id": 2209,
     "word": "resist",
-    "ipa": "/resist/",
+    "ipa": "/ɹiˈzɪst/",
     "pos": "v",
     "meaning": "từ 'resist' (v)",
     "example": "Practice speaking 'resist' clearly.",
@@ -24325,7 +24082,7 @@ export const vocabList = [
   {
     "id": 2210,
     "word": "resolve",
-    "ipa": "/resolve/",
+    "ipa": "/ɹiˈzɑɫv/",
     "pos": "v",
     "meaning": "từ 'resolve' (v)",
     "example": "Practice speaking 'resolve' clearly.",
@@ -24336,7 +24093,7 @@ export const vocabList = [
   {
     "id": 2211,
     "word": "resort",
-    "ipa": "/resort/",
+    "ipa": "/ɹiˈsɔɹt/",
     "pos": "n",
     "meaning": "từ 'resort' (n)",
     "example": "Practice speaking 'resort' clearly.",
@@ -24347,7 +24104,7 @@ export const vocabList = [
   {
     "id": 2212,
     "word": "resource",
-    "ipa": "/resource/",
+    "ipa": "/ˈɹisɔɹs/",
     "pos": "n",
     "meaning": "từ 'resource' (n)",
     "example": "Practice speaking 'resource' clearly.",
@@ -24358,7 +24115,7 @@ export const vocabList = [
   {
     "id": 2213,
     "word": "respect",
-    "ipa": "/respect/",
+    "ipa": "/ɹiˈspɛkt/",
     "pos": "n",
     "meaning": "từ 'respect' (n)",
     "example": "Practice speaking 'respect' clearly.",
@@ -24369,7 +24126,7 @@ export const vocabList = [
   {
     "id": 2214,
     "word": "respond",
-    "ipa": "/respond/",
+    "ipa": "/ɹiˈspɑnd/",
     "pos": "v",
     "meaning": "từ 'respond' (v)",
     "example": "Practice speaking 'respond' clearly.",
@@ -24380,7 +24137,7 @@ export const vocabList = [
   {
     "id": 2215,
     "word": "response",
-    "ipa": "/response/",
+    "ipa": "/ɹiˈspɑns/",
     "pos": "n",
     "meaning": "từ 'response' (n)",
     "example": "Practice speaking 'response' clearly.",
@@ -24391,7 +24148,7 @@ export const vocabList = [
   {
     "id": 2216,
     "word": "responsibility",
-    "ipa": "/responsibility/",
+    "ipa": "/ɹiˌspɑnsəˈbɪɫəti/",
     "pos": "n",
     "meaning": "từ 'responsibility' (n)",
     "example": "Practice speaking 'responsibility' clearly.",
@@ -24402,7 +24159,7 @@ export const vocabList = [
   {
     "id": 2217,
     "word": "responsible",
-    "ipa": "/responsible/",
+    "ipa": "/ɹiˈspɑnsəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'responsible' (adj)",
     "example": "Practice speaking 'responsible' clearly.",
@@ -24413,7 +24170,7 @@ export const vocabList = [
   {
     "id": 2218,
     "word": "rest",
-    "ipa": "/rest/",
+    "ipa": "/ˈɹɛst/",
     "pos": "context",
     "meaning": "từ 'rest' (context)",
     "example": "Practice speaking 'rest' clearly.",
@@ -24424,7 +24181,7 @@ export const vocabList = [
   {
     "id": 2219,
     "word": "restaurant",
-    "ipa": "/restaurant/",
+    "ipa": "/ˈɹɛsˌtɹɑnt/",
     "pos": "n",
     "meaning": "từ 'restaurant' (n)",
     "example": "Practice speaking 'restaurant' clearly.",
@@ -24435,7 +24192,7 @@ export const vocabList = [
   {
     "id": 2220,
     "word": "result",
-    "ipa": "/result/",
+    "ipa": "/ɹiˈzəɫt/",
     "pos": "n",
     "meaning": "từ 'result' (n)",
     "example": "Practice speaking 'result' clearly.",
@@ -24446,7 +24203,7 @@ export const vocabList = [
   {
     "id": 2221,
     "word": "retain",
-    "ipa": "/retain/",
+    "ipa": "/ɹiˈteɪn/",
     "pos": "v",
     "meaning": "từ 'retain' (v)",
     "example": "Practice speaking 'retain' clearly.",
@@ -24457,7 +24214,7 @@ export const vocabList = [
   {
     "id": 2222,
     "word": "retire",
-    "ipa": "/retire/",
+    "ipa": "/ˌɹiˈtaɪɝ/",
     "pos": "v",
     "meaning": "từ 'retire' (v)",
     "example": "Practice speaking 'retire' clearly.",
@@ -24468,7 +24225,7 @@ export const vocabList = [
   {
     "id": 2223,
     "word": "retired",
-    "ipa": "/retired/",
+    "ipa": "/ɹiˈtaɪɝd/",
     "pos": "adj",
     "meaning": "từ 'retired' (adj)",
     "example": "Practice speaking 'retired' clearly.",
@@ -24479,7 +24236,7 @@ export const vocabList = [
   {
     "id": 2224,
     "word": "return",
-    "ipa": "/return/",
+    "ipa": "/ɹiˈtɝn/",
     "pos": "v",
     "meaning": "từ 'return' (v)",
     "example": "Practice speaking 'return' clearly.",
@@ -24490,7 +24247,7 @@ export const vocabList = [
   {
     "id": 2225,
     "word": "reveal",
-    "ipa": "/reveal/",
+    "ipa": "/ɹiˈviɫ/",
     "pos": "v",
     "meaning": "từ 'reveal' (v)",
     "example": "Practice speaking 'reveal' clearly.",
@@ -24501,7 +24258,7 @@ export const vocabList = [
   {
     "id": 2226,
     "word": "review",
-    "ipa": "/review/",
+    "ipa": "/ˌɹivˈju/",
     "pos": "n",
     "meaning": "từ 'review' (n)",
     "example": "Practice speaking 'review' clearly.",
@@ -24512,7 +24269,7 @@ export const vocabList = [
   {
     "id": 2227,
     "word": "revise",
-    "ipa": "/revise/",
+    "ipa": "/ɹiˈvaɪz/",
     "pos": "v",
     "meaning": "từ 'revise' (v)",
     "example": "Practice speaking 'revise' clearly.",
@@ -24523,7 +24280,7 @@ export const vocabList = [
   {
     "id": 2228,
     "word": "revolution",
-    "ipa": "/revolution/",
+    "ipa": "/ˌɹɛvəˈɫuʃən/",
     "pos": "n",
     "meaning": "từ 'revolution' (n)",
     "example": "Practice speaking 'revolution' clearly.",
@@ -24534,7 +24291,7 @@ export const vocabList = [
   {
     "id": 2229,
     "word": "reward",
-    "ipa": "/reward/",
+    "ipa": "/ɹiˈwɔɹd/",
     "pos": "n",
     "meaning": "từ 'reward' (n)",
     "example": "Practice speaking 'reward' clearly.",
@@ -24556,7 +24313,7 @@ export const vocabList = [
   {
     "id": 2231,
     "word": "rice",
-    "ipa": "/rice/",
+    "ipa": "/ˈɹaɪs/",
     "pos": "n",
     "meaning": "từ 'rice' (n)",
     "example": "Practice speaking 'rice' clearly.",
@@ -24578,7 +24335,7 @@ export const vocabList = [
   {
     "id": 2233,
     "word": "rid",
-    "ipa": "/rid/",
+    "ipa": "/ˈɹɪd/",
     "pos": "v",
     "meaning": "từ 'rid' (v)",
     "example": "Practice speaking 'rid' clearly.",
@@ -24600,7 +24357,7 @@ export const vocabList = [
   {
     "id": 2235,
     "word": "right",
-    "ipa": "/right/",
+    "ipa": "/ˈɹaɪt/",
     "pos": "adj",
     "meaning": "từ 'right' (adj)",
     "example": "Practice speaking 'right' clearly.",
@@ -24609,31 +24366,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 2236,
-    "word": "ring1",
-    "ipa": "/ring1/",
-    "pos": "n",
-    "meaning": "từ 'ring1' (n)",
-    "example": "Practice speaking 'ring1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'ring1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 2237,
-    "word": "ring2",
-    "ipa": "/ring2/",
-    "pos": "v",
-    "meaning": "từ 'ring2' (v)",
-    "example": "Practice speaking 'ring2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'ring2' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
     "id": 2238,
     "word": "rise",
-    "ipa": "/rise/",
+    "ipa": "/ˈɹaɪz/",
     "pos": "v",
     "meaning": "từ 'rise' (v)",
     "example": "Practice speaking 'rise' clearly.",
@@ -24644,7 +24379,7 @@ export const vocabList = [
   {
     "id": 2239,
     "word": "risk",
-    "ipa": "/risk/",
+    "ipa": "/ˈɹɪsk/",
     "pos": "n",
     "meaning": "từ 'risk' (n)",
     "example": "Practice speaking 'risk' clearly.",
@@ -24655,7 +24390,7 @@ export const vocabList = [
   {
     "id": 2240,
     "word": "river",
-    "ipa": "/river/",
+    "ipa": "/ˈɹɪvɝ/",
     "pos": "n",
     "meaning": "từ 'river' (n)",
     "example": "Practice speaking 'river' clearly.",
@@ -24666,7 +24401,7 @@ export const vocabList = [
   {
     "id": 2241,
     "word": "road",
-    "ipa": "/road/",
+    "ipa": "/ˈɹoʊd/",
     "pos": "n",
     "meaning": "từ 'road' (n)",
     "example": "Practice speaking 'road' clearly.",
@@ -24677,7 +24412,7 @@ export const vocabList = [
   {
     "id": 2242,
     "word": "robot",
-    "ipa": "/robot/",
+    "ipa": "/ˈɹoʊˌbɑt/",
     "pos": "n",
     "meaning": "từ 'robot' (n)",
     "example": "Practice speaking 'robot' clearly.",
@@ -24688,7 +24423,7 @@ export const vocabList = [
   {
     "id": 2243,
     "word": "rock",
-    "ipa": "/rock/",
+    "ipa": "/ˈɹɑk/",
     "pos": "context",
     "meaning": "từ 'rock' (context)",
     "example": "Practice speaking 'rock' clearly.",
@@ -24699,7 +24434,7 @@ export const vocabList = [
   {
     "id": 2244,
     "word": "role",
-    "ipa": "/role/",
+    "ipa": "/ˈɹoʊɫ/",
     "pos": "n",
     "meaning": "từ 'role' (n)",
     "example": "Practice speaking 'role' clearly.",
@@ -24710,7 +24445,7 @@ export const vocabList = [
   {
     "id": 2245,
     "word": "roll",
-    "ipa": "/roll/",
+    "ipa": "/ˈɹoʊɫ/",
     "pos": "v",
     "meaning": "từ 'roll' (v)",
     "example": "Practice speaking 'roll' clearly.",
@@ -24721,7 +24456,7 @@ export const vocabList = [
   {
     "id": 2246,
     "word": "romantic",
-    "ipa": "/romantic/",
+    "ipa": "/ɹoʊˈmæntɪk/",
     "pos": "adj",
     "meaning": "từ 'romantic' (adj)",
     "example": "Practice speaking 'romantic' clearly.",
@@ -24765,7 +24500,7 @@ export const vocabList = [
   {
     "id": 2250,
     "word": "rope",
-    "ipa": "/rope/",
+    "ipa": "/ˈɹoʊp/",
     "pos": "n",
     "meaning": "từ 'rope' (n)",
     "example": "Practice speaking 'rope' clearly.",
@@ -24776,7 +24511,7 @@ export const vocabList = [
   {
     "id": 2251,
     "word": "rough",
-    "ipa": "/rough/",
+    "ipa": "/ˈɹəf/",
     "pos": "adj",
     "meaning": "từ 'rough' (adj)",
     "example": "Practice speaking 'rough' clearly.",
@@ -24787,7 +24522,7 @@ export const vocabList = [
   {
     "id": 2252,
     "word": "round",
-    "ipa": "/round/",
+    "ipa": "/ˈɹaʊnd/",
     "pos": "adj",
     "meaning": "từ 'round' (adj)",
     "example": "Practice speaking 'round' clearly.",
@@ -24798,7 +24533,7 @@ export const vocabList = [
   {
     "id": 2253,
     "word": "route",
-    "ipa": "/route/",
+    "ipa": "/ˈɹaʊt/",
     "pos": "n",
     "meaning": "từ 'route' (n)",
     "example": "Practice speaking 'route' clearly.",
@@ -24809,7 +24544,7 @@ export const vocabList = [
   {
     "id": 2254,
     "word": "routine",
-    "ipa": "/routine/",
+    "ipa": "/ɹuˈtin/",
     "pos": "n",
     "meaning": "từ 'routine' (n)",
     "example": "Practice speaking 'routine' clearly.",
@@ -24818,20 +24553,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 2255,
-    "word": "row1",
-    "ipa": "/row1/",
-    "pos": "n",
-    "meaning": "từ 'row1' (n)",
-    "example": "Practice speaking 'row1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'row1' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
     "id": 2256,
     "word": "royal",
-    "ipa": "/royal/",
+    "ipa": "/ˈɹɔɪəɫ/",
     "pos": "adj",
     "meaning": "từ 'royal' (adj)",
     "example": "Practice speaking 'royal' clearly.",
@@ -24842,7 +24566,7 @@ export const vocabList = [
   {
     "id": 2257,
     "word": "rub",
-    "ipa": "/rub/",
+    "ipa": "/ˈɹəb/",
     "pos": "v",
     "meaning": "từ 'rub' (v)",
     "example": "Practice speaking 'rub' clearly.",
@@ -24853,7 +24577,7 @@ export const vocabList = [
   {
     "id": 2258,
     "word": "rubber",
-    "ipa": "/rubber/",
+    "ipa": "/ˈɹəbɝ/",
     "pos": "n",
     "meaning": "từ 'rubber' (n)",
     "example": "Practice speaking 'rubber' clearly.",
@@ -24875,7 +24599,7 @@ export const vocabList = [
   {
     "id": 2260,
     "word": "rude",
-    "ipa": "/rude/",
+    "ipa": "/ˈɹud/",
     "pos": "adj",
     "meaning": "từ 'rude' (adj)",
     "example": "Practice speaking 'rude' clearly.",
@@ -24886,7 +24610,7 @@ export const vocabList = [
   {
     "id": 2261,
     "word": "rugby",
-    "ipa": "/rugby/",
+    "ipa": "/ˈɹəɡbi/",
     "pos": "n",
     "meaning": "từ 'rugby' (n)",
     "example": "Practice speaking 'rugby' clearly.",
@@ -24897,7 +24621,7 @@ export const vocabList = [
   {
     "id": 2262,
     "word": "rule",
-    "ipa": "/rule/",
+    "ipa": "/ˈɹuɫ/",
     "pos": "n",
     "meaning": "từ 'rule' (n)",
     "example": "Practice speaking 'rule' clearly.",
@@ -24919,7 +24643,7 @@ export const vocabList = [
   {
     "id": 2264,
     "word": "runner",
-    "ipa": "/runner/",
+    "ipa": "/ˈɹənɝ/",
     "pos": "n",
     "meaning": "từ 'runner' (n)",
     "example": "Practice speaking 'runner' clearly.",
@@ -24930,7 +24654,7 @@ export const vocabList = [
   {
     "id": 2265,
     "word": "running",
-    "ipa": "/running/",
+    "ipa": "/ˈɹənɪŋ/",
     "pos": "n",
     "meaning": "từ 'running' (n)",
     "example": "Practice speaking 'running' clearly.",
@@ -24941,7 +24665,7 @@ export const vocabList = [
   {
     "id": 2266,
     "word": "rural",
-    "ipa": "/rural/",
+    "ipa": "/ˈɹʊɹəɫ/",
     "pos": "adj",
     "meaning": "từ 'rural' (adj)",
     "example": "Practice speaking 'rural' clearly.",
@@ -24963,7 +24687,7 @@ export const vocabList = [
   {
     "id": 2268,
     "word": "sad",
-    "ipa": "/sad/",
+    "ipa": "/ˈsæd/",
     "pos": "adj",
     "meaning": "từ 'sad' (adj)",
     "example": "Practice speaking 'sad' clearly.",
@@ -24974,7 +24698,7 @@ export const vocabList = [
   {
     "id": 2269,
     "word": "sadly",
-    "ipa": "/sadly/",
+    "ipa": "/ˈsædɫi/",
     "pos": "adv",
     "meaning": "từ 'sadly' (adv)",
     "example": "Practice speaking 'sadly' clearly.",
@@ -24985,7 +24709,7 @@ export const vocabList = [
   {
     "id": 2270,
     "word": "safe",
-    "ipa": "/safe/",
+    "ipa": "/ˈseɪf/",
     "pos": "adj",
     "meaning": "từ 'safe' (adj)",
     "example": "Practice speaking 'safe' clearly.",
@@ -24996,7 +24720,7 @@ export const vocabList = [
   {
     "id": 2271,
     "word": "safety",
-    "ipa": "/safety/",
+    "ipa": "/ˈseɪfti/",
     "pos": "n",
     "meaning": "từ 'safety' (n)",
     "example": "Practice speaking 'safety' clearly.",
@@ -25007,7 +24731,7 @@ export const vocabList = [
   {
     "id": 2272,
     "word": "sail",
-    "ipa": "/sail/",
+    "ipa": "/ˈseɪɫ/",
     "pos": "v",
     "meaning": "từ 'sail' (v)",
     "example": "Practice speaking 'sail' clearly.",
@@ -25018,7 +24742,7 @@ export const vocabList = [
   {
     "id": 2273,
     "word": "sailing",
-    "ipa": "/sailing/",
+    "ipa": "/ˈseɪɫɪŋ/",
     "pos": "n",
     "meaning": "từ 'sailing' (n)",
     "example": "Practice speaking 'sailing' clearly.",
@@ -25029,7 +24753,7 @@ export const vocabList = [
   {
     "id": 2274,
     "word": "sailor",
-    "ipa": "/sailor/",
+    "ipa": "/ˈseɪɫɝ/",
     "pos": "n",
     "meaning": "từ 'sailor' (n)",
     "example": "Practice speaking 'sailor' clearly.",
@@ -25040,7 +24764,7 @@ export const vocabList = [
   {
     "id": 2275,
     "word": "salad",
-    "ipa": "/salad/",
+    "ipa": "/ˈsæɫəd/",
     "pos": "n",
     "meaning": "từ 'salad' (n)",
     "example": "Practice speaking 'salad' clearly.",
@@ -25051,7 +24775,7 @@ export const vocabList = [
   {
     "id": 2276,
     "word": "salary",
-    "ipa": "/salary/",
+    "ipa": "/ˈsæɫɝi/",
     "pos": "n",
     "meaning": "từ 'salary' (n)",
     "example": "Practice speaking 'salary' clearly.",
@@ -25062,7 +24786,7 @@ export const vocabList = [
   {
     "id": 2277,
     "word": "sale",
-    "ipa": "/sale/",
+    "ipa": "/ˈseɪɫ/",
     "pos": "n",
     "meaning": "từ 'sale' (n)",
     "example": "Practice speaking 'sale' clearly.",
@@ -25073,7 +24797,7 @@ export const vocabList = [
   {
     "id": 2278,
     "word": "salt",
-    "ipa": "/salt/",
+    "ipa": "/ˈsɔɫt/",
     "pos": "n",
     "meaning": "từ 'salt' (n)",
     "example": "Practice speaking 'salt' clearly.",
@@ -25084,7 +24808,7 @@ export const vocabList = [
   {
     "id": 2279,
     "word": "same",
-    "ipa": "/same/",
+    "ipa": "/ˈseɪm/",
     "pos": "adj",
     "meaning": "từ 'same' (adj)",
     "example": "Practice speaking 'same' clearly.",
@@ -25095,7 +24819,7 @@ export const vocabList = [
   {
     "id": 2280,
     "word": "sample",
-    "ipa": "/sample/",
+    "ipa": "/ˈsæmpəɫ/",
     "pos": "n",
     "meaning": "từ 'sample' (n)",
     "example": "Practice speaking 'sample' clearly.",
@@ -25106,7 +24830,7 @@ export const vocabList = [
   {
     "id": 2281,
     "word": "sand",
-    "ipa": "/sand/",
+    "ipa": "/ˈsænd/",
     "pos": "n",
     "meaning": "từ 'sand' (n)",
     "example": "Practice speaking 'sand' clearly.",
@@ -25128,7 +24852,7 @@ export const vocabList = [
   {
     "id": 2283,
     "word": "satellite",
-    "ipa": "/satellite/",
+    "ipa": "/ˈsætəˌɫaɪt/",
     "pos": "n",
     "meaning": "từ 'satellite' (n)",
     "example": "Practice speaking 'satellite' clearly.",
@@ -25139,7 +24863,7 @@ export const vocabList = [
   {
     "id": 2284,
     "word": "satisfied",
-    "ipa": "/satisfied/",
+    "ipa": "/ˈsætəsˌfaɪd/",
     "pos": "adj",
     "meaning": "từ 'satisfied' (adj)",
     "example": "Practice speaking 'satisfied' clearly.",
@@ -25150,7 +24874,7 @@ export const vocabList = [
   {
     "id": 2285,
     "word": "satisfy",
-    "ipa": "/satisfy/",
+    "ipa": "/ˈsætəsˌfaɪ/",
     "pos": "v",
     "meaning": "từ 'satisfy' (v)",
     "example": "Practice speaking 'satisfy' clearly.",
@@ -25161,7 +24885,7 @@ export const vocabList = [
   {
     "id": 2286,
     "word": "saturday",
-    "ipa": "/saturday/",
+    "ipa": "/ˈsæˌtɪˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'saturday' (n)",
     "example": "Practice speaking 'saturday' clearly.",
@@ -25172,7 +24896,7 @@ export const vocabList = [
   {
     "id": 2287,
     "word": "sauce",
-    "ipa": "/sauce/",
+    "ipa": "/ˈsɔs/",
     "pos": "n",
     "meaning": "từ 'sauce' (n)",
     "example": "Practice speaking 'sauce' clearly.",
@@ -25194,7 +24918,7 @@ export const vocabList = [
   {
     "id": 2289,
     "word": "saving",
-    "ipa": "/saving/",
+    "ipa": "/ˈseɪvɪŋ/",
     "pos": "n",
     "meaning": "từ 'saving' (n)",
     "example": "Practice speaking 'saving' clearly.",
@@ -25216,7 +24940,7 @@ export const vocabList = [
   {
     "id": 2291,
     "word": "scale",
-    "ipa": "/scale/",
+    "ipa": "/ˈskeɪɫ/",
     "pos": "n",
     "meaning": "từ 'scale' (n)",
     "example": "Practice speaking 'scale' clearly.",
@@ -25227,7 +24951,7 @@ export const vocabList = [
   {
     "id": 2292,
     "word": "scan",
-    "ipa": "/scan/",
+    "ipa": "/ˈskæn/",
     "pos": "v",
     "meaning": "từ 'scan' (v)",
     "example": "Practice speaking 'scan' clearly.",
@@ -25238,7 +24962,7 @@ export const vocabList = [
   {
     "id": 2293,
     "word": "scared",
-    "ipa": "/scared/",
+    "ipa": "/ˈskɛɹd/",
     "pos": "adj",
     "meaning": "từ 'scared' (adj)",
     "example": "Practice speaking 'scared' clearly.",
@@ -25249,7 +24973,7 @@ export const vocabList = [
   {
     "id": 2294,
     "word": "scary",
-    "ipa": "/scary/",
+    "ipa": "/ˈskɛɹi/",
     "pos": "adj",
     "meaning": "từ 'scary' (adj)",
     "example": "Practice speaking 'scary' clearly.",
@@ -25260,7 +24984,7 @@ export const vocabList = [
   {
     "id": 2295,
     "word": "scene",
-    "ipa": "/scene/",
+    "ipa": "/ˈsin/",
     "pos": "n",
     "meaning": "từ 'scene' (n)",
     "example": "Practice speaking 'scene' clearly.",
@@ -25304,7 +25028,7 @@ export const vocabList = [
   {
     "id": 2299,
     "word": "science",
-    "ipa": "/science/",
+    "ipa": "/ˈsaɪəns/",
     "pos": "n",
     "meaning": "từ 'science' (n)",
     "example": "Practice speaking 'science' clearly.",
@@ -25315,7 +25039,7 @@ export const vocabList = [
   {
     "id": 2300,
     "word": "scientific",
-    "ipa": "/scientific/",
+    "ipa": "/ˌsaɪənˈtɪfɪk/",
     "pos": "adj",
     "meaning": "từ 'scientific' (adj)",
     "example": "Practice speaking 'scientific' clearly.",
@@ -25326,7 +25050,7 @@ export const vocabList = [
   {
     "id": 2301,
     "word": "scientist",
-    "ipa": "/scientist/",
+    "ipa": "/ˈsaɪəntɪst/",
     "pos": "n",
     "meaning": "từ 'scientist' (n)",
     "example": "Practice speaking 'scientist' clearly.",
@@ -25337,7 +25061,7 @@ export const vocabList = [
   {
     "id": 2302,
     "word": "score",
-    "ipa": "/score/",
+    "ipa": "/ˈskɔɹ/",
     "pos": "v",
     "meaning": "từ 'score' (v)",
     "example": "Practice speaking 'score' clearly.",
@@ -25348,7 +25072,7 @@ export const vocabList = [
   {
     "id": 2303,
     "word": "scream",
-    "ipa": "/scream/",
+    "ipa": "/ˈskɹim/",
     "pos": "v",
     "meaning": "từ 'scream' (v)",
     "example": "Practice speaking 'scream' clearly.",
@@ -25370,7 +25094,7 @@ export const vocabList = [
   {
     "id": 2305,
     "word": "script",
-    "ipa": "/script/",
+    "ipa": "/ˈskɹɪpt/",
     "pos": "n",
     "meaning": "từ 'script' (n)",
     "example": "Practice speaking 'script' clearly.",
@@ -25381,7 +25105,7 @@ export const vocabList = [
   {
     "id": 2306,
     "word": "sculpture",
-    "ipa": "/sculpture/",
+    "ipa": "/ˈskəɫptʃɝ/",
     "pos": "n",
     "meaning": "từ 'sculpture' (n)",
     "example": "Practice speaking 'sculpture' clearly.",
@@ -25392,7 +25116,7 @@ export const vocabList = [
   {
     "id": 2307,
     "word": "sea",
-    "ipa": "/sea/",
+    "ipa": "/ˈsi/",
     "pos": "n",
     "meaning": "từ 'sea' (n)",
     "example": "Practice speaking 'sea' clearly.",
@@ -25414,7 +25138,7 @@ export const vocabList = [
   {
     "id": 2309,
     "word": "season",
-    "ipa": "/season/",
+    "ipa": "/ˈsizən/",
     "pos": "n",
     "meaning": "từ 'season' (n)",
     "example": "Practice speaking 'season' clearly.",
@@ -25425,7 +25149,7 @@ export const vocabList = [
   {
     "id": 2310,
     "word": "seat",
-    "ipa": "/seat/",
+    "ipa": "/ˈsit/",
     "pos": "n",
     "meaning": "từ 'seat' (n)",
     "example": "Practice speaking 'seat' clearly.",
@@ -25434,20 +25158,9 @@ export const vocabList = [
     "topic": "Ăn uống"
   },
   {
-    "id": 2311,
-    "word": "second1",
-    "ipa": "/second1/",
-    "pos": "context",
-    "meaning": "từ 'second1' (context)",
-    "example": "Practice speaking 'second1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'second1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Thời gian & Ngày tháng"
-  },
-  {
     "id": 2312,
     "word": "secondary",
-    "ipa": "/secondary/",
+    "ipa": "/ˈsɛkənˌdɛɹi/",
     "pos": "adj",
     "meaning": "từ 'secondary' (adj)",
     "example": "Practice speaking 'secondary' clearly.",
@@ -25458,7 +25171,7 @@ export const vocabList = [
   {
     "id": 2313,
     "word": "secondly",
-    "ipa": "/secondly/",
+    "ipa": "/ˈsɛkəndɫi/",
     "pos": "adv",
     "meaning": "từ 'secondly' (adv)",
     "example": "Practice speaking 'secondly' clearly.",
@@ -25469,7 +25182,7 @@ export const vocabList = [
   {
     "id": 2314,
     "word": "secret",
-    "ipa": "/secret/",
+    "ipa": "/ˈsikɹət/",
     "pos": "adj",
     "meaning": "từ 'secret' (adj)",
     "example": "Practice speaking 'secret' clearly.",
@@ -25480,7 +25193,7 @@ export const vocabList = [
   {
     "id": 2315,
     "word": "secretary",
-    "ipa": "/secretary/",
+    "ipa": "/ˈsɛkɹəˌtɛɹi/",
     "pos": "n",
     "meaning": "từ 'secretary' (n)",
     "example": "Practice speaking 'secretary' clearly.",
@@ -25491,7 +25204,7 @@ export const vocabList = [
   {
     "id": 2316,
     "word": "section",
-    "ipa": "/section/",
+    "ipa": "/ˈsɛkʃən/",
     "pos": "n",
     "meaning": "từ 'section' (n)",
     "example": "Practice speaking 'section' clearly.",
@@ -25502,7 +25215,7 @@ export const vocabList = [
   {
     "id": 2317,
     "word": "sector",
-    "ipa": "/sector/",
+    "ipa": "/ˈsɛktɝ/",
     "pos": "n",
     "meaning": "từ 'sector' (n)",
     "example": "Practice speaking 'sector' clearly.",
@@ -25513,7 +25226,7 @@ export const vocabList = [
   {
     "id": 2318,
     "word": "secure",
-    "ipa": "/secure/",
+    "ipa": "/sɪkˈjʊɹ/",
     "pos": "v",
     "meaning": "từ 'secure' (v)",
     "example": "Practice speaking 'secure' clearly.",
@@ -25524,7 +25237,7 @@ export const vocabList = [
   {
     "id": 2319,
     "word": "security",
-    "ipa": "/security/",
+    "ipa": "/sɪkˈjʊɹəti/",
     "pos": "n",
     "meaning": "từ 'security' (n)",
     "example": "Practice speaking 'security' clearly.",
@@ -25579,7 +25292,7 @@ export const vocabList = [
   {
     "id": 2324,
     "word": "select",
-    "ipa": "/select/",
+    "ipa": "/səˈɫɛkt/",
     "pos": "v",
     "meaning": "từ 'select' (v)",
     "example": "Practice speaking 'select' clearly.",
@@ -25590,7 +25303,7 @@ export const vocabList = [
   {
     "id": 2325,
     "word": "selection",
-    "ipa": "/selection/",
+    "ipa": "/səˈɫɛkʃən/",
     "pos": "n",
     "meaning": "từ 'selection' (n)",
     "example": "Practice speaking 'selection' clearly.",
@@ -25601,7 +25314,7 @@ export const vocabList = [
   {
     "id": 2326,
     "word": "self",
-    "ipa": "/self/",
+    "ipa": "/ˈsɛɫf/",
     "pos": "n",
     "meaning": "từ 'self' (n)",
     "example": "Practice speaking 'self' clearly.",
@@ -25623,7 +25336,7 @@ export const vocabList = [
   {
     "id": 2328,
     "word": "send",
-    "ipa": "/send/",
+    "ipa": "/ˈsɛnd/",
     "pos": "v",
     "meaning": "gửi đi",
     "example": "Send a sweet greeting message.",
@@ -25634,7 +25347,7 @@ export const vocabList = [
   {
     "id": 2329,
     "word": "senior",
-    "ipa": "/senior/",
+    "ipa": "/ˈsinjɝ/",
     "pos": "adj",
     "meaning": "từ 'senior' (adj)",
     "example": "Practice speaking 'senior' clearly.",
@@ -25645,7 +25358,7 @@ export const vocabList = [
   {
     "id": 2330,
     "word": "sense",
-    "ipa": "/sense/",
+    "ipa": "/ˈsɛns/",
     "pos": "n",
     "meaning": "từ 'sense' (n)",
     "example": "Practice speaking 'sense' clearly.",
@@ -25656,7 +25369,7 @@ export const vocabList = [
   {
     "id": 2331,
     "word": "sensible",
-    "ipa": "/sensible/",
+    "ipa": "/ˈsɛnsəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'sensible' (adj)",
     "example": "Practice speaking 'sensible' clearly.",
@@ -25667,7 +25380,7 @@ export const vocabList = [
   {
     "id": 2332,
     "word": "sensitive",
-    "ipa": "/sensitive/",
+    "ipa": "/ˈsɛnsətɪv/",
     "pos": "adj",
     "meaning": "từ 'sensitive' (adj)",
     "example": "Practice speaking 'sensitive' clearly.",
@@ -25678,7 +25391,7 @@ export const vocabList = [
   {
     "id": 2333,
     "word": "sentence",
-    "ipa": "/sentence/",
+    "ipa": "/ˈsɛntəns/",
     "pos": "n",
     "meaning": "từ 'sentence' (n)",
     "example": "Practice speaking 'sentence' clearly.",
@@ -25689,7 +25402,7 @@ export const vocabList = [
   {
     "id": 2334,
     "word": "separate",
-    "ipa": "/separate/",
+    "ipa": "/ˈsɛpɝˌeɪt/",
     "pos": "adj",
     "meaning": "từ 'separate' (adj)",
     "example": "Practice speaking 'separate' clearly.",
@@ -25700,7 +25413,7 @@ export const vocabList = [
   {
     "id": 2335,
     "word": "september",
-    "ipa": "/september/",
+    "ipa": "/sɛpˈtɛmbɝ/",
     "pos": "n",
     "meaning": "từ 'september' (n)",
     "example": "Practice speaking 'september' clearly.",
@@ -25711,7 +25424,7 @@ export const vocabList = [
   {
     "id": 2336,
     "word": "sequence",
-    "ipa": "/sequence/",
+    "ipa": "/ˈsikwəns/",
     "pos": "n",
     "meaning": "từ 'sequence' (n)",
     "example": "Practice speaking 'sequence' clearly.",
@@ -25722,7 +25435,7 @@ export const vocabList = [
   {
     "id": 2337,
     "word": "series",
-    "ipa": "/series/",
+    "ipa": "/ˈsɪɹiz/",
     "pos": "n",
     "meaning": "từ 'series' (n)",
     "example": "Practice speaking 'series' clearly.",
@@ -25733,7 +25446,7 @@ export const vocabList = [
   {
     "id": 2338,
     "word": "serious",
-    "ipa": "/serious/",
+    "ipa": "/ˈsɪɹiəs/",
     "pos": "adj",
     "meaning": "từ 'serious' (adj)",
     "example": "Practice speaking 'serious' clearly.",
@@ -25744,7 +25457,7 @@ export const vocabList = [
   {
     "id": 2339,
     "word": "seriously",
-    "ipa": "/seriously/",
+    "ipa": "/ˈsɪɹiəsɫi/",
     "pos": "adv",
     "meaning": "từ 'seriously' (adv)",
     "example": "Practice speaking 'seriously' clearly.",
@@ -25755,7 +25468,7 @@ export const vocabList = [
   {
     "id": 2340,
     "word": "servant",
-    "ipa": "/servant/",
+    "ipa": "/ˈsɝvənt/",
     "pos": "n",
     "meaning": "từ 'servant' (n)",
     "example": "Practice speaking 'servant' clearly.",
@@ -25766,7 +25479,7 @@ export const vocabList = [
   {
     "id": 2341,
     "word": "serve",
-    "ipa": "/serve/",
+    "ipa": "/ˈsɝv/",
     "pos": "v",
     "meaning": "từ 'serve' (v)",
     "example": "Practice speaking 'serve' clearly.",
@@ -25777,7 +25490,7 @@ export const vocabList = [
   {
     "id": 2342,
     "word": "service",
-    "ipa": "/service/",
+    "ipa": "/ˈsɝvəs/",
     "pos": "n",
     "meaning": "từ 'service' (n)",
     "example": "Practice speaking 'service' clearly.",
@@ -25788,7 +25501,7 @@ export const vocabList = [
   {
     "id": 2343,
     "word": "session",
-    "ipa": "/session/",
+    "ipa": "/ˈsɛʃən/",
     "pos": "n",
     "meaning": "từ 'session' (n)",
     "example": "Practice speaking 'session' clearly.",
@@ -25799,7 +25512,7 @@ export const vocabList = [
   {
     "id": 2344,
     "word": "set",
-    "ipa": "/set/",
+    "ipa": "/ˈsɛt/",
     "pos": "context",
     "meaning": "từ 'set' (context)",
     "example": "Practice speaking 'set' clearly.",
@@ -25810,7 +25523,7 @@ export const vocabList = [
   {
     "id": 2345,
     "word": "setting",
-    "ipa": "/setting/",
+    "ipa": "/ˈsɛtɪŋ/",
     "pos": "n",
     "meaning": "từ 'setting' (n)",
     "example": "Practice speaking 'setting' clearly.",
@@ -25821,7 +25534,7 @@ export const vocabList = [
   {
     "id": 2346,
     "word": "settle",
-    "ipa": "/settle/",
+    "ipa": "/ˈsɛtəɫ/",
     "pos": "v",
     "meaning": "từ 'settle' (v)",
     "example": "Practice speaking 'settle' clearly.",
@@ -25832,7 +25545,7 @@ export const vocabList = [
   {
     "id": 2347,
     "word": "seven",
-    "ipa": "/seven/",
+    "ipa": "/ˈsɛvən/",
     "pos": "number",
     "meaning": "từ 'seven' (number)",
     "example": "Practice speaking 'seven' clearly.",
@@ -25854,7 +25567,7 @@ export const vocabList = [
   {
     "id": 2349,
     "word": "seventy",
-    "ipa": "/seventy/",
+    "ipa": "/ˈsɛvəni/",
     "pos": "number",
     "meaning": "từ 'seventy' (number)",
     "example": "Practice speaking 'seventy' clearly.",
@@ -25865,7 +25578,7 @@ export const vocabList = [
   {
     "id": 2350,
     "word": "several",
-    "ipa": "/several/",
+    "ipa": "/ˈsɛvɝəɫ/",
     "pos": "det/pron",
     "meaning": "từ 'several' (det/pron)",
     "example": "Practice speaking 'several' clearly.",
@@ -25876,7 +25589,7 @@ export const vocabList = [
   {
     "id": 2351,
     "word": "severe",
-    "ipa": "/severe/",
+    "ipa": "/səˈvɪɹ/",
     "pos": "adj",
     "meaning": "từ 'severe' (adj)",
     "example": "Practice speaking 'severe' clearly.",
@@ -25887,7 +25600,7 @@ export const vocabList = [
   {
     "id": 2352,
     "word": "sex",
-    "ipa": "/sex/",
+    "ipa": "/ˈsɛks/",
     "pos": "n",
     "meaning": "từ 'sex' (n)",
     "example": "Practice speaking 'sex' clearly.",
@@ -25898,7 +25611,7 @@ export const vocabList = [
   {
     "id": 2353,
     "word": "sexual",
-    "ipa": "/sexual/",
+    "ipa": "/ˈsɛkʃuəɫ/",
     "pos": "adj",
     "meaning": "từ 'sexual' (adj)",
     "example": "Practice speaking 'sexual' clearly.",
@@ -26305,7 +26018,7 @@ export const vocabList = [
   {
     "id": 2390,
     "word": "sick",
-    "ipa": "/sick/",
+    "ipa": "/ˈsɪk/",
     "pos": "adj",
     "meaning": "từ 'sick' (adj)",
     "example": "Practice speaking 'sick' clearly.",
@@ -26316,7 +26029,7 @@ export const vocabList = [
   {
     "id": 2391,
     "word": "side",
-    "ipa": "/side/",
+    "ipa": "/ˈsaɪd/",
     "pos": "n",
     "meaning": "từ 'side' (n)",
     "example": "Practice speaking 'side' clearly.",
@@ -26327,7 +26040,7 @@ export const vocabList = [
   {
     "id": 2392,
     "word": "sight",
-    "ipa": "/sight/",
+    "ipa": "/ˈsaɪt/",
     "pos": "n",
     "meaning": "từ 'sight' (n)",
     "example": "Practice speaking 'sight' clearly.",
@@ -26338,7 +26051,7 @@ export const vocabList = [
   {
     "id": 2393,
     "word": "sign",
-    "ipa": "/sign/",
+    "ipa": "/ˈsaɪn/",
     "pos": "n",
     "meaning": "từ 'sign' (n)",
     "example": "Practice speaking 'sign' clearly.",
@@ -26349,7 +26062,7 @@ export const vocabList = [
   {
     "id": 2394,
     "word": "signal",
-    "ipa": "/signal/",
+    "ipa": "/ˈsɪɡnəɫ/",
     "pos": "n",
     "meaning": "từ 'signal' (n)",
     "example": "Practice speaking 'signal' clearly.",
@@ -26360,7 +26073,7 @@ export const vocabList = [
   {
     "id": 2395,
     "word": "significant",
-    "ipa": "/significant/",
+    "ipa": "/səɡˈnɪfɪkənt/",
     "pos": "adj",
     "meaning": "từ 'significant' (adj)",
     "example": "Practice speaking 'significant' clearly.",
@@ -26371,7 +26084,7 @@ export const vocabList = [
   {
     "id": 2396,
     "word": "significantly",
-    "ipa": "/significantly/",
+    "ipa": "/sɪɡˈnɪfɪkəntɫi/",
     "pos": "adv",
     "meaning": "từ 'significantly' (adv)",
     "example": "Practice speaking 'significantly' clearly.",
@@ -26382,7 +26095,7 @@ export const vocabList = [
   {
     "id": 2397,
     "word": "silence",
-    "ipa": "/silence/",
+    "ipa": "/ˈsaɪɫəns/",
     "pos": "n",
     "meaning": "từ 'silence' (n)",
     "example": "Practice speaking 'silence' clearly.",
@@ -26393,7 +26106,7 @@ export const vocabList = [
   {
     "id": 2398,
     "word": "silent",
-    "ipa": "/silent/",
+    "ipa": "/ˈsaɪɫənt/",
     "pos": "adj",
     "meaning": "từ 'silent' (adj)",
     "example": "Practice speaking 'silent' clearly.",
@@ -26404,7 +26117,7 @@ export const vocabList = [
   {
     "id": 2399,
     "word": "silk",
-    "ipa": "/silk/",
+    "ipa": "/ˈsɪɫk/",
     "pos": "n",
     "meaning": "từ 'silk' (n)",
     "example": "Practice speaking 'silk' clearly.",
@@ -26415,7 +26128,7 @@ export const vocabList = [
   {
     "id": 2400,
     "word": "silly",
-    "ipa": "/silly/",
+    "ipa": "/ˈsɪɫi/",
     "pos": "adj",
     "meaning": "từ 'silly' (adj)",
     "example": "Practice speaking 'silly' clearly.",
@@ -26426,7 +26139,7 @@ export const vocabList = [
   {
     "id": 2401,
     "word": "silver",
-    "ipa": "/silver/",
+    "ipa": "/ˈsɪɫvɝ/",
     "pos": "n",
     "meaning": "từ 'silver' (n)",
     "example": "Practice speaking 'silver' clearly.",
@@ -26437,7 +26150,7 @@ export const vocabList = [
   {
     "id": 2402,
     "word": "similar",
-    "ipa": "/similar/",
+    "ipa": "/ˈsɪməɫɝ/",
     "pos": "adj",
     "meaning": "từ 'similar' (adj)",
     "example": "Practice speaking 'similar' clearly.",
@@ -26448,7 +26161,7 @@ export const vocabList = [
   {
     "id": 2403,
     "word": "similarity",
-    "ipa": "/similarity/",
+    "ipa": "/ˌsɪməˈɫɛɹəti/",
     "pos": "n",
     "meaning": "từ 'similarity' (n)",
     "example": "Practice speaking 'similarity' clearly.",
@@ -26459,7 +26172,7 @@ export const vocabList = [
   {
     "id": 2404,
     "word": "similarly",
-    "ipa": "/similarly/",
+    "ipa": "/ˈsɪməɫɝɫi/",
     "pos": "adv",
     "meaning": "từ 'similarly' (adv)",
     "example": "Practice speaking 'similarly' clearly.",
@@ -26470,7 +26183,7 @@ export const vocabList = [
   {
     "id": 2405,
     "word": "simple",
-    "ipa": "/simple/",
+    "ipa": "/ˈsɪmpəɫ/",
     "pos": "adj",
     "meaning": "từ 'simple' (adj)",
     "example": "Practice speaking 'simple' clearly.",
@@ -26481,7 +26194,7 @@ export const vocabList = [
   {
     "id": 2406,
     "word": "simply",
-    "ipa": "/simply/",
+    "ipa": "/ˈsɪmpɫi/",
     "pos": "adv",
     "meaning": "từ 'simply' (adv)",
     "example": "Practice speaking 'simply' clearly.",
@@ -26492,7 +26205,7 @@ export const vocabList = [
   {
     "id": 2407,
     "word": "since",
-    "ipa": "/since/",
+    "ipa": "/ˈsɪns/",
     "pos": "prep",
     "meaning": "từ 'since' (prep)",
     "example": "Practice speaking 'since' clearly.",
@@ -26503,7 +26216,7 @@ export const vocabList = [
   {
     "id": 2408,
     "word": "sincere",
-    "ipa": "/sincere/",
+    "ipa": "/sɪnˈsɪɹ/",
     "pos": "adj",
     "meaning": "từ 'sincere' (adj)",
     "example": "Practice speaking 'sincere' clearly.",
@@ -26514,7 +26227,7 @@ export const vocabList = [
   {
     "id": 2409,
     "word": "sing",
-    "ipa": "/sing/",
+    "ipa": "/ˈsɪŋ/",
     "pos": "v",
     "meaning": "từ 'sing' (v)",
     "example": "Practice speaking 'sing' clearly.",
@@ -26525,7 +26238,7 @@ export const vocabList = [
   {
     "id": 2410,
     "word": "singer",
-    "ipa": "/singer/",
+    "ipa": "/ˈsɪŋɝ/",
     "pos": "n",
     "meaning": "từ 'singer' (n)",
     "example": "Practice speaking 'singer' clearly.",
@@ -26536,7 +26249,7 @@ export const vocabList = [
   {
     "id": 2411,
     "word": "singing",
-    "ipa": "/singing/",
+    "ipa": "/ˈsɪŋɪŋ/",
     "pos": "n",
     "meaning": "từ 'singing' (n)",
     "example": "Practice speaking 'singing' clearly.",
@@ -26547,7 +26260,7 @@ export const vocabList = [
   {
     "id": 2412,
     "word": "single",
-    "ipa": "/single/",
+    "ipa": "/ˈsɪŋɡəɫ/",
     "pos": "adj",
     "meaning": "từ 'single' (adj)",
     "example": "Practice speaking 'single' clearly.",
@@ -26558,7 +26271,7 @@ export const vocabList = [
   {
     "id": 2413,
     "word": "sink",
-    "ipa": "/sink/",
+    "ipa": "/ˈsɪŋk/",
     "pos": "v",
     "meaning": "từ 'sink' (v)",
     "example": "Practice speaking 'sink' clearly.",
@@ -26569,7 +26282,7 @@ export const vocabList = [
   {
     "id": 2414,
     "word": "sir",
-    "ipa": "/sir/",
+    "ipa": "/ˈsɝ/",
     "pos": "n",
     "meaning": "từ 'sir' (n)",
     "example": "Practice speaking 'sir' clearly.",
@@ -26580,7 +26293,7 @@ export const vocabList = [
   {
     "id": 2415,
     "word": "sister",
-    "ipa": "/sister/",
+    "ipa": "/ˈsɪstɝ/",
     "pos": "n",
     "meaning": "từ 'sister' (n)",
     "example": "Practice speaking 'sister' clearly.",
@@ -26591,7 +26304,7 @@ export const vocabList = [
   {
     "id": 2416,
     "word": "sit",
-    "ipa": "/sit/",
+    "ipa": "/ˈsɪt/",
     "pos": "v",
     "meaning": "từ 'sit' (v)",
     "example": "Practice speaking 'sit' clearly.",
@@ -26602,7 +26315,7 @@ export const vocabList = [
   {
     "id": 2417,
     "word": "site",
-    "ipa": "/site/",
+    "ipa": "/ˈsaɪt/",
     "pos": "n",
     "meaning": "từ 'site' (n)",
     "example": "Practice speaking 'site' clearly.",
@@ -26613,7 +26326,7 @@ export const vocabList = [
   {
     "id": 2418,
     "word": "situation",
-    "ipa": "/situation/",
+    "ipa": "/ˌsɪtʃuˈeɪʃən/",
     "pos": "n",
     "meaning": "từ 'situation' (n)",
     "example": "Practice speaking 'situation' clearly.",
@@ -26624,7 +26337,7 @@ export const vocabList = [
   {
     "id": 2419,
     "word": "six",
-    "ipa": "/six/",
+    "ipa": "/ˈsɪks/",
     "pos": "number",
     "meaning": "từ 'six' (number)",
     "example": "Practice speaking 'six' clearly.",
@@ -26646,7 +26359,7 @@ export const vocabList = [
   {
     "id": 2421,
     "word": "sixty",
-    "ipa": "/sixty/",
+    "ipa": "/ˈsɪksti/",
     "pos": "number",
     "meaning": "từ 'sixty' (number)",
     "example": "Practice speaking 'sixty' clearly.",
@@ -26657,7 +26370,7 @@ export const vocabList = [
   {
     "id": 2422,
     "word": "size",
-    "ipa": "/size/",
+    "ipa": "/ˈsaɪz/",
     "pos": "n",
     "meaning": "từ 'size' (n)",
     "example": "Practice speaking 'size' clearly.",
@@ -26668,7 +26381,7 @@ export const vocabList = [
   {
     "id": 2423,
     "word": "ski",
-    "ipa": "/ski/",
+    "ipa": "/ˈski/",
     "pos": "v",
     "meaning": "từ 'ski' (v)",
     "example": "Practice speaking 'ski' clearly.",
@@ -26679,7 +26392,7 @@ export const vocabList = [
   {
     "id": 2424,
     "word": "skiing",
-    "ipa": "/skiing/",
+    "ipa": "/ˈskiɪŋ/",
     "pos": "n",
     "meaning": "từ 'skiing' (n)",
     "example": "Practice speaking 'skiing' clearly.",
@@ -26690,7 +26403,7 @@ export const vocabList = [
   {
     "id": 2425,
     "word": "skill",
-    "ipa": "/skill/",
+    "ipa": "/ˈskɪɫ/",
     "pos": "n",
     "meaning": "từ 'skill' (n)",
     "example": "Practice speaking 'skill' clearly.",
@@ -26701,7 +26414,7 @@ export const vocabList = [
   {
     "id": 2426,
     "word": "skin",
-    "ipa": "/skin/",
+    "ipa": "/ˈskɪn/",
     "pos": "n",
     "meaning": "từ 'skin' (n)",
     "example": "Practice speaking 'skin' clearly.",
@@ -26712,7 +26425,7 @@ export const vocabList = [
   {
     "id": 2427,
     "word": "skirt",
-    "ipa": "/skirt/",
+    "ipa": "/ˈskɝt/",
     "pos": "n",
     "meaning": "từ 'skirt' (n)",
     "example": "Practice speaking 'skirt' clearly.",
@@ -26723,7 +26436,7 @@ export const vocabList = [
   {
     "id": 2428,
     "word": "sky",
-    "ipa": "/sky/",
+    "ipa": "/ˈskaɪ/",
     "pos": "n",
     "meaning": "từ 'sky' (n)",
     "example": "Practice speaking 'sky' clearly.",
@@ -26734,7 +26447,7 @@ export const vocabList = [
   {
     "id": 2429,
     "word": "slave",
-    "ipa": "/slave/",
+    "ipa": "/ˈsɫeɪv/",
     "pos": "n",
     "meaning": "từ 'slave' (n)",
     "example": "Practice speaking 'slave' clearly.",
@@ -26756,7 +26469,7 @@ export const vocabList = [
   {
     "id": 2431,
     "word": "slice",
-    "ipa": "/slice/",
+    "ipa": "/ˈsɫaɪs/",
     "pos": "n",
     "meaning": "từ 'slice' (n)",
     "example": "Practice speaking 'slice' clearly.",
@@ -26767,7 +26480,7 @@ export const vocabList = [
   {
     "id": 2432,
     "word": "slide",
-    "ipa": "/slide/",
+    "ipa": "/ˈsɫaɪd/",
     "pos": "v",
     "meaning": "từ 'slide' (v)",
     "example": "Practice speaking 'slide' clearly.",
@@ -26778,7 +26491,7 @@ export const vocabList = [
   {
     "id": 2433,
     "word": "slight",
-    "ipa": "/slight/",
+    "ipa": "/ˈsɫaɪt/",
     "pos": "adj",
     "meaning": "từ 'slight' (adj)",
     "example": "Practice speaking 'slight' clearly.",
@@ -26789,7 +26502,7 @@ export const vocabList = [
   {
     "id": 2434,
     "word": "slightly",
-    "ipa": "/slightly/",
+    "ipa": "/ˈsɫaɪtɫi/",
     "pos": "adv",
     "meaning": "từ 'slightly' (adv)",
     "example": "Practice speaking 'slightly' clearly.",
@@ -26800,7 +26513,7 @@ export const vocabList = [
   {
     "id": 2435,
     "word": "slip",
-    "ipa": "/slip/",
+    "ipa": "/ˈsɫɪp/",
     "pos": "v",
     "meaning": "từ 'slip' (v)",
     "example": "Practice speaking 'slip' clearly.",
@@ -26811,7 +26524,7 @@ export const vocabList = [
   {
     "id": 2436,
     "word": "slope",
-    "ipa": "/slope/",
+    "ipa": "/ˈsɫoʊp/",
     "pos": "n",
     "meaning": "từ 'slope' (n)",
     "example": "Practice speaking 'slope' clearly.",
@@ -26822,7 +26535,7 @@ export const vocabList = [
   {
     "id": 2437,
     "word": "slow",
-    "ipa": "/slow/",
+    "ipa": "/ˈsɫoʊ/",
     "pos": "adj",
     "meaning": "từ 'slow' (adj)",
     "example": "Practice speaking 'slow' clearly.",
@@ -26833,7 +26546,7 @@ export const vocabList = [
   {
     "id": 2438,
     "word": "slowly",
-    "ipa": "/slowly/",
+    "ipa": "/ˈsɫoʊɫi/",
     "pos": "adv",
     "meaning": "từ 'slowly' (adv)",
     "example": "Practice speaking 'slowly' clearly.",
@@ -26844,7 +26557,7 @@ export const vocabList = [
   {
     "id": 2439,
     "word": "small",
-    "ipa": "/small/",
+    "ipa": "/ˈsmɔɫ/",
     "pos": "adj",
     "meaning": "từ 'small' (adj)",
     "example": "Practice speaking 'small' clearly.",
@@ -26855,7 +26568,7 @@ export const vocabList = [
   {
     "id": 2440,
     "word": "smart",
-    "ipa": "/smart/",
+    "ipa": "/ˈsmɑɹt/",
     "pos": "adj",
     "meaning": "từ 'smart' (adj)",
     "example": "Practice speaking 'smart' clearly.",
@@ -26877,7 +26590,7 @@ export const vocabList = [
   {
     "id": 2442,
     "word": "smell",
-    "ipa": "/smell/",
+    "ipa": "/ˈsmɛɫ/",
     "pos": "v",
     "meaning": "từ 'smell' (v)",
     "example": "Practice speaking 'smell' clearly.",
@@ -26899,7 +26612,7 @@ export const vocabList = [
   {
     "id": 2444,
     "word": "smoke",
-    "ipa": "/smoke/",
+    "ipa": "/ˈsmoʊk/",
     "pos": "n",
     "meaning": "từ 'smoke' (n)",
     "example": "Practice speaking 'smoke' clearly.",
@@ -26910,7 +26623,7 @@ export const vocabList = [
   {
     "id": 2445,
     "word": "smoking",
-    "ipa": "/smoking/",
+    "ipa": "/ˈsmoʊkɪŋ/",
     "pos": "n",
     "meaning": "từ 'smoking' (n)",
     "example": "Practice speaking 'smoking' clearly.",
@@ -26932,7 +26645,7 @@ export const vocabList = [
   {
     "id": 2447,
     "word": "snake",
-    "ipa": "/snake/",
+    "ipa": "/ˈsneɪk/",
     "pos": "n",
     "meaning": "từ 'snake' (n)",
     "example": "Practice speaking 'snake' clearly.",
@@ -26943,7 +26656,7 @@ export const vocabList = [
   {
     "id": 2448,
     "word": "snow",
-    "ipa": "/snow/",
+    "ipa": "/ˈsnoʊ/",
     "pos": "n",
     "meaning": "từ 'snow' (n)",
     "example": "Practice speaking 'snow' clearly.",
@@ -26954,7 +26667,7 @@ export const vocabList = [
   {
     "id": 2449,
     "word": "so",
-    "ipa": "/so/",
+    "ipa": "/ˈsoʊ/",
     "pos": "adv",
     "meaning": "từ 'so' (adv)",
     "example": "Practice speaking 'so' clearly.",
@@ -26965,7 +26678,7 @@ export const vocabList = [
   {
     "id": 2450,
     "word": "soap",
-    "ipa": "/soap/",
+    "ipa": "/ˈsoʊp/",
     "pos": "n",
     "meaning": "từ 'soap' (n)",
     "example": "Practice speaking 'soap' clearly.",
@@ -26976,7 +26689,7 @@ export const vocabList = [
   {
     "id": 2451,
     "word": "soccer",
-    "ipa": "/soccer/",
+    "ipa": "/ˈsɑkɝ/",
     "pos": "n",
     "meaning": "từ 'soccer' (n)",
     "example": "Practice speaking 'soccer' clearly.",
@@ -26987,7 +26700,7 @@ export const vocabList = [
   {
     "id": 2452,
     "word": "social",
-    "ipa": "/social/",
+    "ipa": "/ˈsoʊʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'social' (adj)",
     "example": "Practice speaking 'social' clearly.",
@@ -26998,7 +26711,7 @@ export const vocabList = [
   {
     "id": 2453,
     "word": "society",
-    "ipa": "/society/",
+    "ipa": "/səˈsaɪəti/",
     "pos": "n",
     "meaning": "từ 'society' (n)",
     "example": "Practice speaking 'society' clearly.",
@@ -27009,7 +26722,7 @@ export const vocabList = [
   {
     "id": 2454,
     "word": "sock",
-    "ipa": "/sock/",
+    "ipa": "/ˈsɑk/",
     "pos": "n",
     "meaning": "từ 'sock' (n)",
     "example": "Practice speaking 'sock' clearly.",
@@ -27020,7 +26733,7 @@ export const vocabList = [
   {
     "id": 2455,
     "word": "soft",
-    "ipa": "/soft/",
+    "ipa": "/ˈsɑft/",
     "pos": "adj",
     "meaning": "từ 'soft' (adj)",
     "example": "Practice speaking 'soft' clearly.",
@@ -27031,7 +26744,7 @@ export const vocabList = [
   {
     "id": 2456,
     "word": "software",
-    "ipa": "/software/",
+    "ipa": "/ˈsɔfˌwɛɹ/",
     "pos": "n",
     "meaning": "từ 'software' (n)",
     "example": "Practice speaking 'software' clearly.",
@@ -27042,7 +26755,7 @@ export const vocabList = [
   {
     "id": 2457,
     "word": "soil",
-    "ipa": "/soil/",
+    "ipa": "/ˈsɔɪɫ/",
     "pos": "n",
     "meaning": "từ 'soil' (n)",
     "example": "Practice speaking 'soil' clearly.",
@@ -27053,7 +26766,7 @@ export const vocabList = [
   {
     "id": 2458,
     "word": "solar",
-    "ipa": "/solar/",
+    "ipa": "/ˈsoʊɫɝ/",
     "pos": "adj",
     "meaning": "từ 'solar' (adj)",
     "example": "Practice speaking 'solar' clearly.",
@@ -27064,7 +26777,7 @@ export const vocabList = [
   {
     "id": 2459,
     "word": "soldier",
-    "ipa": "/soldier/",
+    "ipa": "/ˈsoʊɫdʒɝ/",
     "pos": "n",
     "meaning": "từ 'soldier' (n)",
     "example": "Practice speaking 'soldier' clearly.",
@@ -27075,7 +26788,7 @@ export const vocabList = [
   {
     "id": 2460,
     "word": "solid",
-    "ipa": "/solid/",
+    "ipa": "/ˈsɑɫəd/",
     "pos": "adj",
     "meaning": "từ 'solid' (adj)",
     "example": "Practice speaking 'solid' clearly.",
@@ -27086,7 +26799,7 @@ export const vocabList = [
   {
     "id": 2461,
     "word": "solution",
-    "ipa": "/solution/",
+    "ipa": "/səˈɫuʃən/",
     "pos": "n",
     "meaning": "từ 'solution' (n)",
     "example": "Practice speaking 'solution' clearly.",
@@ -27097,7 +26810,7 @@ export const vocabList = [
   {
     "id": 2462,
     "word": "solve",
-    "ipa": "/solve/",
+    "ipa": "/ˈsɑɫv/",
     "pos": "v",
     "meaning": "từ 'solve' (v)",
     "example": "Practice speaking 'solve' clearly.",
@@ -27108,7 +26821,7 @@ export const vocabList = [
   {
     "id": 2463,
     "word": "some",
-    "ipa": "/some/",
+    "ipa": "/ˈsəm/",
     "pos": "det",
     "meaning": "từ 'some' (det)",
     "example": "Practice speaking 'some' clearly.",
@@ -27119,7 +26832,7 @@ export const vocabList = [
   {
     "id": 2464,
     "word": "somebody",
-    "ipa": "/somebody/",
+    "ipa": "/ˈsəmˌbɑdi/",
     "pos": "pron",
     "meaning": "từ 'somebody' (pron)",
     "example": "Practice speaking 'somebody' clearly.",
@@ -27130,7 +26843,7 @@ export const vocabList = [
   {
     "id": 2465,
     "word": "someone",
-    "ipa": "/someone/",
+    "ipa": "/ˈsəmˌwən/",
     "pos": "pron",
     "meaning": "từ 'someone' (pron)",
     "example": "Practice speaking 'someone' clearly.",
@@ -27152,7 +26865,7 @@ export const vocabList = [
   {
     "id": 2467,
     "word": "sometimes",
-    "ipa": "/sometimes/",
+    "ipa": "/ˈsəmˌtaɪmz/",
     "pos": "adv",
     "meaning": "từ 'sometimes' (adv)",
     "example": "Practice speaking 'sometimes' clearly.",
@@ -27163,7 +26876,7 @@ export const vocabList = [
   {
     "id": 2468,
     "word": "somewhat",
-    "ipa": "/somewhat/",
+    "ipa": "/ˈsəmˈwət/",
     "pos": "adv",
     "meaning": "từ 'somewhat' (adv)",
     "example": "Practice speaking 'somewhat' clearly.",
@@ -27174,7 +26887,7 @@ export const vocabList = [
   {
     "id": 2469,
     "word": "somewhere",
-    "ipa": "/somewhere/",
+    "ipa": "/ˈsəmˌwɛɹ/",
     "pos": "adv",
     "meaning": "từ 'somewhere' (adv)",
     "example": "Practice speaking 'somewhere' clearly.",
@@ -27185,7 +26898,7 @@ export const vocabList = [
   {
     "id": 2470,
     "word": "son",
-    "ipa": "/son/",
+    "ipa": "/ˈsən/",
     "pos": "n",
     "meaning": "từ 'son' (n)",
     "example": "Practice speaking 'son' clearly.",
@@ -27196,7 +26909,7 @@ export const vocabList = [
   {
     "id": 2471,
     "word": "song",
-    "ipa": "/song/",
+    "ipa": "/ˈsɔŋ/",
     "pos": "n",
     "meaning": "từ 'song' (n)",
     "example": "Practice speaking 'song' clearly.",
@@ -27229,7 +26942,7 @@ export const vocabList = [
   {
     "id": 2474,
     "word": "sort",
-    "ipa": "/sort/",
+    "ipa": "/ˈsɔɹt/",
     "pos": "n",
     "meaning": "từ 'sort' (n)",
     "example": "Practice speaking 'sort' clearly.",
@@ -27240,7 +26953,7 @@ export const vocabList = [
   {
     "id": 2475,
     "word": "soul",
-    "ipa": "/soul/",
+    "ipa": "/ˈsoʊɫ/",
     "pos": "n",
     "meaning": "từ 'soul' (n)",
     "example": "Practice speaking 'soul' clearly.",
@@ -27251,7 +26964,7 @@ export const vocabList = [
   {
     "id": 2476,
     "word": "sound",
-    "ipa": "/sound/",
+    "ipa": "/ˈsaʊnd/",
     "pos": "n",
     "meaning": "từ 'sound' (n)",
     "example": "Practice speaking 'sound' clearly.",
@@ -27262,7 +26975,7 @@ export const vocabList = [
   {
     "id": 2477,
     "word": "soup",
-    "ipa": "/soup/",
+    "ipa": "/ˈsup/",
     "pos": "n",
     "meaning": "từ 'soup' (n)",
     "example": "Practice speaking 'soup' clearly.",
@@ -27273,7 +26986,7 @@ export const vocabList = [
   {
     "id": 2478,
     "word": "source",
-    "ipa": "/source/",
+    "ipa": "/ˈsɔɹs/",
     "pos": "n",
     "meaning": "từ 'source' (n)",
     "example": "Practice speaking 'source' clearly.",
@@ -27306,7 +27019,7 @@ export const vocabList = [
   {
     "id": 2481,
     "word": "space",
-    "ipa": "/space/",
+    "ipa": "/ˈspeɪs/",
     "pos": "n",
     "meaning": "từ 'space' (n)",
     "example": "Practice speaking 'space' clearly.",
@@ -27328,7 +27041,7 @@ export const vocabList = [
   {
     "id": 2483,
     "word": "speaker",
-    "ipa": "/speaker/",
+    "ipa": "/ˈspikɝ/",
     "pos": "n",
     "meaning": "từ 'speaker' (n)",
     "example": "Practice speaking 'speaker' clearly.",
@@ -27339,7 +27052,7 @@ export const vocabList = [
   {
     "id": 2484,
     "word": "special",
-    "ipa": "/special/",
+    "ipa": "/ˈspɛʃəɫ/",
     "pos": "adj",
     "meaning": "từ 'special' (adj)",
     "example": "Practice speaking 'special' clearly.",
@@ -27350,7 +27063,7 @@ export const vocabList = [
   {
     "id": 2485,
     "word": "specialist",
-    "ipa": "/specialist/",
+    "ipa": "/ˈspɛʃəɫəst/",
     "pos": "n",
     "meaning": "từ 'specialist' (n)",
     "example": "Practice speaking 'specialist' clearly.",
@@ -27361,7 +27074,7 @@ export const vocabList = [
   {
     "id": 2486,
     "word": "species",
-    "ipa": "/species/",
+    "ipa": "/ˈspiʃiz/",
     "pos": "n",
     "meaning": "từ 'species' (n)",
     "example": "Practice speaking 'species' clearly.",
@@ -27372,7 +27085,7 @@ export const vocabList = [
   {
     "id": 2487,
     "word": "specific",
-    "ipa": "/specific/",
+    "ipa": "/spəˈsɪfɪk/",
     "pos": "adj",
     "meaning": "từ 'specific' (adj)",
     "example": "Practice speaking 'specific' clearly.",
@@ -27383,7 +27096,7 @@ export const vocabList = [
   {
     "id": 2488,
     "word": "specifically",
-    "ipa": "/specifically/",
+    "ipa": "/spəˈsɪfɪkɫi/",
     "pos": "adv",
     "meaning": "từ 'specifically' (adv)",
     "example": "Practice speaking 'specifically' clearly.",
@@ -27416,7 +27129,7 @@ export const vocabList = [
   {
     "id": 2491,
     "word": "spell",
-    "ipa": "/spell/",
+    "ipa": "/ˈspɛɫ/",
     "pos": "v",
     "meaning": "từ 'spell' (v)",
     "example": "Practice speaking 'spell' clearly.",
@@ -27427,7 +27140,7 @@ export const vocabList = [
   {
     "id": 2492,
     "word": "spelling",
-    "ipa": "/spelling/",
+    "ipa": "/ˈspɛɫɪŋ/",
     "pos": "n",
     "meaning": "từ 'spelling' (n)",
     "example": "Practice speaking 'spelling' clearly.",
@@ -27438,7 +27151,7 @@ export const vocabList = [
   {
     "id": 2493,
     "word": "spend",
-    "ipa": "/spend/",
+    "ipa": "/ˈspɛnd/",
     "pos": "v",
     "meaning": "tiêu (tiền), dành (thời gian)",
     "example": "Spend time with loved ones.",
@@ -27449,7 +27162,7 @@ export const vocabList = [
   {
     "id": 2494,
     "word": "spending",
-    "ipa": "/spending/",
+    "ipa": "/ˈspɛndɪŋ/",
     "pos": "n",
     "meaning": "từ 'spending' (n)",
     "example": "Practice speaking 'spending' clearly.",
@@ -27460,7 +27173,7 @@ export const vocabList = [
   {
     "id": 2495,
     "word": "spicy",
-    "ipa": "/spicy/",
+    "ipa": "/ˈspaɪsi/",
     "pos": "adj",
     "meaning": "từ 'spicy' (adj)",
     "example": "Practice speaking 'spicy' clearly.",
@@ -27471,7 +27184,7 @@ export const vocabList = [
   {
     "id": 2496,
     "word": "spider",
-    "ipa": "/spider/",
+    "ipa": "/ˈspaɪdɝ/",
     "pos": "n",
     "meaning": "từ 'spider' (n)",
     "example": "Practice speaking 'spider' clearly.",
@@ -27482,7 +27195,7 @@ export const vocabList = [
   {
     "id": 2497,
     "word": "spirit",
-    "ipa": "/spirit/",
+    "ipa": "/ˈspɪɹət/",
     "pos": "n",
     "meaning": "từ 'spirit' (n)",
     "example": "Practice speaking 'spirit' clearly.",
@@ -27493,7 +27206,7 @@ export const vocabList = [
   {
     "id": 2498,
     "word": "spiritual",
-    "ipa": "/spiritual/",
+    "ipa": "/ˈspɪɹɪˌtʃuəɫ/",
     "pos": "adj",
     "meaning": "từ 'spiritual' (adj)",
     "example": "Practice speaking 'spiritual' clearly.",
@@ -27504,7 +27217,7 @@ export const vocabList = [
   {
     "id": 2499,
     "word": "split",
-    "ipa": "/split/",
+    "ipa": "/ˈspɫɪt/",
     "pos": "v",
     "meaning": "từ 'split' (v)",
     "example": "Practice speaking 'split' clearly.",
@@ -27515,7 +27228,7 @@ export const vocabList = [
   {
     "id": 2500,
     "word": "spoken",
-    "ipa": "/spoken/",
+    "ipa": "/ˈspoʊkən/",
     "pos": "adj",
     "meaning": "từ 'spoken' (adj)",
     "example": "Practice speaking 'spoken' clearly.",
@@ -27526,7 +27239,7 @@ export const vocabList = [
   {
     "id": 2501,
     "word": "sponsor",
-    "ipa": "/sponsor/",
+    "ipa": "/ˈspɑnsɝ/",
     "pos": "v",
     "meaning": "từ 'sponsor' (v)",
     "example": "Practice speaking 'sponsor' clearly.",
@@ -27548,7 +27261,7 @@ export const vocabList = [
   {
     "id": 2503,
     "word": "sport",
-    "ipa": "/sport/",
+    "ipa": "/ˈspɔɹt/",
     "pos": "n",
     "meaning": "từ 'sport' (n)",
     "example": "Practice speaking 'sport' clearly.",
@@ -27559,7 +27272,7 @@ export const vocabList = [
   {
     "id": 2504,
     "word": "spot",
-    "ipa": "/spot/",
+    "ipa": "/ˈspɑt/",
     "pos": "n",
     "meaning": "từ 'spot' (n)",
     "example": "Practice speaking 'spot' clearly.",
@@ -27570,7 +27283,7 @@ export const vocabList = [
   {
     "id": 2505,
     "word": "spread",
-    "ipa": "/spread/",
+    "ipa": "/ˈspɹɛd/",
     "pos": "v",
     "meaning": "từ 'spread' (v)",
     "example": "Practice speaking 'spread' clearly.",
@@ -27581,7 +27294,7 @@ export const vocabList = [
   {
     "id": 2506,
     "word": "spring",
-    "ipa": "/spring/",
+    "ipa": "/ˈspɹɪŋ/",
     "pos": "n",
     "meaning": "từ 'spring' (n)",
     "example": "Practice speaking 'spring' clearly.",
@@ -27592,7 +27305,7 @@ export const vocabList = [
   {
     "id": 2507,
     "word": "square",
-    "ipa": "/square/",
+    "ipa": "/ˈskwɛɹ/",
     "pos": "adj",
     "meaning": "từ 'square' (adj)",
     "example": "Practice speaking 'square' clearly.",
@@ -27603,7 +27316,7 @@ export const vocabList = [
   {
     "id": 2508,
     "word": "stable",
-    "ipa": "/stable/",
+    "ipa": "/ˈsteɪbəɫ/",
     "pos": "adj",
     "meaning": "từ 'stable' (adj)",
     "example": "Practice speaking 'stable' clearly.",
@@ -27614,7 +27327,7 @@ export const vocabList = [
   {
     "id": 2509,
     "word": "stadium",
-    "ipa": "/stadium/",
+    "ipa": "/ˈsteɪdiəm/",
     "pos": "n",
     "meaning": "từ 'stadium' (n)",
     "example": "Practice speaking 'stadium' clearly.",
@@ -27625,7 +27338,7 @@ export const vocabList = [
   {
     "id": 2510,
     "word": "staff",
-    "ipa": "/staff/",
+    "ipa": "/ˈstæf/",
     "pos": "n",
     "meaning": "từ 'staff' (n)",
     "example": "Practice speaking 'staff' clearly.",
@@ -27636,7 +27349,7 @@ export const vocabList = [
   {
     "id": 2511,
     "word": "stage",
-    "ipa": "/stage/",
+    "ipa": "/ˈsteɪdʒ/",
     "pos": "n",
     "meaning": "từ 'stage' (n)",
     "example": "Practice speaking 'stage' clearly.",
@@ -27647,7 +27360,7 @@ export const vocabList = [
   {
     "id": 2512,
     "word": "stair",
-    "ipa": "/stair/",
+    "ipa": "/ˈstɛɹ/",
     "pos": "n",
     "meaning": "từ 'stair' (n)",
     "example": "Practice speaking 'stair' clearly.",
@@ -27658,7 +27371,7 @@ export const vocabList = [
   {
     "id": 2513,
     "word": "stamp",
-    "ipa": "/stamp/",
+    "ipa": "/ˈstæmp/",
     "pos": "n",
     "meaning": "từ 'stamp' (n)",
     "example": "Practice speaking 'stamp' clearly.",
@@ -27669,7 +27382,7 @@ export const vocabList = [
   {
     "id": 2514,
     "word": "stand",
-    "ipa": "/stand/",
+    "ipa": "/ˈstænd/",
     "pos": "v",
     "meaning": "từ 'stand' (v)",
     "example": "Practice speaking 'stand' clearly.",
@@ -27680,7 +27393,7 @@ export const vocabList = [
   {
     "id": 2515,
     "word": "standard",
-    "ipa": "/standard/",
+    "ipa": "/ˈstændɝd/",
     "pos": "n",
     "meaning": "từ 'standard' (n)",
     "example": "Practice speaking 'standard' clearly.",
@@ -27691,7 +27404,7 @@ export const vocabList = [
   {
     "id": 2516,
     "word": "star",
-    "ipa": "/star/",
+    "ipa": "/ˈstɑɹ/",
     "pos": "n",
     "meaning": "từ 'star' (n)",
     "example": "Practice speaking 'star' clearly.",
@@ -27702,7 +27415,7 @@ export const vocabList = [
   {
     "id": 2517,
     "word": "stare",
-    "ipa": "/stare/",
+    "ipa": "/ˈstɛɹ/",
     "pos": "v",
     "meaning": "từ 'stare' (v)",
     "example": "Practice speaking 'stare' clearly.",
@@ -27724,7 +27437,7 @@ export const vocabList = [
   {
     "id": 2519,
     "word": "state",
-    "ipa": "/state/",
+    "ipa": "/ˈsteɪt/",
     "pos": "n",
     "meaning": "từ 'state' (n)",
     "example": "Practice speaking 'state' clearly.",
@@ -27735,7 +27448,7 @@ export const vocabList = [
   {
     "id": 2520,
     "word": "statement",
-    "ipa": "/statement/",
+    "ipa": "/ˈsteɪtmənt/",
     "pos": "n",
     "meaning": "từ 'statement' (n)",
     "example": "Practice speaking 'statement' clearly.",
@@ -27746,7 +27459,7 @@ export const vocabList = [
   {
     "id": 2521,
     "word": "station",
-    "ipa": "/station/",
+    "ipa": "/ˈsteɪʃən/",
     "pos": "n",
     "meaning": "từ 'station' (n)",
     "example": "Practice speaking 'station' clearly.",
@@ -27757,7 +27470,7 @@ export const vocabList = [
   {
     "id": 2522,
     "word": "statistic",
-    "ipa": "/statistic/",
+    "ipa": "/stəˈtɪstɪk/",
     "pos": "n",
     "meaning": "từ 'statistic' (n)",
     "example": "Practice speaking 'statistic' clearly.",
@@ -27768,7 +27481,7 @@ export const vocabList = [
   {
     "id": 2523,
     "word": "statue",
-    "ipa": "/statue/",
+    "ipa": "/ˈstæˌtʃu/",
     "pos": "n",
     "meaning": "từ 'statue' (n)",
     "example": "Practice speaking 'statue' clearly.",
@@ -27779,7 +27492,7 @@ export const vocabList = [
   {
     "id": 2524,
     "word": "status",
-    "ipa": "/status/",
+    "ipa": "/ˈstætəs/",
     "pos": "n",
     "meaning": "từ 'status' (n)",
     "example": "Practice speaking 'status' clearly.",
@@ -27801,7 +27514,7 @@ export const vocabList = [
   {
     "id": 2526,
     "word": "steady",
-    "ipa": "/steady/",
+    "ipa": "/ˈstɛdi/",
     "pos": "adj",
     "meaning": "từ 'steady' (adj)",
     "example": "Practice speaking 'steady' clearly.",
@@ -27812,7 +27525,7 @@ export const vocabList = [
   {
     "id": 2527,
     "word": "steal",
-    "ipa": "/steal/",
+    "ipa": "/ˈstiɫ/",
     "pos": "v",
     "meaning": "từ 'steal' (v)",
     "example": "Practice speaking 'steal' clearly.",
@@ -27845,7 +27558,7 @@ export const vocabList = [
   {
     "id": 2530,
     "word": "step",
-    "ipa": "/step/",
+    "ipa": "/ˈstɛp/",
     "pos": "n",
     "meaning": "từ 'step' (n)",
     "example": "Practice speaking 'step' clearly.",
@@ -27856,7 +27569,7 @@ export const vocabList = [
   {
     "id": 2531,
     "word": "stick",
-    "ipa": "/stick/",
+    "ipa": "/ˈstɪk/",
     "pos": "context",
     "meaning": "từ 'stick' (context)",
     "example": "Practice speaking 'stick' clearly.",
@@ -27867,7 +27580,7 @@ export const vocabList = [
   {
     "id": 2532,
     "word": "sticky",
-    "ipa": "/sticky/",
+    "ipa": "/ˈstɪki/",
     "pos": "adj",
     "meaning": "từ 'sticky' (adj)",
     "example": "Practice speaking 'sticky' clearly.",
@@ -27878,7 +27591,7 @@ export const vocabList = [
   {
     "id": 2533,
     "word": "stiff",
-    "ipa": "/stiff/",
+    "ipa": "/ˈstɪf/",
     "pos": "adj",
     "meaning": "từ 'stiff' (adj)",
     "example": "Practice speaking 'stiff' clearly.",
@@ -27889,7 +27602,7 @@ export const vocabList = [
   {
     "id": 2534,
     "word": "still",
-    "ipa": "/still/",
+    "ipa": "/ˈstɪɫ/",
     "pos": "adv",
     "meaning": "từ 'still' (adv)",
     "example": "Practice speaking 'still' clearly.",
@@ -27900,7 +27613,7 @@ export const vocabList = [
   {
     "id": 2535,
     "word": "stock",
-    "ipa": "/stock/",
+    "ipa": "/ˈstɑk/",
     "pos": "n",
     "meaning": "từ 'stock' (n)",
     "example": "Practice speaking 'stock' clearly.",
@@ -27922,7 +27635,7 @@ export const vocabList = [
   {
     "id": 2537,
     "word": "stone",
-    "ipa": "/stone/",
+    "ipa": "/ˈstoʊn/",
     "pos": "n",
     "meaning": "từ 'stone' (n)",
     "example": "Practice speaking 'stone' clearly.",
@@ -27944,7 +27657,7 @@ export const vocabList = [
   {
     "id": 2539,
     "word": "store",
-    "ipa": "/store/",
+    "ipa": "/ˈstɔɹ/",
     "pos": "n",
     "meaning": "từ 'store' (n)",
     "example": "Practice speaking 'store' clearly.",
@@ -27955,7 +27668,7 @@ export const vocabList = [
   {
     "id": 2540,
     "word": "storm",
-    "ipa": "/storm/",
+    "ipa": "/ˈstɔɹm/",
     "pos": "n",
     "meaning": "từ 'storm' (n)",
     "example": "Practice speaking 'storm' clearly.",
@@ -27966,7 +27679,7 @@ export const vocabList = [
   {
     "id": 2541,
     "word": "story",
-    "ipa": "/story/",
+    "ipa": "/ˈstɔɹi/",
     "pos": "n",
     "meaning": "từ 'story' (n)",
     "example": "Practice speaking 'story' clearly.",
@@ -27977,7 +27690,7 @@ export const vocabList = [
   {
     "id": 2542,
     "word": "straight",
-    "ipa": "/straight/",
+    "ipa": "/ˈstɹeɪt/",
     "pos": "adv",
     "meaning": "từ 'straight' (adv)",
     "example": "Practice speaking 'straight' clearly.",
@@ -27988,7 +27701,7 @@ export const vocabList = [
   {
     "id": 2543,
     "word": "strange",
-    "ipa": "/strange/",
+    "ipa": "/ˈstɹeɪndʒ/",
     "pos": "adj",
     "meaning": "từ 'strange' (adj)",
     "example": "Practice speaking 'strange' clearly.",
@@ -27999,7 +27712,7 @@ export const vocabList = [
   {
     "id": 2544,
     "word": "stranger",
-    "ipa": "/stranger/",
+    "ipa": "/ˈstɹeɪndʒɝ/",
     "pos": "n",
     "meaning": "từ 'stranger' (n)",
     "example": "Practice speaking 'stranger' clearly.",
@@ -28010,7 +27723,7 @@ export const vocabList = [
   {
     "id": 2545,
     "word": "strategy",
-    "ipa": "/strategy/",
+    "ipa": "/ˈstɹætədʒi/",
     "pos": "n",
     "meaning": "từ 'strategy' (n)",
     "example": "Practice speaking 'strategy' clearly.",
@@ -28021,7 +27734,7 @@ export const vocabList = [
   {
     "id": 2546,
     "word": "stream",
-    "ipa": "/stream/",
+    "ipa": "/ˈstɹim/",
     "pos": "n",
     "meaning": "từ 'stream' (n)",
     "example": "Practice speaking 'stream' clearly.",
@@ -28054,7 +27767,7 @@ export const vocabList = [
   {
     "id": 2549,
     "word": "stress",
-    "ipa": "/stress/",
+    "ipa": "/ˈstɹɛs/",
     "pos": "n",
     "meaning": "từ 'stress' (n)",
     "example": "Practice speaking 'stress' clearly.",
@@ -28076,7 +27789,7 @@ export const vocabList = [
   {
     "id": 2551,
     "word": "strict",
-    "ipa": "/strict/",
+    "ipa": "/ˈstɹɪkt/",
     "pos": "adj",
     "meaning": "từ 'strict' (adj)",
     "example": "Practice speaking 'strict' clearly.",
@@ -28087,7 +27800,7 @@ export const vocabList = [
   {
     "id": 2552,
     "word": "strike",
-    "ipa": "/strike/",
+    "ipa": "/ˈstɹaɪk/",
     "pos": "v",
     "meaning": "từ 'strike' (v)",
     "example": "Practice speaking 'strike' clearly.",
@@ -28098,7 +27811,7 @@ export const vocabList = [
   {
     "id": 2553,
     "word": "string",
-    "ipa": "/string/",
+    "ipa": "/ˈstɹɪŋ/",
     "pos": "n",
     "meaning": "từ 'string' (n)",
     "example": "Practice speaking 'string' clearly.",
@@ -28109,7 +27822,7 @@ export const vocabList = [
   {
     "id": 2554,
     "word": "strong",
-    "ipa": "/strong/",
+    "ipa": "/ˈstɹɔŋ/",
     "pos": "adj",
     "meaning": "từ 'strong' (adj)",
     "example": "Practice speaking 'strong' clearly.",
@@ -28120,7 +27833,7 @@ export const vocabList = [
   {
     "id": 2555,
     "word": "strongly",
-    "ipa": "/strongly/",
+    "ipa": "/ˈstɹɔŋɫi/",
     "pos": "adv",
     "meaning": "từ 'strongly' (adv)",
     "example": "Practice speaking 'strongly' clearly.",
@@ -28131,7 +27844,7 @@ export const vocabList = [
   {
     "id": 2556,
     "word": "structure",
-    "ipa": "/structure/",
+    "ipa": "/ˈstɹəktʃɝ/",
     "pos": "n",
     "meaning": "từ 'structure' (n)",
     "example": "Practice speaking 'structure' clearly.",
@@ -28142,7 +27855,7 @@ export const vocabList = [
   {
     "id": 2557,
     "word": "struggle",
-    "ipa": "/struggle/",
+    "ipa": "/ˈstɹəɡəɫ/",
     "pos": "v",
     "meaning": "từ 'struggle' (v)",
     "example": "Practice speaking 'struggle' clearly.",
@@ -28153,7 +27866,7 @@ export const vocabList = [
   {
     "id": 2558,
     "word": "student",
-    "ipa": "/student/",
+    "ipa": "/ˈstudənt/",
     "pos": "n",
     "meaning": "từ 'student' (n)",
     "example": "Practice speaking 'student' clearly.",
@@ -28164,7 +27877,7 @@ export const vocabList = [
   {
     "id": 2559,
     "word": "studio",
-    "ipa": "/studio/",
+    "ipa": "/ˈstudiˌoʊ/",
     "pos": "n",
     "meaning": "từ 'studio' (n)",
     "example": "Practice speaking 'studio' clearly.",
@@ -28186,7 +27899,7 @@ export const vocabList = [
   {
     "id": 2561,
     "word": "stuff",
-    "ipa": "/stuff/",
+    "ipa": "/ˈstəf/",
     "pos": "n",
     "meaning": "từ 'stuff' (n)",
     "example": "Practice speaking 'stuff' clearly.",
@@ -28197,7 +27910,7 @@ export const vocabList = [
   {
     "id": 2562,
     "word": "stupid",
-    "ipa": "/stupid/",
+    "ipa": "/ˈstupəd/",
     "pos": "adj",
     "meaning": "từ 'stupid' (adj)",
     "example": "Practice speaking 'stupid' clearly.",
@@ -28208,7 +27921,7 @@ export const vocabList = [
   {
     "id": 2563,
     "word": "style",
-    "ipa": "/style/",
+    "ipa": "/ˈstaɪɫ/",
     "pos": "n",
     "meaning": "từ 'style' (n)",
     "example": "Practice speaking 'style' clearly.",
@@ -28219,7 +27932,7 @@ export const vocabList = [
   {
     "id": 2564,
     "word": "subject",
-    "ipa": "/subject/",
+    "ipa": "/ˈsəbdʒɪkt/",
     "pos": "n",
     "meaning": "từ 'subject' (n)",
     "example": "Practice speaking 'subject' clearly.",
@@ -28230,7 +27943,7 @@ export const vocabList = [
   {
     "id": 2565,
     "word": "submit",
-    "ipa": "/submit/",
+    "ipa": "/səbˈmɪt/",
     "pos": "v",
     "meaning": "từ 'submit' (v)",
     "example": "Practice speaking 'submit' clearly.",
@@ -28241,7 +27954,7 @@ export const vocabList = [
   {
     "id": 2566,
     "word": "substance",
-    "ipa": "/substance/",
+    "ipa": "/ˈsəbstəns/",
     "pos": "n",
     "meaning": "từ 'substance' (n)",
     "example": "Practice speaking 'substance' clearly.",
@@ -28263,7 +27976,7 @@ export const vocabList = [
   {
     "id": 2568,
     "word": "success",
-    "ipa": "/success/",
+    "ipa": "/səkˈsɛs/",
     "pos": "n",
     "meaning": "từ 'success' (n)",
     "example": "Practice speaking 'success' clearly.",
@@ -28274,7 +27987,7 @@ export const vocabList = [
   {
     "id": 2569,
     "word": "successful",
-    "ipa": "/successful/",
+    "ipa": "/səkˈsɛsfəɫ/",
     "pos": "adj",
     "meaning": "từ 'successful' (adj)",
     "example": "Practice speaking 'successful' clearly.",
@@ -28285,7 +27998,7 @@ export const vocabList = [
   {
     "id": 2570,
     "word": "successfully",
-    "ipa": "/successfully/",
+    "ipa": "/səkˈsɛsfəɫi/",
     "pos": "adv",
     "meaning": "từ 'successfully' (adv)",
     "example": "Practice speaking 'successfully' clearly.",
@@ -28307,7 +28020,7 @@ export const vocabList = [
   {
     "id": 2572,
     "word": "sudden",
-    "ipa": "/sudden/",
+    "ipa": "/ˈsədən/",
     "pos": "adj",
     "meaning": "từ 'sudden' (adj)",
     "example": "Practice speaking 'sudden' clearly.",
@@ -28318,7 +28031,7 @@ export const vocabList = [
   {
     "id": 2573,
     "word": "suddenly",
-    "ipa": "/suddenly/",
+    "ipa": "/ˈsədənɫi/",
     "pos": "adv",
     "meaning": "từ 'suddenly' (adv)",
     "example": "Practice speaking 'suddenly' clearly.",
@@ -28329,7 +28042,7 @@ export const vocabList = [
   {
     "id": 2574,
     "word": "suffer",
-    "ipa": "/suffer/",
+    "ipa": "/ˈsəfɝ/",
     "pos": "v",
     "meaning": "từ 'suffer' (v)",
     "example": "Practice speaking 'suffer' clearly.",
@@ -28340,7 +28053,7 @@ export const vocabList = [
   {
     "id": 2575,
     "word": "sugar",
-    "ipa": "/sugar/",
+    "ipa": "/ˈʃʊɡɝ/",
     "pos": "n",
     "meaning": "từ 'sugar' (n)",
     "example": "Practice speaking 'sugar' clearly.",
@@ -28351,7 +28064,7 @@ export const vocabList = [
   {
     "id": 2576,
     "word": "suggest",
-    "ipa": "/suggest/",
+    "ipa": "/səˈdʒɛst/",
     "pos": "v",
     "meaning": "từ 'suggest' (v)",
     "example": "Practice speaking 'suggest' clearly.",
@@ -28362,7 +28075,7 @@ export const vocabList = [
   {
     "id": 2577,
     "word": "suggestion",
-    "ipa": "/suggestion/",
+    "ipa": "/səˈdʒɛstʃən/",
     "pos": "n",
     "meaning": "từ 'suggestion' (n)",
     "example": "Practice speaking 'suggestion' clearly.",
@@ -28373,7 +28086,7 @@ export const vocabList = [
   {
     "id": 2578,
     "word": "suit",
-    "ipa": "/suit/",
+    "ipa": "/ˈsut/",
     "pos": "n",
     "meaning": "từ 'suit' (n)",
     "example": "Practice speaking 'suit' clearly.",
@@ -28384,7 +28097,7 @@ export const vocabList = [
   {
     "id": 2579,
     "word": "suitable",
-    "ipa": "/suitable/",
+    "ipa": "/ˈsutəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'suitable' (adj)",
     "example": "Practice speaking 'suitable' clearly.",
@@ -28395,7 +28108,7 @@ export const vocabList = [
   {
     "id": 2580,
     "word": "sum",
-    "ipa": "/sum/",
+    "ipa": "/ˈsəm/",
     "pos": "n",
     "meaning": "từ 'sum' (n)",
     "example": "Practice speaking 'sum' clearly.",
@@ -28406,7 +28119,7 @@ export const vocabList = [
   {
     "id": 2581,
     "word": "summarize",
-    "ipa": "/summarize/",
+    "ipa": "/ˈsəmɝˌaɪz/",
     "pos": "v",
     "meaning": "từ 'summarize' (v)",
     "example": "Practice speaking 'summarize' clearly.",
@@ -28417,7 +28130,7 @@ export const vocabList = [
   {
     "id": 2582,
     "word": "summary",
-    "ipa": "/summary/",
+    "ipa": "/ˈsəmɝi/",
     "pos": "n",
     "meaning": "từ 'summary' (n)",
     "example": "Practice speaking 'summary' clearly.",
@@ -28428,7 +28141,7 @@ export const vocabList = [
   {
     "id": 2583,
     "word": "summer",
-    "ipa": "/summer/",
+    "ipa": "/ˈsəmɝ/",
     "pos": "n",
     "meaning": "từ 'summer' (n)",
     "example": "Practice speaking 'summer' clearly.",
@@ -28439,7 +28152,7 @@ export const vocabList = [
   {
     "id": 2584,
     "word": "sun",
-    "ipa": "/sun/",
+    "ipa": "/ˈsən/",
     "pos": "n",
     "meaning": "từ 'sun' (n)",
     "example": "Practice speaking 'sun' clearly.",
@@ -28450,7 +28163,7 @@ export const vocabList = [
   {
     "id": 2585,
     "word": "sunday",
-    "ipa": "/sunday/",
+    "ipa": "/ˈsənˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'sunday' (n)",
     "example": "Practice speaking 'sunday' clearly.",
@@ -28461,7 +28174,7 @@ export const vocabList = [
   {
     "id": 2586,
     "word": "supermarket",
-    "ipa": "/supermarket/",
+    "ipa": "/ˈsupɝˌmɑɹkɪt/",
     "pos": "n",
     "meaning": "từ 'supermarket' (n)",
     "example": "Practice speaking 'supermarket' clearly.",
@@ -28472,7 +28185,7 @@ export const vocabList = [
   {
     "id": 2587,
     "word": "supply",
-    "ipa": "/supply/",
+    "ipa": "/səˈpɫaɪ/",
     "pos": "n",
     "meaning": "từ 'supply' (n)",
     "example": "Practice speaking 'supply' clearly.",
@@ -28483,7 +28196,7 @@ export const vocabList = [
   {
     "id": 2588,
     "word": "support",
-    "ipa": "/support/",
+    "ipa": "/səˈpɔɹt/",
     "pos": "v",
     "meaning": "từ 'support' (v)",
     "example": "Practice speaking 'support' clearly.",
@@ -28494,7 +28207,7 @@ export const vocabList = [
   {
     "id": 2589,
     "word": "supporter",
-    "ipa": "/supporter/",
+    "ipa": "/səˈpɔɹtɝ/",
     "pos": "n",
     "meaning": "từ 'supporter' (n)",
     "example": "Practice speaking 'supporter' clearly.",
@@ -28505,7 +28218,7 @@ export const vocabList = [
   {
     "id": 2590,
     "word": "suppose",
-    "ipa": "/suppose/",
+    "ipa": "/səˈpoʊz/",
     "pos": "v",
     "meaning": "từ 'suppose' (v)",
     "example": "Practice speaking 'suppose' clearly.",
@@ -28516,7 +28229,7 @@ export const vocabList = [
   {
     "id": 2591,
     "word": "sure",
-    "ipa": "/sure/",
+    "ipa": "/ˈʃʊɹ/",
     "pos": "adj",
     "meaning": "từ 'sure' (adj)",
     "example": "Practice speaking 'sure' clearly.",
@@ -28527,7 +28240,7 @@ export const vocabList = [
   {
     "id": 2592,
     "word": "surely",
-    "ipa": "/surely/",
+    "ipa": "/ˈʃʊɹɫi/",
     "pos": "adv",
     "meaning": "từ 'surely' (adv)",
     "example": "Practice speaking 'surely' clearly.",
@@ -28538,7 +28251,7 @@ export const vocabList = [
   {
     "id": 2593,
     "word": "surface",
-    "ipa": "/surface/",
+    "ipa": "/ˈsɝfəs/",
     "pos": "n",
     "meaning": "từ 'surface' (n)",
     "example": "Practice speaking 'surface' clearly.",
@@ -28549,7 +28262,7 @@ export const vocabList = [
   {
     "id": 2594,
     "word": "surgery",
-    "ipa": "/surgery/",
+    "ipa": "/ˈsɝdʒɝi/",
     "pos": "n",
     "meaning": "từ 'surgery' (n)",
     "example": "Practice speaking 'surgery' clearly.",
@@ -28560,7 +28273,7 @@ export const vocabList = [
   {
     "id": 2595,
     "word": "surprise",
-    "ipa": "/surprise/",
+    "ipa": "/səˈpɹaɪz/",
     "pos": "n",
     "meaning": "từ 'surprise' (n)",
     "example": "Practice speaking 'surprise' clearly.",
@@ -28571,7 +28284,7 @@ export const vocabList = [
   {
     "id": 2596,
     "word": "surprised",
-    "ipa": "/surprised/",
+    "ipa": "/səˈpɹaɪzd/",
     "pos": "adj",
     "meaning": "từ 'surprised' (adj)",
     "example": "Practice speaking 'surprised' clearly.",
@@ -28582,7 +28295,7 @@ export const vocabList = [
   {
     "id": 2597,
     "word": "surprising",
-    "ipa": "/surprising/",
+    "ipa": "/səˈpɹaɪzɪŋ/",
     "pos": "adj",
     "meaning": "từ 'surprising' (adj)",
     "example": "Practice speaking 'surprising' clearly.",
@@ -28593,7 +28306,7 @@ export const vocabList = [
   {
     "id": 2598,
     "word": "surround",
-    "ipa": "/surround/",
+    "ipa": "/sɝˈaʊnd/",
     "pos": "v",
     "meaning": "từ 'surround' (v)",
     "example": "Practice speaking 'surround' clearly.",
@@ -28604,7 +28317,7 @@ export const vocabList = [
   {
     "id": 2599,
     "word": "surrounding",
-    "ipa": "/surrounding/",
+    "ipa": "/sɝˈaʊndɪŋ/",
     "pos": "adj",
     "meaning": "từ 'surrounding' (adj)",
     "example": "Practice speaking 'surrounding' clearly.",
@@ -28615,7 +28328,7 @@ export const vocabList = [
   {
     "id": 2600,
     "word": "survey",
-    "ipa": "/survey/",
+    "ipa": "/ˈsɝˌveɪ/",
     "pos": "n",
     "meaning": "từ 'survey' (n)",
     "example": "Practice speaking 'survey' clearly.",
@@ -28626,7 +28339,7 @@ export const vocabList = [
   {
     "id": 2601,
     "word": "survive",
-    "ipa": "/survive/",
+    "ipa": "/sɝˈvaɪv/",
     "pos": "v",
     "meaning": "từ 'survive' (v)",
     "example": "Practice speaking 'survive' clearly.",
@@ -28637,7 +28350,7 @@ export const vocabList = [
   {
     "id": 2602,
     "word": "suspect",
-    "ipa": "/suspect/",
+    "ipa": "/ˈsəsˌpɛkt/",
     "pos": "v",
     "meaning": "từ 'suspect' (v)",
     "example": "Practice speaking 'suspect' clearly.",
@@ -28648,7 +28361,7 @@ export const vocabList = [
   {
     "id": 2603,
     "word": "swear",
-    "ipa": "/swear/",
+    "ipa": "/ˈswɛɹ/",
     "pos": "v",
     "meaning": "từ 'swear' (v)",
     "example": "Practice speaking 'swear' clearly.",
@@ -28659,7 +28372,7 @@ export const vocabList = [
   {
     "id": 2604,
     "word": "sweater",
-    "ipa": "/sweater/",
+    "ipa": "/ˈswɛtɝ/",
     "pos": "n",
     "meaning": "từ 'sweater' (n)",
     "example": "Practice speaking 'sweater' clearly.",
@@ -28692,7 +28405,7 @@ export const vocabList = [
   {
     "id": 2607,
     "word": "swim",
-    "ipa": "/swim/",
+    "ipa": "/ˈswɪm/",
     "pos": "v",
     "meaning": "từ 'swim' (v)",
     "example": "Practice speaking 'swim' clearly.",
@@ -28703,7 +28416,7 @@ export const vocabList = [
   {
     "id": 2608,
     "word": "swimming",
-    "ipa": "/swimming/",
+    "ipa": "/ˈswɪmɪŋ/",
     "pos": "n",
     "meaning": "từ 'swimming' (n)",
     "example": "Practice speaking 'swimming' clearly.",
@@ -28725,7 +28438,7 @@ export const vocabList = [
   {
     "id": 2610,
     "word": "symbol",
-    "ipa": "/symbol/",
+    "ipa": "/ˈsɪmbəɫ/",
     "pos": "n",
     "meaning": "từ 'symbol' (n)",
     "example": "Practice speaking 'symbol' clearly.",
@@ -28747,7 +28460,7 @@ export const vocabList = [
   {
     "id": 2612,
     "word": "symptom",
-    "ipa": "/symptom/",
+    "ipa": "/ˈsɪmptəm/",
     "pos": "n",
     "meaning": "từ 'symptom' (n)",
     "example": "Practice speaking 'symptom' clearly.",
@@ -28758,7 +28471,7 @@ export const vocabList = [
   {
     "id": 2613,
     "word": "system",
-    "ipa": "/system/",
+    "ipa": "/ˈsɪstəm/",
     "pos": "n",
     "meaning": "từ 'system' (n)",
     "example": "Practice speaking 'system' clearly.",
@@ -28769,7 +28482,7 @@ export const vocabList = [
   {
     "id": 2614,
     "word": "table",
-    "ipa": "/table/",
+    "ipa": "/ˈteɪbəɫ/",
     "pos": "n",
     "meaning": "từ 'table' (n)",
     "example": "Practice speaking 'table' clearly.",
@@ -28780,7 +28493,7 @@ export const vocabList = [
   {
     "id": 2615,
     "word": "tablet",
-    "ipa": "/tablet/",
+    "ipa": "/ˈtæbɫət/",
     "pos": "n",
     "meaning": "từ 'tablet' (n)",
     "example": "Practice speaking 'tablet' clearly.",
@@ -28791,7 +28504,7 @@ export const vocabList = [
   {
     "id": 2616,
     "word": "tail",
-    "ipa": "/tail/",
+    "ipa": "/ˈteɪɫ/",
     "pos": "n",
     "meaning": "từ 'tail' (n)",
     "example": "Practice speaking 'tail' clearly.",
@@ -28813,7 +28526,7 @@ export const vocabList = [
   {
     "id": 2618,
     "word": "tale",
-    "ipa": "/tale/",
+    "ipa": "/ˈteɪɫ/",
     "pos": "n",
     "meaning": "từ 'tale' (n)",
     "example": "Practice speaking 'tale' clearly.",
@@ -28824,7 +28537,7 @@ export const vocabList = [
   {
     "id": 2619,
     "word": "talent",
-    "ipa": "/talent/",
+    "ipa": "/ˈtæɫənt/",
     "pos": "n",
     "meaning": "từ 'talent' (n)",
     "example": "Practice speaking 'talent' clearly.",
@@ -28835,7 +28548,7 @@ export const vocabList = [
   {
     "id": 2620,
     "word": "talented",
-    "ipa": "/talented/",
+    "ipa": "/ˈtæɫəntɪd/",
     "pos": "adj",
     "meaning": "từ 'talented' (adj)",
     "example": "Practice speaking 'talented' clearly.",
@@ -28857,7 +28570,7 @@ export const vocabList = [
   {
     "id": 2622,
     "word": "tall",
-    "ipa": "/tall/",
+    "ipa": "/ˈtɔɫ/",
     "pos": "adj",
     "meaning": "từ 'tall' (adj)",
     "example": "Practice speaking 'tall' clearly.",
@@ -28868,7 +28581,7 @@ export const vocabList = [
   {
     "id": 2623,
     "word": "tank",
-    "ipa": "/tank/",
+    "ipa": "/ˈtæŋk/",
     "pos": "n",
     "meaning": "từ 'tank' (n)",
     "example": "Practice speaking 'tank' clearly.",
@@ -28879,7 +28592,7 @@ export const vocabList = [
   {
     "id": 2624,
     "word": "tape",
-    "ipa": "/tape/",
+    "ipa": "/ˈteɪp/",
     "pos": "n",
     "meaning": "từ 'tape' (n)",
     "example": "Practice speaking 'tape' clearly.",
@@ -28890,7 +28603,7 @@ export const vocabList = [
   {
     "id": 2625,
     "word": "target",
-    "ipa": "/target/",
+    "ipa": "/ˈtɑɹɡət/",
     "pos": "n",
     "meaning": "từ 'target' (n)",
     "example": "Practice speaking 'target' clearly.",
@@ -28901,7 +28614,7 @@ export const vocabList = [
   {
     "id": 2626,
     "word": "task",
-    "ipa": "/task/",
+    "ipa": "/ˈtæsk/",
     "pos": "n",
     "meaning": "từ 'task' (n)",
     "example": "Practice speaking 'task' clearly.",
@@ -28912,7 +28625,7 @@ export const vocabList = [
   {
     "id": 2627,
     "word": "taste",
-    "ipa": "/taste/",
+    "ipa": "/ˈteɪst/",
     "pos": "n",
     "meaning": "từ 'taste' (n)",
     "example": "Practice speaking 'taste' clearly.",
@@ -28923,7 +28636,7 @@ export const vocabList = [
   {
     "id": 2628,
     "word": "tax",
-    "ipa": "/tax/",
+    "ipa": "/ˈtæks/",
     "pos": "n",
     "meaning": "từ 'tax' (n)",
     "example": "Practice speaking 'tax' clearly.",
@@ -28934,7 +28647,7 @@ export const vocabList = [
   {
     "id": 2629,
     "word": "taxi",
-    "ipa": "/taxi/",
+    "ipa": "/ˈtæksi/",
     "pos": "n",
     "meaning": "từ 'taxi' (n)",
     "example": "Practice speaking 'taxi' clearly.",
@@ -28945,7 +28658,7 @@ export const vocabList = [
   {
     "id": 2630,
     "word": "tea",
-    "ipa": "/tea/",
+    "ipa": "/ˈti/",
     "pos": "n",
     "meaning": "từ 'tea' (n)",
     "example": "Practice speaking 'tea' clearly.",
@@ -28989,34 +28702,12 @@ export const vocabList = [
   {
     "id": 2634,
     "word": "team",
-    "ipa": "/team/",
+    "ipa": "/ˈtim/",
     "pos": "n",
     "meaning": "từ 'team' (n)",
     "example": "Practice speaking 'team' clearly.",
     "exampleVi": "Hãy luyện phát âm từ 'team' thật rõ ràng.",
     "level": "A1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 2635,
-    "word": "tear1",
-    "ipa": "/tear1/",
-    "pos": "v",
-    "meaning": "từ 'tear1' (v)",
-    "example": "Practice speaking 'tear1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'tear1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 2636,
-    "word": "tear2",
-    "ipa": "/tear2/",
-    "pos": "n",
-    "meaning": "từ 'tear2' (n)",
-    "example": "Practice speaking 'tear2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'tear2' thật rõ ràng.",
-    "level": "B1",
     "topic": "Đời sống"
   },
   {
@@ -29088,7 +28779,7 @@ export const vocabList = [
   {
     "id": 2643,
     "word": "television",
-    "ipa": "/television/",
+    "ipa": "/ˈtɛɫəˌvɪʒən/",
     "pos": "n",
     "meaning": "từ 'television' (n)",
     "example": "Practice speaking 'television' clearly.",
@@ -29110,7 +28801,7 @@ export const vocabList = [
   {
     "id": 2645,
     "word": "temperature",
-    "ipa": "/temperature/",
+    "ipa": "/ˈtɛmpɝətʃɝ/",
     "pos": "n",
     "meaning": "từ 'temperature' (n)",
     "example": "Practice speaking 'temperature' clearly.",
@@ -29121,7 +28812,7 @@ export const vocabList = [
   {
     "id": 2646,
     "word": "temporary",
-    "ipa": "/temporary/",
+    "ipa": "/ˈtɛmpɝˌɛɹi/",
     "pos": "adj",
     "meaning": "từ 'temporary' (adj)",
     "example": "Practice speaking 'temporary' clearly.",
@@ -29132,7 +28823,7 @@ export const vocabList = [
   {
     "id": 2647,
     "word": "ten",
-    "ipa": "/ten/",
+    "ipa": "/ˈtɛn/",
     "pos": "number",
     "meaning": "từ 'ten' (number)",
     "example": "Practice speaking 'ten' clearly.",
@@ -29143,7 +28834,7 @@ export const vocabList = [
   {
     "id": 2648,
     "word": "tend",
-    "ipa": "/tend/",
+    "ipa": "/ˈtɛnd/",
     "pos": "v",
     "meaning": "từ 'tend' (v)",
     "example": "Practice speaking 'tend' clearly.",
@@ -29154,7 +28845,7 @@ export const vocabList = [
   {
     "id": 2649,
     "word": "tennis",
-    "ipa": "/tennis/",
+    "ipa": "/ˈtɛnəs/",
     "pos": "n",
     "meaning": "từ 'tennis' (n)",
     "example": "Practice speaking 'tennis' clearly.",
@@ -29165,7 +28856,7 @@ export const vocabList = [
   {
     "id": 2650,
     "word": "tent",
-    "ipa": "/tent/",
+    "ipa": "/ˈtɛnt/",
     "pos": "n",
     "meaning": "từ 'tent' (n)",
     "example": "Practice speaking 'tent' clearly.",
@@ -29176,7 +28867,7 @@ export const vocabList = [
   {
     "id": 2651,
     "word": "term",
-    "ipa": "/term/",
+    "ipa": "/ˈtɝm/",
     "pos": "n",
     "meaning": "từ 'term' (n)",
     "example": "Practice speaking 'term' clearly.",
@@ -29187,7 +28878,7 @@ export const vocabList = [
   {
     "id": 2652,
     "word": "terrible",
-    "ipa": "/terrible/",
+    "ipa": "/ˈtɛɹəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'terrible' (adj)",
     "example": "Practice speaking 'terrible' clearly.",
@@ -29198,7 +28889,7 @@ export const vocabList = [
   {
     "id": 2653,
     "word": "test",
-    "ipa": "/test/",
+    "ipa": "/ˈtɛst/",
     "pos": "n",
     "meaning": "từ 'test' (n)",
     "example": "Practice speaking 'test' clearly.",
@@ -29209,7 +28900,7 @@ export const vocabList = [
   {
     "id": 2654,
     "word": "text",
-    "ipa": "/text/",
+    "ipa": "/ˈtɛkst/",
     "pos": "n",
     "meaning": "từ 'text' (n)",
     "example": "Practice speaking 'text' clearly.",
@@ -29660,7 +29351,7 @@ export const vocabList = [
   {
     "id": 2695,
     "word": "ticket",
-    "ipa": "/ticket/",
+    "ipa": "/ˈtɪkət/",
     "pos": "n",
     "meaning": "từ 'ticket' (n)",
     "example": "Practice speaking 'ticket' clearly.",
@@ -29671,7 +29362,7 @@ export const vocabList = [
   {
     "id": 2696,
     "word": "tidy",
-    "ipa": "/tidy/",
+    "ipa": "/ˈtaɪdi/",
     "pos": "adj",
     "meaning": "từ 'tidy' (adj)",
     "example": "Practice speaking 'tidy' clearly.",
@@ -29682,7 +29373,7 @@ export const vocabList = [
   {
     "id": 2697,
     "word": "tie",
-    "ipa": "/tie/",
+    "ipa": "/ˈtaɪ/",
     "pos": "v",
     "meaning": "từ 'tie' (v)",
     "example": "Practice speaking 'tie' clearly.",
@@ -29693,7 +29384,7 @@ export const vocabList = [
   {
     "id": 2698,
     "word": "tight",
-    "ipa": "/tight/",
+    "ipa": "/ˈtaɪt/",
     "pos": "adj",
     "meaning": "từ 'tight' (adj)",
     "example": "Practice speaking 'tight' clearly.",
@@ -29704,7 +29395,7 @@ export const vocabList = [
   {
     "id": 2699,
     "word": "till",
-    "ipa": "/till/",
+    "ipa": "/ˈtɪɫ/",
     "pos": "conj/prep",
     "meaning": "từ 'till' (conj/prep)",
     "example": "Practice speaking 'till' clearly.",
@@ -29715,7 +29406,7 @@ export const vocabList = [
   {
     "id": 2700,
     "word": "time",
-    "ipa": "/time/",
+    "ipa": "/ˈtaɪm/",
     "pos": "n",
     "meaning": "từ 'time' (n)",
     "example": "Practice speaking 'time' clearly.",
@@ -29726,7 +29417,7 @@ export const vocabList = [
   {
     "id": 2701,
     "word": "tin",
-    "ipa": "/tin/",
+    "ipa": "/ˈtɪn/",
     "pos": "n",
     "meaning": "từ 'tin' (n)",
     "example": "Practice speaking 'tin' clearly.",
@@ -29737,7 +29428,7 @@ export const vocabList = [
   {
     "id": 2702,
     "word": "tiny",
-    "ipa": "/tiny/",
+    "ipa": "/ˈtaɪni/",
     "pos": "adj",
     "meaning": "từ 'tiny' (adj)",
     "example": "Practice speaking 'tiny' clearly.",
@@ -29748,7 +29439,7 @@ export const vocabList = [
   {
     "id": 2703,
     "word": "tip",
-    "ipa": "/tip/",
+    "ipa": "/ˈtɪp/",
     "pos": "n",
     "meaning": "từ 'tip' (n)",
     "example": "Practice speaking 'tip' clearly.",
@@ -29759,7 +29450,7 @@ export const vocabList = [
   {
     "id": 2704,
     "word": "tired",
-    "ipa": "/tired/",
+    "ipa": "/ˈtaɪɝd/",
     "pos": "adj",
     "meaning": "từ 'tired' (adj)",
     "example": "Practice speaking 'tired' clearly.",
@@ -29770,7 +29461,7 @@ export const vocabList = [
   {
     "id": 2705,
     "word": "title",
-    "ipa": "/title/",
+    "ipa": "/ˈtaɪtəɫ/",
     "pos": "n",
     "meaning": "từ 'title' (n)",
     "example": "Practice speaking 'title' clearly.",
@@ -29781,7 +29472,7 @@ export const vocabList = [
   {
     "id": 2706,
     "word": "to",
-    "ipa": "/to/",
+    "ipa": "/ˈtu/",
     "pos": "prep",
     "meaning": "từ 'to' (prep)",
     "example": "Practice speaking 'to' clearly.",
@@ -29792,7 +29483,7 @@ export const vocabList = [
   {
     "id": 2707,
     "word": "today",
-    "ipa": "/today/",
+    "ipa": "/təˈdeɪ/",
     "pos": "adv",
     "meaning": "từ 'today' (adv)",
     "example": "Practice speaking 'today' clearly.",
@@ -29803,7 +29494,7 @@ export const vocabList = [
   {
     "id": 2708,
     "word": "toe",
-    "ipa": "/toe/",
+    "ipa": "/ˈtoʊ/",
     "pos": "n",
     "meaning": "từ 'toe' (n)",
     "example": "Practice speaking 'toe' clearly.",
@@ -29825,7 +29516,7 @@ export const vocabList = [
   {
     "id": 2710,
     "word": "toilet",
-    "ipa": "/toilet/",
+    "ipa": "/ˈtɔɪɫət/",
     "pos": "n",
     "meaning": "từ 'toilet' (n)",
     "example": "Practice speaking 'toilet' clearly.",
@@ -29836,7 +29527,7 @@ export const vocabList = [
   {
     "id": 2711,
     "word": "tomato",
-    "ipa": "/tomato/",
+    "ipa": "/təˈmɑˌtoʊ/",
     "pos": "n",
     "meaning": "từ 'tomato' (n)",
     "example": "Practice speaking 'tomato' clearly.",
@@ -29847,7 +29538,7 @@ export const vocabList = [
   {
     "id": 2712,
     "word": "tomorrow",
-    "ipa": "/tomorrow/",
+    "ipa": "/təˈmɑˌɹoʊ/",
     "pos": "adv",
     "meaning": "từ 'tomorrow' (adv)",
     "example": "Practice speaking 'tomorrow' clearly.",
@@ -29858,7 +29549,7 @@ export const vocabList = [
   {
     "id": 2713,
     "word": "tone",
-    "ipa": "/tone/",
+    "ipa": "/ˈtoʊn/",
     "pos": "n",
     "meaning": "từ 'tone' (n)",
     "example": "Practice speaking 'tone' clearly.",
@@ -29869,7 +29560,7 @@ export const vocabList = [
   {
     "id": 2714,
     "word": "tongue",
-    "ipa": "/tongue/",
+    "ipa": "/ˈtəŋ/",
     "pos": "n",
     "meaning": "từ 'tongue' (n)",
     "example": "Practice speaking 'tongue' clearly.",
@@ -29880,7 +29571,7 @@ export const vocabList = [
   {
     "id": 2715,
     "word": "tonight",
-    "ipa": "/tonight/",
+    "ipa": "/təˈnaɪt/",
     "pos": "adv",
     "meaning": "từ 'tonight' (adv)",
     "example": "Practice speaking 'tonight' clearly.",
@@ -29924,7 +29615,7 @@ export const vocabList = [
   {
     "id": 2719,
     "word": "top",
-    "ipa": "/top/",
+    "ipa": "/ˈtɑp/",
     "pos": "n",
     "meaning": "từ 'top' (n)",
     "example": "Practice speaking 'top' clearly.",
@@ -29935,7 +29626,7 @@ export const vocabList = [
   {
     "id": 2720,
     "word": "topic",
-    "ipa": "/topic/",
+    "ipa": "/ˈtɑpɪk/",
     "pos": "n",
     "meaning": "từ 'topic' (n)",
     "example": "Practice speaking 'topic' clearly.",
@@ -29946,7 +29637,7 @@ export const vocabList = [
   {
     "id": 2721,
     "word": "total",
-    "ipa": "/total/",
+    "ipa": "/ˈtoʊtəɫ/",
     "pos": "adj",
     "meaning": "từ 'total' (adj)",
     "example": "Practice speaking 'total' clearly.",
@@ -29957,7 +29648,7 @@ export const vocabList = [
   {
     "id": 2722,
     "word": "totally",
-    "ipa": "/totally/",
+    "ipa": "/ˈtoʊtəɫi/",
     "pos": "adv",
     "meaning": "từ 'totally' (adv)",
     "example": "Practice speaking 'totally' clearly.",
@@ -29979,7 +29670,7 @@ export const vocabList = [
   {
     "id": 2724,
     "word": "tough",
-    "ipa": "/tough/",
+    "ipa": "/ˈtəf/",
     "pos": "adj",
     "meaning": "từ 'tough' (adj)",
     "example": "Practice speaking 'tough' clearly.",
@@ -29990,7 +29681,7 @@ export const vocabList = [
   {
     "id": 2725,
     "word": "tour",
-    "ipa": "/tour/",
+    "ipa": "/ˈtʊɹ/",
     "pos": "n",
     "meaning": "từ 'tour' (n)",
     "example": "Practice speaking 'tour' clearly.",
@@ -30001,7 +29692,7 @@ export const vocabList = [
   {
     "id": 2726,
     "word": "tourism",
-    "ipa": "/tourism/",
+    "ipa": "/ˈtʊˌɹɪzəm/",
     "pos": "n",
     "meaning": "từ 'tourism' (n)",
     "example": "Practice speaking 'tourism' clearly.",
@@ -30012,7 +29703,7 @@ export const vocabList = [
   {
     "id": 2727,
     "word": "tourist",
-    "ipa": "/tourist/",
+    "ipa": "/ˈtʊɹəst/",
     "pos": "n",
     "meaning": "từ 'tourist' (n)",
     "example": "Practice speaking 'tourist' clearly.",
@@ -30023,7 +29714,7 @@ export const vocabList = [
   {
     "id": 2728,
     "word": "towards",
-    "ipa": "/towards/",
+    "ipa": "/ˈtɔɹdz/",
     "pos": "prep",
     "meaning": "từ 'towards' (prep)",
     "example": "Practice speaking 'towards' clearly.",
@@ -30034,7 +29725,7 @@ export const vocabList = [
   {
     "id": 2729,
     "word": "towel",
-    "ipa": "/towel/",
+    "ipa": "/ˈtaʊəɫ/",
     "pos": "n",
     "meaning": "từ 'towel' (n)",
     "example": "Practice speaking 'towel' clearly.",
@@ -30045,7 +29736,7 @@ export const vocabList = [
   {
     "id": 2730,
     "word": "tower",
-    "ipa": "/tower/",
+    "ipa": "/ˈtaʊɝ/",
     "pos": "n",
     "meaning": "từ 'tower' (n)",
     "example": "Practice speaking 'tower' clearly.",
@@ -30056,7 +29747,7 @@ export const vocabList = [
   {
     "id": 2731,
     "word": "town",
-    "ipa": "/town/",
+    "ipa": "/ˈtaʊn/",
     "pos": "n",
     "meaning": "từ 'town' (n)",
     "example": "Practice speaking 'town' clearly.",
@@ -30067,7 +29758,7 @@ export const vocabList = [
   {
     "id": 2732,
     "word": "toy",
-    "ipa": "/toy/",
+    "ipa": "/ˈtɔɪ/",
     "pos": "n",
     "meaning": "từ 'toy' (n)",
     "example": "Practice speaking 'toy' clearly.",
@@ -30078,7 +29769,7 @@ export const vocabList = [
   {
     "id": 2733,
     "word": "track",
-    "ipa": "/track/",
+    "ipa": "/ˈtɹæk/",
     "pos": "n",
     "meaning": "từ 'track' (n)",
     "example": "Practice speaking 'track' clearly.",
@@ -30089,7 +29780,7 @@ export const vocabList = [
   {
     "id": 2734,
     "word": "trade",
-    "ipa": "/trade/",
+    "ipa": "/ˈtɹeɪd/",
     "pos": "n",
     "meaning": "từ 'trade' (n)",
     "example": "Practice speaking 'trade' clearly.",
@@ -30100,7 +29791,7 @@ export const vocabList = [
   {
     "id": 2735,
     "word": "tradition",
-    "ipa": "/tradition/",
+    "ipa": "/tɹəˈdɪʃən/",
     "pos": "n",
     "meaning": "từ 'tradition' (n)",
     "example": "Practice speaking 'tradition' clearly.",
@@ -30111,7 +29802,7 @@ export const vocabList = [
   {
     "id": 2736,
     "word": "traditional",
-    "ipa": "/traditional/",
+    "ipa": "/tɹəˈdɪʃənəɫ/",
     "pos": "adj",
     "meaning": "từ 'traditional' (adj)",
     "example": "Practice speaking 'traditional' clearly.",
@@ -30122,7 +29813,7 @@ export const vocabList = [
   {
     "id": 2737,
     "word": "traffic",
-    "ipa": "/traffic/",
+    "ipa": "/ˈtɹæfɪk/",
     "pos": "n",
     "meaning": "từ 'traffic' (n)",
     "example": "Practice speaking 'traffic' clearly.",
@@ -30133,7 +29824,7 @@ export const vocabList = [
   {
     "id": 2738,
     "word": "train",
-    "ipa": "/train/",
+    "ipa": "/ˈtɹeɪn/",
     "pos": "n",
     "meaning": "từ 'train' (n)",
     "example": "Practice speaking 'train' clearly.",
@@ -30144,7 +29835,7 @@ export const vocabList = [
   {
     "id": 2739,
     "word": "trainer",
-    "ipa": "/trainer/",
+    "ipa": "/ˈtɹeɪnɝ/",
     "pos": "n",
     "meaning": "từ 'trainer' (n)",
     "example": "Practice speaking 'trainer' clearly.",
@@ -30155,7 +29846,7 @@ export const vocabList = [
   {
     "id": 2740,
     "word": "training",
-    "ipa": "/training/",
+    "ipa": "/ˈtɹeɪnɪŋ/",
     "pos": "n",
     "meaning": "từ 'training' (n)",
     "example": "Practice speaking 'training' clearly.",
@@ -30166,7 +29857,7 @@ export const vocabList = [
   {
     "id": 2741,
     "word": "transfer",
-    "ipa": "/transfer/",
+    "ipa": "/ˈtɹænsfɝ/",
     "pos": "v",
     "meaning": "từ 'transfer' (v)",
     "example": "Practice speaking 'transfer' clearly.",
@@ -30177,7 +29868,7 @@ export const vocabList = [
   {
     "id": 2742,
     "word": "transform",
-    "ipa": "/transform/",
+    "ipa": "/ˈtɹænsfɔɹm/",
     "pos": "v",
     "meaning": "từ 'transform' (v)",
     "example": "Practice speaking 'transform' clearly.",
@@ -30188,7 +29879,7 @@ export const vocabList = [
   {
     "id": 2743,
     "word": "transition",
-    "ipa": "/transition/",
+    "ipa": "/tɹænˈzɪʃən/",
     "pos": "n",
     "meaning": "từ 'transition' (n)",
     "example": "Practice speaking 'transition' clearly.",
@@ -30199,7 +29890,7 @@ export const vocabList = [
   {
     "id": 2744,
     "word": "translate",
-    "ipa": "/translate/",
+    "ipa": "/tɹænˈsɫeɪt/",
     "pos": "v",
     "meaning": "từ 'translate' (v)",
     "example": "Practice speaking 'translate' clearly.",
@@ -30210,7 +29901,7 @@ export const vocabList = [
   {
     "id": 2745,
     "word": "translation",
-    "ipa": "/translation/",
+    "ipa": "/tɹænˈsɫeɪʃən/",
     "pos": "n",
     "meaning": "từ 'translation' (n)",
     "example": "Practice speaking 'translation' clearly.",
@@ -30221,7 +29912,7 @@ export const vocabList = [
   {
     "id": 2746,
     "word": "transport",
-    "ipa": "/transport/",
+    "ipa": "/ˈtɹænspɔɹt/",
     "pos": "n",
     "meaning": "từ 'transport' (n)",
     "example": "Practice speaking 'transport' clearly.",
@@ -30243,7 +29934,7 @@ export const vocabList = [
   {
     "id": 2748,
     "word": "traveller",
-    "ipa": "/traveller/",
+    "ipa": "/ˈtɹævəɫɝ/",
     "pos": "n",
     "meaning": "từ 'traveller' (n)",
     "example": "Practice speaking 'traveller' clearly.",
@@ -30254,7 +29945,7 @@ export const vocabList = [
   {
     "id": 2749,
     "word": "treat",
-    "ipa": "/treat/",
+    "ipa": "/ˈtɹit/",
     "pos": "v",
     "meaning": "từ 'treat' (v)",
     "example": "Practice speaking 'treat' clearly.",
@@ -30265,7 +29956,7 @@ export const vocabList = [
   {
     "id": 2750,
     "word": "treatment",
-    "ipa": "/treatment/",
+    "ipa": "/ˈtɹitmənt/",
     "pos": "n",
     "meaning": "từ 'treatment' (n)",
     "example": "Practice speaking 'treatment' clearly.",
@@ -30287,7 +29978,7 @@ export const vocabList = [
   {
     "id": 2752,
     "word": "trend",
-    "ipa": "/trend/",
+    "ipa": "/ˈtɹɛnd/",
     "pos": "n",
     "meaning": "từ 'trend' (n)",
     "example": "Practice speaking 'trend' clearly.",
@@ -30298,7 +29989,7 @@ export const vocabList = [
   {
     "id": 2753,
     "word": "trial",
-    "ipa": "/trial/",
+    "ipa": "/ˈtɹaɪəɫ/",
     "pos": "n",
     "meaning": "từ 'trial' (n)",
     "example": "Practice speaking 'trial' clearly.",
@@ -30309,7 +30000,7 @@ export const vocabList = [
   {
     "id": 2754,
     "word": "trick",
-    "ipa": "/trick/",
+    "ipa": "/ˈtɹɪk/",
     "pos": "n",
     "meaning": "từ 'trick' (n)",
     "example": "Practice speaking 'trick' clearly.",
@@ -30320,7 +30011,7 @@ export const vocabList = [
   {
     "id": 2755,
     "word": "trip",
-    "ipa": "/trip/",
+    "ipa": "/ˈtɹɪp/",
     "pos": "n",
     "meaning": "từ 'trip' (n)",
     "example": "Practice speaking 'trip' clearly.",
@@ -30331,7 +30022,7 @@ export const vocabList = [
   {
     "id": 2756,
     "word": "tropical",
-    "ipa": "/tropical/",
+    "ipa": "/ˈtɹɑpɪkəɫ/",
     "pos": "adj",
     "meaning": "từ 'tropical' (adj)",
     "example": "Practice speaking 'tropical' clearly.",
@@ -30342,7 +30033,7 @@ export const vocabList = [
   {
     "id": 2757,
     "word": "trouble",
-    "ipa": "/trouble/",
+    "ipa": "/ˈtɹəbəɫ/",
     "pos": "n",
     "meaning": "từ 'trouble' (n)",
     "example": "Practice speaking 'trouble' clearly.",
@@ -30353,7 +30044,7 @@ export const vocabList = [
   {
     "id": 2758,
     "word": "trousers",
-    "ipa": "/trousers/",
+    "ipa": "/ˈtɹaʊzɝz/",
     "pos": "n",
     "meaning": "từ 'trousers' (n)",
     "example": "Practice speaking 'trousers' clearly.",
@@ -30364,7 +30055,7 @@ export const vocabList = [
   {
     "id": 2759,
     "word": "truck",
-    "ipa": "/truck/",
+    "ipa": "/ˈtɹək/",
     "pos": "n",
     "meaning": "từ 'truck' (n)",
     "example": "Practice speaking 'truck' clearly.",
@@ -30375,7 +30066,7 @@ export const vocabList = [
   {
     "id": 2760,
     "word": "true",
-    "ipa": "/true/",
+    "ipa": "/ˈtɹu/",
     "pos": "adj",
     "meaning": "từ 'true' (adj)",
     "example": "Practice speaking 'true' clearly.",
@@ -30386,7 +30077,7 @@ export const vocabList = [
   {
     "id": 2761,
     "word": "truly",
-    "ipa": "/truly/",
+    "ipa": "/ˈtɹuɫi/",
     "pos": "adv",
     "meaning": "từ 'truly' (adv)",
     "example": "Practice speaking 'truly' clearly.",
@@ -30397,7 +30088,7 @@ export const vocabList = [
   {
     "id": 2762,
     "word": "trust",
-    "ipa": "/trust/",
+    "ipa": "/ˈtɹəst/",
     "pos": "n",
     "meaning": "từ 'trust' (n)",
     "example": "Practice speaking 'trust' clearly.",
@@ -30441,7 +30132,7 @@ export const vocabList = [
   {
     "id": 2766,
     "word": "tube",
-    "ipa": "/tube/",
+    "ipa": "/ˈtjub/",
     "pos": "n",
     "meaning": "từ 'tube' (n)",
     "example": "Practice speaking 'tube' clearly.",
@@ -30452,7 +30143,7 @@ export const vocabList = [
   {
     "id": 2767,
     "word": "tuesday",
-    "ipa": "/tuesday/",
+    "ipa": "/ˈtjuzˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'tuesday' (n)",
     "example": "Practice speaking 'tuesday' clearly.",
@@ -30463,7 +30154,7 @@ export const vocabList = [
   {
     "id": 2768,
     "word": "tune",
-    "ipa": "/tune/",
+    "ipa": "/ˈtun/",
     "pos": "n",
     "meaning": "từ 'tune' (n)",
     "example": "Practice speaking 'tune' clearly.",
@@ -30474,7 +30165,7 @@ export const vocabList = [
   {
     "id": 2769,
     "word": "tunnel",
-    "ipa": "/tunnel/",
+    "ipa": "/ˈtənəɫ/",
     "pos": "n",
     "meaning": "từ 'tunnel' (n)",
     "example": "Practice speaking 'tunnel' clearly.",
@@ -30496,7 +30187,7 @@ export const vocabList = [
   {
     "id": 2771,
     "word": "tv",
-    "ipa": "/tv/",
+    "ipa": "/ˈtiˈvi/",
     "pos": "n",
     "meaning": "từ 'tv' (n)",
     "example": "Practice speaking 'tv' clearly.",
@@ -30507,7 +30198,7 @@ export const vocabList = [
   {
     "id": 2772,
     "word": "twelve",
-    "ipa": "/twelve/",
+    "ipa": "/ˈtwɛɫv/",
     "pos": "number",
     "meaning": "từ 'twelve' (number)",
     "example": "Practice speaking 'twelve' clearly.",
@@ -30518,7 +30209,7 @@ export const vocabList = [
   {
     "id": 2773,
     "word": "twenty",
-    "ipa": "/twenty/",
+    "ipa": "/ˈtwɛni/",
     "pos": "number",
     "meaning": "từ 'twenty' (number)",
     "example": "Practice speaking 'twenty' clearly.",
@@ -30529,7 +30220,7 @@ export const vocabList = [
   {
     "id": 2774,
     "word": "twice",
-    "ipa": "/twice/",
+    "ipa": "/ˈtwaɪs/",
     "pos": "adv",
     "meaning": "từ 'twice' (adv)",
     "example": "Practice speaking 'twice' clearly.",
@@ -30540,7 +30231,7 @@ export const vocabList = [
   {
     "id": 2775,
     "word": "twin",
-    "ipa": "/twin/",
+    "ipa": "/ˈtwɪn/",
     "pos": "n",
     "meaning": "từ 'twin' (n)",
     "example": "Practice speaking 'twin' clearly.",
@@ -30551,7 +30242,7 @@ export const vocabList = [
   {
     "id": 2776,
     "word": "two",
-    "ipa": "/two/",
+    "ipa": "/ˈtu/",
     "pos": "number",
     "meaning": "từ 'two' (number)",
     "example": "Practice speaking 'two' clearly.",
@@ -30562,7 +30253,7 @@ export const vocabList = [
   {
     "id": 2777,
     "word": "type",
-    "ipa": "/type/",
+    "ipa": "/ˈtaɪp/",
     "pos": "n",
     "meaning": "từ 'type' (n)",
     "example": "Practice speaking 'type' clearly.",
@@ -30573,7 +30264,7 @@ export const vocabList = [
   {
     "id": 2778,
     "word": "typical",
-    "ipa": "/typical/",
+    "ipa": "/ˈtɪpəkəɫ/",
     "pos": "adj",
     "meaning": "từ 'typical' (adj)",
     "example": "Practice speaking 'typical' clearly.",
@@ -30584,7 +30275,7 @@ export const vocabList = [
   {
     "id": 2779,
     "word": "typically",
-    "ipa": "/typically/",
+    "ipa": "/ˈtɪpɪkəɫi/",
     "pos": "adv",
     "meaning": "từ 'typically' (adv)",
     "example": "Practice speaking 'typically' clearly.",
@@ -30595,7 +30286,7 @@ export const vocabList = [
   {
     "id": 2780,
     "word": "tyre",
-    "ipa": "/tyre/",
+    "ipa": "/ˈtaɪɹ/",
     "pos": "n",
     "meaning": "từ 'tyre' (n)",
     "example": "Practice speaking 'tyre' clearly.",
@@ -30606,7 +30297,7 @@ export const vocabList = [
   {
     "id": 2781,
     "word": "ugly",
-    "ipa": "/ugly/",
+    "ipa": "/ˈəɡɫi/",
     "pos": "adj",
     "meaning": "từ 'ugly' (adj)",
     "example": "Practice speaking 'ugly' clearly.",
@@ -30617,7 +30308,7 @@ export const vocabList = [
   {
     "id": 2782,
     "word": "ultimately",
-    "ipa": "/ultimately/",
+    "ipa": "/ˈəɫtəmətɫi/",
     "pos": "adv",
     "meaning": "từ 'ultimately' (adv)",
     "example": "Practice speaking 'ultimately' clearly.",
@@ -30628,7 +30319,7 @@ export const vocabList = [
   {
     "id": 2783,
     "word": "umbrella",
-    "ipa": "/umbrella/",
+    "ipa": "/ˈəmˌbɹɛɫə/",
     "pos": "n",
     "meaning": "từ 'umbrella' (n)",
     "example": "Practice speaking 'umbrella' clearly.",
@@ -30639,7 +30330,7 @@ export const vocabList = [
   {
     "id": 2784,
     "word": "unable",
-    "ipa": "/unable/",
+    "ipa": "/əˈneɪbəɫ/",
     "pos": "adj",
     "meaning": "từ 'unable' (adj)",
     "example": "Practice speaking 'unable' clearly.",
@@ -30650,7 +30341,7 @@ export const vocabList = [
   {
     "id": 2785,
     "word": "uncle",
-    "ipa": "/uncle/",
+    "ipa": "/ˈəŋkəɫ/",
     "pos": "n",
     "meaning": "từ 'uncle' (n)",
     "example": "Practice speaking 'uncle' clearly.",
@@ -30661,7 +30352,7 @@ export const vocabList = [
   {
     "id": 2786,
     "word": "uncomfortable",
-    "ipa": "/uncomfortable/",
+    "ipa": "/ənˈkəmfɝtəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'uncomfortable' (adj)",
     "example": "Practice speaking 'uncomfortable' clearly.",
@@ -30672,7 +30363,7 @@ export const vocabList = [
   {
     "id": 2787,
     "word": "unconscious",
-    "ipa": "/unconscious/",
+    "ipa": "/ˌənˈkɑnʃəs/",
     "pos": "adj",
     "meaning": "từ 'unconscious' (adj)",
     "example": "Practice speaking 'unconscious' clearly.",
@@ -30683,7 +30374,7 @@ export const vocabList = [
   {
     "id": 2788,
     "word": "under",
-    "ipa": "/under/",
+    "ipa": "/ˈəndɝ/",
     "pos": "prep",
     "meaning": "từ 'under' (prep)",
     "example": "Practice speaking 'under' clearly.",
@@ -30694,7 +30385,7 @@ export const vocabList = [
   {
     "id": 2789,
     "word": "underground",
-    "ipa": "/underground/",
+    "ipa": "/ˈəndɝˌɡɹaʊnd/",
     "pos": "adj",
     "meaning": "từ 'underground' (adj)",
     "example": "Practice speaking 'underground' clearly.",
@@ -30716,7 +30407,7 @@ export const vocabList = [
   {
     "id": 2791,
     "word": "understanding",
-    "ipa": "/understanding/",
+    "ipa": "/ˌəndɝˈstændɪŋ/",
     "pos": "n",
     "meaning": "từ 'understanding' (n)",
     "example": "Practice speaking 'understanding' clearly.",
@@ -30727,7 +30418,7 @@ export const vocabList = [
   {
     "id": 2792,
     "word": "underwear",
-    "ipa": "/underwear/",
+    "ipa": "/ˈəndɝˌwɛɹ/",
     "pos": "n",
     "meaning": "từ 'underwear' (n)",
     "example": "Practice speaking 'underwear' clearly.",
@@ -30738,7 +30429,7 @@ export const vocabList = [
   {
     "id": 2793,
     "word": "unemployed",
-    "ipa": "/unemployed/",
+    "ipa": "/ˌənɛmˈpɫɔɪd/",
     "pos": "adj",
     "meaning": "từ 'unemployed' (adj)",
     "example": "Practice speaking 'unemployed' clearly.",
@@ -30749,7 +30440,7 @@ export const vocabList = [
   {
     "id": 2794,
     "word": "unemployment",
-    "ipa": "/unemployment/",
+    "ipa": "/ˌənɪmˈpɫɔɪmənt/",
     "pos": "n",
     "meaning": "từ 'unemployment' (n)",
     "example": "Practice speaking 'unemployment' clearly.",
@@ -30760,7 +30451,7 @@ export const vocabList = [
   {
     "id": 2795,
     "word": "unexpected",
-    "ipa": "/unexpected/",
+    "ipa": "/ˌənɪkˈspɛktɪd/",
     "pos": "adj",
     "meaning": "từ 'unexpected' (adj)",
     "example": "Practice speaking 'unexpected' clearly.",
@@ -30771,7 +30462,7 @@ export const vocabList = [
   {
     "id": 2796,
     "word": "unfair",
-    "ipa": "/unfair/",
+    "ipa": "/ˈənˈfɛɹ/",
     "pos": "adj",
     "meaning": "từ 'unfair' (adj)",
     "example": "Practice speaking 'unfair' clearly.",
@@ -30782,7 +30473,7 @@ export const vocabList = [
   {
     "id": 2797,
     "word": "unfortunately",
-    "ipa": "/unfortunately/",
+    "ipa": "/ənˈfɔɹtʃənətɫi/",
     "pos": "adv",
     "meaning": "từ 'unfortunately' (adv)",
     "example": "Practice speaking 'unfortunately' clearly.",
@@ -30793,7 +30484,7 @@ export const vocabList = [
   {
     "id": 2798,
     "word": "unhappy",
-    "ipa": "/unhappy/",
+    "ipa": "/ənˈhæpi/",
     "pos": "adj",
     "meaning": "từ 'unhappy' (adj)",
     "example": "Practice speaking 'unhappy' clearly.",
@@ -30804,7 +30495,7 @@ export const vocabList = [
   {
     "id": 2799,
     "word": "uniform",
-    "ipa": "/uniform/",
+    "ipa": "/ˈjunəˌfɔɹm/",
     "pos": "n",
     "meaning": "từ 'uniform' (n)",
     "example": "Practice speaking 'uniform' clearly.",
@@ -30815,7 +30506,7 @@ export const vocabList = [
   {
     "id": 2800,
     "word": "union",
-    "ipa": "/union/",
+    "ipa": "/ˈjunjən/",
     "pos": "n",
     "meaning": "từ 'union' (n)",
     "example": "Practice speaking 'union' clearly.",
@@ -30826,7 +30517,7 @@ export const vocabList = [
   {
     "id": 2801,
     "word": "unique",
-    "ipa": "/unique/",
+    "ipa": "/juˈnik/",
     "pos": "adj",
     "meaning": "từ 'unique' (adj)",
     "example": "Practice speaking 'unique' clearly.",
@@ -30837,7 +30528,7 @@ export const vocabList = [
   {
     "id": 2802,
     "word": "unit",
-    "ipa": "/unit/",
+    "ipa": "/ˈjunət/",
     "pos": "n",
     "meaning": "từ 'unit' (n)",
     "example": "Practice speaking 'unit' clearly.",
@@ -30848,7 +30539,7 @@ export const vocabList = [
   {
     "id": 2803,
     "word": "united",
-    "ipa": "/united/",
+    "ipa": "/juˈnaɪtɪd/",
     "pos": "adj",
     "meaning": "từ 'united' (adj)",
     "example": "Practice speaking 'united' clearly.",
@@ -30859,7 +30550,7 @@ export const vocabList = [
   {
     "id": 2804,
     "word": "universe",
-    "ipa": "/universe/",
+    "ipa": "/ˈjunəˌvɝs/",
     "pos": "n",
     "meaning": "từ 'universe' (n)",
     "example": "Practice speaking 'universe' clearly.",
@@ -30870,7 +30561,7 @@ export const vocabList = [
   {
     "id": 2805,
     "word": "university",
-    "ipa": "/university/",
+    "ipa": "/ˌjunəˈvɝsəti/",
     "pos": "n",
     "meaning": "từ 'university' (n)",
     "example": "Practice speaking 'university' clearly.",
@@ -30881,7 +30572,7 @@ export const vocabList = [
   {
     "id": 2806,
     "word": "unknown",
-    "ipa": "/unknown/",
+    "ipa": "/ənˈnoʊn/",
     "pos": "adj",
     "meaning": "từ 'unknown' (adj)",
     "example": "Practice speaking 'unknown' clearly.",
@@ -30892,7 +30583,7 @@ export const vocabList = [
   {
     "id": 2807,
     "word": "unless",
-    "ipa": "/unless/",
+    "ipa": "/ənˈɫɛs/",
     "pos": "conj",
     "meaning": "từ 'unless' (conj)",
     "example": "Practice speaking 'unless' clearly.",
@@ -30903,7 +30594,7 @@ export const vocabList = [
   {
     "id": 2808,
     "word": "unlike",
-    "ipa": "/unlike/",
+    "ipa": "/ənˈɫaɪk/",
     "pos": "prep",
     "meaning": "từ 'unlike' (prep)",
     "example": "Practice speaking 'unlike' clearly.",
@@ -30914,7 +30605,7 @@ export const vocabList = [
   {
     "id": 2809,
     "word": "unlikely",
-    "ipa": "/unlikely/",
+    "ipa": "/ənˈɫaɪkɫi/",
     "pos": "adj",
     "meaning": "từ 'unlikely' (adj)",
     "example": "Practice speaking 'unlikely' clearly.",
@@ -30925,7 +30616,7 @@ export const vocabList = [
   {
     "id": 2810,
     "word": "unnecessary",
-    "ipa": "/unnecessary/",
+    "ipa": "/ənˈnɛsəˌsɛɹi/",
     "pos": "adj",
     "meaning": "từ 'unnecessary' (adj)",
     "example": "Practice speaking 'unnecessary' clearly.",
@@ -30936,7 +30627,7 @@ export const vocabList = [
   {
     "id": 2811,
     "word": "unpleasant",
-    "ipa": "/unpleasant/",
+    "ipa": "/ənˈpɫɛzənt/",
     "pos": "adj",
     "meaning": "từ 'unpleasant' (adj)",
     "example": "Practice speaking 'unpleasant' clearly.",
@@ -30947,7 +30638,7 @@ export const vocabList = [
   {
     "id": 2812,
     "word": "until",
-    "ipa": "/until/",
+    "ipa": "/ənˈtɪɫ/",
     "pos": "conj/prep",
     "meaning": "từ 'until' (conj/prep)",
     "example": "Practice speaking 'until' clearly.",
@@ -30958,7 +30649,7 @@ export const vocabList = [
   {
     "id": 2813,
     "word": "unusual",
-    "ipa": "/unusual/",
+    "ipa": "/ənˈjuˌʒuəɫ/",
     "pos": "adj",
     "meaning": "từ 'unusual' (adj)",
     "example": "Practice speaking 'unusual' clearly.",
@@ -30969,7 +30660,7 @@ export const vocabList = [
   {
     "id": 2814,
     "word": "up",
-    "ipa": "/up/",
+    "ipa": "/ˈəp/",
     "pos": "adv",
     "meaning": "từ 'up' (adv)",
     "example": "Practice speaking 'up' clearly.",
@@ -30980,7 +30671,7 @@ export const vocabList = [
   {
     "id": 2815,
     "word": "update",
-    "ipa": "/update/",
+    "ipa": "/ˈəpˌdeɪt/",
     "pos": "v",
     "meaning": "từ 'update' (v)",
     "example": "Practice speaking 'update' clearly.",
@@ -30991,7 +30682,7 @@ export const vocabList = [
   {
     "id": 2816,
     "word": "upon",
-    "ipa": "/upon/",
+    "ipa": "/əˈpɑn/",
     "pos": "prep",
     "meaning": "từ 'upon' (prep)",
     "example": "Practice speaking 'upon' clearly.",
@@ -31002,7 +30693,7 @@ export const vocabList = [
   {
     "id": 2817,
     "word": "upper",
-    "ipa": "/upper/",
+    "ipa": "/ˈəpɝ/",
     "pos": "adj",
     "meaning": "từ 'upper' (adj)",
     "example": "Practice speaking 'upper' clearly.",
@@ -31013,7 +30704,7 @@ export const vocabList = [
   {
     "id": 2818,
     "word": "upset",
-    "ipa": "/upset/",
+    "ipa": "/ˈəpˌsɛt/",
     "pos": "adj",
     "meaning": "từ 'upset' (adj)",
     "example": "Practice speaking 'upset' clearly.",
@@ -31024,7 +30715,7 @@ export const vocabList = [
   {
     "id": 2819,
     "word": "upstairs",
-    "ipa": "/upstairs/",
+    "ipa": "/əpˈstɛɹz/",
     "pos": "adv",
     "meaning": "từ 'upstairs' (adv)",
     "example": "Practice speaking 'upstairs' clearly.",
@@ -31035,7 +30726,7 @@ export const vocabList = [
   {
     "id": 2820,
     "word": "upwards",
-    "ipa": "/upwards/",
+    "ipa": "/ˈəpwɝdz/",
     "pos": "adv",
     "meaning": "từ 'upwards' (adv)",
     "example": "Practice speaking 'upwards' clearly.",
@@ -31046,7 +30737,7 @@ export const vocabList = [
   {
     "id": 2821,
     "word": "urban",
-    "ipa": "/urban/",
+    "ipa": "/ˈɝbən/",
     "pos": "adj",
     "meaning": "từ 'urban' (adj)",
     "example": "Practice speaking 'urban' clearly.",
@@ -31057,7 +30748,7 @@ export const vocabList = [
   {
     "id": 2822,
     "word": "urge",
-    "ipa": "/urge/",
+    "ipa": "/ˈɝdʒ/",
     "pos": "v",
     "meaning": "từ 'urge' (v)",
     "example": "Practice speaking 'urge' clearly.",
@@ -31088,31 +30779,9 @@ export const vocabList = [
     "topic": "Công nghệ & Thiết bị"
   },
   {
-    "id": 2825,
-    "word": "used1",
-    "ipa": "/used1/",
-    "pos": "adj",
-    "meaning": "từ 'used1' (adj)",
-    "example": "Practice speaking 'used1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'used1' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
-    "id": 2826,
-    "word": "used2",
-    "ipa": "/used2/",
-    "pos": "adj",
-    "meaning": "từ 'used2' (adj)",
-    "example": "Practice speaking 'used2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'used2' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Đời sống"
-  },
-  {
     "id": 2827,
     "word": "used to",
-    "ipa": "/used to/",
+    "ipa": "/ˈjuzd ˈtu/",
     "pos": "modal v",
     "meaning": "từ 'used to' (modal v)",
     "example": "Practice speaking 'used to' clearly.",
@@ -31123,7 +30792,7 @@ export const vocabList = [
   {
     "id": 2828,
     "word": "useful",
-    "ipa": "/useful/",
+    "ipa": "/ˈjusfəɫ/",
     "pos": "adj",
     "meaning": "từ 'useful' (adj)",
     "example": "Practice speaking 'useful' clearly.",
@@ -31134,7 +30803,7 @@ export const vocabList = [
   {
     "id": 2829,
     "word": "user",
-    "ipa": "/user/",
+    "ipa": "/ˈjuzɝ/",
     "pos": "n",
     "meaning": "từ 'user' (n)",
     "example": "Practice speaking 'user' clearly.",
@@ -31145,7 +30814,7 @@ export const vocabList = [
   {
     "id": 2830,
     "word": "usual",
-    "ipa": "/usual/",
+    "ipa": "/ˈjuʒəwəɫ/",
     "pos": "adj",
     "meaning": "từ 'usual' (adj)",
     "example": "Practice speaking 'usual' clearly.",
@@ -31156,7 +30825,7 @@ export const vocabList = [
   {
     "id": 2831,
     "word": "usually",
-    "ipa": "/usually/",
+    "ipa": "/ˈjuʒəɫi/",
     "pos": "adv",
     "meaning": "từ 'usually' (adv)",
     "example": "Practice speaking 'usually' clearly.",
@@ -31167,7 +30836,7 @@ export const vocabList = [
   {
     "id": 2832,
     "word": "vacation",
-    "ipa": "/vacation/",
+    "ipa": "/veɪˈkeɪʃən/",
     "pos": "n",
     "meaning": "từ 'vacation' (n)",
     "example": "Practice speaking 'vacation' clearly.",
@@ -31178,7 +30847,7 @@ export const vocabList = [
   {
     "id": 2833,
     "word": "valley",
-    "ipa": "/valley/",
+    "ipa": "/ˈvæɫi/",
     "pos": "n",
     "meaning": "từ 'valley' (n)",
     "example": "Practice speaking 'valley' clearly.",
@@ -31189,7 +30858,7 @@ export const vocabList = [
   {
     "id": 2834,
     "word": "valuable",
-    "ipa": "/valuable/",
+    "ipa": "/ˈvæɫjəbəɫ/",
     "pos": "adj",
     "meaning": "từ 'valuable' (adj)",
     "example": "Practice speaking 'valuable' clearly.",
@@ -31200,7 +30869,7 @@ export const vocabList = [
   {
     "id": 2835,
     "word": "value",
-    "ipa": "/value/",
+    "ipa": "/ˈvæɫju/",
     "pos": "n",
     "meaning": "từ 'value' (n)",
     "example": "Practice speaking 'value' clearly.",
@@ -31211,7 +30880,7 @@ export const vocabList = [
   {
     "id": 2836,
     "word": "van",
-    "ipa": "/van/",
+    "ipa": "/ˈvæn/",
     "pos": "n",
     "meaning": "từ 'van' (n)",
     "example": "Practice speaking 'van' clearly.",
@@ -31222,7 +30891,7 @@ export const vocabList = [
   {
     "id": 2837,
     "word": "variety",
-    "ipa": "/variety/",
+    "ipa": "/vɝˈaɪəti/",
     "pos": "n",
     "meaning": "từ 'variety' (n)",
     "example": "Practice speaking 'variety' clearly.",
@@ -31233,7 +30902,7 @@ export const vocabList = [
   {
     "id": 2838,
     "word": "various",
-    "ipa": "/various/",
+    "ipa": "/ˈvɛɹiəs/",
     "pos": "adj",
     "meaning": "từ 'various' (adj)",
     "example": "Practice speaking 'various' clearly.",
@@ -31244,7 +30913,7 @@ export const vocabList = [
   {
     "id": 2839,
     "word": "vary",
-    "ipa": "/vary/",
+    "ipa": "/ˈvɛɹi/",
     "pos": "v",
     "meaning": "từ 'vary' (v)",
     "example": "Practice speaking 'vary' clearly.",
@@ -31255,7 +30924,7 @@ export const vocabList = [
   {
     "id": 2840,
     "word": "vast",
-    "ipa": "/vast/",
+    "ipa": "/ˈvæst/",
     "pos": "adj",
     "meaning": "từ 'vast' (adj)",
     "example": "Practice speaking 'vast' clearly.",
@@ -31266,7 +30935,7 @@ export const vocabList = [
   {
     "id": 2841,
     "word": "vegetable",
-    "ipa": "/vegetable/",
+    "ipa": "/ˈvɛdʒtəbəɫ/",
     "pos": "n",
     "meaning": "từ 'vegetable' (n)",
     "example": "Practice speaking 'vegetable' clearly.",
@@ -31277,7 +30946,7 @@ export const vocabList = [
   {
     "id": 2842,
     "word": "vehicle",
-    "ipa": "/vehicle/",
+    "ipa": "/ˈvihɪkəɫ/",
     "pos": "n",
     "meaning": "từ 'vehicle' (n)",
     "example": "Practice speaking 'vehicle' clearly.",
@@ -31288,7 +30957,7 @@ export const vocabList = [
   {
     "id": 2843,
     "word": "venue",
-    "ipa": "/venue/",
+    "ipa": "/ˈvɛnju/",
     "pos": "n",
     "meaning": "từ 'venue' (n)",
     "example": "Practice speaking 'venue' clearly.",
@@ -31299,7 +30968,7 @@ export const vocabList = [
   {
     "id": 2844,
     "word": "version",
-    "ipa": "/version/",
+    "ipa": "/ˈvɝʒən/",
     "pos": "n",
     "meaning": "từ 'version' (n)",
     "example": "Practice speaking 'version' clearly.",
@@ -31310,7 +30979,7 @@ export const vocabList = [
   {
     "id": 2845,
     "word": "very",
-    "ipa": "/very/",
+    "ipa": "/ˈvɛɹi/",
     "pos": "adv",
     "meaning": "từ 'very' (adv)",
     "example": "Practice speaking 'very' clearly.",
@@ -31321,7 +30990,7 @@ export const vocabList = [
   {
     "id": 2846,
     "word": "via",
-    "ipa": "/via/",
+    "ipa": "/ˈvaɪə/",
     "pos": "prep",
     "meaning": "từ 'via' (prep)",
     "example": "Practice speaking 'via' clearly.",
@@ -31332,7 +31001,7 @@ export const vocabList = [
   {
     "id": 2847,
     "word": "victim",
-    "ipa": "/victim/",
+    "ipa": "/ˈvɪktəm/",
     "pos": "n",
     "meaning": "từ 'victim' (n)",
     "example": "Practice speaking 'victim' clearly.",
@@ -31343,7 +31012,7 @@ export const vocabList = [
   {
     "id": 2848,
     "word": "victory",
-    "ipa": "/victory/",
+    "ipa": "/ˈvɪktɝi/",
     "pos": "n",
     "meaning": "từ 'victory' (n)",
     "example": "Practice speaking 'victory' clearly.",
@@ -31354,7 +31023,7 @@ export const vocabList = [
   {
     "id": 2849,
     "word": "video",
-    "ipa": "/video/",
+    "ipa": "/ˈvɪdioʊ/",
     "pos": "n",
     "meaning": "từ 'video' (n)",
     "example": "Practice speaking 'video' clearly.",
@@ -31365,7 +31034,7 @@ export const vocabList = [
   {
     "id": 2850,
     "word": "view",
-    "ipa": "/view/",
+    "ipa": "/ˈvju/",
     "pos": "n",
     "meaning": "từ 'view' (n)",
     "example": "Practice speaking 'view' clearly.",
@@ -31376,7 +31045,7 @@ export const vocabList = [
   {
     "id": 2851,
     "word": "viewer",
-    "ipa": "/viewer/",
+    "ipa": "/ˈvjuɝ/",
     "pos": "n",
     "meaning": "từ 'viewer' (n)",
     "example": "Practice speaking 'viewer' clearly.",
@@ -31387,7 +31056,7 @@ export const vocabList = [
   {
     "id": 2852,
     "word": "village",
-    "ipa": "/village/",
+    "ipa": "/ˈvɪɫədʒ/",
     "pos": "n",
     "meaning": "từ 'village' (n)",
     "example": "Practice speaking 'village' clearly.",
@@ -31398,7 +31067,7 @@ export const vocabList = [
   {
     "id": 2853,
     "word": "violence",
-    "ipa": "/violence/",
+    "ipa": "/ˈvaɪəɫəns/",
     "pos": "n",
     "meaning": "từ 'violence' (n)",
     "example": "Practice speaking 'violence' clearly.",
@@ -31409,7 +31078,7 @@ export const vocabList = [
   {
     "id": 2854,
     "word": "violent",
-    "ipa": "/violent/",
+    "ipa": "/ˈvaɪəɫənt/",
     "pos": "adj",
     "meaning": "từ 'violent' (adj)",
     "example": "Practice speaking 'violent' clearly.",
@@ -31420,7 +31089,7 @@ export const vocabList = [
   {
     "id": 2855,
     "word": "virtual",
-    "ipa": "/virtual/",
+    "ipa": "/ˈvɝtʃuəɫ/",
     "pos": "adj",
     "meaning": "từ 'virtual' (adj)",
     "example": "Practice speaking 'virtual' clearly.",
@@ -31431,7 +31100,7 @@ export const vocabList = [
   {
     "id": 2856,
     "word": "virus",
-    "ipa": "/virus/",
+    "ipa": "/ˈvaɪɹəs/",
     "pos": "n",
     "meaning": "từ 'virus' (n)",
     "example": "Practice speaking 'virus' clearly.",
@@ -31442,7 +31111,7 @@ export const vocabList = [
   {
     "id": 2857,
     "word": "vision",
-    "ipa": "/vision/",
+    "ipa": "/ˈvɪʒən/",
     "pos": "n",
     "meaning": "từ 'vision' (n)",
     "example": "Practice speaking 'vision' clearly.",
@@ -31464,7 +31133,7 @@ export const vocabList = [
   {
     "id": 2859,
     "word": "visitor",
-    "ipa": "/visitor/",
+    "ipa": "/ˈvɪzɪtɝ/",
     "pos": "n",
     "meaning": "từ 'visitor' (n)",
     "example": "Practice speaking 'visitor' clearly.",
@@ -31475,7 +31144,7 @@ export const vocabList = [
   {
     "id": 2860,
     "word": "visual",
-    "ipa": "/visual/",
+    "ipa": "/ˈvɪʒəwəɫ/",
     "pos": "adj",
     "meaning": "từ 'visual' (adj)",
     "example": "Practice speaking 'visual' clearly.",
@@ -31486,7 +31155,7 @@ export const vocabList = [
   {
     "id": 2861,
     "word": "vital",
-    "ipa": "/vital/",
+    "ipa": "/ˈvaɪtəɫ/",
     "pos": "adj",
     "meaning": "từ 'vital' (adj)",
     "example": "Practice speaking 'vital' clearly.",
@@ -31497,7 +31166,7 @@ export const vocabList = [
   {
     "id": 2862,
     "word": "vitamin",
-    "ipa": "/vitamin/",
+    "ipa": "/ˈvaɪtəmən/",
     "pos": "n",
     "meaning": "từ 'vitamin' (n)",
     "example": "Practice speaking 'vitamin' clearly.",
@@ -31508,7 +31177,7 @@ export const vocabList = [
   {
     "id": 2863,
     "word": "voice",
-    "ipa": "/voice/",
+    "ipa": "/ˈvɔɪs/",
     "pos": "n",
     "meaning": "từ 'voice' (n)",
     "example": "Practice speaking 'voice' clearly.",
@@ -31519,7 +31188,7 @@ export const vocabList = [
   {
     "id": 2864,
     "word": "volume",
-    "ipa": "/volume/",
+    "ipa": "/ˈvɑɫjum/",
     "pos": "n",
     "meaning": "từ 'volume' (n)",
     "example": "Practice speaking 'volume' clearly.",
@@ -31541,7 +31210,7 @@ export const vocabList = [
   {
     "id": 2866,
     "word": "vote",
-    "ipa": "/vote/",
+    "ipa": "/ˈvoʊt/",
     "pos": "n",
     "meaning": "từ 'vote' (n)",
     "example": "Practice speaking 'vote' clearly.",
@@ -31552,7 +31221,7 @@ export const vocabList = [
   {
     "id": 2867,
     "word": "wage",
-    "ipa": "/wage/",
+    "ipa": "/ˈweɪdʒ/",
     "pos": "n",
     "meaning": "từ 'wage' (n)",
     "example": "Practice speaking 'wage' clearly.",
@@ -31574,7 +31243,7 @@ export const vocabList = [
   {
     "id": 2869,
     "word": "waiter",
-    "ipa": "/waiter/",
+    "ipa": "/ˈweɪtɝ/",
     "pos": "n",
     "meaning": "từ 'waiter' (n)",
     "example": "Practice speaking 'waiter' clearly.",
@@ -31585,7 +31254,7 @@ export const vocabList = [
   {
     "id": 2870,
     "word": "wake",
-    "ipa": "/wake/",
+    "ipa": "/ˈweɪk/",
     "pos": "v",
     "meaning": "từ 'wake' (v)",
     "example": "Practice speaking 'wake' clearly.",
@@ -31607,7 +31276,7 @@ export const vocabList = [
   {
     "id": 2872,
     "word": "wall",
-    "ipa": "/wall/",
+    "ipa": "/ˈwɔɫ/",
     "pos": "n",
     "meaning": "từ 'wall' (n)",
     "example": "Practice speaking 'wall' clearly.",
@@ -31629,7 +31298,7 @@ export const vocabList = [
   {
     "id": 2874,
     "word": "war",
-    "ipa": "/war/",
+    "ipa": "/ˈwɔɹ/",
     "pos": "n",
     "meaning": "từ 'war' (n)",
     "example": "Practice speaking 'war' clearly.",
@@ -31640,7 +31309,7 @@ export const vocabList = [
   {
     "id": 2875,
     "word": "warm",
-    "ipa": "/warm/",
+    "ipa": "/ˈwɔɹm/",
     "pos": "adj",
     "meaning": "từ 'warm' (adj)",
     "example": "Practice speaking 'warm' clearly.",
@@ -31651,7 +31320,7 @@ export const vocabList = [
   {
     "id": 2876,
     "word": "warn",
-    "ipa": "/warn/",
+    "ipa": "/ˈwɔɹn/",
     "pos": "v",
     "meaning": "từ 'warn' (v)",
     "example": "Practice speaking 'warn' clearly.",
@@ -31662,7 +31331,7 @@ export const vocabList = [
   {
     "id": 2877,
     "word": "warning",
-    "ipa": "/warning/",
+    "ipa": "/ˈwɔɹnɪŋ/",
     "pos": "n",
     "meaning": "từ 'warning' (n)",
     "example": "Practice speaking 'warning' clearly.",
@@ -31695,7 +31364,7 @@ export const vocabList = [
   {
     "id": 2880,
     "word": "waste",
-    "ipa": "/waste/",
+    "ipa": "/ˈweɪst/",
     "pos": "n",
     "meaning": "từ 'waste' (n)",
     "example": "Practice speaking 'waste' clearly.",
@@ -31717,7 +31386,7 @@ export const vocabList = [
   {
     "id": 2882,
     "word": "water",
-    "ipa": "/water/",
+    "ipa": "/ˈwɔtɝ/",
     "pos": "n",
     "meaning": "từ 'water' (n)",
     "example": "Practice speaking 'water' clearly.",
@@ -31728,7 +31397,7 @@ export const vocabList = [
   {
     "id": 2883,
     "word": "wave",
-    "ipa": "/wave/",
+    "ipa": "/ˈweɪv/",
     "pos": "n",
     "meaning": "từ 'wave' (n)",
     "example": "Practice speaking 'wave' clearly.",
@@ -31739,7 +31408,7 @@ export const vocabList = [
   {
     "id": 2884,
     "word": "way",
-    "ipa": "/way/",
+    "ipa": "/ˈweɪ/",
     "pos": "n",
     "meaning": "từ 'way' (n)",
     "example": "Practice speaking 'way' clearly.",
@@ -31761,7 +31430,7 @@ export const vocabList = [
   {
     "id": 2886,
     "word": "weak",
-    "ipa": "/weak/",
+    "ipa": "/ˈwik/",
     "pos": "adj",
     "meaning": "từ 'weak' (adj)",
     "example": "Practice speaking 'weak' clearly.",
@@ -31772,7 +31441,7 @@ export const vocabList = [
   {
     "id": 2887,
     "word": "weakness",
-    "ipa": "/weakness/",
+    "ipa": "/ˈwiknəs/",
     "pos": "n",
     "meaning": "từ 'weakness' (n)",
     "example": "Practice speaking 'weakness' clearly.",
@@ -31805,7 +31474,7 @@ export const vocabList = [
   {
     "id": 2890,
     "word": "weapon",
-    "ipa": "/weapon/",
+    "ipa": "/ˈwɛpən/",
     "pos": "n",
     "meaning": "từ 'weapon' (n)",
     "example": "Practice speaking 'weapon' clearly.",
@@ -31838,7 +31507,7 @@ export const vocabList = [
   {
     "id": 2893,
     "word": "web",
-    "ipa": "/web/",
+    "ipa": "/ˈwɛb/",
     "pos": "n",
     "meaning": "từ 'web' (n)",
     "example": "Practice speaking 'web' clearly.",
@@ -31849,7 +31518,7 @@ export const vocabList = [
   {
     "id": 2894,
     "word": "website",
-    "ipa": "/website/",
+    "ipa": "/ˈwɛbˌsaɪt/",
     "pos": "n",
     "meaning": "từ 'website' (n)",
     "example": "Practice speaking 'website' clearly.",
@@ -31860,7 +31529,7 @@ export const vocabList = [
   {
     "id": 2895,
     "word": "wedding",
-    "ipa": "/wedding/",
+    "ipa": "/ˈwɛdɪŋ/",
     "pos": "n",
     "meaning": "từ 'wedding' (n)",
     "example": "Practice speaking 'wedding' clearly.",
@@ -31871,7 +31540,7 @@ export const vocabList = [
   {
     "id": 2896,
     "word": "wednesday",
-    "ipa": "/wednesday/",
+    "ipa": "/ˈwɛnzˌdeɪ/",
     "pos": "n",
     "meaning": "từ 'wednesday' (n)",
     "example": "Practice speaking 'wednesday' clearly.",
@@ -31904,7 +31573,7 @@ export const vocabList = [
   {
     "id": 2899,
     "word": "weigh",
-    "ipa": "/weigh/",
+    "ipa": "/ˈweɪ/",
     "pos": "v",
     "meaning": "từ 'weigh' (v)",
     "example": "Practice speaking 'weigh' clearly.",
@@ -31915,7 +31584,7 @@ export const vocabList = [
   {
     "id": 2900,
     "word": "weight",
-    "ipa": "/weight/",
+    "ipa": "/ˈweɪt/",
     "pos": "n",
     "meaning": "từ 'weight' (n)",
     "example": "Practice speaking 'weight' clearly.",
@@ -31937,7 +31606,7 @@ export const vocabList = [
   {
     "id": 2902,
     "word": "well",
-    "ipa": "/well/",
+    "ipa": "/ˈwɛɫ/",
     "pos": "adv",
     "meaning": "từ 'well' (adv)",
     "example": "Practice speaking 'well' clearly.",
@@ -31948,7 +31617,7 @@ export const vocabList = [
   {
     "id": 2903,
     "word": "west",
-    "ipa": "/west/",
+    "ipa": "/ˈwɛst/",
     "pos": "n",
     "meaning": "từ 'west' (n)",
     "example": "Practice speaking 'west' clearly.",
@@ -31959,7 +31628,7 @@ export const vocabList = [
   {
     "id": 2904,
     "word": "western",
-    "ipa": "/western/",
+    "ipa": "/ˈhwɛstɝn/",
     "pos": "adj",
     "meaning": "từ 'western' (adj)",
     "example": "Practice speaking 'western' clearly.",
@@ -31970,7 +31639,7 @@ export const vocabList = [
   {
     "id": 2905,
     "word": "wet",
-    "ipa": "/wet/",
+    "ipa": "/ˈwɛt/",
     "pos": "adj",
     "meaning": "từ 'wet' (adj)",
     "example": "Practice speaking 'wet' clearly.",
@@ -31992,7 +31661,7 @@ export const vocabList = [
   {
     "id": 2907,
     "word": "whatever",
-    "ipa": "/whatever/",
+    "ipa": "/ˌhwəˈtɛvɝ/",
     "pos": "det/pron",
     "meaning": "từ 'whatever' (det/pron)",
     "example": "Practice speaking 'whatever' clearly.",
@@ -32025,7 +31694,7 @@ export const vocabList = [
   {
     "id": 2910,
     "word": "whenever",
-    "ipa": "/whenever/",
+    "ipa": "/hwɛˈnɛvɝ/",
     "pos": "conj",
     "meaning": "từ 'whenever' (conj)",
     "example": "Practice speaking 'whenever' clearly.",
@@ -32047,7 +31716,7 @@ export const vocabList = [
   {
     "id": 2912,
     "word": "whereas",
-    "ipa": "/whereas/",
+    "ipa": "/hwɛˈɹæz/",
     "pos": "conj",
     "meaning": "từ 'whereas' (conj)",
     "example": "Practice speaking 'whereas' clearly.",
@@ -32058,7 +31727,7 @@ export const vocabList = [
   {
     "id": 2913,
     "word": "wherever",
-    "ipa": "/wherever/",
+    "ipa": "/hwɛˈɹɛvɝ/",
     "pos": "conj",
     "meaning": "từ 'wherever' (conj)",
     "example": "Practice speaking 'wherever' clearly.",
@@ -32091,7 +31760,7 @@ export const vocabList = [
   {
     "id": 2916,
     "word": "while",
-    "ipa": "/while/",
+    "ipa": "/ˈhwaɪɫ/",
     "pos": "conj",
     "meaning": "từ 'while' (conj)",
     "example": "Practice speaking 'while' clearly.",
@@ -32102,7 +31771,7 @@ export const vocabList = [
   {
     "id": 2917,
     "word": "whisper",
-    "ipa": "/whisper/",
+    "ipa": "/ˈhwɪspɝ/",
     "pos": "v",
     "meaning": "từ 'whisper' (v)",
     "example": "Practice speaking 'whisper' clearly.",
@@ -32113,7 +31782,7 @@ export const vocabList = [
   {
     "id": 2918,
     "word": "white",
-    "ipa": "/white/",
+    "ipa": "/ˈhwaɪt/",
     "pos": "adj",
     "meaning": "từ 'white' (adj)",
     "example": "Practice speaking 'white' clearly.",
@@ -32135,7 +31804,7 @@ export const vocabList = [
   {
     "id": 2920,
     "word": "whole",
-    "ipa": "/whole/",
+    "ipa": "/ˈhoʊɫ/",
     "pos": "adj",
     "meaning": "từ 'whole' (adj)",
     "example": "Practice speaking 'whole' clearly.",
@@ -32146,7 +31815,7 @@ export const vocabList = [
   {
     "id": 2921,
     "word": "whom",
-    "ipa": "/whom/",
+    "ipa": "/ˈhum/",
     "pos": "pron",
     "meaning": "từ 'whom' (pron)",
     "example": "Practice speaking 'whom' clearly.",
@@ -32157,7 +31826,7 @@ export const vocabList = [
   {
     "id": 2922,
     "word": "whose",
-    "ipa": "/whose/",
+    "ipa": "/ˈhuz/",
     "pos": "det/pron",
     "meaning": "từ 'whose' (det/pron)",
     "example": "Practice speaking 'whose' clearly.",
@@ -32179,7 +31848,7 @@ export const vocabList = [
   {
     "id": 2924,
     "word": "wide",
-    "ipa": "/wide/",
+    "ipa": "/ˈwaɪd/",
     "pos": "adj",
     "meaning": "từ 'wide' (adj)",
     "example": "Practice speaking 'wide' clearly.",
@@ -32190,7 +31859,7 @@ export const vocabList = [
   {
     "id": 2925,
     "word": "widely",
-    "ipa": "/widely/",
+    "ipa": "/ˈwaɪdɫi/",
     "pos": "adv",
     "meaning": "từ 'widely' (adv)",
     "example": "Practice speaking 'widely' clearly.",
@@ -32201,7 +31870,7 @@ export const vocabList = [
   {
     "id": 2926,
     "word": "wife",
-    "ipa": "/wife/",
+    "ipa": "/ˈwaɪf/",
     "pos": "n",
     "meaning": "từ 'wife' (n)",
     "example": "Practice speaking 'wife' clearly.",
@@ -32212,7 +31881,7 @@ export const vocabList = [
   {
     "id": 2927,
     "word": "wild",
-    "ipa": "/wild/",
+    "ipa": "/ˈwaɪɫd/",
     "pos": "adj",
     "meaning": "từ 'wild' (adj)",
     "example": "Practice speaking 'wild' clearly.",
@@ -32223,7 +31892,7 @@ export const vocabList = [
   {
     "id": 2928,
     "word": "wildlife",
-    "ipa": "/wildlife/",
+    "ipa": "/ˈwaɪɫdˌɫaɪf/",
     "pos": "n",
     "meaning": "từ 'wildlife' (n)",
     "example": "Practice speaking 'wildlife' clearly.",
@@ -32234,7 +31903,7 @@ export const vocabList = [
   {
     "id": 2929,
     "word": "will",
-    "ipa": "/will/",
+    "ipa": "/ˈwɪɫ/",
     "pos": "modal v",
     "meaning": "từ 'will' (modal v)",
     "example": "Practice speaking 'will' clearly.",
@@ -32245,7 +31914,7 @@ export const vocabList = [
   {
     "id": 2930,
     "word": "willing",
-    "ipa": "/willing/",
+    "ipa": "/ˈwɪɫɪŋ/",
     "pos": "adj",
     "meaning": "từ 'willing' (adj)",
     "example": "Practice speaking 'willing' clearly.",
@@ -32256,7 +31925,7 @@ export const vocabList = [
   {
     "id": 2931,
     "word": "win",
-    "ipa": "/win/",
+    "ipa": "/ˈwɪn/",
     "pos": "v",
     "meaning": "từ 'win' (v)",
     "example": "Practice speaking 'win' clearly.",
@@ -32265,31 +31934,9 @@ export const vocabList = [
     "topic": "Đời sống"
   },
   {
-    "id": 2932,
-    "word": "wind1",
-    "ipa": "/wind1/",
-    "pos": "n",
-    "meaning": "từ 'wind1' (n)",
-    "example": "Practice speaking 'wind1' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'wind1' thật rõ ràng.",
-    "level": "A2",
-    "topic": "Thời tiết & Thiên nhiên"
-  },
-  {
-    "id": 2933,
-    "word": "wind2",
-    "ipa": "/wind2/",
-    "pos": "v",
-    "meaning": "từ 'wind2' (v)",
-    "example": "Practice speaking 'wind2' clearly.",
-    "exampleVi": "Hãy luyện phát âm từ 'wind2' thật rõ ràng.",
-    "level": "B1",
-    "topic": "Thời tiết & Thiên nhiên"
-  },
-  {
     "id": 2934,
     "word": "window",
-    "ipa": "/window/",
+    "ipa": "/ˈwɪndoʊ/",
     "pos": "n",
     "meaning": "từ 'window' (n)",
     "example": "Practice speaking 'window' clearly.",
@@ -32300,7 +31947,7 @@ export const vocabList = [
   {
     "id": 2935,
     "word": "wine",
-    "ipa": "/wine/",
+    "ipa": "/ˈwaɪn/",
     "pos": "n",
     "meaning": "từ 'wine' (n)",
     "example": "Practice speaking 'wine' clearly.",
@@ -32311,7 +31958,7 @@ export const vocabList = [
   {
     "id": 2936,
     "word": "wing",
-    "ipa": "/wing/",
+    "ipa": "/ˈwɪŋ/",
     "pos": "n",
     "meaning": "từ 'wing' (n)",
     "example": "Practice speaking 'wing' clearly.",
@@ -32322,7 +31969,7 @@ export const vocabList = [
   {
     "id": 2937,
     "word": "winner",
-    "ipa": "/winner/",
+    "ipa": "/ˈwɪnɝ/",
     "pos": "n",
     "meaning": "từ 'winner' (n)",
     "example": "Practice speaking 'winner' clearly.",
@@ -32333,7 +31980,7 @@ export const vocabList = [
   {
     "id": 2938,
     "word": "winter",
-    "ipa": "/winter/",
+    "ipa": "/ˈwɪntɝ/",
     "pos": "n",
     "meaning": "từ 'winter' (n)",
     "example": "Practice speaking 'winter' clearly.",
@@ -32344,7 +31991,7 @@ export const vocabList = [
   {
     "id": 2939,
     "word": "wire",
-    "ipa": "/wire/",
+    "ipa": "/ˈwaɪɝ/",
     "pos": "n",
     "meaning": "từ 'wire' (n)",
     "example": "Practice speaking 'wire' clearly.",
@@ -32355,7 +32002,7 @@ export const vocabList = [
   {
     "id": 2940,
     "word": "wise",
-    "ipa": "/wise/",
+    "ipa": "/ˈwaɪz/",
     "pos": "adj",
     "meaning": "từ 'wise' (adj)",
     "example": "Practice speaking 'wise' clearly.",
@@ -32410,7 +32057,7 @@ export const vocabList = [
   {
     "id": 2945,
     "word": "witness",
-    "ipa": "/witness/",
+    "ipa": "/ˈwɪtnəs/",
     "pos": "n",
     "meaning": "từ 'witness' (n)",
     "example": "Practice speaking 'witness' clearly.",
@@ -32421,7 +32068,7 @@ export const vocabList = [
   {
     "id": 2946,
     "word": "woman",
-    "ipa": "/woman/",
+    "ipa": "/ˈwʊmən/",
     "pos": "n",
     "meaning": "từ 'woman' (n)",
     "example": "Practice speaking 'woman' clearly.",
@@ -32432,7 +32079,7 @@ export const vocabList = [
   {
     "id": 2947,
     "word": "wonder",
-    "ipa": "/wonder/",
+    "ipa": "/ˈwəndɝ/",
     "pos": "v",
     "meaning": "từ 'wonder' (v)",
     "example": "Practice speaking 'wonder' clearly.",
@@ -32443,7 +32090,7 @@ export const vocabList = [
   {
     "id": 2948,
     "word": "wonderful",
-    "ipa": "/wonderful/",
+    "ipa": "/ˈwəndɝfəɫ/",
     "pos": "adj",
     "meaning": "từ 'wonderful' (adj)",
     "example": "Practice speaking 'wonderful' clearly.",
@@ -32487,7 +32134,7 @@ export const vocabList = [
   {
     "id": 2952,
     "word": "word",
-    "ipa": "/word/",
+    "ipa": "/ˈwɝd/",
     "pos": "n",
     "meaning": "từ 'word' (n)",
     "example": "Practice speaking 'word' clearly.",
@@ -32509,7 +32156,7 @@ export const vocabList = [
   {
     "id": 2954,
     "word": "worker",
-    "ipa": "/worker/",
+    "ipa": "/ˈwɝkɝ/",
     "pos": "n",
     "meaning": "từ 'worker' (n)",
     "example": "Practice speaking 'worker' clearly.",
@@ -32520,7 +32167,7 @@ export const vocabList = [
   {
     "id": 2955,
     "word": "working",
-    "ipa": "/working/",
+    "ipa": "/ˈwɝkɪŋ/",
     "pos": "adj",
     "meaning": "từ 'working' (adj)",
     "example": "Practice speaking 'working' clearly.",
@@ -32531,7 +32178,7 @@ export const vocabList = [
   {
     "id": 2956,
     "word": "world",
-    "ipa": "/world/",
+    "ipa": "/ˈwɝɫd/",
     "pos": "n",
     "meaning": "từ 'world' (n)",
     "example": "Practice speaking 'world' clearly.",
@@ -32542,7 +32189,7 @@ export const vocabList = [
   {
     "id": 2957,
     "word": "worldwide",
-    "ipa": "/worldwide/",
+    "ipa": "/ˈwɝɫdˈwaɪd/",
     "pos": "adj",
     "meaning": "từ 'worldwide' (adj)",
     "example": "Practice speaking 'worldwide' clearly.",
@@ -32553,7 +32200,7 @@ export const vocabList = [
   {
     "id": 2958,
     "word": "worried",
-    "ipa": "/worried/",
+    "ipa": "/ˈwɝid/",
     "pos": "adj",
     "meaning": "từ 'worried' (adj)",
     "example": "Practice speaking 'worried' clearly.",
@@ -32575,7 +32222,7 @@ export const vocabList = [
   {
     "id": 2960,
     "word": "worse",
-    "ipa": "/worse/",
+    "ipa": "/ˈwɝs/",
     "pos": "adj",
     "meaning": "từ 'worse' (adj)",
     "example": "Practice speaking 'worse' clearly.",
@@ -32586,7 +32233,7 @@ export const vocabList = [
   {
     "id": 2961,
     "word": "worst",
-    "ipa": "/worst/",
+    "ipa": "/ˈwɝst/",
     "pos": "adj",
     "meaning": "từ 'worst' (adj)",
     "example": "Practice speaking 'worst' clearly.",
@@ -32608,7 +32255,7 @@ export const vocabList = [
   {
     "id": 2963,
     "word": "would",
-    "ipa": "/would/",
+    "ipa": "/ˈwʊd/",
     "pos": "modal v",
     "meaning": "từ 'would' (modal v)",
     "example": "Practice speaking 'would' clearly.",
@@ -32619,7 +32266,7 @@ export const vocabList = [
   {
     "id": 2964,
     "word": "wound",
-    "ipa": "/wound/",
+    "ipa": "/ˈwaʊnd/",
     "pos": "n",
     "meaning": "từ 'wound' (n)",
     "example": "Practice speaking 'wound' clearly.",
@@ -32630,7 +32277,7 @@ export const vocabList = [
   {
     "id": 2965,
     "word": "wow",
-    "ipa": "/wow/",
+    "ipa": "/ˈwaʊ/",
     "pos": "exclam",
     "meaning": "từ 'wow' (exclam)",
     "example": "Practice speaking 'wow' clearly.",
@@ -32641,7 +32288,7 @@ export const vocabList = [
   {
     "id": 2966,
     "word": "wrap",
-    "ipa": "/wrap/",
+    "ipa": "/ˈɹæp/",
     "pos": "v",
     "meaning": "từ 'wrap' (v)",
     "example": "Practice speaking 'wrap' clearly.",
@@ -32663,7 +32310,7 @@ export const vocabList = [
   {
     "id": 2968,
     "word": "writer",
-    "ipa": "/writer/",
+    "ipa": "/ˈɹaɪtɝ/",
     "pos": "n",
     "meaning": "từ 'writer' (n)",
     "example": "Practice speaking 'writer' clearly.",
@@ -32674,7 +32321,7 @@ export const vocabList = [
   {
     "id": 2969,
     "word": "writing",
-    "ipa": "/writing/",
+    "ipa": "/ˈɹaɪtɪŋ/",
     "pos": "n",
     "meaning": "từ 'writing' (n)",
     "example": "Practice speaking 'writing' clearly.",
@@ -32685,7 +32332,7 @@ export const vocabList = [
   {
     "id": 2970,
     "word": "written",
-    "ipa": "/written/",
+    "ipa": "/ˈɹɪtən/",
     "pos": "adj",
     "meaning": "từ 'written' (adj)",
     "example": "Practice speaking 'written' clearly.",
@@ -32696,7 +32343,7 @@ export const vocabList = [
   {
     "id": 2971,
     "word": "wrong",
-    "ipa": "/wrong/",
+    "ipa": "/ˈɹɔŋ/",
     "pos": "adj",
     "meaning": "từ 'wrong' (adj)",
     "example": "Practice speaking 'wrong' clearly.",
@@ -32707,7 +32354,7 @@ export const vocabList = [
   {
     "id": 2972,
     "word": "yard",
-    "ipa": "/yard/",
+    "ipa": "/ˈjɑɹd/",
     "pos": "n",
     "meaning": "từ 'yard' (n)",
     "example": "Practice speaking 'yard' clearly.",
@@ -32718,7 +32365,7 @@ export const vocabList = [
   {
     "id": 2973,
     "word": "yeah",
-    "ipa": "/yeah/",
+    "ipa": "/ˈjæ/",
     "pos": "exclam",
     "meaning": "từ 'yeah' (exclam)",
     "example": "Practice speaking 'yeah' clearly.",
@@ -32729,7 +32376,7 @@ export const vocabList = [
   {
     "id": 2974,
     "word": "year",
-    "ipa": "/year/",
+    "ipa": "/ˈjɪɹ/",
     "pos": "n",
     "meaning": "từ 'year' (n)",
     "example": "Practice speaking 'year' clearly.",
@@ -32740,7 +32387,7 @@ export const vocabList = [
   {
     "id": 2975,
     "word": "yellow",
-    "ipa": "/yellow/",
+    "ipa": "/ˈjɛɫoʊ/",
     "pos": "adj",
     "meaning": "từ 'yellow' (adj)",
     "example": "Practice speaking 'yellow' clearly.",
@@ -32751,7 +32398,7 @@ export const vocabList = [
   {
     "id": 2976,
     "word": "yes",
-    "ipa": "/yes/",
+    "ipa": "/ˈjɛs/",
     "pos": "exclam",
     "meaning": "từ 'yes' (exclam)",
     "example": "Practice speaking 'yes' clearly.",
@@ -32762,7 +32409,7 @@ export const vocabList = [
   {
     "id": 2977,
     "word": "yesterday",
-    "ipa": "/yesterday/",
+    "ipa": "/ˈjɛstɝˌdeɪ/",
     "pos": "adv",
     "meaning": "từ 'yesterday' (adv)",
     "example": "Practice speaking 'yesterday' clearly.",
@@ -32773,7 +32420,7 @@ export const vocabList = [
   {
     "id": 2978,
     "word": "yet",
-    "ipa": "/yet/",
+    "ipa": "/ˈjɛt/",
     "pos": "adv",
     "meaning": "từ 'yet' (adv)",
     "example": "Practice speaking 'yet' clearly.",
@@ -32795,7 +32442,7 @@ export const vocabList = [
   {
     "id": 2980,
     "word": "young",
-    "ipa": "/young/",
+    "ipa": "/ˈjəŋ/",
     "pos": "adj",
     "meaning": "từ 'young' (adj)",
     "example": "Practice speaking 'young' clearly.",
@@ -32817,7 +32464,7 @@ export const vocabList = [
   {
     "id": 2982,
     "word": "yours",
-    "ipa": "/yours/",
+    "ipa": "/ˈjɔɹz/",
     "pos": "pron",
     "meaning": "từ 'yours' (pron)",
     "example": "Practice speaking 'yours' clearly.",
@@ -32828,7 +32475,7 @@ export const vocabList = [
   {
     "id": 2983,
     "word": "yourself",
-    "ipa": "/yourself/",
+    "ipa": "/ˈjɔɹsɛɫf/",
     "pos": "pron",
     "meaning": "từ 'yourself' (pron)",
     "example": "Practice speaking 'yourself' clearly.",
@@ -32850,7 +32497,7 @@ export const vocabList = [
   {
     "id": 2985,
     "word": "zero",
-    "ipa": "/zero/",
+    "ipa": "/ˈziɹoʊ/",
     "pos": "number",
     "meaning": "từ 'zero' (number)",
     "example": "Practice speaking 'zero' clearly.",
@@ -32861,7 +32508,7 @@ export const vocabList = [
   {
     "id": 2986,
     "word": "zone",
-    "ipa": "/zone/",
+    "ipa": "/ˈzoʊn/",
     "pos": "n",
     "meaning": "từ 'zone' (n)",
     "example": "Practice speaking 'zone' clearly.",
@@ -32872,7 +32519,7 @@ export const vocabList = [
   {
     "id": 2987,
     "word": "wifi",
-    "ipa": "/wifi/",
+    "ipa": "/ˈwaɪˌfaɪ/",
     "pos": "n",
     "meaning": "từ 'wifi' (n)",
     "example": "Practice speaking 'wifi' clearly.",
@@ -32883,7 +32530,7 @@ export const vocabList = [
   {
     "id": 2988,
     "word": "selfie",
-    "ipa": "/selfie/",
+    "ipa": "/ˈsɛɫˌfi/",
     "pos": "n",
     "meaning": "từ 'selfie' (n)",
     "example": "Practice speaking 'selfie' clearly.",
@@ -32894,7 +32541,7 @@ export const vocabList = [
   {
     "id": 2989,
     "word": "podcast",
-    "ipa": "/podcast/",
+    "ipa": "/ˈpɔdˌkæst/",
     "pos": "n",
     "meaning": "từ 'podcast' (n)",
     "example": "Practice speaking 'podcast' clearly.",
@@ -32912,17 +32559,6 @@ export const vocabList = [
     "exampleVi": "Cô ấy đã dùng từ 'avatar' trong câu của mình.",
     "level": "A2",
     "topic": "Chào hỏi & Giao tiếp"
-  },
-  {
-    "id": 2991,
-    "word": "podcast",
-    "ipa": "/ˈpɒdkɑːst/",
-    "pos": "n",
-    "meaning": "tập tin âm thanh phát sóng",
-    "example": "I listen to English podcasts every morning.",
-    "exampleVi": "Tôi nghe podcast tiếng Anh mỗi sáng.",
-    "level": "B1",
-    "topic": "Công nghệ & Thiết bị"
   },
   {
     "id": 2992,
@@ -33366,5 +33002,4 @@ export const vocabList = [
   }
 ];
 
-export const vocabData = vocabList;
-export default vocabList;
+export default vocabData;

@@ -18,7 +18,6 @@
 - Tiếng Anh ngành IT, bẫy lỗi sai, đấu trường 60 giây và bảng xếp hạng.
 - Theo dõi XP, chuỗi ngày học, tiến độ và chứng chỉ.
 - Giao diện sáng/tối, responsive và hỗ trợ safe area trên điện thoại.
-- Nhập kho từ vựng cá nhân bằng JSON hoặc CSV.
 
 ## Công nghệ
 
@@ -69,6 +68,7 @@ Khóa API không được gửi xuống frontend. Frontend chỉ biết URL côn
 ```bash
 git clone https://github.com/Quyenlaaaa/lingogoc-app.git
 cd lingogoc-app
+cd web
 npm install
 ```
 
@@ -135,12 +135,12 @@ node backend/test-worker.mjs  # kiểm tra hợp đồng API của Worker
 | `GET` | `/api/vocabulary/cambridge?word=hello` | Tích hợp Cambridge tùy chọn; trả `204` khi chưa cấu hình |
 | `POST` | `/api/speaking/chat` | Trả lời hội thoại và gợi ý sửa câu |
 
-Chi tiết request/response nằm trong [BACKEND_API.md](./BACKEND_API.md) và [backend/README.md](./backend/README.md).
+Chi tiết request/response nằm trong [BACKEND_API.md](./web/BACKEND_API.md) và [backend/README.md](./web/backend/README.md).
 
 ### Dữ liệu AI và retry
 
 - Kết quả chỉ được chấp nhận khi có đủ 5 ví dụ song ngữ thuộc 5 ngữ cảnh riêng biệt.
-- Worker tự thử lại khi nhà cung cấp trả lỗi tạm thời, giới hạn lượt gọi hoặc dữ liệu chưa hợp lệ.
+- Mỗi thao tác tương tác chỉ tạo tối đa một yêu cầu AI. Sau lỗi, trình duyệt và Worker cùng khóa tự động gọi lại trong 30 phút; nút **Thử lại AI** cho phép người dùng chủ động gọi ngay.
 - Kết quả hợp lệ được lưu trong Workers KV và cache ở trình duyệt.
 - Việc đóng modal hoặc chuyển màn hình không hủy yêu cầu đang chạy; khi hoàn tất, dữ liệu vẫn được lưu để sử dụng lại.
 - Trình duyệt chỉ đọc dữ liệu của màn hình hiện tại theo lô; không chạy hàng đợi AI 3.000 từ trên thiết bị người học.
@@ -148,7 +148,9 @@ Chi tiết request/response nằm trong [BACKEND_API.md](./BACKEND_API.md) và [
 
 ## Kho từ vựng hệ thống
 
-Người học luôn sử dụng kho 3.000 từ do hệ thống quản lý. Bản chính được đọc từ Workers KV qua `/api/vocabulary/catalog`; bản trong `src/data/vocabData.js` là dữ liệu dự phòng khi server tạm thời không khả dụng.
+Người học luôn sử dụng kho 3.000 từ do hệ thống quản lý. Bản chính được đọc từ Workers KV qua `/api/vocabulary/catalog`; bản trong `web/src/data/vocabData.js` là dữ liệu dự phòng khi server tạm thời không khả dụng. IPA trong bản đóng gói được kiểm tra để không dùng lại chính cách viết tiếng Anh làm phiên âm.
+
+Phiên âm được bổ sung từ bộ dữ liệu mã nguồn mở `open-dict-data/ipa-dict`; thông tin giấy phép nằm trong [web/THIRD_PARTY_NOTICES.md](./web/THIRD_PARTY_NOTICES.md).
 
 Sau khi cập nhật kho từ, đồng bộ toàn bộ từ, IPA, nghĩa và ví dụ lên KV bằng một lượt ghi:
 
@@ -165,7 +167,7 @@ npm run audit:vocab
 npm run backfill:vocab
 ```
 
-Checkpoint nằm trong `scripts/data_cache` (không commit). Chỉ dùng `npm run sync:vocab-db` để phát hành catalog; người dùng không tham gia quá trình tạo dữ liệu AI.
+Checkpoint nằm trong `web/scripts/data_cache` (không commit). Chỉ dùng `npm run sync:vocab-db` để phát hành catalog; người dùng không tham gia quá trình tạo dữ liệu AI.
 
 ## Quyền riêng tư và bảo mật
 
@@ -180,6 +182,7 @@ Checkpoint nằm trong `scripts/data_cache` (không commit). Chỉ dùng `npm ru
 ### Backend
 
 ```bash
+cd web
 cd backend
 npx wrangler secret put XTROUTER_API_KEY
 npx wrangler deploy
@@ -194,6 +197,7 @@ Sau khi triển khai, kiểm tra `/health` và bảo đảm `aiConfigured` là `
 Cập nhật `VITE_API_BASE_URL` thành URL Worker production rồi chạy:
 
 ```bash
+cd web
 npm run deploy
 ```
 
@@ -203,18 +207,14 @@ Lệnh này build ứng dụng và xuất bản thư mục `dist` lên nhánh Gi
 
 ```text
 lingogoc-app/
-├── backend/              # Cloudflare Worker, cấu hình và test API
-├── android/              # ứng dụng Android Kotlin và hướng dẫn tạo APK
-├── public/               # tài nguyên tĩnh của frontend
-├── scripts/              # các script kiểm thử
-├── src/
-│   ├── components/       # các màn hình và thành phần React
-│   ├── data/             # dữ liệu học được đóng gói
-│   └── utils/            # AI, audio, SRS, lưu trữ và xử lý dữ liệu
-├── .env.example
-├── BACKEND_API.md
-├── package.json
-└── vite.config.js
+├── web/                  # React, Cloudflare Worker, dữ liệu và script quản trị web
+│   ├── backend/          # Cloudflare Worker, cấu hình và test API
+│   ├── public/           # tài nguyên tĩnh của frontend
+│   ├── scripts/          # kiểm thử, audit và đồng bộ kho từ
+│   └── src/              # giao diện, dữ liệu và tiện ích web
+├── app/                  # ứng dụng Android Kotlin và hướng dẫn tạo APK
+├── .github/              # workflow build/deploy
+└── README.md
 ```
 
 ## Đóng góp

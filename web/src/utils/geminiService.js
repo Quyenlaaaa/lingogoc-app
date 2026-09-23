@@ -1,14 +1,60 @@
 // Vocabulary enrichment is performed by the LingoGoc backend. Provider keys
 // never enter localStorage or the public browser bundle.
-import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi';
+import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi.js';
 
 const VOCAB_ENRICHMENT_PREFIX = 'lingogoc_vocab_enrichment_v3_';
 const CACHE_SCHEMA_VERSION = 1;
 const CACHE_DATABASE = 'lingogoc_learning_cache';
 const CACHE_STORE = 'vocabulary_enrichment';
+const RETRY_STATE_PREFIX = 'lingogoc_vocab_retry_v1_';
+export const ENRICHMENT_RETRY_COOLDOWN_MS = 30 * 60 * 1000;
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const activeEnrichmentRequests = new Map();
 const REQUIRED_CONTEXT_EXAMPLES = 5;
+
+function retryStorageKey(word) {
+  return `${RETRY_STATE_PREFIX}${String(word || '').trim().toLowerCase()}`;
+}
+
+export function getEnrichmentRetryState(word, now = Date.now()) {
+  if (!word || typeof localStorage === 'undefined') return null;
+  try {
+    const state = JSON.parse(localStorage.getItem(retryStorageKey(word)) || 'null');
+    const nextRetryAtMs = Date.parse(state?.nextRetryAt || '');
+    if (!Number.isFinite(nextRetryAtMs)) return null;
+    return {
+      ...state,
+      coolingDown: nextRetryAtMs > now,
+      remainingMs: Math.max(0, nextRetryAtMs - now),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function rememberEnrichmentFailure(word, error) {
+  const failedAt = new Date();
+  const state = {
+    failedAt: failedAt.toISOString(),
+    nextRetryAt: new Date(failedAt.getTime() + ENRICHMENT_RETRY_COOLDOWN_MS).toISOString(),
+    code: cleanText(error?.code || 'BACKEND_UNAVAILABLE', 120),
+    message: cleanText(error?.message || 'Không thể kết nối AI.', 300),
+  };
+  try {
+    localStorage.setItem(retryStorageKey(word), JSON.stringify(state));
+  } catch {
+    // The in-memory request still finishes safely when storage is unavailable.
+  }
+  return state;
+}
+
+function clearEnrichmentFailure(word) {
+  try {
+    localStorage.removeItem(retryStorageKey(word));
+  } catch {
+    // Ignore restricted storage environments.
+  }
+}
 
 function cleanText(value, maxLength = 500) {
   return typeof value === 'string'
@@ -176,7 +222,7 @@ async function createBackendError(response) {
     // Status-based retry handling below still works for non-JSON responses.
   }
   const error = new Error(payload?.error?.message || payload?.error || payload?.message || `${fallback} (HTTP ${response.status})`);
-  error.code = payload?.code || `HTTP_${response.status}`;
+  error.code = payload?.code || payload?.error?.code || `HTTP_${response.status}`;
   error.retryable = typeof payload?.retryable === 'boolean'
     ? payload.retryable
     : RETRYABLE_HTTP_STATUSES.has(response.status);
@@ -224,8 +270,22 @@ async function performWordEnrichment(
     };
   }
 
-  const retryUntilSuccess = Boolean(options.retryUntilSuccess);
-  const maxAttempts = retryUntilSuccess ? Number.POSITIVE_INFINITY : Math.max(1, options.maxAttempts || 1);
+  const retryState = getEnrichmentRetryState(word);
+  if (!options.manualRetry && retryState?.coolingDown) {
+    const cooldownResult = {
+      unavailableReason: 'RETRY_COOLDOWN',
+      unavailableCode: retryState.code,
+      nextRetryAt: retryState.nextRetryAt,
+      retryAfterMs: retryState.remainingMs,
+    };
+    return localFallback
+      ? { ...localFallback, ...cooldownResult, fromCache: true, serverSyncPending: true }
+      : { isAiGenerated: false, contextExamples: [], collocations: [], senses: [], ...cooldownResult };
+  }
+
+  // A single user action is always bounded. Further automatic attempts wait
+  // for the persisted 30-minute cooldown; manual retry may bypass that wait.
+  const maxAttempts = Math.min(3, Math.max(1, Number(options.maxAttempts) || 1));
   let attempt = 0;
 
   while (attempt < maxAttempts) {
@@ -235,7 +295,13 @@ async function performWordEnrichment(
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         signal,
-        body: JSON.stringify({ word, meaning, topic, dictionaryDefinitions }),
+        body: JSON.stringify({
+          word,
+          meaning,
+          topic,
+          dictionaryDefinitions,
+          force: Boolean(options.manualRetry),
+        }),
       });
       if (!response.ok) throw await createBackendError(response);
 
@@ -251,6 +317,7 @@ async function performWordEnrichment(
         error.retryable = true;
         throw error;
       }
+      clearEnrichmentFailure(word);
       return await cacheWordEnrichment(word, result);
     } catch (error) {
       if (error?.name === 'AbortError') throw error;
@@ -264,8 +331,16 @@ async function performWordEnrichment(
       }
 
       if (localFallback) {
-        return { ...localFallback, fromCache: true, serverSyncPending: true };
+        const failure = rememberEnrichmentFailure(word, error);
+        return {
+          ...localFallback,
+          fromCache: true,
+          serverSyncPending: true,
+          nextRetryAt: failure.nextRetryAt,
+          unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
+        };
       }
+      const failure = rememberEnrichmentFailure(word, error);
       return {
         isAiGenerated: false,
         contextExamples: [],
@@ -273,6 +348,7 @@ async function performWordEnrichment(
         senses: [],
         unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
         unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
+        nextRetryAt: failure.nextRetryAt,
       };
     }
   }
@@ -286,7 +362,7 @@ export function enrichWordWithLLM(
   signal,
   options = {},
 ) {
-  const keepAlive = Boolean(options.keepAlive || options.retryUntilSuccess);
+  const keepAlive = Boolean(options.keepAlive);
   if (!keepAlive) {
     return performWordEnrichment(word, meaning, topic, dictionaryDefinitions, signal, options);
   }

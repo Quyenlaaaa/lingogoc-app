@@ -1,16 +1,24 @@
-import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi';
-import { sanitizeBundledVocabulary } from './vocabularyQuality';
+import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi.js';
+import { sanitizeBundledVocabulary } from './vocabularyQuality.js';
 
 const EXPECTED_SYSTEM_WORDS = 3000;
 
 export async function loadBundledSystemVocabulary() {
-  const { vocabData } = await import('../data/vocabData');
+  const { vocabData } = await import('../data/vocabData.js');
   return sanitizeBundledVocabulary(vocabData);
 }
 
-function normalizeCatalog(payload) {
+function normalizeCatalog(payload, fallbackWords = []) {
   const words = sanitizeBundledVocabulary(payload?.data?.words || payload?.words);
-  return words.length === EXPECTED_SYSTEM_WORDS ? words : null;
+  if (words.length !== EXPECTED_SYSTEM_WORDS) return null;
+
+  // The bundled catalog can carry a newer IPA correction than the remote KV
+  // catalog. Preserve that verified pronunciation until the next DB sync.
+  const fallbackIpa = new Map(fallbackWords.map((item) => [item.word.toLowerCase(), item.ipa]));
+  return words.map((item) => ({
+    ...item,
+    ipa: item.ipa || fallbackIpa.get(item.word.toLowerCase()) || '',
+  }));
 }
 
 async function hashVocabulary(words) {
@@ -46,7 +54,7 @@ export async function refreshSystemVocabulary(currentWords, timeoutMs = 4000) {
     const response = await fetchWithTimeout('/api/vocabulary/catalog', timeoutMs);
     if (!response.ok) throw new Error(`SYSTEM_VOCABULARY_HTTP_${response.status}`);
     const payload = await readJsonResponse(response, 'Kho từ hệ thống trên server không hợp lệ.');
-    const words = normalizeCatalog(payload);
+    const words = normalizeCatalog(payload, currentWords);
     if (!words) throw new Error('SYSTEM_VOCABULARY_INCOMPLETE');
     return words;
   } catch (error) {

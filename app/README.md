@@ -10,20 +10,20 @@
 
 ## Chạy trong Android Studio
 
-1. Mở thư mục `android` bằng Android Studio.
+1. Mở thư mục `app` bằng Android Studio.
 2. Chờ Gradle Sync hoàn tất.
 3. Chọn máy Android thật hoặc emulator API 26 trở lên.
 4. Bấm **Run app**.
 
 ## Tạo APK debug
 
-Từ thư mục `android`:
+Từ thư mục `app`:
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-APK được tạo tại `android/app/build/outputs/apk/debug/app-debug.apk`.
+APK được tạo tại `app/app/build/outputs/apk/debug/app-debug.apk`.
 
 Sau khi code được đẩy lên nhánh `main`, workflow **Android Kotlin APK** cũng tự build và đăng APK debug trong mục Artifacts của GitHub Actions.
 

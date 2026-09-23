@@ -10,12 +10,16 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+app/.tools/
+microsoft-jdk-17-windows-x64.msi
+microsoft-jdk-17-windows-x64.zip
+android-commandlinetools-windows.zip
 *.local
 .env
 .env.*
 !.env.example
-backend/.dev.vars
-backend/.wrangler/
+web/backend/.dev.vars
+web/backend/.wrangler/
 
 # Editor directories and files
 .vscode/*
@@ -27,17 +31,17 @@ backend/.wrangler/
 *.njsproj
 *.sln
 *.sw?
-scripts/data_cache
+web/scripts/data_cache/
 
 # Android build and local machine files
-android/.gradle/
-android/local.properties
-android/**/build/
-android/captures/
-android/*.jks
-android/*.keystore
+app/.gradle/
+app/local.properties
+app/**/build/
+app/captures/
+app/*.jks
+app/*.keystore
 
 # Personal learning datasets (never commit these)
 private-data/
-public/private-data/
+web/public/private-data/
 *.lingogoc-private.json

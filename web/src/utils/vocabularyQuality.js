@@ -54,6 +54,40 @@ export function isInvalidBundledVocabularyWord(word) {
   );
 }
 
+function stripPronunciationWrapper(value) {
+  let result = normalizeText(value);
+  if (result.startsWith('/') || result.startsWith('[')) result = result.slice(1);
+  if (result.endsWith('/') || result.endsWith(']')) result = result.slice(0, -1);
+  return result;
+}
+
+function comparablePronunciation(value) {
+  return stripPronunciationWrapper(value)
+    .toLocaleLowerCase('en')
+    .replace(/[’']/g, "'");
+}
+
+export function isValidIpa(ipa, word = '') {
+  const raw = normalizeText(ipa);
+  const pronunciation = comparablePronunciation(raw);
+  const headword = comparablePronunciation(word);
+  if (!raw || !pronunciation || /\d/.test(pronunciation)) return false;
+  // The legacy generator used /word/ when no phonetic data existed. Never
+  // present that spelling fallback as an IPA transcription.
+  if (headword && pronunciation === headword) return false;
+  return true;
+}
+
+export function normalizeIpa(ipa, word = '') {
+  if (!isValidIpa(ipa, word)) return '';
+  const value = stripPronunciationWrapper(ipa);
+  return `/${value}/`;
+}
+
+export function getDisplayIpa(ipa, word = '') {
+  return normalizeIpa(ipa, word) || 'IPA đang được bổ sung';
+}
+
 // The bundled word list must contain real headwords only. Some source dictionaries
 // append numbers to distinguish meanings (for example can1/can2); those labels are
 // not words learners should see. Keep this stricter rule scoped to bundled data so
@@ -62,14 +96,15 @@ export function sanitizeBundledVocabulary(vocabulary) {
   if (!Array.isArray(vocabulary)) return [];
 
   const seen = new Set();
-  return vocabulary.filter((item) => {
-    if (isInvalidBundledVocabularyWord(item)) return false;
+  return vocabulary.reduce((result, item) => {
+    if (isInvalidBundledVocabularyWord(item)) return result;
 
     const key = normalizeText(item.word).toLocaleLowerCase('en');
-    if (seen.has(key)) return false;
+    if (seen.has(key)) return result;
     seen.add(key);
-    return true;
-  });
+    result.push({ ...item, ipa: normalizeIpa(item.ipa, item.word) });
+    return result;
+  }, []);
 }
 
 export function isLowQualityExample(example) {

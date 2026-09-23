@@ -512,6 +512,20 @@ async function enrichVocabulary(request, env, origin, context) {
     }
   }
 
+  const retryKey = backfillRetryKey(word);
+  if (env.VOCAB_CACHE && body?.force !== true) {
+    const retryState = await env.VOCAB_CACHE.get(retryKey, 'json');
+    const nextRetryAtMs = Date.parse(retryState?.nextRetryAt || '');
+    if (Number.isFinite(nextRetryAtMs) && nextRetryAtMs > Date.now()) {
+      return json({
+        error: 'AI đang tạm nghỉ sau lần gọi lỗi. Hệ thống sẽ tự thử lại sau 30 phút hoặc bạn có thể bấm Thử lại AI.',
+        code: 'ENRICHMENT_COOLDOWN',
+        retryable: true,
+        nextRetryAt: retryState.nextRetryAt,
+      }, 429, origin);
+    }
+  }
+
   const missingExampleCount = Math.max(0, 5 - (bestPartial?.contextExamples?.length || 0));
   const generationInput = {
     ...input,
@@ -551,6 +565,18 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
         lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
       }));
     }
+    if (env.VOCAB_CACHE) {
+      const previousRetry = await env.VOCAB_CACHE.get(retryKey, 'json');
+      const attempts = (Number(previousRetry?.attempts) || 0) + 1;
+      const now = Date.now();
+      await env.VOCAB_CACHE.put(retryKey, JSON.stringify({
+        word,
+        attempts,
+        lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+        lastTriedAt: new Date(now).toISOString(),
+        nextRetryAt: new Date(now + retryDelayMs(attempts)).toISOString(),
+      }), { expirationTtl: 7 * 24 * 60 * 60 });
+    }
     throw error;
   }
 
@@ -566,6 +592,7 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
     // Await the durable write: the client only receives success after the
     // generated examples have been safely stored on the server.
     await env.VOCAB_CACHE.put(cacheIdentity.serverKey, JSON.stringify(result));
+    if (env.VOCAB_CACHE.delete) await env.VOCAB_CACHE.delete(retryKey);
   }
   const cacheResponse = new Response(JSON.stringify(result), {
     headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=604800' },
@@ -791,6 +818,11 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
           AI_ROUTING_MODE: 'background',
         }, '', context);
         const enrichmentPayload = await enrichmentResponse.json();
+        if (!enrichmentResponse.ok) {
+          const enrichmentError = new Error(enrichmentPayload?.code || `ENRICHMENT_HTTP_${enrichmentResponse.status}`);
+          enrichmentError.retryAfter = enrichmentPayload?.nextRetryAt || null;
+          throw enrichmentError;
+        }
         generated += 1;
         state.generated += 1;
         state.generatedInCurrentPass += 1;

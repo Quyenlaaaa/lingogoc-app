@@ -378,6 +378,15 @@ const partialBatchPayload = await partialBatchResponse.json();
 assert.equal(partialBatchPayload.data.items[0].meaningVi, 'khảo sát; xem xét');
 assert.equal(partialBatchPayload.data.items[0].status, 'partial');
 assert.deepEqual(partialBatchPayload.data.needsEnrichment, ['survey']);
+const cooldownResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'survey', meaning: "từ 'survey' (v)", topic: 'Công việc' }),
+}), env, context);
+const cooldownPayload = await cooldownResponse.json();
+assert.equal(cooldownResponse.status, 429);
+assert.equal(cooldownPayload.code, 'ENRICHMENT_COOLDOWN');
+assert.ok(Date.parse(cooldownPayload.nextRetryAt) > Date.now());
 let requestedMissingExamples = null;
 customProviderResponse = async ({ body }) => {
   const input = JSON.parse(body.messages.at(-1).content);
@@ -399,7 +408,7 @@ customProviderResponse = async ({ body }) => {
 const completedPartialResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
-  body: JSON.stringify({ word: 'survey', meaning: "từ 'survey' (v)", topic: 'Công việc' }),
+  body: JSON.stringify({ word: 'survey', meaning: "từ 'survey' (v)", topic: 'Công việc', force: true }),
 }), {
   ...env,
   XTROUTER_API_KEY: '',

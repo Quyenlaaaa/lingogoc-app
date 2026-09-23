@@ -10,6 +10,7 @@
     "test:speech": "node scripts/test_speech_mobile.mjs",
     "test:vocab": "node scripts/test_vocab_quality.mjs",
     "audit:vocab": "node scripts/audit-vocabulary-release.mjs",
+    "backfill:ipa": "node scripts/backfill-ipa.mjs",
     "backfill:vocab": "node scripts/backfill-vocabulary.mjs --limit=100",
     "sync:vocab-db": "node scripts/sync-vocabulary-kv.mjs",
     "preview": "vite preview",

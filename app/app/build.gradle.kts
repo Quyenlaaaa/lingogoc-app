@@ -41,23 +41,22 @@ android {
     }
 }
 
-val repositoryRoot = rootProject.projectDir.parentFile
+val webRoot = rootProject.projectDir.parentFile.resolve("web")
 val npmCommand = if (System.getProperty("os.name").lowercase().contains("windows")) "npm.cmd" else "npm"
 val generatedWebAssets = layout.buildDirectory.dir("generated/webAssets")
 
 val buildWeb by tasks.registering(Exec::class) {
-    workingDir(repositoryRoot)
+    workingDir(webRoot)
     commandLine(npmCommand, "run", "build")
-    inputs.dir(repositoryRoot.resolve("src"))
-    inputs.dir(repositoryRoot.resolve("public"))
-    inputs.file(repositoryRoot.resolve("index.html"))
-    inputs.file(repositoryRoot.resolve("vite.config.js"))
-    outputs.dir(repositoryRoot.resolve("dist"))
+    inputs.dir(webRoot.resolve("src"))
+    inputs.file(webRoot.resolve("index.html"))
+    inputs.file(webRoot.resolve("vite.config.js"))
+    outputs.dir(webRoot.resolve("dist"))
 }
 
 val syncWebAssets by tasks.registering(Copy::class) {
     dependsOn(buildWeb)
-    from(repositoryRoot.resolve("dist"))
+    from(webRoot.resolve("dist"))
     into(generatedWebAssets.map { it.dir("web") })
 }
 

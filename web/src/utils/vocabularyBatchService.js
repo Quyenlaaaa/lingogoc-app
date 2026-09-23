@@ -6,6 +6,17 @@ import {
   getMeaningCacheKey,
 } from './vocabularyMeaningService.js';
 
+const BATCH_CACHE_TTL_MS = 30 * 60 * 1000;
+const batchResponseCache = new Map();
+const batchFailureCooldown = new Map();
+
+function batchKey(items) {
+  return items
+    .map((item) => `${String(item.word).toLowerCase()}::${String(item.pos || item.type || '').toLowerCase()}`)
+    .sort()
+    .join('|');
+}
+
 export async function fetchVocabularyBatch(items, signal) {
   const unique = [];
   const seen = new Set();
@@ -26,15 +37,30 @@ export async function fetchVocabularyBatch(items, signal) {
   });
   if (!unique.length || !hasBackendApi()) return results;
 
-  const response = await fetch(getBackendUrl('/api/vocabulary/batch'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    signal,
-    body: JSON.stringify({
-      items: unique.map((item) => ({ word: item.word, pos: item.pos || item.type || '' })),
-    }),
-  });
-  if (!response.ok) throw new Error(`VOCABULARY_BATCH_HTTP_${response.status}`);
+  const requestKey = batchKey(unique);
+  const now = Date.now();
+  const cachedBatch = batchResponseCache.get(requestKey);
+  if (cachedBatch && now - cachedBatch.savedAt < BATCH_CACHE_TTL_MS) {
+    return { ...results, ...cachedBatch.results };
+  }
+  const failedAt = batchFailureCooldown.get(requestKey) || 0;
+  if (now - failedAt < BATCH_CACHE_TTL_MS) return results;
+
+  let response;
+  try {
+    response = await fetch(getBackendUrl('/api/vocabulary/batch'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      signal,
+      body: JSON.stringify({
+        items: unique.map((item) => ({ word: item.word, pos: item.pos || item.type || '' })),
+      }),
+    });
+    if (!response.ok) throw new Error(`VOCABULARY_BATCH_HTTP_${response.status}`);
+  } catch (error) {
+    if (error?.name !== 'AbortError') batchFailureCooldown.set(requestKey, Date.now());
+    throw error;
+  }
   const payload = await readJsonResponse(response, 'Dữ liệu từ vựng theo lô không hợp lệ.');
   const records = Array.isArray(payload?.data?.items) ? payload.data.items : [];
 
@@ -53,6 +79,8 @@ export async function fetchVocabularyBatch(items, signal) {
   (payload?.data?.needsEnrichment || payload?.data?.missing || []).forEach((word) => {
     results[word] = { ...(results[word] || {}), pending: true };
   });
+  batchFailureCooldown.delete(requestKey);
+  batchResponseCache.set(requestKey, { savedAt: Date.now(), results: { ...results } });
   return results;
 }
 

@@ -29,6 +29,7 @@ import {
   buildClozePrompt,
   buildQuizOptions,
   getTrustedExamples,
+  getDisplayIpa,
   isLowQualityExample,
   isLowQualityMeaning,
 } from '../utils/vocabularyQuality';
@@ -234,7 +235,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         currentCard.topic,
         [],
         undefined,
-        { retryUntilSuccess: true, keepAlive: true },
+        { manualRetry: true, keepAlive: true, maxAttempts: 1 },
       );
       if (viewMountedRef.current) setFlashcardAiData(result);
     } catch (error) {
@@ -257,8 +258,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         [],
         undefined,
         {
-          retryUntilSuccess: true,
+          manualRetry: true,
           keepAlive: true,
+          maxAttempts: 1,
           onRetry: ({ attempt }) => {
             if (viewMountedRef.current) {
               setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: attempt } }));
@@ -553,7 +555,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                 <div className="card-center-word">
                   <h3 className="card-word-text">{currentCard.word}</h3>
-                  <div className="card-ipa-text">{currentCard.ipa}</div>
+                  <div className="card-ipa-text">{getDisplayIpa(currentCard.ipa, currentCard.word)}</div>
                 </div>
 
                 <div className="card-instruction-hint">
@@ -771,7 +773,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                     <div className="item-word-body">
                       <div className="item-word-name">{w.word}</div>
-                      <div className="item-ipa-text">{w.ipa}</div>
+                      <div className="item-ipa-text">{getDisplayIpa(w.ipa, w.word)}</div>
                       <div className="item-meaning-text">{displayMeaning}</div>
                       <div className="item-example-box">
                         <div className="item-example-summary">
@@ -902,7 +904,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
               ) : (
                 <div className="en-quiz-prompt">
                   <h3 className="target-word-heading">{quizQuestion.target.word}</h3>
-                  <div className="target-ipa">{quizQuestion.target.ipa} ({quizQuestion.target.pos})</div>
+                  <div className="target-ipa">{getDisplayIpa(quizQuestion.target.ipa, quizQuestion.target.word)} ({quizQuestion.target.pos})</div>
                   <button 
                     className="listen-sound-btn" 
                     onClick={() => handleSpeak(quizQuestion.target.word)}

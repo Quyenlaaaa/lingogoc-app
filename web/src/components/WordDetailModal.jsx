@@ -14,7 +14,7 @@ import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { getCachedWordEnrichment } from '../utils/geminiService';
 import { fetchVocabularyBatch } from '../utils/vocabularyBatchService';
 import { speakText } from '../utils/speechHelper';
-import { getTrustedExamples, isLowQualityExample, isLowQualityMeaning } from '../utils/vocabularyQuality';
+import { getDisplayIpa, getTrustedExamples, isLowQualityExample, isLowQualityMeaning, normalizeIpa } from '../utils/vocabularyQuality';
 
 export default function WordDetailModal({ word, initialEnrichment, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
@@ -185,7 +185,10 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
           </h1>
 
           <div style={{ fontSize: '1.25rem', color: '#818cf8', fontFamily: 'monospace', marginBottom: '8px' }}>
-            {realDictData?.phonetic || word.ipa}
+            {getDisplayIpa(
+              normalizeIpa(realDictData?.phonetic, word.word) || word.ipa,
+              word.word,
+            )}
           </div>
 
           <div className="word-detail-meaning" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
