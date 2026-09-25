@@ -4,7 +4,7 @@ Version: 1.1
 
 Updated: 2026-09-25
 
-Program status: `IN_PROGRESS`
+Program status: `BLOCKED`
 
 This file is the single source of truth for execution order, status, and handoff.
 `PRODUCT_ROADMAP.md` contains long-term vision only.
@@ -70,11 +70,12 @@ Frontend error boundary, request IDs, server timing, structured Worker logs, and
 
 ### P0-04 — CI/CD and production smoke tests
 
-Status: `IN_PROGRESS`
+Status: `BLOCKED`
 
-Unblock when the user authorizes push/deploy and GitHub environment `production` has
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Staging must have separate KV and
-D1 resources. Validation/deploy workflow, smoke script, and rollback guide exist.
+Production validation, direct Worker deployment, automated smoke, GitHub Pages, and
+Android builds are proven. Unblock the remaining automated Worker deployment when the
+GitHub environment `production` has `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`. Staging must still receive separate KV and D1 resources.
 
 ---
 
@@ -362,21 +363,21 @@ durable audited order storage before any learner-facing payment surface is safe.
 
 Active task: `P0-04 — CI/CD and production smoke tests`
 
-Status: `IN_PROGRESS`
+Status: `BLOCKED`
 
 Branch: `main`
 
-Last known production commit before this plan: `29038aa`
+Last deployed production commit: `fd307ffaac05115992f2923f34cd8f23b2e21276`
 
-Last known production Worker version: `af413c3d-4c9b-4851-8e1e-f6d5a72b7972`
+Last deployed production Worker version: `81f8f670-d8d4-4d31-ae31-6f09a928e2b8`
 
 ### Next work
 
-1. Run the full local release gate and commit/push the accumulated production work.
-2. Monitor Worker, GitHub Pages, and Android workflows; deploy the Worker and capture
-   the resulting commit, deployment version, and workflow URLs.
-3. Run the automated production smoke suite, then record the result and provide the
-   physical mobile Chrome/Cốc Cốc smoke checklist.
+1. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` to the protected GitHub
+   `production` environment, then rerun the Worker deployment workflow.
+2. Provision isolated staging KV/D1 resources before enabling staging writes.
+3. Run `Android Device Matrix` and complete `app/DEVICE_TEST_MATRIX.md` on physical
+   Chrome, Cốc Cốc, and the APK.
 
 ## Handoff log
 
@@ -720,3 +721,42 @@ speech, migration preparation, Worker contract, production build, migration SQL,
   Matrix`, complete `app/DEVICE_TEST_MATRIX.md` on physical Chrome/Cốc Cốc/APK, then
   configure protected signing/Play secrets and run `Android Signed Release`. No push,
   deploy, account mutation, keystore creation, or Play upload occurred.
+
+### 2026-09-25 — Production release completed; CI secret/staging blocker recorded
+
+- Full release gate passed: lint, feature, vocabulary, speech, migration, learning,
+  speaking, module, identity, backup, security, offline, Android bridge/release,
+  diagnostic, admin, Worker contract, production build, and every Edge 390 x 844
+  browser suite. Android `assembleDebug` and `assembleDebugAndroidTest` also passed.
+- The mobile gate found and fixed the global speech-status toast layering: it now
+  remains visible above Settings while only its action buttons accept pointer input,
+  so it cannot block Explore or other controls.
+- Pushed commits `d6267bf53a677fc07680e86c409d4cc12420c167` and
+  `fd307ffaac05115992f2923f34cd8f23b2e21276` to `main`. GitHub Pages succeeded at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36085110528 and Android at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36085110553.
+- Direct Wrangler production deployment succeeded at
+  `https://lingogoc-api.lingogoc-api.workers.dev`, version
+  `81f8f670-d8d4-4d31-ae31-6f09a928e2b8`. Automated production smoke passed health,
+  operations, the 3,000-word catalog, cached batch/enrichment without an AI call, and
+  speech audio using cached word `ticket`.
+- Worker workflow validation succeeded at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36085110573, but its deploy
+  and smoke jobs were skipped because the GitHub `production` environment does not
+  contain `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The direct deployment
+  closes the current production release but not that automation gap.
+- Cloudflare rejected the Analytics Engine binding because it is not enabled on this
+  account (error 10089). The optional binding is now commented out; isolate-local
+  operations metrics remain available, and Analytics Engine can be re-enabled after
+  account activation.
+- A direct Pages content probe from this workspace timed out after CI had reported a
+  successful deployment; the automated workflow is the release evidence. Physical
+  Chrome/Cốc Cốc/APK audio and microphone checks and the workflow-dispatch Android
+  emulator matrix remain outstanding.
+- Changed in the final release slice: all accumulated production stabilization work,
+  `web/src/components/SpeechStatus.jsx`, `web/src/index.css`,
+  `web/backend/wrangler.toml`, `web/backend/DEPLOYMENT.md`, and this checkpoint.
+- Exact next action: configure the two protected Cloudflare GitHub secrets, rerun the
+  Worker workflow, provision isolated staging KV/D1, then execute the Android Device
+  Matrix and physical-device checklist. Do not repeat the completed local release
+  gate unless code changes.
