@@ -954,6 +954,9 @@ speech, migration preparation, Worker contract, production build, migration SQL,
   The D1 audit reports 2,781 unique records, 2,765 complete/five-example records, 16
   partial records, and 219 catalog words not yet enriched. Hourly background completion
   remains active and now writes D1 first.
+- Pushed follow-up commit `6fc3d85e70f7767e5d40d08279dbd2f3be70d095`. GitHub Pages,
+  Worker validation, and Android succeeded at runs `36093187456`, `36093187365`, and
+  `36093187516`, respectively.
 - Exact next task: collect/query `lingogoc_worker_metrics` after ingestion becomes
   visible, verify cache/provider latency KPIs, and continue completing the 219 missing
   plus 16 partial words without duplicate AI calls.
