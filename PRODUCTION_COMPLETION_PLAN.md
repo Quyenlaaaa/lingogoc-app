@@ -4,7 +4,7 @@ Version: 1.1
 
 Updated: 2026-09-25
 
-Program status: `IN_PROGRESS`
+Program status: `BLOCKED`
 
 This file is the single source of truth for execution order, status, and handoff.
 `PRODUCT_ROADMAP.md` contains long-term vision only.
@@ -70,7 +70,7 @@ Frontend error boundary, request IDs, server timing, structured Worker logs, and
 
 ### P0-04 — CI/CD and production smoke tests
 
-Status: `IN_PROGRESS`
+Status: `BLOCKED`
 
 Production validation, direct Worker deployment, automated smoke, GitHub Pages, and
 Android builds are proven. Unblock the remaining automated Worker deployment when the
@@ -387,13 +387,13 @@ durable audited order storage before any learner-facing payment surface is safe.
 
 Active task: `P0-04 — CI/CD and production smoke tests`
 
-Status: `IN_PROGRESS`
+Status: `BLOCKED`
 
 Branch: `main`
 
-Last deployed production commit: `fd307ffaac05115992f2923f34cd8f23b2e21276`
+Last deployed production commit: `8f1735a5d6312664a996c14807dc3e6f4f8f6933`
 
-Last deployed production Worker version: `81f8f670-d8d4-4d31-ae31-6f09a928e2b8`
+Last deployed production Worker version: `dbe0b521-78ce-4d8e-b643-631ba8422def`
 
 ### Next work
 
@@ -837,3 +837,33 @@ speech, migration preparation, Worker contract, production build, migration SQL,
 - Exact next command after push/deploy authorization: run `git diff --check`, commit
   the combined UI/cache release, push `main`, deploy the Worker, monitor Pages/Android,
   and compare cold/warm production batch timings plus mobile network request counts.
+
+### 2026-09-25 — Catalog UI and cache-first release deployed
+
+- Pushed `8f1735a5d6312664a996c14807dc3e6f4f8f6933` (`Restore vocabulary catalog and
+  optimize cache reads`) to `main` with the P2-04-R1 UI restoration and P1-03-R1
+  browser/Worker caching improvements.
+- Full release gate passed: all unit/static suites, Worker contracts, production web
+  build, and the mobile/desktop vocabulary browser suite. Local Android assembly could
+  not reuse the host's Gradle cache and the isolated Gradle download timed out; the
+  clean GitHub Android workflow subsequently built successfully.
+- GitHub Pages succeeded at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36088062842 and Android at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36088062878.
+- Direct Worker deployment succeeded at
+  `https://lingogoc-api.lingogoc-api.workers.dev`, version
+  `dbe0b521-78ce-4d8e-b643-631ba8422def`. Automated smoke passed health, catalog,
+  cached enrichment, and speech for `ticket`.
+- Production batch verification returned `MISS-BATCH` on the first 24-word request
+  (1,246 ms end-to-end, 447 ms Worker) and `HIT-BATCH` on the repeat (343 ms
+  end-to-end, 8 ms Worker), proving the repeat avoided durable KV reads.
+- Worker validation succeeded at
+  https://github.com/Quyenlaaaa/lingogoc-app/actions/runs/36088062940. Its deploy and
+  smoke steps remain skipped because the protected GitHub Cloudflare secrets are not
+  configured; the direct Wrangler deployment closed this release only.
+- Direct HTTP access to GitHub Pages from this workspace timed out at connection after
+  20 seconds, as in the prior release. The successful Pages deployment workflow is
+  the available web release evidence; physical Chrome/Cốc Cốc verification remains.
+- Exact next action: add the two protected Cloudflare GitHub secrets and perform the
+  physical mobile checklist, confirming default catalog mode, equal summary frames,
+  page-number navigation, and zero batch request on a fully cached page.
