@@ -1017,3 +1017,17 @@ speech, migration preparation, Worker contract, production build, migration SQL,
 - Changed files: `web/backend/src/worker.js`, `web/backend/test-worker.mjs`, and this
   checkpoint. Exact next action: deploy, force one controlled retry for `deny`, and
   verify the durable D1 record changes from four to five examples.
+
+### 2026-09-25 — Inflected-form fix deployed and `deny` completed
+
+- Pushed commit `987e027cf31b98d003285f8382eb2a25f9acb556` and deployed Worker
+  version `f91fd3c9-f855-42fd-b475-5b8873f516ea`.
+- One controlled forced retry for `deny` succeeded through `GROQ_FREE`: the existing
+  four contexts were preserved and the natural sentence “The landlord denied my
+  request…” became the fifth context. D1 now reports `status=complete`, five examples,
+  job attempts reset to zero, no next retry, and no last error.
+- The production partial count fell from 16 to 15. Production smoke passed after the
+  write. GitHub Pages, Worker validation, and Android succeeded at runs `36095751223`,
+  `36095751312`, and `36095751289`, respectively.
+- Exact next task: let the prioritized hourly queue apply the same inflection-aware
+  validation to the remaining 15 partial words and verify the count after each run.
