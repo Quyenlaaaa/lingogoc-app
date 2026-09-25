@@ -998,3 +998,22 @@ speech, migration preparation, Worker contract, production build, migration SQL,
 - Exact next task: inspect the first hourly run after this deploy, verify partial jobs
   appear in D1 and the partial count falls, then continue hourly observation without
   manual duplicate calls.
+
+### 2026-09-25 — Inflected headword validation fix
+
+- A real manual retry for `deny` reached D1 but remained at four examples because the
+  validator required the exact substring `deny`; natural output using `denied` was
+  incorrectly discarded. The request correctly persisted the best partial result and
+  advanced its retry job, so no database write was lost.
+- Added boundary-aware English morphology validation for regular plural/third-person,
+  past, and `-ing` forms, including consonant-`y`, silent-`e`, `-ie`, and doubled-final
+  spelling. Common irregular forms cover `be`, `do`, `find`, `get`, `go`, `have`,
+  `teach`, and `throw`.
+- Regression tests accept `denies`, `denied`, `denying`, and `found` for their correct
+  headwords while rejecting unrelated substring matches such as `identity` for `deny`.
+- Full release gate passed: lint, vocabulary, speech, migration, learning, diagnostic,
+  administration, Worker contracts, and production build. Only the existing bundle
+  size notice remains.
+- Changed files: `web/backend/src/worker.js`, `web/backend/test-worker.mjs`, and this
+  checkpoint. Exact next action: deploy, force one controlled retry for `deny`, and
+  verify the durable D1 record changes from four to five examples.

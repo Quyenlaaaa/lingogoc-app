@@ -282,8 +282,52 @@ function isUsefulVietnameseMeaning(value, word = '') {
   return hasVietnameseSignal;
 }
 
+const IRREGULAR_VOCABULARY_FORMS = Object.freeze({
+  be: ['am', 'is', 'are', 'was', 'were', 'been', 'being'],
+  do: ['does', 'did', 'done', 'doing'],
+  find: ['finds', 'found', 'finding'],
+  get: ['gets', 'got', 'gotten', 'getting'],
+  go: ['goes', 'went', 'gone', 'going'],
+  have: ['has', 'had', 'having'],
+  teach: ['teaches', 'taught', 'teaching'],
+  throw: ['throws', 'threw', 'thrown', 'throwing'],
+});
+
+function vocabularyWordForms(word) {
+  const base = cleanText(word, 80).toLocaleLowerCase('en');
+  const forms = new Set([base]);
+  if (!/^[a-z]+$/.test(base)) return [...forms];
+  for (const form of IRREGULAR_VOCABULARY_FORMS[base] || []) forms.add(form);
+
+  if (/[^aeiou]y$/.test(base)) {
+    forms.add(`${base.slice(0, -1)}ies`);
+    forms.add(`${base.slice(0, -1)}ied`);
+  } else {
+    forms.add(`${base}${/(?:s|x|z|ch|sh|o)$/.test(base) ? 'es' : 's'}`);
+    forms.add(base.endsWith('e') ? `${base}d` : `${base}ed`);
+  }
+
+  if (base.endsWith('ie')) forms.add(`${base.slice(0, -2)}ying`);
+  else if (base.endsWith('e') && !base.endsWith('ee')) forms.add(`${base.slice(0, -1)}ing`);
+  else forms.add(`${base}ing`);
+
+  if (/[^aeiou][aeiou][^aeiouwxy]$/.test(base)) {
+    const finalLetter = base.at(-1);
+    forms.add(`${base}${finalLetter}ed`);
+    forms.add(`${base}${finalLetter}ing`);
+  }
+  return [...forms];
+}
+
+function sentenceUsesVocabularyWord(sentence, word) {
+  const forms = vocabularyWordForms(word)
+    .sort((left, right) => right.length - left.length)
+    .map((form) => form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  if (!forms.length) return false;
+  return new RegExp(`(?:^|[^a-z])(?:${forms.join('|')})(?=$|[^a-z])`, 'i').test(String(sentence || ''));
+}
+
 function normalizePartialEnrichment(data, word) {
-  const normalizedWord = word.toLowerCase();
   const seenContexts = new Set();
   const examples = Array.isArray(data?.contextExamples)
     ? data.contextExamples
@@ -295,7 +339,7 @@ function normalizePartialEnrichment(data, word) {
       .filter((item) => {
         const contextKey = item.context.toLowerCase();
         const isValid = item.context
-          && item.en.toLowerCase().includes(normalizedWord)
+          && sentenceUsesVocabularyWord(item.en, word)
           && item.en.length >= 8
           && item.vi.length >= 5
           && !seenContexts.has(contextKey);
@@ -2318,6 +2362,8 @@ function publicError(error) {
   if (error instanceof SyntaxError) return ['JSON không hợp lệ.', 400, 'INVALID_REQUEST_JSON', false];
   return ['Máy chủ AI gặp lỗi tạm thời.', 500, code, true];
 }
+
+export { sentenceUsesVocabularyWord };
 
 export default {
   async fetch(request, env, context) {

@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
-import worker from './src/worker.js';
+import worker, { sentenceUsesVocabularyWord } from './src/worker.js';
+
+assert.equal(sentenceUsesVocabularyWord('The manager denied the accusation.', 'deny'), true);
+assert.equal(sentenceUsesVocabularyWord('She denies every false claim.', 'deny'), true);
+assert.equal(sentenceUsesVocabularyWord('He is denying responsibility.', 'deny'), true);
+assert.equal(sentenceUsesVocabularyWord('The evidence was found yesterday.', 'find'), true);
+assert.equal(sentenceUsesVocabularyWord('Their identity remained private.', 'deny'), false);
 
 let cachedResponse = null;
 const dictionaryEdgeCache = new Map();
@@ -68,7 +74,7 @@ globalThis.fetch = async (url, options) => {
         meaningNote: 'Dùng khi đồng ý nhận hoặc thừa nhận điều gì.',
         senses: [{ pos: 'verb', meaningVi: 'chấp nhận', usage: 'accept + noun' }],
         contextExamples: [
-          { context: 'Đời sống', en: 'They accept card payments here.', vi: 'Ở đây họ chấp nhận thanh toán bằng thẻ.' },
+          { context: 'Đời sống', en: 'They accepted card payments here.', vi: 'Ở đây họ chấp nhận thanh toán bằng thẻ.' },
           { context: 'Công việc', en: 'I accept the terms of the contract.', vi: 'Tôi chấp nhận các điều khoản của hợp đồng.' },
           { context: 'Hội thoại', en: 'Please accept my sincere apology.', vi: 'Xin hãy chấp nhận lời xin lỗi chân thành của tôi.' },
           { context: 'Học tập', en: 'The school will accept applications until Friday.', vi: 'Trường sẽ nhận đơn đăng ký đến thứ Sáu.' },
