@@ -174,6 +174,44 @@ export async function getDurableCachedWordEnrichment(word) {
   return cacheWordEnrichment(word, persistent);
 }
 
+export async function getDurableCachedWordEnrichments(words) {
+  const results = {};
+  const missing = [];
+  const seen = new Set();
+
+  (words || []).forEach((value) => {
+    const word = String(value || '').trim().toLowerCase();
+    if (!word || seen.has(word)) return;
+    seen.add(word);
+    const cached = getCachedWordEnrichment(word);
+    if (cached) results[word] = cached;
+    else missing.push(word);
+  });
+  if (!missing.length) return results;
+
+  const database = await openCacheDatabase();
+  if (!database) return results;
+  await new Promise((resolve) => {
+    const transaction = database.transaction(CACHE_STORE, 'readonly');
+    const store = transaction.objectStore(CACHE_STORE);
+    missing.forEach((word) => {
+      const request = store.get(word);
+      request.onsuccess = () => {
+        const stored = request.result;
+        const normalized = normalizeEnrichment(stored?.data || stored);
+        if (normalized.contextExamples.length) {
+          results[word] = { ...normalized, savedAt: stored?.savedAt || null };
+        }
+      };
+    });
+    transaction.oncomplete = resolve;
+    transaction.onerror = resolve;
+    transaction.onabort = resolve;
+  });
+  database.close();
+  return results;
+}
+
 async function writePersistentEnrichment(word, payload) {
   const database = await openCacheDatabase();
   if (!database) return;

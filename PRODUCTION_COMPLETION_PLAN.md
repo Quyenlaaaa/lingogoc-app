@@ -4,7 +4,7 @@ Version: 1.1
 
 Updated: 2026-09-25
 
-Program status: `BLOCKED`
+Program status: `IN_PROGRESS`
 
 This file is the single source of truth for execution order, status, and handoff.
 `PRODUCT_ROADMAP.md` contains long-term vision only.
@@ -70,7 +70,7 @@ Frontend error boundary, request IDs, server timing, structured Worker logs, and
 
 ### P0-04 — CI/CD and production smoke tests
 
-Status: `BLOCKED`
+Status: `IN_PROGRESS`
 
 Production validation, direct Worker deployment, automated smoke, GitHub Pages, and
 Android builds are proven. Unblock the remaining automated Worker deployment when the
@@ -132,6 +132,19 @@ metrics; Analytics Engine schema and p50/p95 runbook.
 
 Unblock when an authorized staging deploy can validate the Analytics Engine binding,
 then production traffic can verify the KPI targets.
+
+### P1-03-R1 — Cache-first vocabulary loading
+
+Status: `DONE`
+
+Scope: avoid server reads for locally complete words, request only missing/partial
+records, reuse one IndexedDB connection per visible batch, and Edge-cache safe batch
+responses without changing existing KV keys. Acceptance: a page with 24 complete
+local enrichments performs zero network requests; partial pages send only unresolved
+words; repeated Worker batches avoid duplicate KV reads; abort/failure cooldown and
+five-context validation remain correct. Tests: `npm.cmd run test:vocab`, a dedicated
+batch-service test, `node backend/test-worker.mjs`, `npm.cmd run lint`, and
+`npm.cmd run build`.
 
 ### P1-04 — Vocabulary administration
 
@@ -197,6 +210,17 @@ flashcards, lists, detail, quizzes, Smart Review, Word Scramble, and Solo Challe
 all answer results update SRS; mobile search, five-example modal, page jump, and four
 review grades pass the Edge 390 x 844 behavior test. Test commands: `npm.cmd run
 test:vocab`, `npm.cmd run test:learning`, and `npm.cmd run test:vocab:browser`.
+
+### P2-04-R1 — Restore the 3,000-word catalog layout
+Status: `DONE`
+
+Scope: make the catalog list the default vocabulary surface, keep page-number entry
+directly below Previous/Next, and guarantee equal card/example-summary geometry across
+mobile and desktop. Acceptance: page jump is visible and functional; every visible
+card has a bounded summary container; cards and summary containers align within each
+desktop row; mobile has no horizontal overflow. Tests: `npm.cmd run test:vocab`,
+`npm.cmd run test:learning`, `npm.cmd run test:vocab:browser`, `npm.cmd run lint`, and
+`npm.cmd run build`.
 
 ### P2-05 — AI Speaking
 Status: `DONE`
@@ -363,7 +387,7 @@ durable audited order storage before any learner-facing payment surface is safe.
 
 Active task: `P0-04 — CI/CD and production smoke tests`
 
-Status: `BLOCKED`
+Status: `IN_PROGRESS`
 
 Branch: `main`
 
@@ -760,3 +784,56 @@ speech, migration preparation, Worker contract, production build, migration SQL,
   Worker workflow, provision isolated staging KV/D1, then execute the Android Device
   Matrix and physical-device checklist. Do not repeat the completed local release
   gate unless code changes.
+
+### 2026-09-25 — P2-04-R1 catalog layout regression fixed locally
+
+- Restored the 3,000-word catalog as the default vocabulary surface so pagination and
+  summary cards are immediately discoverable; flashcards remain available through the
+  explicit `Thẻ Nhớ 3D` mode.
+- Made the page-jump control visually distinct and kept `Nhập trang` plus `Chuyển tới`
+  directly below Previous/Next. The control was verified by navigating to page 2.
+- Locked every example-summary frame to 142 px, hardened card/header sizing, and
+  ellipsized long topic badges so cards align without leaking content.
+- Expanded the real-browser regression test to require the list default, visible and
+  equal summary frames at 390 x 844, aligned desktop cards and frames at 1280 x 900,
+  working page entry, and no mobile horizontal overflow.
+- Passed `lint`, `test:vocab`, `test:learning`, `test:speech`, `test:migration`,
+  `test:diagnostic`, `test:admin`, Worker contracts, production build, and
+  `test:vocab:browser`. The existing >500 kB chunk notice remains non-blocking.
+- Changed files: `web/src/components/VocabView.jsx`, `web/src/index.css`,
+  `web/scripts/test_vocabulary_learning_browser.mjs`, and this checkpoint.
+- Remaining risk: the fix is local and is not visible on production until a new push
+  and GitHub Pages deployment are explicitly authorized.
+- Exact next command after authorization: run `git diff --check`, commit the four
+  files, push `main`, monitor GitHub Pages, and repeat the production mobile smoke.
+
+### 2026-09-25 — P1-03-R1 cache-first vocabulary loading completed locally
+
+- Production diagnosis confirmed the KV namespace remains configured and healthy;
+  deploys did not delete it. A cold 24-word batch measured 1,548 ms end-to-end/390 ms
+  Worker time, while the immediate warm call measured 420 ms/29 ms. Backfill was
+  still active at cursor 2,751/3,000 with 918 generated and 131 retry-pending words.
+- The browser now loads all visible enrichments through one IndexedDB connection,
+  combines them with localStorage meanings, returns immediately when every word has a
+  clear Vietnamese meaning and five contexts, and sends only unresolved words to the
+  Worker. Existing KV keys and persisted data are unchanged.
+- The Worker now Edge-caches normalized batch payloads for 60 seconds using prompt,
+  model, word, and part-of-speech identity. A repeated identical batch returns
+  `HIT-BATCH` without any additional KV read; misses report `MISS-BATCH` for metrics.
+- Mobile browser coverage proves 24 locally complete words create zero batch network
+  requests; deleting one cached word creates one request containing only that word.
+  Existing page-jump, equal summary-frame, desktop alignment, SRS, and overflow checks
+  continue to pass.
+- Passed lint, vocabulary, learning, speech, migration, diagnostic, admin, offline,
+  Worker contracts, production build, and the mobile/desktop vocabulary browser suite.
+  The existing >500 kB chunk notice remains non-blocking.
+- Changed in this slice: `web/src/utils/geminiService.js`,
+  `web/src/utils/vocabularyBatchService.js`, `web/backend/src/worker.js`,
+  `web/backend/test-worker.mjs`, the vocabulary browser test, and this checkpoint.
+  The unpushed P2-04-R1 UI files remain part of the same clean release candidate.
+- Remaining risk: the browser and Worker optimizations are local until explicitly
+  pushed/deployed; D1 single-query batch reads and stable provider-independent legacy
+  cache-key migration remain future staging work.
+- Exact next command after push/deploy authorization: run `git diff --check`, commit
+  the combined UI/cache release, push `main`, deploy the Worker, monitor Pages/Android,
+  and compare cold/warm production batch timings plus mobile network request counts.

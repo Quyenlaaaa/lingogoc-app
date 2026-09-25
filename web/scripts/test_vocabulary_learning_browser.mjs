@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
+import { vocabData } from '../src/data/vocabData.js';
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distRoot = path.join(webRoot, 'dist');
@@ -33,24 +34,80 @@ try {
     isMobile: true,
     hasTouch: true,
   });
-  await page.route('https://lingogoc-api.lingogoc-api.workers.dev/**', (route) => route.abort());
-  await page.goto(`http://127.0.0.1:${port}/`);
-  await page.evaluate(() => {
-    const contextExamples = Array.from({ length: 5 }, (_, index) => ({
-      context: `context-${index + 1}`,
-      en: `They had to abandon plan number ${index + 1}.`,
-      vi: `Họ phải từ bỏ kế hoạch số ${index + 1}.`,
-    }));
-    localStorage.setItem('lingogoc_vocab_enrichment_v3_abandon', JSON.stringify({
-      schemaVersion: 1,
-      savedAt: '2026-09-24T00:00:00.000Z',
-      data: { primaryMeaningVi: 'từ bỏ; bỏ rơi', contextExamples, persistedOnServer: true },
-    }));
+  let vocabularyBatchRequests = 0;
+  const vocabularyBatchBodies = [];
+  await page.route('https://lingogoc-api.lingogoc-api.workers.dev/**', (route) => {
+    if (new URL(route.request().url()).pathname === '/api/vocabulary/batch') {
+      vocabularyBatchRequests += 1;
+      const body = route.request().postDataJSON();
+      vocabularyBatchBodies.push(body);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: {
+          items: [],
+          missing: body.items.map(({ word }) => word.toLowerCase()),
+          needsEnrichment: body.items.map(({ word }) => word.toLowerCase()),
+        } }),
+      });
+    }
+    return route.abort();
   });
+  await page.goto(`http://127.0.0.1:${port}/`);
+  const firstPageWords = vocabData.slice(0, 24).map(({ word }) => word.toLowerCase());
+  await page.evaluate((firstPageWords) => {
+    firstPageWords.forEach((word) => {
+      const contextExamples = Array.from({ length: 5 }, (_, index) => ({
+        context: `context-${index + 1}`,
+        en: `A natural example for ${word} in situation number ${index + 1}.`,
+        vi: `Một ví dụ tự nhiên cho ${word} trong tình huống số ${index + 1}.`,
+      }));
+      localStorage.setItem(`lingogoc_vocab_enrichment_v3_${word}`, JSON.stringify({
+        schemaVersion: 1,
+        savedAt: '2026-09-24T00:00:00.000Z',
+        data: {
+          primaryMeaningVi: word === 'abandon' ? 'từ bỏ; bỏ rơi' : `nghĩa tiếng Việt của ${word}`,
+          contextExamples,
+          persistedOnServer: true,
+        },
+      }));
+    });
+  }, firstPageWords);
   await page.reload();
 
   await page.locator('.mobile-bottom-nav button').filter({ hasText: 'Từ vựng' }).click();
   await page.locator('.vocab-view').waitFor();
+  await page.locator('.vocab-cards-grid').waitFor();
+  await page.waitForTimeout(300);
+  assert.equal(vocabularyBatchRequests, 0, 'a locally complete page must not call the vocabulary batch API');
+  assert.equal(
+    await page.getByRole('button', { name: /Danh Sách/ }).getAttribute('class').then((value) => value.includes('active')),
+    true,
+    'the 3,000-word catalog list must be the default vocabulary surface',
+  );
+  const mobileSummaryGeometry = await page.locator('.item-example-box').evaluateAll((nodes) => nodes.slice(0, 8).map((node) => ({
+    height: node.getBoundingClientRect().height,
+    visible: Boolean(node.offsetWidth || node.offsetHeight),
+  })));
+  assert.equal(mobileSummaryGeometry.length > 0, true, 'catalog cards must render example-summary frames');
+  assert.equal(mobileSummaryGeometry.every(({ height, visible }) => visible && Math.abs(height - 142) < 1), true, 'mobile example-summary frames must have one fixed height');
+
+  const unresolvedWord = firstPageWords.at(-1);
+  await page.evaluate((word) => localStorage.removeItem(`lingogoc_vocab_enrichment_v3_${word}`), unresolvedWord);
+  await page.reload();
+  await page.locator('.mobile-bottom-nav button').filter({ hasText: 'Từ vựng' }).click();
+  await page.locator('.vocab-cards-grid').waitFor();
+  await page.waitForFunction(() => document.querySelectorAll('.item-example-box').length === 24);
+  for (let attempt = 0; attempt < 30 && vocabularyBatchRequests === 0; attempt += 1) {
+    await page.waitForTimeout(50);
+  }
+  assert.equal(vocabularyBatchRequests, 1, 'one unresolved local word must trigger one batch request');
+  assert.deepEqual(
+    vocabularyBatchBodies[0].items.map(({ word }) => word.toLowerCase()),
+    [unresolvedWord],
+    'the batch request must contain only the unresolved word',
+  );
+  await page.getByRole('button', { name: /Thẻ Nhớ 3D/ }).click();
   const search = page.locator('.vocab-search-input');
   await search.fill('ability');
   await page.locator('.card-word-text').getByText('ability', { exact: true }).waitFor();
@@ -82,7 +139,7 @@ try {
   await page.getByRole('button', { name: /Danh Sách/ }).click();
   const pageInput = page.locator('#vocabulary-page-input');
   await pageInput.fill('2');
-  await page.getByRole('button', { name: 'Chuyển trang' }).click();
+  await page.getByRole('button', { name: 'Chuyển tới' }).click();
   await page.getByText(/Trang 2 \/ /).waitFor();
   const paginationOrder = await page.locator('.pagination-section').evaluate((section) => {
     const buttons = section.querySelector('.pagination-bar').getBoundingClientRect();
@@ -114,7 +171,23 @@ try {
     false,
     'vocabulary and SRS controls must not create horizontal overflow',
   );
-  console.log('Mobile vocabulary and SRS browser checks passed.');
+
+  const desktopPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await desktopPage.route('https://lingogoc-api.lingogoc-api.workers.dev/**', (route) => route.abort());
+  await desktopPage.goto(`http://127.0.0.1:${port}/`);
+  await desktopPage.locator('#tab-vocab').click();
+  await desktopPage.locator('.vocab-cards-grid').waitFor();
+  const desktopGeometry = await desktopPage.locator('.vocab-item-card').evaluateAll((cards) => cards.slice(0, 4).map((card) => ({
+    cardHeight: card.getBoundingClientRect().height,
+    summaryHeight: card.querySelector('.item-example-box')?.getBoundingClientRect().height || 0,
+    summaryVisible: Boolean(card.querySelector('.item-example-box')?.offsetHeight),
+  })));
+  assert.equal(desktopGeometry.length >= 3, true, 'desktop catalog must render a complete first row');
+  assert.equal(new Set(desktopGeometry.map(({ cardHeight }) => Math.round(cardHeight))).size, 1, 'desktop cards in a row must align');
+  assert.equal(desktopGeometry.every(({ summaryHeight, summaryVisible }) => summaryVisible && Math.abs(summaryHeight - 142) < 1), true, 'desktop example-summary frames must align');
+  await desktopPage.close();
+
+  console.log('Mobile and desktop vocabulary/SRS browser checks passed.');
 } finally {
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

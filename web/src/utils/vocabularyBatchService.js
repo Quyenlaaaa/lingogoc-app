@@ -1,14 +1,15 @@
 import { getBackendUrl, hasBackendApi, readJsonResponse } from './backendApi.js';
 import {
   cacheWordEnrichment,
-  getCachedWordEnrichment,
-  getDurableCachedWordEnrichment,
+  getDurableCachedWordEnrichments,
+  hasCompleteWordEnrichment,
 } from './geminiService.js';
 import {
   cacheVietnameseMeaning,
   getCachedVietnameseMeaning,
   getMeaningCacheKey,
 } from './vocabularyMeaningService.js';
+import { isLowQualityMeaning } from './vocabularyQuality.js';
 
 const BATCH_CACHE_TTL_MS = 30 * 60 * 1000;
 const batchResponseCache = new Map();
@@ -32,17 +33,23 @@ export async function fetchVocabularyBatch(items, signal) {
   });
 
   const results = {};
-  await Promise.all(unique.map(async (item) => {
+  const localEnrichments = await getDurableCachedWordEnrichments(unique.map((item) => item.word));
+  unique.forEach((item) => {
     const meaning = getCachedVietnameseMeaning(item);
-    const enrichment = getCachedWordEnrichment(item.word)
-      || await getDurableCachedWordEnrichment(item.word);
+    const enrichment = localEnrichments[item.word.toLowerCase()] || null;
     if (meaning || enrichment) {
       results[item.word.toLowerCase()] = { meaning, enrichment, fromLocalCache: true };
     }
-  }));
-  if (!unique.length || !hasBackendApi()) return results;
+  });
+  const unresolved = unique.filter((item) => {
+    const local = results[item.word.toLowerCase()];
+    return !local?.enrichment
+      || isLowQualityMeaning(local.enrichment.primaryMeaningVi)
+      || !hasCompleteWordEnrichment(local.enrichment);
+  });
+  if (!unresolved.length || !hasBackendApi()) return results;
 
-  const requestKey = batchKey(unique);
+  const requestKey = batchKey(unresolved);
   const now = Date.now();
   const cachedBatch = batchResponseCache.get(requestKey);
   if (cachedBatch && now - cachedBatch.savedAt < BATCH_CACHE_TTL_MS) {
@@ -58,7 +65,7 @@ export async function fetchVocabularyBatch(items, signal) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       signal,
       body: JSON.stringify({
-        items: unique.map((item) => ({ word: item.word, pos: item.pos || item.type || '' })),
+        items: unresolved.map((item) => ({ word: item.word, pos: item.pos || item.type || '' })),
       }),
     });
     if (!response.ok) throw new Error(`VOCABULARY_BATCH_HTTP_${response.status}`);
@@ -70,14 +77,14 @@ export async function fetchVocabularyBatch(items, signal) {
   const records = Array.isArray(payload?.data?.items) ? payload.data.items : [];
 
   await Promise.all(records.map(async (record) => {
-    const item = unique.find((candidate) => candidate.word.toLowerCase() === record.word);
+    const item = unresolved.find((candidate) => candidate.word.toLowerCase() === record.word);
     if (!item) return;
     const meaning = record.meaningVi
       ? cacheVietnameseMeaning(item, { meaningVi: record.meaningVi, source: 'server-kv' })
       : getCachedVietnameseMeaning(item);
     const enrichment = record.enrichment
       ? await cacheWordEnrichment(item.word, record.enrichment)
-      : getCachedWordEnrichment(item.word);
+      : results[record.word]?.enrichment || null;
     results[record.word] = { meaning, enrichment, fromServer: true };
   }));
 

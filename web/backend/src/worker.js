@@ -668,6 +668,17 @@ async function cacheIdentityFor(data) {
   };
 }
 
+async function batchCacheRequestFor(items, env) {
+  const bytes = new TextEncoder().encode(JSON.stringify({
+    version: VOCABULARY_PROMPT_VERSION,
+    model: getFreeModel(env),
+    items: items.map((item) => [item.word, item.pos]),
+  }));
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const hash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  return new Request(`https://lingogoc-cache.invalid/vocabulary/batch/${hash}`, { method: 'GET' });
+}
+
 async function readDurableEnrichment(env, cacheKey) {
   if (env.VOCAB_DB) {
     try {
@@ -1042,6 +1053,20 @@ async function getVocabularyBatch(request, env, origin) {
     return json({ data: { items: [], missing: items.map((item) => item.word) } }, 200, origin);
   }
 
+  const batchCacheRequest = await batchCacheRequestFor(items, env);
+  const batchCache = caches.default;
+  const cachedBatch = await batchCache.match(batchCacheRequest);
+  if (cachedBatch) {
+    try {
+      return json(await cachedBatch.json(), 200, origin, {
+        'Cache-Control': 'private, max-age=60',
+        'X-LingoGoc-Cache': 'HIT-BATCH',
+      });
+    } catch {
+      await batchCache.delete(batchCacheRequest);
+    }
+  }
+
   const records = await Promise.all(items.map(async (item) => {
     const identity = await cacheIdentityFor({
       version: VOCABULARY_PROMPT_VERSION,
@@ -1101,13 +1126,20 @@ async function getVocabularyBatch(request, env, origin) {
   const ready = records.filter(Boolean);
   const readyWords = new Set(ready.map((item) => item.word));
   const enrichedWords = new Set(ready.filter((item) => item.enrichment).map((item) => item.word));
-  return json({
+  const payload = {
     data: {
       items: ready,
       missing: items.filter((item) => !readyWords.has(item.word)).map((item) => item.word),
       needsEnrichment: items.filter((item) => !enrichedWords.has(item.word)).map((item) => item.word),
     },
-  }, 200, origin, { 'Cache-Control': 'private, max-age=60' });
+  };
+  await batchCache.put(batchCacheRequest, new Response(JSON.stringify(payload), {
+    headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=60' },
+  }));
+  return json(payload, 200, origin, {
+    'Cache-Control': 'private, max-age=60',
+    'X-LingoGoc-Cache': 'MISS-BATCH',
+  });
 }
 
 function newBackfillState(contentHash) {

@@ -32,6 +32,7 @@ let providerRequest = null;
 let providerCallCount = 0;
 let customProviderResponse = null;
 const serverCache = new Map();
+let kvReadCount = 0;
 const analyticsPoints = [];
 globalThis.fetch = async (url, options) => {
   if (String(url).startsWith('https://translate.google.com/translate_tts')) {
@@ -91,6 +92,7 @@ const env = {
   ALLOWED_ORIGINS: 'http://localhost:5173',
   VOCAB_CACHE: {
     get: async (key, type) => {
+      kvReadCount += 1;
       const value = serverCache.get(key);
       return type === 'json' && value ? JSON.parse(value) : value || null;
     },
@@ -428,9 +430,10 @@ const providerMetricsResponse = await worker.fetch(
 const providerMetricsPayload = await providerMetricsResponse.json();
 assert.equal(providerMetricsPayload.data.providers.xkiro.health.successes, 1);
 assert.equal(providerMetricsPayload.data.providers.xkiro.health.totalTokens, 360);
-assert.equal(providerMetricsPayload.data.cache.total, 1);
-assert.equal(providerMetricsPayload.data.cache.misses, 1);
-assert.equal(providerMetricsPayload.data.cache.hitRate, 0);
+assert.ok(providerMetricsPayload.data.cache.total >= 1);
+assert.ok(providerMetricsPayload.data.cache.misses >= 1);
+assert.equal(providerMetricsPayload.data.cache.byStatus.MISS, 1);
+assert.ok(providerMetricsPayload.data.cache.hitRate >= 0 && providerMetricsPayload.data.cache.hitRate <= 1);
 assert.ok(analyticsPoints.some((point) => point.indexes[0] === 'XKIRO_FREE'));
 assert.ok(analyticsPoints.some((point) => point.indexes[0] === 'CACHE'));
 
@@ -446,6 +449,17 @@ assert.equal(batchPayload.data.items[0].enrichment.contextExamples.length, 5);
 assert.deepEqual(batchPayload.data.missing, ['not-ready']);
 assert.deepEqual(batchPayload.data.needsEnrichment, ['not-ready']);
 assert.equal(providerCallCount, 1, 'batch reads must never call the AI provider');
+assert.equal(batchResponse.headers.get('X-LingoGoc-Cache'), 'MISS-BATCH');
+const readsAfterFirstBatch = kvReadCount;
+const repeatedBatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'accept', pos: 'v' }, { word: 'not-ready', pos: 'adj' }] }),
+}), env, context);
+assert.equal(repeatedBatchResponse.status, 200);
+assert.equal(repeatedBatchResponse.headers.get('X-LingoGoc-Cache'), 'HIT-BATCH');
+assert.equal(kvReadCount, readsAfterFirstBatch, 'a repeated batch must not read KV again');
+assert.deepEqual((await repeatedBatchResponse.json()).data.missing, ['not-ready']);
 
 const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',

@@ -58,7 +58,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
   const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
   // Navigation & Filter States
-  const [studyMode, setStudyMode] = useState('flashcard'); // 'flashcard', 'list', 'quiz', 'mic'
+  // The 3,000-word catalog is the primary vocabulary surface. Keep flashcards as an
+  // explicit learning mode instead of hiding the catalog controls on first entry.
+  const [studyMode, setStudyMode] = useState('list'); // 'flashcard', 'list', 'quiz', 'scramble'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('Tất cả');
   const [selectedLevel, setSelectedLevel] = useState('Tất cả');
@@ -902,7 +904,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 goToPage(pageInput);
               }}
             >
-              <label htmlFor="vocabulary-page-input">Đến trang</label>
+              <label htmlFor="vocabulary-page-input">Nhập trang</label>
               <input
                 id="vocabulary-page-input"
                 className="page-jump-input"
@@ -917,7 +919,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 }}
                 aria-label={`Nhập số trang từ 1 đến ${totalPages}`}
               />
-              <button type="submit" className="page-jump-btn">Chuyển trang</button>
+              <button type="submit" className="page-jump-btn">Chuyển tới</button>
             </form>
           </div>
         </div>

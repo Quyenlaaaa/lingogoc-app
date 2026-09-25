@@ -1569,7 +1569,8 @@ a {
 .vocab-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: minmax(370px, auto);
+  align-items: stretch;
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -1583,6 +1584,7 @@ a {
   flex-direction: column;
   height: 100%;
   min-height: 370px;
+  box-sizing: border-box;
   transition: all var(--transition-fast);
   min-width: 0;
 }
@@ -1600,12 +1602,21 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 24px;
   margin-bottom: 10px;
 }
 
 .item-badges {
   display: flex;
+  min-width: 0;
   gap: 6px;
+}
+
+.vocab-item-card .badge-topic {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .star-action-btn {
@@ -1685,8 +1696,11 @@ a {
 .item-example-box {
   display: flex;
   flex-direction: column;
+  flex: 0 0 142px;
   height: 142px;
   min-height: 142px;
+  max-height: 142px;
+  box-sizing: border-box;
   background: var(--bg-card-subtle);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -1867,6 +1881,10 @@ a {
   align-items: center;
   gap: 12px;
   margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card-subtle);
 }
 
 .vocab-list-container {
