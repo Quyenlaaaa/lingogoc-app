@@ -32,10 +32,12 @@ speech, Worker contract and production build. After deploy it runs
 `npm run smoke:production`. The smoke word must already have five examples in
 durable cache, so this check never intentionally generates new AI content.
 
-The Worker configuration includes Analytics Engine dataset
-`lingogoc_worker_metrics`. Its first production data point creates the dataset; verify
-provider/cache events in Analytics Engine after deploy. Metrics contain route/status,
-provider/model, latency, and token counts, never prompts or keys.
+Analytics Engine is optional and currently commented out in `wrangler.toml` so an
+account without that product enabled can still deploy. Enable Analytics Engine in the
+Cloudflare account, uncomment the `METRICS` dataset binding, deploy, and then verify
+provider/cache events. Metrics contain route/status, provider/model, latency, and token
+counts, never prompts or keys. Without the binding, `/api/operations/status` still
+reports isolate-local counters.
 
 ### Analytics Engine schema
 
