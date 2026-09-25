@@ -15,6 +15,10 @@ import { vocabData } from '../src/data/vocabData.js';
 import { getCachedVietnameseMeaning } from '../src/utils/vocabularyMeaningService.js';
 import { getVocabularyPresentation } from '../src/utils/vocabularyPresentation.js';
 import { getSrsGradeOptions } from '../src/utils/srsEngine.js';
+import {
+  getVocabularyEnrichmentMessage,
+  shouldApplyVocabularyBatchResult,
+} from '../src/utils/vocabularyEnrichmentUi.js';
 
 const vocabulary = [
   { id: 1, word: 'accept', meaning: 'chấp nhận', pos: 'v', topic: 'Giao tiếp', level: 'A2', example: 'I accept your offer.' },
@@ -34,6 +38,11 @@ assert.equal(isInvalidBundledVocabularyWord("can't"), false);
 assert.equal(isValidIpa('/fire/', 'fire'), false);
 assert.equal(isValidIpa('/ˈfaɪə(r)/', 'fire'), true);
 assert.equal(getDisplayIpa('/explore/', 'explore'), 'IPA đang được bổ sung');
+assert.equal(shouldApplyVocabularyBatchResult(100, 0), true);
+assert.equal(shouldApplyVocabularyBatchResult(100, 101), false, 'an older batch must not replace a newer manual retry');
+assert.match(getVocabularyEnrichmentMessage({ unavailableReason: 'pending', unavailableCode: 'SYSTEM_ENRICHMENT_PENDING' }), /chưa có đủ 5 ví dụ/i);
+assert.match(getVocabularyEnrichmentMessage({ unavailableReason: 'provider', unavailableCode: 'AI_PROVIDER_429' }), /hết hạn mức/i);
+assert.match(getVocabularyEnrichmentMessage({ unavailableReason: 'invalid', unavailableCode: 'INSUFFICIENT_BILINGUAL_EXAMPLES' }), /chưa đủ 5 ngữ cảnh/i);
 
 const presentation = getVocabularyPresentation(
   { word: 'accept', meaning: "từ 'accept' (v)", ipa: '/accept/', example: 'I accept your offer.', exampleVi: 'Tôi chấp nhận đề nghị của bạn.' },

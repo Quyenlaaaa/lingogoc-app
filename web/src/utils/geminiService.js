@@ -269,6 +269,7 @@ async function createBackendError(response) {
   }
   const error = new Error(payload?.error?.message || payload?.error || payload?.message || `${fallback} (HTTP ${response.status})`);
   error.code = payload?.code || payload?.error?.code || `HTTP_${response.status}`;
+  error.requestId = payload?.requestId || response.headers.get('X-Request-ID') || '';
   error.retryable = typeof payload?.retryable === 'boolean'
     ? payload.retryable
     : RETRYABLE_HTTP_STATUSES.has(response.status);
@@ -385,6 +386,7 @@ async function performWordEnrichment(
           unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
           nextRetryAt: failure.nextRetryAt,
           unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
+          unavailableRequestId: error?.requestId || '',
         };
       }
       const failure = rememberEnrichmentFailure(word, error);
@@ -395,6 +397,7 @@ async function performWordEnrichment(
         senses: [],
         unavailableReason: error?.message || 'BACKEND_UNAVAILABLE',
         unavailableCode: error?.code || 'BACKEND_UNAVAILABLE',
+        unavailableRequestId: error?.requestId || '',
         nextRetryAt: failure.nextRetryAt,
       };
     }

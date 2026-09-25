@@ -56,6 +56,7 @@ try {
   const sql = await readFile(report.sqlPath, 'utf8');
   assert.match(sql, /ON CONFLICT\(cache_key\) DO UPDATE/);
   assert.match(sql, /O''Brien/);
+  assert.doesNotMatch(sql, /BEGIN TRANSACTION|COMMIT;/);
   const checkpoint = JSON.parse(await readFile(report.checkpointPath, 'utf8'));
   assert.equal(checkpoint.applied, false);
   assert.equal(checkpoint.idempotencyKey, report.idempotencyKey);

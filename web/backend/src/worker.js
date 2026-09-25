@@ -701,6 +701,38 @@ async function readDurableEnrichment(env, cacheKey) {
   return data ? { data, source: 'KV' } : null;
 }
 
+async function readDurableEnrichmentsBatch(env, entries) {
+  const results = new Map();
+  if (env.VOCAB_DB && entries.length) {
+    try {
+      const placeholders = entries.map((_, index) => `?${index + 1}`).join(', ');
+      const rows = await env.VOCAB_DB.prepare(`
+        SELECT cache_key, payload_json
+        FROM vocabulary_enrichments
+        WHERE cache_key IN (${placeholders})
+      `).bind(...entries.map((entry) => entry.identity.serverKey)).all();
+      for (const row of rows?.results || []) {
+        if (row?.cache_key && row?.payload_json) {
+          results.set(row.cache_key, { data: JSON.parse(row.payload_json), source: 'D1' });
+        }
+      }
+    } catch (error) {
+      console.error(JSON.stringify({
+        event: 'd1_batch_read_error',
+        code: cleanText(String(error?.message || 'D1_BATCH_READ_FAILED').split(':')[0], 120),
+      }));
+    }
+  }
+  if (env.VOCAB_CACHE) {
+    await Promise.all(entries.map(async (entry) => {
+      if (results.has(entry.identity.serverKey)) return;
+      const data = await env.VOCAB_CACHE.get(entry.identity.serverKey, 'json');
+      if (data) results.set(entry.identity.serverKey, { data, source: 'KV' });
+    }));
+  }
+  return results;
+}
+
 async function writeDurableEnrichment(env, cacheKey, word, data) {
   const payload = JSON.stringify(data);
   let d1Saved = false;
@@ -1067,13 +1099,17 @@ async function getVocabularyBatch(request, env, origin) {
     }
   }
 
-  const records = await Promise.all(items.map(async (item) => {
-    const identity = await cacheIdentityFor({
+  const entries = await Promise.all(items.map(async (item) => ({
+    item,
+    identity: await cacheIdentityFor({
       version: VOCABULARY_PROMPT_VERSION,
       model: getFreeModel(env),
       word: item.word,
-    });
-    const storedEnrichment = (await readDurableEnrichment(env, identity.serverKey))?.data;
+    }),
+  })));
+  const durableRecords = await readDurableEnrichmentsBatch(env, entries);
+  const records = await Promise.all(entries.map(async ({ item, identity }) => {
+    const storedEnrichment = durableRecords.get(identity.serverKey)?.data;
     let enrichment = null;
     let partial = null;
     try {
@@ -1133,12 +1169,15 @@ async function getVocabularyBatch(request, env, origin) {
       needsEnrichment: items.filter((item) => !enrichedWords.has(item.word)).map((item) => item.word),
     },
   };
-  await batchCache.put(batchCacheRequest, new Response(JSON.stringify(payload), {
-    headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=60' },
-  }));
+  const isCompleteBatch = payload.data.missing.length === 0 && payload.data.needsEnrichment.length === 0;
+  if (isCompleteBatch) {
+    await batchCache.put(batchCacheRequest, new Response(JSON.stringify(payload), {
+      headers: { ...JSON_HEADERS, 'Cache-Control': 'public, max-age=300' },
+    }));
+  }
   return json(payload, 200, origin, {
-    'Cache-Control': 'private, max-age=60',
-    'X-LingoGoc-Cache': 'MISS-BATCH',
+    'Cache-Control': isCompleteBatch ? 'private, max-age=60' : 'no-store',
+    'X-LingoGoc-Cache': isCompleteBatch ? 'MISS-BATCH' : 'MISS-BATCH-INCOMPLETE',
   });
 }
 

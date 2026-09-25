@@ -31,6 +31,10 @@ import {
   buildQuizOptions,
 } from '../utils/vocabularyQuality';
 import { getVocabularyPresentation } from '../utils/vocabularyPresentation';
+import {
+  getVocabularyEnrichmentMessage,
+  shouldApplyVocabularyBatchResult,
+} from '../utils/vocabularyEnrichmentUi';
 import WordDetailModal from './WordDetailModal';
 import WordScrambleGame from './WordScrambleGame';
 
@@ -79,6 +83,8 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const [translatedMeanings, setTranslatedMeanings] = useState({});
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const viewMountedRef = useRef(true);
+  const enrichmentRequestSequenceRef = useRef(0);
+  const manualRetryVersionRef = useRef(new Map());
   const listContainerRef = useRef(null);
   const itemsPerPage = 24;
 
@@ -198,6 +204,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     if (!meaningCandidates.length) return undefined;
 
     const controller = new AbortController();
+    const batchStartedAt = ++enrichmentRequestSequenceRef.current;
     fetchVocabularyBatch(meaningCandidates, controller.signal)
       .then((results) => {
         if (!viewMountedRef.current) return;
@@ -209,6 +216,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           setListAiData((current) => {
             const next = { ...current };
             meaningCandidates.forEach((item) => {
+              if (!shouldApplyVocabularyBatchResult(
+                batchStartedAt,
+                manualRetryVersionRef.current.get(item.word.toLowerCase()),
+              )) return;
               const result = results[item.word.toLowerCase()];
               if (result?.enrichment) next[item.word.toLowerCase()] = result.enrichment;
               else if (result?.pending) next[item.word.toLowerCase()] = { unavailableReason: 'SYSTEM_ENRICHMENT_PENDING' };
@@ -217,7 +228,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           });
         } else if (studyMode === 'flashcard' && currentCard) {
           const result = results[currentCard.word.toLowerCase()];
-          if (result?.enrichment) {
+          if (result?.enrichment && shouldApplyVocabularyBatchResult(
+            batchStartedAt,
+            manualRetryVersionRef.current.get(currentCard.word.toLowerCase()),
+          )) {
             setFlashcardAiState({ word: currentCard.word, data: result.enrichment });
           }
         }
@@ -235,6 +249,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const retryFlashcardExamples = async (event) => {
     event.stopPropagation();
     if (!currentCard || isLoadingFlashcardExamples) return;
+    manualRetryVersionRef.current.set(
+      currentCard.word.toLowerCase(),
+      ++enrichmentRequestSequenceRef.current,
+    );
     setIsLoadingFlashcardExamples(true);
     try {
       const result = await enrichWordWithLLM(
@@ -245,9 +263,17 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         undefined,
         { manualRetry: true, keepAlive: true, maxAttempts: 1 },
       );
+      manualRetryVersionRef.current.set(
+        currentCard.word.toLowerCase(),
+        ++enrichmentRequestSequenceRef.current,
+      );
       if (viewMountedRef.current) setFlashcardAiState({ word: currentCard.word, data: result });
     } catch (error) {
       if (error?.name !== 'AbortError') {
+        manualRetryVersionRef.current.set(
+          currentCard.word.toLowerCase(),
+          ++enrichmentRequestSequenceRef.current,
+        );
         console.warn('Could not retry vocabulary examples:', error);
         if (viewMountedRef.current) {
           setFlashcardAiState({
@@ -269,6 +295,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
   const retryListExamples = async (item) => {
     const key = item.word.toLowerCase();
+    manualRetryVersionRef.current.set(key, ++enrichmentRequestSequenceRef.current);
     setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: 0 } }));
     try {
       const result = await enrichWordWithLLM(
@@ -288,11 +315,13 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           },
         },
       );
+      manualRetryVersionRef.current.set(key, ++enrichmentRequestSequenceRef.current);
       if (viewMountedRef.current) {
         setListAiData((current) => ({ ...current, [key]: result }));
       }
     } catch (error) {
       if (error?.name !== 'AbortError') {
+        manualRetryVersionRef.current.set(key, ++enrichmentRequestSequenceRef.current);
         console.warn('Could not retry vocabulary examples:', error);
         if (viewMountedRef.current) {
           setListAiData((current) => ({
@@ -689,7 +718,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                         {isLoadingFlashcardExamples
                           ? 'Đang tải ví dụ song ngữ…'
                           : flashcardAiData?.unavailableReason
-                            ? 'AI đang bận · Bấm để thử lại'
+                            ? `${getVocabularyEnrichmentMessage(flashcardAiData)} Bấm để thử lại.`
                             : 'Chưa có ví dụ đã kiểm chứng. Mở phần ví dụ đa ngữ cảnh.'}
                       </span>
                     </button>
@@ -812,6 +841,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                             <>
                               <strong>5/5 ngữ cảnh đã sẵn sàng</strong>
                               <span className="item-example-contexts">{contextLabels.join(' • ')}</span>
+                              {aiState?.persistencePending && (
+                                <span className="item-example-sync-pending">Đã lưu trên thiết bị · server sẽ đồng bộ lại.</span>
+                              )}
                             </>
                           ) : (
                             <div className="item-example-loading">
@@ -820,16 +852,21 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                               : aiState?.unavailableReason === 'SYSTEM_ENRICHMENT_PENDING'
                               ? '0/5 ví dụ · hệ thống đang tự động bổ sung.'
                               : aiState?.unavailableReason
-                              ? 'AI đang bận, chưa thể tạo ví dụ.'
+                              ? getVocabularyEnrichmentMessage(aiState)
                               : aiState?.isLoading || hasBackendApi()
                                 ? aiState?.retryAttempt
                                   ? `AI phản hồi chậm · đang tự thử lại lần ${aiState.retryAttempt}…`
                                   : 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
                                 : 'Chưa có ví dụ đã kiểm chứng.'}
                             {aiState?.unavailableReason && (
-                              <button type="button" className="item-ai-retry" onClick={() => retryListExamples(w)}>
-                                Thử lại AI
-                              </button>
+                              <>
+                                {aiState.unavailableRequestId && (
+                                  <span className="item-ai-request-id">Mã lỗi: {aiState.unavailableRequestId}</span>
+                                )}
+                                <button type="button" className="item-ai-retry" onClick={() => retryListExamples(w)}>
+                                  Thử lại AI
+                                </button>
+                              </>
                             )}
                           </div>
                           )}

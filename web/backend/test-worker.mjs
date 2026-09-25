@@ -110,12 +110,14 @@ function createD1Mock() {
   const manualReviews = new Map();
   const adminEvents = new Map();
   const states = new Map();
+  const stats = { batchReads: 0 };
   return {
     rows,
     jobs,
     manualReviews,
     adminEvents,
     states,
+    stats,
     binding: {
       prepare(sql) {
         let values = [];
@@ -147,6 +149,14 @@ function createD1Mock() {
             throw new Error('Unexpected D1 SELECT');
           },
           async all() {
+            if (/SELECT\s+cache_key,\s*payload_json\s+FROM vocabulary_enrichments\s+WHERE cache_key IN/i.test(sql)) {
+              stats.batchReads += 1;
+              return {
+                results: values
+                  .filter((key) => rows.has(key))
+                  .map((key) => ({ cache_key: key, payload_json: rows.get(key).payload_json })),
+              };
+            }
             if (/FROM vocabulary_enrichments/i.test(sql) && /GROUP BY status/i.test(sql)) {
               const counts = new Map();
               for (const row of rows.values()) {
@@ -449,7 +459,7 @@ assert.equal(batchPayload.data.items[0].enrichment.contextExamples.length, 5);
 assert.deepEqual(batchPayload.data.missing, ['not-ready']);
 assert.deepEqual(batchPayload.data.needsEnrichment, ['not-ready']);
 assert.equal(providerCallCount, 1, 'batch reads must never call the AI provider');
-assert.equal(batchResponse.headers.get('X-LingoGoc-Cache'), 'MISS-BATCH');
+assert.equal(batchResponse.headers.get('X-LingoGoc-Cache'), 'MISS-BATCH-INCOMPLETE');
 const readsAfterFirstBatch = kvReadCount;
 const repeatedBatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
   method: 'POST',
@@ -457,9 +467,21 @@ const repeatedBatchResponse = await worker.fetch(new Request('http://localhost:8
   body: JSON.stringify({ items: [{ word: 'accept', pos: 'v' }, { word: 'not-ready', pos: 'adj' }] }),
 }), env, context);
 assert.equal(repeatedBatchResponse.status, 200);
-assert.equal(repeatedBatchResponse.headers.get('X-LingoGoc-Cache'), 'HIT-BATCH');
-assert.equal(kvReadCount, readsAfterFirstBatch, 'a repeated batch must not read KV again');
+assert.equal(repeatedBatchResponse.headers.get('X-LingoGoc-Cache'), 'MISS-BATCH-INCOMPLETE');
+assert.ok(kvReadCount > readsAfterFirstBatch, 'an incomplete batch must not be served from stale Edge Cache');
 assert.deepEqual((await repeatedBatchResponse.json()).data.missing, ['not-ready']);
+
+const completeBatchRequest = () => new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'accept', pos: 'v' }] }),
+});
+const completeBatchResponse = await worker.fetch(completeBatchRequest(), env, context);
+assert.equal(completeBatchResponse.headers.get('X-LingoGoc-Cache'), 'MISS-BATCH');
+const readsAfterCompleteBatch = kvReadCount;
+const repeatedCompleteBatchResponse = await worker.fetch(completeBatchRequest(), env, context);
+assert.equal(repeatedCompleteBatchResponse.headers.get('X-LingoGoc-Cache'), 'HIT-BATCH');
+assert.equal(kvReadCount, readsAfterCompleteBatch, 'a repeated complete batch must not read KV again');
 
 const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
@@ -531,6 +553,18 @@ const d1ReadResponse = await worker.fetch(new Request('http://localhost:8787/api
 assert.equal(d1ReadResponse.status, 200);
 assert.equal(d1ReadResponse.headers.get('X-LingoGoc-Cache'), 'D1');
 assert.equal(providerCallCount, providerCallsBeforeD1Read, 'D1 hit must never call an AI provider');
+
+vocabularyEdgeCache.clear();
+const d1BatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'accept', pos: 'v' }, { word: 'absentword', pos: 'adj' }] }),
+}), kvWriteFailEnv, context);
+const d1BatchPayload = await d1BatchResponse.json();
+assert.equal(d1BatchResponse.status, 200);
+assert.equal(d1BatchPayload.data.items[0].word, 'accept');
+assert.deepEqual(d1BatchPayload.data.missing, ['absentword']);
+assert.equal(d1Mock.stats.batchReads, 1, 'one visible batch must use one D1 SELECT instead of one SELECT per word');
 
 const d1AuditResponse = await worker.fetch(
   new Request('http://localhost:8787/api/vocabulary/audit', { headers: { Origin: 'http://localhost:5173' } }),
@@ -968,6 +1002,14 @@ const completedPartialPayload = await completedPartialResponse.json();
 assert.equal(completedPartialResponse.status, 200);
 assert.equal(requestedMissingExamples, 4);
 assert.equal(completedPartialPayload.data.contextExamples.length, 5);
+const refreshedSurveyBatchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'survey', pos: 'v' }] }),
+}), env, context);
+const refreshedSurveyBatchPayload = await refreshedSurveyBatchResponse.json();
+assert.equal(refreshedSurveyBatchPayload.data.items[0].enrichment.contextExamples.length, 5);
+assert.deepEqual(refreshedSurveyBatchPayload.data.needsEnrichment, [], 'a completed retry must be visible immediately without stale partial batch cache');
 customProviderResponse = null;
 
 const fallbackModels = [];

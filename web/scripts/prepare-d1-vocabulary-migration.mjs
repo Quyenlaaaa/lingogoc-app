@@ -98,9 +98,7 @@ if (writeSql) {
   const sqlPath = path.join(outputDirectory, `${sourceHash}.sql`);
   const checkpointPath = path.join(outputDirectory, `${sourceHash}.checkpoint.json`);
   const sql = [
-    'BEGIN TRANSACTION;',
     ...statements,
-    'COMMIT;',
     '',
   ].join('\n');
   await writeFile(sqlPath, sql, 'utf8');

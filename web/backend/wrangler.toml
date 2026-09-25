@@ -30,11 +30,15 @@ crons = ["0 * * * *"]
 [ai]
 binding = "AI"
 
-# Optional: enable Analytics Engine for the Cloudflare account before uncommenting.
-# [[analytics_engine_datasets]]
-# binding = "METRICS"
-# dataset = "lingogoc_worker_metrics"
+[[analytics_engine_datasets]]
+binding = "METRICS"
+dataset = "lingogoc_worker_metrics"
 
 [[kv_namespaces]]
 binding = "VOCAB_CACHE"
 id = "17736059afb349f68eafd1945eb541dc"
+
+[[d1_databases]]
+binding = "VOCAB_DB"
+database_name = "dataenglish_d1"
+database_id = "59385bac-e70b-41df-8c09-57ac73fe3cb0"

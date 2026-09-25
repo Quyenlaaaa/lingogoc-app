@@ -35,6 +35,7 @@ try {
     hasTouch: true,
   });
   let vocabularyBatchRequests = 0;
+  let vocabularyEnrichmentRequests = 0;
   const vocabularyBatchBodies = [];
   await page.route('https://lingogoc-api.lingogoc-api.workers.dev/**', (route) => {
     if (new URL(route.request().url()).pathname === '/api/vocabulary/batch') {
@@ -48,6 +49,26 @@ try {
           items: [],
           missing: body.items.map(({ word }) => word.toLowerCase()),
           needsEnrichment: body.items.map(({ word }) => word.toLowerCase()),
+        } }),
+      });
+    }
+    if (new URL(route.request().url()).pathname === '/api/vocabulary/enrich') {
+      vocabularyEnrichmentRequests += 1;
+      const { word } = route.request().postDataJSON();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: {
+          primaryMeaningVi: `nghĩa tiếng Việt của ${word}`,
+          contextExamples: Array.from({ length: 5 }, (_, index) => ({
+            context: `manual-context-${index + 1}`,
+            en: `A manual retry example for ${word} in situation ${index + 1}.`,
+            vi: `Ví dụ thử lại cho ${word} trong tình huống ${index + 1}.`,
+          })),
+          generatedByProvider: 'TEST_FREE',
+          generatedByModel: 'test-model',
+          persistedOnServer: true,
+          serverSavedAt: new Date().toISOString(),
         } }),
       });
     }
@@ -107,6 +128,11 @@ try {
     [unresolvedWord],
     'the batch request must contain only the unresolved word',
   );
+  const unresolvedCard = page.locator('.vocab-item-card').filter({ has: page.getByText(unresolvedWord, { exact: true }) });
+  await unresolvedCard.getByRole('button', { name: 'Thử lại AI' }).click();
+  await unresolvedCard.getByText('5/5 ngữ cảnh đã sẵn sàng', { exact: true }).waitFor();
+  assert.equal(vocabularyEnrichmentRequests, 1, 'manual retry must make one bounded enrichment request');
+  assert.equal(vocabularyBatchRequests, 1, 'manual retry success must render directly without another batch read');
   await page.getByRole('button', { name: /Thẻ Nhớ 3D/ }).click();
   const search = page.locator('.vocab-search-input');
   await search.fill('ability');

@@ -4,7 +4,7 @@ Version: 1.1
 
 Updated: 2026-09-25
 
-Program status: `BLOCKED`
+Program status: `IN_PROGRESS`
 
 This file is the single source of truth for execution order, status, and handoff.
 `PRODUCT_ROADMAP.md` contains long-term vision only.
@@ -97,10 +97,10 @@ quality overlay.
 
 ### P1-02 — Durable data and background queue
 
-Status: `BLOCKED`
+Status: `IN_PROGRESS`
 
-Unblock when authorized to create a separate D1 staging database, bind `VOCAB_DB`,
-apply migrations, deploy staging, and run migration/smoke tests.
+Production D1 configuration was authorized on 2026-09-25. Database
+`dataenglish_d1` exists and binding/migration/data-copy verification is in progress.
 
 Completed locally:
 
@@ -145,6 +145,20 @@ words; repeated Worker batches avoid duplicate KV reads; abort/failure cooldown 
 five-context validation remain correct. Tests: `npm.cmd run test:vocab`, a dedicated
 batch-service test, `node backend/test-worker.mjs`, `npm.cmd run lint`, and
 `npm.cmd run build`.
+
+### P1-03-R2 — Retry freshness, actionable errors, and D1 batch reads
+
+Status: `DONE`
+
+Scope: implement optimization measures 1–6 in order: never Edge-cache incomplete
+batches; prevent older batch responses from replacing manual-retry results; render the
+retry result immediately; expose safe actionable failure states; preserve the existing
+local cache-first zero-request path; and use one D1 query for a visible batch with KV
+fallback. Acceptance: an incomplete batch is re-read immediately after enrichment; a
+late pending response cannot overwrite a newer five-example result; error copy reflects
+quota/network/validation/persistence state; complete local pages perform zero network;
+and D1 resolves up to 24 words with one prepared query. Tests: vocabulary unit/browser,
+Worker/D1 contracts, lint, production build, and the required release gate.
 
 ### P1-04 — Vocabulary administration
 
@@ -867,3 +881,59 @@ speech, migration preparation, Worker contract, production build, migration SQL,
 - Exact next action: add the two protected Cloudflare GitHub secrets and perform the
   physical mobile checklist, confirming default catalog mode, equal summary frames,
   page-number navigation, and zero batch request on a fully cached page.
+
+### 2026-09-25 — P1-03-R2 optimization measures 1–6 completed locally
+
+- Incomplete Worker batches are now `no-store` and report
+  `MISS-BATCH-INCOMPLETE`; only batches with no missing or enrichment-pending words
+  enter the five-minute Edge Cache. A contract reproduces the former `get` bug and
+  proves a successful manual enrichment is visible on the very next batch read.
+- Every vocabulary batch and manual retry receives a monotonically increasing client
+  version. A batch response older than a retry start or completion cannot replace the
+  newer loading, success, or failure state.
+- Manual retry renders its response directly and persists through the existing browser
+  cache without issuing another batch request. The mobile browser suite proves one
+  unresolved word causes one enrichment call, then immediately renders 5/5 examples.
+- Replaced the generic `AI đang bận` copy with safe quota, provider, network/timeout,
+  invalid-content, cooldown, and backend-configuration messages. Worker request IDs
+  propagate to the card, and KV-write-pending success clearly says the device copy is
+  safe while server synchronization remains pending.
+- Preserved the previously proven local cache-first path: 24 complete local records
+  produce zero batch calls, while one unresolved word sends only that word.
+- D1 batch reads now calculate the 24 cache identities, execute one parameterized
+  `SELECT cache_key, payload_json ... IN (...)`, and use KV only for D1 misses. A D1
+  mock contract asserts one visible batch performs exactly one D1 SELECT.
+- Passed lint, all unit/static suites, Worker/D1 contracts, production build, and the
+  mobile/desktop vocabulary browser suite. The existing >500 kB bundle warning remains.
+- Changed files: `web/backend/src/worker.js`, `web/backend/test-worker.mjs`,
+  `web/src/components/VocabView.jsx`, `web/src/utils/geminiService.js`,
+  `web/src/utils/vocabularyEnrichmentUi.js`, `web/src/index.css`, the vocabulary tests,
+  and this checkpoint.
+- Remaining risk: D1 query code is complete but production has no `VOCAB_DB` binding,
+  so it correctly continues using KV. This slice is local and has not been pushed or
+  deployed because the user did not request deployment in this session.
+- Exact next command after explicit push/deploy authorization: run `git diff --check`,
+  commit the R2 slice, push `main`, deploy the Worker, verify `get` retry then immediate
+  batch freshness, monitor Pages/Android, and record the Worker version/workflow URLs.
+
+### 2026-09-25 — Production D1 populated; binding deploy awaiting confirmation
+
+- Confirmed Wrangler OAuth access to account `f66e7a88ef5ff3163fc23274f3379b2a`
+  and found the existing empty D1 database `dataenglish_d1`.
+- Bound `VOCAB_DB` locally, applied both production migrations remotely, exported all
+  `2,781` `vocabulary:v2:*` records from KV in 100-key read batches, and imported them
+  idempotently without deleting KV or calling any AI provider.
+- Read-only verification found `2,781` unique keys/words: `2,765` complete and `16`
+  partial. `get`, `explore`, `fire`, and `rank` each have a clear Vietnamese meaning
+  and five examples in D1.
+- Added a repeatable KV export tool. Updated SQL preparation to omit unsupported manual
+  transaction statements; D1 file import supplies rollback behavior. Migration tests
+  and Worker contracts pass.
+- Enabled the local `METRICS` binding for dataset `lingogoc_worker_metrics`. Wrangler
+  dry-run recognizes KV, D1, Analytics Engine, and Workers AI bindings. Analytics will
+  remain empty until this Worker version is deployed and receives a real request.
+- No push or Worker deployment occurred. Exact next action after explicit production
+  deploy authorization: run the release gate, deploy the Worker, invoke health and a
+  cached vocabulary request, verify `d1Configured: true`, and confirm the first
+  Analytics Engine data points. If Cloudflare returns error 10089 again, the user must
+  activate Analytics Engine for the account in the dashboard before retrying.

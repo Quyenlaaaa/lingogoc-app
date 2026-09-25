@@ -20,6 +20,7 @@ android-commandlinetools-windows.zip
 !.env.example
 web/backend/.dev.vars
 web/backend/.wrangler/
+.wrangler/
 
 # Editor directories and files
 .vscode/*

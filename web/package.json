@@ -32,6 +32,7 @@
     "smoke:production": "node scripts/smoke-production.mjs",
     "audit:vocab": "node scripts/audit-vocabulary-release.mjs",
     "audit:vocab-server": "node scripts/audit-server-vocabulary.mjs",
+    "export:vocab-kv": "node scripts/export-vocabulary-kv.mjs",
     "migrate:vocab-d1": "node scripts/prepare-d1-vocabulary-migration.mjs",
     "backfill:ipa": "node scripts/backfill-ipa.mjs",
     "backfill:vocab": "node scripts/backfill-vocabulary.mjs --limit=100",
