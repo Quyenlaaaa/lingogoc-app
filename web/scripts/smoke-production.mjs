@@ -54,7 +54,7 @@ const enrichResponse = await request('/api/vocabulary/enrich', {
   body: JSON.stringify({ word: smokeWord, meaning: record.meaningVi || '', topic: 'smoke-test' }),
 });
 assert.equal(enrichResponse.status, 200);
-assert.ok(['HIT', 'HIT+KV', 'KV'].includes(enrichResponse.headers.get('X-LingoGoc-Cache')),
+assert.ok(['HIT', 'HIT+KV', 'HIT+D1', 'KV', 'D1'].includes(enrichResponse.headers.get('X-LingoGoc-Cache')),
   'smoke enrichment must reuse cache instead of calling AI');
 const enrichment = await enrichResponse.json();
 assert.equal(enrichment.data.contextExamples.length, 5);

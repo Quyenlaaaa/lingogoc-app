@@ -97,10 +97,10 @@ quality overlay.
 
 ### P1-02 — Durable data and background queue
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
-Production D1 configuration was authorized on 2026-09-25. Database
-`dataenglish_d1` exists and binding/migration/data-copy verification is in progress.
+Production D1 `dataenglish_d1` is migrated, populated from KV, bound as `VOCAB_DB`,
+and verified as the live durable source. KV remains the compatibility/cache layer.
 
 Completed locally:
 
@@ -113,7 +113,7 @@ Completed locally:
 
 ### P1-03 — Optimize AI routing speed and cost
 
-Status: `BLOCKED`
+Status: `IN_PROGRESS`
 
 Scope and acceptance:
 
@@ -130,8 +130,8 @@ Implemented locally: health-ranked provider selection; one immediate provider;
 failures; provider latency/success/error/token/cost metrics; isolate-local cache hit
 metrics; Analytics Engine schema and p50/p95 runbook.
 
-Unblock when an authorized staging deploy can validate the Analytics Engine binding,
-then production traffic can verify the KPI targets.
+The production `METRICS` binding is live. Gather production traffic and query the
+Analytics Engine dataset to verify KPI targets before closing this task.
 
 ### P1-03-R1 — Cache-first vocabulary loading
 
@@ -937,3 +937,23 @@ speech, migration preparation, Worker contract, production build, migration SQL,
   cached vocabulary request, verify `d1Configured: true`, and confirm the first
   Analytics Engine data points. If Cloudflare returns error 10089 again, the user must
   activate Analytics Engine for the account in the dashboard before retrying.
+
+### 2026-09-25 — D1 and Analytics Engine production release
+
+- Full release gate passed: lint, vocabulary, speech, migration, learning, diagnostic,
+  administration, security, Worker contracts, production build, and the 390 x 844 plus
+  desktop vocabulary browser suite. The existing bundle-size notice remains.
+- Pushed commit `1cc50099d17d392118a36eeb226c97062a08edbe` to `main` and deployed Worker version
+  `2d58dbd1-601f-4e17-b788-25c9f5c6ecc5` with `VOCAB_DB`, `VOCAB_CACHE`, `METRICS`,
+  and Workers AI bindings accepted by Cloudflare.
+- The first smoke attempt exposed only a stale assertion that did not recognize the
+  new `X-LingoGoc-Cache: D1` source. Production returned the cached `ticket` result
+  with five examples and no AI call; the smoke assertion was updated and the complete
+  production smoke then passed health, catalog, D1 enrichment, and speech audio.
+- Production operations is healthy with `d1Configured: true` and `durableSource: D1`.
+  The D1 audit reports 2,781 unique records, 2,765 complete/five-example records, 16
+  partial records, and 219 catalog words not yet enriched. Hourly background completion
+  remains active and now writes D1 first.
+- Exact next task: collect/query `lingogoc_worker_metrics` after ingestion becomes
+  visible, verify cache/provider latency KPIs, and continue completing the 219 missing
+  plus 16 partial words without duplicate AI calls.
