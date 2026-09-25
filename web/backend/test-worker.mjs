@@ -110,7 +110,7 @@ function createD1Mock() {
   const manualReviews = new Map();
   const adminEvents = new Map();
   const states = new Map();
-  const stats = { batchReads: 0 };
+  const stats = { batchReads: 0, priorityReads: 0 };
   return {
     rows,
     jobs,
@@ -149,6 +149,27 @@ function createD1Mock() {
             throw new Error('Unexpected D1 SELECT');
           },
           async all() {
+            if (/LEFT JOIN vocabulary_jobs AS jobs/i.test(sql) && /enrichments\.status = 'partial'/i.test(sql)) {
+              stats.priorityReads += 1;
+              const now = Date.parse(values[1]);
+              const limit = Number(values[2]) || 96;
+              return {
+                results: [...rows.values()]
+                  .filter((row) => row.prompt_version === values[0] && row.status === 'partial')
+                  .filter((row) => {
+                    const job = jobs.get(row.word);
+                    if (!job) return true;
+                    if (!['pending', 'retry_pending'].includes(job.status)) return false;
+                    return !job.next_retry_at || Date.parse(job.next_retry_at) <= now;
+                  })
+                  .sort((left, right) => {
+                    const attemptDifference = (jobs.get(left.word)?.attempts || 0) - (jobs.get(right.word)?.attempts || 0);
+                    return attemptDifference || String(left.updated_at).localeCompare(String(right.updated_at));
+                  })
+                  .slice(0, limit)
+                  .map((row) => ({ word: row.word })),
+              };
+            }
             if (/SELECT\s+cache_key,\s*payload_json\s+FROM vocabulary_enrichments\s+WHERE cache_key IN/i.test(sql)) {
               stats.batchReads += 1;
               return {
@@ -1318,6 +1339,93 @@ const manualStatusPayload = await manualStatusResponse.json();
 assert.equal(manualStatusPayload.data.manualReview.count, 1);
 assert.equal(manualStatusPayload.data.manualReview.items[0].word, 'stumble');
 
+const priorityD1 = createD1Mock();
+const priorityDigest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({
+  version: 2,
+  model: env.AI_FREE_MODEL,
+  word: 'explore',
+})));
+const priorityHash = [...new Uint8Array(priorityDigest)]
+  .map((byte) => byte.toString(16).padStart(2, '0'))
+  .join('');
+const priorityCacheKey = `vocabulary:v2:${priorityHash}`;
+priorityD1.rows.set(priorityCacheKey, {
+  word: 'explore',
+  prompt_version: 2,
+  status: 'partial',
+  payload_json: JSON.stringify({
+    word: 'explore',
+    primaryMeaningVi: 'khÃ¡m phÃ¡',
+    contextExamples: exploreExamples.slice(0, 3),
+    status: 'partial',
+  }),
+  provider: '',
+  model: env.AI_FREE_MODEL,
+  updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+});
+serverCache.set('system-vocabulary:backfill:v1', JSON.stringify({
+  ...nonBlockingState,
+  cursor: 1500,
+  status: 'active',
+}));
+serverCache.set('system-vocabulary:backfill-retry:v1:explore', JSON.stringify({
+  word: 'explore',
+  attempts: 1,
+  lastError: 'INSUFFICIENT_BILINGUAL_EXAMPLES',
+  lastProviderErrors: [],
+  lastTriedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  nextRetryAt: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(),
+}));
+vocabularyEdgeCache.clear();
+const priorityProviderWords = [];
+customProviderResponse = async ({ body }) => {
+  const input = JSON.parse(body.messages.at(-1).content);
+  priorityProviderWords.push(input.word);
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify({
+      primaryMeaningVi: input.word === 'explore' ? 'khÃ¡m phÃ¡' : 'Ä‘ang chá»',
+      contextExamples: Array.from({ length: 5 }, (_, index) => ({
+        context: `context ${index + 1}`,
+        en: `${input.word} appears in example ${index + 1}.`,
+        vi: `VÃ­ dá»¥ ${index + 1} cho ${input.word}.`,
+      })),
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+await worker.scheduled(
+  { scheduledTime: Date.now() + 3 * 60 * 60 * 1000, cron: '0 * * * *' },
+  {
+    ...env,
+    VOCAB_DB: priorityD1.binding,
+    XTROUTER_API_KEY: '',
+    AI_PAID_MODEL: '',
+    GROQ_API_KEY: 'groq-test-key',
+    GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  },
+  { waitUntil: (promise) => nonBlockingPending.push(promise) },
+);
+await Promise.all(nonBlockingPending.splice(0));
+assert.equal(priorityD1.stats.priorityReads, 1, 'scheduled work must query D1 partial records once');
+assert.equal(priorityProviderWords.includes('explore'), false, 'a prioritized partial must still honor its cooldown');
+assert.equal(priorityD1.jobs.get('explore').attempts, 1, 'legacy KV retry attempts must be promoted into D1');
+assert.equal(priorityD1.jobs.get('explore').status, 'retry_pending');
+serverCache.delete('system-vocabulary:backfill-retry:v1:explore');
+customProviderResponse = async ({ body }) => {
+  const input = JSON.parse(body.messages.at(-1).content);
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify({
+      primaryMeaningVi: input.word === 'explore' ? 'khÃ¡m phÃ¡' : 'Ä‘ang chá»',
+      contextExamples: [{
+        context: 'new context',
+        en: `${input.word} appears in one new example.`,
+        vi: `Má»™t vÃ­ dá»¥ má»›i cho ${input.word}.`,
+      }],
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+
 const d1Backfill = createD1Mock();
 d1Backfill.jobs.set('stumble', {
   status: 'retry_pending',
@@ -1350,7 +1458,7 @@ await worker.scheduled(
 );
 await Promise.all(nonBlockingPending.splice(0));
 const d1BackfillState = JSON.parse(d1Backfill.states.get('system-vocabulary:backfill:v1').payload_json);
-assert.equal(d1BackfillState.cursor, 2, 'D1 checkpoint must advance when KV writes fail');
+assert.ok(d1BackfillState.lastRunAt, 'D1 checkpoint must record scheduled work when KV writes fail');
 assert.equal(d1Backfill.jobs.get('stumble').status, 'manual_review');
 assert.equal(d1Backfill.jobs.get('stumble').next_retry_at, null);
 assert.equal(d1Backfill.manualReviews.get('stumble').attempts, 5);

@@ -960,3 +960,27 @@ speech, migration preparation, Worker contract, production build, migration SQL,
 - Exact next task: collect/query `lingogoc_worker_metrics` after ingestion becomes
   visible, verify cache/provider latency KPIs, and continue completing the 219 missing
   plus 16 partial words without duplicate AI calls.
+
+### 2026-09-25 — Partial vocabulary retry prioritization completed locally
+
+- Diagnosed all 16 production partial enrichments: each has valid Vietnamese meaning,
+  but together they are missing 26 examples. All retain legacy retry metadata in KV;
+  no D1 retry/manual-review rows existed yet.
+- The Worker now promotes a legacy KV retry record into D1 on first read, preserving
+  attempts, cooldown, provider errors, and timestamps without an AI call.
+- Each hourly run performs one bounded D1 query for eligible partial enrichments and
+  handles them before the normal 3,000-word cursor. Cooldowns/manual review remain
+  authoritative, existing examples are preserved, and the existing limit of two free
+  AI attempts/generations per run is unchanged.
+- Regression coverage proves a partial word far from the cursor is discovered, a
+  future cooldown prevents its AI call, and its legacy retry attempts are durably
+  promoted to D1. Existing KV-write-failure/manual-review behavior remains covered.
+- Lint, vocabulary, speech, migration, learning, diagnostic, administration, Worker
+  contracts, production build, and `git diff --check` pass; only the existing bundle
+  size notice remains.
+- Changed files: `web/backend/src/worker.js`, `web/backend/test-worker.mjs`, and this
+  checkpoint. No production mutation, push, or deploy occurred in this slice.
+- Exact next action after explicit authorization: commit/push, deploy the Worker,
+  verify the 16 legacy jobs promote into D1 across scheduled runs, and re-run the D1
+  audit until partial count reaches zero or genuine fifth-attempt failures enter manual
+  review.

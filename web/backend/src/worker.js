@@ -1281,7 +1281,29 @@ async function readVocabularyJob(env, word) {
       }));
     }
   }
-  return env.VOCAB_CACHE?.get(backfillRetryKey(word), 'json') || null;
+  const legacy = await env.VOCAB_CACHE?.get(backfillRetryKey(word), 'json') || null;
+  if (!legacy) return null;
+  const promoted = {
+    word,
+    status: cleanText(legacy.status || 'retry_pending', 30),
+    attempts: Number(legacy.attempts) || 0,
+    nextRetryAt: legacy.nextRetryAt || null,
+    lastError: cleanText(legacy.lastError, 120),
+    lastProviderErrors: Array.isArray(legacy.lastProviderErrors) ? legacy.lastProviderErrors : [],
+    lastTriedAt: legacy.lastTriedAt || new Date(0).toISOString(),
+  };
+  if (env.VOCAB_DB) {
+    try {
+      await writeVocabularyJob(env, promoted);
+    } catch (error) {
+      console.error(JSON.stringify({
+        event: 'd1_job_promotion_error',
+        word,
+        code: cleanText(String(error?.message || 'D1_JOB_PROMOTION_FAILED').split(':')[0], 120),
+      }));
+    }
+  }
+  return promoted;
 }
 
 async function writeVocabularyJob(env, job) {
@@ -1414,6 +1436,41 @@ function retryDelayMs() {
   return BACKFILL_RETRY_DELAY_MS;
 }
 
+async function listPrioritizedPartialWords(env, now, limit = BACKFILL_SCAN_LIMIT) {
+  if (!env.VOCAB_DB) return [];
+  try {
+    const rows = await env.VOCAB_DB.prepare(`
+      SELECT enrichments.word
+      FROM vocabulary_enrichments AS enrichments
+      LEFT JOIN vocabulary_jobs AS jobs
+        ON jobs.word = enrichments.word
+        AND jobs.prompt_version = enrichments.prompt_version
+      WHERE enrichments.prompt_version = ?1
+        AND enrichments.status = 'partial'
+        AND (
+          jobs.word IS NULL
+          OR (
+            jobs.status IN ('pending', 'retry_pending')
+            AND (jobs.next_retry_at IS NULL OR jobs.next_retry_at <= ?2)
+          )
+        )
+      ORDER BY COALESCE(jobs.attempts, 0) ASC, enrichments.updated_at ASC
+      LIMIT ?3
+    `).bind(
+      VOCABULARY_PROMPT_VERSION,
+      new Date(now).toISOString(),
+      Math.max(1, Math.min(Number(limit) || BACKFILL_SCAN_LIMIT, BACKFILL_SCAN_LIMIT)),
+    ).all();
+    return [...new Set((rows?.results || []).map((row) => cleanText(row?.word, 80).toLowerCase()).filter(Boolean))];
+  } catch (error) {
+    console.error(JSON.stringify({
+      event: 'd1_partial_priority_error',
+      code: cleanText(String(error?.message || 'D1_PARTIAL_PRIORITY_FAILED').split(':')[0], 120),
+    }));
+    return [];
+  }
+}
+
 async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date.now()) {
   if (!env.VOCAB_CACHE) return { status: 'disabled', reason: 'KV_NOT_CONFIGURED' };
   const catalog = await env.VOCAB_CACHE.get(SYSTEM_VOCABULARY_KEY, 'json');
@@ -1439,13 +1496,37 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
   let attempted = 0;
   let failed = 0;
   let retrySkipped = 0;
+  const catalogByWord = new Map(catalog.words.map((item) => [cleanText(item?.word, 80).toLowerCase(), item]));
+  const priorityItems = (await listPrioritizedPartialWords(env, now))
+    .map((word) => catalogByWord.get(word))
+    .filter(Boolean);
+  let priorityIndex = 0;
 
   while (scanned < BACKFILL_SCAN_LIMIT && generated < BACKFILL_GENERATE_LIMIT && attempted < BACKFILL_ATTEMPT_LIMIT) {
-    const item = catalog.words[state.cursor];
+    const isPriorityItem = priorityIndex < priorityItems.length;
+    const item = isPriorityItem ? priorityItems[priorityIndex++] : catalog.words[state.cursor];
     if (!item) {
-      state.cursor = 0;
+      if (!isPriorityItem) state.cursor = 0;
       continue;
     }
+    const advanceScan = () => {
+      let wrapped = false;
+      if (!isPriorityItem) {
+        state.cursor += 1;
+        if (state.cursor >= catalog.words.length) {
+          state.cursor = 0;
+          state.passes += 1;
+          wrapped = true;
+        }
+      }
+      scanned += 1;
+      return wrapped;
+    };
+    const resetPassCounters = () => {
+      state.generatedInCurrentPass = 0;
+      state.retryPendingInCurrentPass = 0;
+      state.verifiedInCurrentPass = 0;
+    };
     const word = cleanText(item.word, 80).toLowerCase();
     const identity = await cacheIdentityFor({
       version: VOCABULARY_PROMPT_VERSION,
@@ -1468,29 +1549,13 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
       const retryState = await readVocabularyJob(env, word);
       if (retryState?.status === 'manual_review') {
         state.manualReview = Math.max(Number(state.manualReview) || 0, 1);
-        state.cursor += 1;
-        scanned += 1;
-        if (state.cursor >= catalog.words.length) {
-          state.cursor = 0;
-          state.passes += 1;
-          state.generatedInCurrentPass = 0;
-          state.retryPendingInCurrentPass = 0;
-          state.verifiedInCurrentPass = 0;
-        }
+        if (advanceScan()) resetPassCounters();
         continue;
       }
       if (retryState?.nextRetryAt && Date.parse(retryState.nextRetryAt) > now) {
         retrySkipped += 1;
         state.retryPendingInCurrentPass += 1;
-        state.cursor += 1;
-        scanned += 1;
-        if (state.cursor >= catalog.words.length) {
-          state.cursor = 0;
-          state.passes += 1;
-          state.generatedInCurrentPass = 0;
-          state.retryPendingInCurrentPass = 0;
-          state.verifiedInCurrentPass = 0;
-        }
+        if (advanceScan()) resetPassCounters();
         continue;
       }
       attempted += 1;
@@ -1559,11 +1624,7 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
       }
     }
 
-    state.cursor += 1;
-    scanned += 1;
-    if (state.cursor >= catalog.words.length) {
-      state.cursor = 0;
-      state.passes += 1;
+    if (advanceScan()) {
       if (state.generatedInCurrentPass === 0
         && state.retryPendingInCurrentPass === 0
         && (Number(state.manualReview) || 0) === 0) {
@@ -1572,9 +1633,7 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
         await saveBackfillState(env, state);
         return state;
       }
-      state.generatedInCurrentPass = 0;
-      state.retryPendingInCurrentPass = 0;
-      state.verifiedInCurrentPass = 0;
+      resetPassCounters();
     }
     if (!isComplete) await saveBackfillState(env, state);
   }
