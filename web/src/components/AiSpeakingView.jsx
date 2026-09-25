@@ -27,17 +27,30 @@ import {
   saveSpeakingConfig,
 } from '../utils/speakingAiService';
 import { hasBackendApi } from '../utils/backendApi';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import {
+  beginSpeakingTurn,
+  completeSpeakingTurn,
+  createSpeakingSession,
+  failSpeakingTurn,
+  loadActiveSpeakingSession,
+  loadCurrentSpeakingSession,
+  retrySpeakingTurn,
+} from '../utils/speakingSessionStore';
 
-const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function initialSpeakingSession() {
+  return loadCurrentSpeakingSession() || loadActiveSpeakingSession(aiScenarios[0]);
+}
 
-export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed = 0.9 }) {
-  const [scenario, setScenario] = useState(aiScenarios[0]);
-  const [messages, setMessages] = useState(() => [{
-    sender: 'ai',
-    text: aiScenarios[0].introMessage,
-    textVi: aiScenarios[0].introMessageVi,
-    timestamp: now(),
-  }]);
+function messageTime(message) {
+  const timestamp = Date.parse(message?.createdAt || '');
+  return Number.isFinite(timestamp)
+    ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : '';
+}
+
+export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
+  const [session, setSession] = useState(initialSpeakingSession);
   const [input, setInput] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -45,9 +58,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showTranslation, setShowTranslation] = useState(true);
   const [showHints, setShowHints] = useState(true);
-  const [hints, setHints] = useState(aiScenarios[0].starterHints || []);
-  const [correction, setCorrection] = useState('');
-  const [encouragement, setEncouragement] = useState('');
   const [pronunciation, setPronunciation] = useState(null);
   const [error, setError] = useState('');
   const [config, setConfig] = useState(loadSpeakingConfig);
@@ -58,8 +68,16 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
   const startMicRef = useRef(null);
   const chatEndRef = useRef(null);
   const isMountedRef = useRef(true);
+  const activeSessionIdRef = useRef(session.id);
+  const resumedRequestRef = useRef(null);
 
   const connected = hasBackendApi();
+  const scenario = useMemo(() => aiScenarios.find((item) => item.id === session.scenarioId) || aiScenarios[0], [session.scenarioId]);
+  const messages = session.messages;
+  const latestFeedback = session.feedback.at(-1) || null;
+  const correction = latestFeedback?.correction || '';
+  const encouragement = latestFeedback?.encouragement || '';
+  const hints = latestFeedback?.hints?.length ? latestFeedback.hints : scenario.starterHints || [];
 
   const stopAudio = useCallback((updateState = true) => {
     if (autoListenTimerRef.current) {
@@ -102,16 +120,9 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
       }
     }
     stopAudio();
-    setScenario(nextScenario);
-    setMessages([{
-      sender: 'ai',
-      text: nextScenario.introMessage,
-      textVi: nextScenario.introMessageVi,
-      timestamp: now(),
-    }]);
-    setHints(nextScenario.starterHints || []);
-    setCorrection('');
-    setEncouragement('');
+    const nextSession = createSpeakingSession(nextScenario);
+    activeSessionIdRef.current = nextSession.id;
+    setSession(nextSession);
     setPronunciation(null);
     setInput('');
     setInterimTranscript('');
@@ -122,7 +133,6 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      requestControllerRef.current?.abort();
       const recognition = recognitionRef.current;
       recognitionRef.current = null;
       if (recognition) {
@@ -149,11 +159,56 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     if (config.autoListen) stopMic();
   };
 
-  const activeHints = useMemo(() => hints?.slice(0, 3) || [], [hints]);
+  const activeHints = hints.slice(0, 3);
+
+  const executePendingTurn = useCallback(async (pendingSession, pronunciationScore = null) => {
+    if (!pendingSession.pendingTurn || !connected) return;
+    const pendingScenario = aiScenarios.find((item) => item.id === pendingSession.scenarioId) || aiScenarios[0];
+    const requestId = pendingSession.pendingTurn.requestId;
+    const controller = new AbortController();
+    requestControllerRef.current = controller;
+    if (isMountedRef.current) setIsThinking(true);
+
+    try {
+      const result = await requestSpeakingReply({
+        requestId,
+        scenario: pendingScenario,
+        messages: pendingSession.messages,
+        signal: controller.signal,
+      });
+      const completed = completeSpeakingTurn(pendingSession, requestId, result, pronunciationScore);
+      const learningResult = dispatchLearningEvent({
+        id: requestId,
+        type: 'xp.awarded',
+        source: 'speaking',
+        payload: { xp: 15 },
+      });
+      onUpdateUserData?.(learningResult.userData);
+      if (isMountedRef.current && activeSessionIdRef.current === pendingSession.id) {
+        setSession(completed);
+        setError('');
+        speak(result.replyEn, { resumeListening: true });
+      }
+    } catch (requestError) {
+      const message = requestError.name === 'AbortError'
+        ? 'Lượt nói đã tạm dừng. Bạn có thể thử lại mà không tạo lượt mới.'
+        : requestError.message || 'Không thể kết nối với AI.';
+      const failed = failSpeakingTurn(pendingSession, requestId, message);
+      if (isMountedRef.current && activeSessionIdRef.current === pendingSession.id) {
+        setSession(failed);
+        setError(message);
+      }
+    } finally {
+      if (requestControllerRef.current === controller) {
+        requestControllerRef.current = null;
+        if (isMountedRef.current) setIsThinking(false);
+      }
+    }
+  }, [connected, onUpdateUserData, speak]);
 
   const sendTurn = useCallback(async (rawText, targetHint = null) => {
     const text = String(rawText || input).trim();
-    if (!text || isThinking) return;
+    if (!text || isThinking || session.pendingTurn) return;
     if (!connected) {
       setError('Backend AI chưa được cấu hình. Quản trị viên cần thiết lập VITE_API_BASE_URL khi deploy frontend.');
       return;
@@ -163,43 +218,32 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
     setInput('');
     setInterimTranscript('');
     setError('');
-    setCorrection('');
-    setEncouragement('');
-    setPronunciation(targetHint ? evaluatePronunciation(targetHint.en, text) : null);
+    const pronunciationResult = targetHint ? evaluatePronunciation(targetHint.en, text) : null;
+    setPronunciation(pronunciationResult);
+    const requestId = `speaking:${session.id}:${crypto.randomUUID()}`;
+    const pendingSession = beginSpeakingTurn(session, { requestId, text });
+    setSession(pendingSession);
+    await executePendingTurn(pendingSession, pronunciationResult?.score ?? null);
+  }, [connected, executePendingTurn, input, isThinking, session, stopAudio]);
 
-    const userMessage = { sender: 'user', text, timestamp: now() };
-    const history = [...messages, userMessage];
-    setMessages(history);
-    setIsThinking(true);
-    const controller = new AbortController();
-    requestControllerRef.current = controller;
+  const retryPending = useCallback(() => {
+    if (!session.pendingTurn || isThinking) return;
+    setError('');
+    const retried = retrySpeakingTurn(session);
+    setSession(retried);
+    executePendingTurn(retried);
+  }, [executePendingTurn, isThinking, session]);
 
-    try {
-      const result = await requestSpeakingReply({ config, scenario, messages: history, signal: controller.signal });
-      if (!isMountedRef.current) return;
-      const aiMessage = {
-        sender: 'ai',
-        text: result.replyEn,
-        textVi: result.replyVi,
-        timestamp: now(),
-      };
-      setMessages((previous) => [...previous, aiMessage]);
-      setCorrection(result.correction);
-      setEncouragement(result.encouragement);
-      if (result.hints?.length) setHints(result.hints);
-      onUpdateUserData?.({ ...userData, xp: (userData?.xp || 0) + 15 });
-      speak(result.replyEn, { resumeListening: true });
-    } catch (requestError) {
-      if (isMountedRef.current && requestError.name !== 'AbortError') setError(requestError.message || 'Không thể kết nối với AI.');
-    } finally {
-      if (isMountedRef.current) setIsThinking(false);
-      if (requestControllerRef.current === controller) requestControllerRef.current = null;
-    }
-  }, [config, connected, input, isThinking, messages, onUpdateUserData, scenario, speak, stopAudio, userData]);
+  useEffect(() => {
+    activeSessionIdRef.current = session.id;
+    if (session.pendingTurn?.status !== 'pending') return;
+    if (resumedRequestRef.current === session.pendingTurn.requestId || requestControllerRef.current) return;
+    resumedRequestRef.current = session.pendingTurn.requestId;
+    executePendingTurn(session);
+  }, [executePendingTurn, session]);
 
   const stopThinking = () => {
     requestControllerRef.current?.abort();
-    setIsThinking(false);
   };
 
   const startMic = (targetHint = null) => {
@@ -290,7 +334,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
         ))}
       </div>
 
-      {error && <div className="speaking-error" role="alert"><AlertCircle size={18} /><span>{error}</span><button onClick={() => setError('')}><X size={16} /></button></div>}
+      {error && <div className="speaking-error" role="alert"><AlertCircle size={18} /><span>{error}</span>{session.pendingTurn?.status === 'failed' && <button onClick={retryPending}>Thử lại</button>}<button onClick={() => setError('')} title="Đóng"><X size={16} /></button></div>}
 
       <section className="speaking-chat-arena speaking-arena-v2">
         <header className="chat-arena-header">
@@ -320,7 +364,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
               <article key={`${message.timestamp}-${index}`} className={`chat-bubble-wrapper ${isAi ? 'from-ai' : 'from-user'}`}>
                 <div className="bubble-avatar">{isAi ? scenario.avatar : '👤'}</div>
                 <div className="bubble-content">
-                  <div className="bubble-header-row"><span className="bubble-sender">{isAi ? scenario.partnerName : 'Bạn'}</span><span className="bubble-time">{message.timestamp}</span></div>
+                  <div className="bubble-header-row"><span className="bubble-sender">{isAi ? scenario.partnerName : 'Bạn'}</span><span className="bubble-time">{messageTime(message)}</span></div>
                   <div className="bubble-text-en">{message.text}</div>
                   {isAi && <button className="replay-tts-btn" onClick={() => speak(message.text)}><Volume2 size={15} /> Nghe lại</button>}
                   {isAi && showTranslation && message.textVi && <div className="bubble-sub-vi">🇻🇳 {message.textVi}</div>}
@@ -333,6 +377,7 @@ export default function AiSpeakingView({ userData, onUpdateUserData, voiceSpeed 
         </div>
 
         {(correction || encouragement) && <div className="ai-coach-card"><Sparkles size={20} /><div><strong>Phản hồi từ gia sư AI</strong>{correction && <p>{correction}</p>}{encouragement && <small>{encouragement}</small>}</div></div>}
+        {latestFeedback?.scores && <div className="speaking-score-row" aria-label="Điểm luyện nói">{['grammar', 'vocabulary', 'fluency', 'pronunciation'].map((key) => latestFeedback.scores[key] == null ? null : <span key={key}><strong>{latestFeedback.scores[key]}</strong><small>{key}</small></span>)}</div>}
         {pronunciation && <div className="eval-feedback-card"><div className="eval-score-gauge"><span className="score-num">{pronunciation.score}%</span><span className="score-label">Độ khớp câu</span></div><div className="eval-text-details"><div className="eval-title">So với câu gợi ý bạn vừa luyện</div><div className="eval-msg">{pronunciation.feedback}</div></div></div>}
 
         {showHints && activeHints.length > 0 && <div className="smart-hints-drawer speaking-hints-v2">

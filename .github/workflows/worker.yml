@@ -1,0 +1,93 @@
+name: Validate and Deploy Cloudflare Worker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "web/backend/**"
+      - "web/scripts/smoke-production.mjs"
+      - "web/package.json"
+      - "web/package-lock.json"
+      - ".github/workflows/worker.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm run lint
+        working-directory: web
+      - run: npm run test:features
+        working-directory: web
+      - run: npm run test:vocab
+        working-directory: web
+      - run: npm run test:speech
+        working-directory: web
+      - run: npm run test:migration
+        working-directory: web
+      - run: npm run test:learning
+        working-directory: web
+      - run: npm run test:speaking
+        working-directory: web
+      - run: npm run test:modules
+        working-directory: web
+      - run: npm run test:identity
+        working-directory: web
+      - run: npm run test:backup
+        working-directory: web
+      - run: npm run test:security
+        working-directory: web
+      - run: npm run test:diagnostic
+        working-directory: web
+      - run: npm run test:admin
+        working-directory: web
+      - run: node backend/test-worker.mjs
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+
+  deploy-production:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - name: Check deploy credentials
+        id: credentials
+        shell: bash
+        run: |
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Worker deploy skipped. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to the production environment secrets."
+          fi
+      - name: Deploy Worker
+        if: steps.credentials.outputs.available == 'true'
+        working-directory: web/backend
+        run: npx wrangler deploy
+      - name: Production smoke test
+        if: steps.credentials.outputs.available == 'true'
+        working-directory: web
+        run: npm run smoke:production

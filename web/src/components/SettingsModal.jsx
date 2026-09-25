@@ -6,12 +6,17 @@ import {
   Upload, 
   Trash2, 
   X, 
-  Crown,
   Play,
   Volume2
 } from 'lucide-react';
-import { loadUserData, saveUserData, resetUserData } from '../utils/storage';
+import { resetUserData } from '../utils/storage';
 import speechHelper, { VOICE_PRESETS } from '../utils/speechHelper';
+import {
+  createLocalBackup,
+  parseLocalBackup,
+  restoreLocalBackup,
+  serializeLocalBackup,
+} from '../utils/localBackupService';
 
 const AVATARS = ['👤', '🦁', '🦄', '👑', '🌸', '🚀', '🐱', '⚽', '🎸', '⚡', '🦅', '💎'];
 
@@ -19,8 +24,7 @@ export default function SettingsModal({
   isOpen, 
   onClose, 
   userData, 
-  onUpdateUserData, 
-  onOpenVipModal,
+  onUpdateUserData,
 }) {
   const [name, setName] = useState(userData?.name || 'Học Viên LingoGoc');
   const [selectedAvatar, setSelectedAvatar] = useState(userData?.avatar || '👤');
@@ -60,41 +64,52 @@ export default function SettingsModal({
 
   // Xuất file JSON sao lưu
   const handleExportData = () => {
-    const fullData = loadUserData();
+    const backupText = serializeLocalBackup(createLocalBackup());
     const fileName = `lingogoc_backup_${new Date().toISOString().split('T')[0]}.json`;
     if (typeof window !== 'undefined' && typeof window.LingoGocNative?.saveBackup === 'function') {
-      window.LingoGocNative.saveBackup(fileName, JSON.stringify(fullData, null, 2));
+      window.LingoGocNative.saveBackup(fileName, backupText);
+      setNotice({ type: 'success', text: 'Đã gửi bản sao lưu đầy đủ tới trình lưu tệp của thiết bị.' });
       return;
     }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
+    const objectUrl = URL.createObjectURL(new Blob([backupText], { type: 'application/json' }));
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", fileName);
+    downloadAnchor.href = objectUrl;
+    downloadAnchor.download = fileName;
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+    setNotice({ type: 'success', text: 'Đã tạo bản sao lưu đầy đủ trên thiết bị.' });
   };
 
   // Nhập file JSON khôi phục
   const handleImportFile = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    if (file.size > 2_000_000) {
+      setNotice({ type: 'error', text: 'Tệp sao lưu vượt quá giới hạn 2 MB.' });
+      event.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const importedData = JSON.parse(e.target.result);
-        if (importedData && typeof importedData.xp === 'number') {
-          saveUserData(importedData);
-          onUpdateUserData(importedData);
-          alert('Khôi phục dữ liệu thành công!');
-          onClose();
-        } else {
-          alert('Tệp dữ liệu không hợp lệ!');
-        }
-      } catch (err) {
-        alert('Lỗi khi đọc tệp dữ liệu: ' + err.message);
+        const restored = restoreLocalBackup(parseLocalBackup(e.target.result), { mode: 'merge' });
+        onUpdateUserData(restored.userData);
+        setName(restored.userData?.name || 'Học Viên LingoGoc');
+        setSelectedAvatar(restored.userData?.avatar || '👤');
+        setSelectedVoice(restored.userData?.settings?.voicePreset || 'auto');
+        setNotice({ type: 'success', text: 'Đã hợp nhất bản sao lưu đầy đủ. Tiến độ hiện có không bị ghi đè bởi dữ liệu cũ hơn.' });
+      } catch {
+        setNotice({ type: 'error', text: 'Tệp sao lưu không hợp lệ hoặc đã bị hỏng.' });
+      } finally {
+        event.target.value = '';
       }
+    };
+    reader.onerror = () => {
+      setNotice({ type: 'error', text: 'Không thể đọc tệp sao lưu trên thiết bị này.' });
+      event.target.value = '';
     };
     reader.readAsText(file);
   };
@@ -275,39 +290,7 @@ export default function SettingsModal({
           </div>
         </div>
 
-        {/* Section 2: VIP Status */}
-        <div style={{
-          background: userData?.isVip ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-          border: `1px solid ${userData?.isVip ? '#10b981' : '#f59e0b'}`,
-          borderRadius: '16px',
-          padding: '16px 20px',
-          marginBottom: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: userData?.isVip ? '#10b981' : '#f59e0b' }}>
-              <Crown size={18} />
-              <span>{userData?.isVip ? 'Tài Khoản VIP Pro Đã Kích Hoạt' : 'Tài Khoản Miễn Phí (Free)'}</span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              {userData?.isVip ? 'Bạn đang có toàn quyền sử dụng tất cả tính năng cao cấp.' : 'Nâng cấp để mở khóa 3000 từ và AI luyện nói không giới hạn.'}
-            </div>
-          </div>
-
-          {!userData?.isVip && onOpenVipModal && (
-            <button
-              onClick={() => { onClose(); onOpenVipModal(); }}
-              className="btn btn-primary"
-              style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 700, borderRadius: '10px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none' }}
-            >
-              Nâng Cấp
-            </button>
-          )}
-        </div>
-
-        {/* Section 3: Progress Backup & Restore */}
+        {/* Progress Backup & Restore */}
         <div style={{
           background: 'var(--surface-soft)',
           border: '1px solid var(--border-color)',
@@ -318,6 +301,9 @@ export default function SettingsModal({
           <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '12px' }}>
             Sao lưu & Chuyển đổi thiết bị:
           </div>
+          <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.5 }}>
+            Bao gồm tiến độ, SRS, hàng đợi offline, lịch sử kiểm tra và các phiên học. Khi khôi phục, dữ liệu được hợp nhất an toàn với thiết bị hiện tại.
+          </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button

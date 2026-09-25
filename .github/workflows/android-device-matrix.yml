@@ -1,0 +1,71 @@
+name: Android Device Matrix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  instrumentation:
+    name: Android ${{ matrix.android-version }} (API ${{ matrix.api-level }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - android-version: 8
+            api-level: 26
+          - android-version: 10
+            api-level: 29
+          - android-version: 12
+            api-level: 31
+          - android-version: 14
+            api-level: 34
+          - android-version: 15
+            api-level: 35
+    env:
+      VITE_API_BASE_URL: https://lingogoc-api.lingogoc-api.workers.dev
+      VITE_SPEAKING_AUTO_LISTEN: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+        working-directory: web
+
+      - name: Native bridge contracts
+        working-directory: web
+        run: |
+          npm run test:speech
+          npm run test:android-bridge
+
+      - name: Emulator smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: cd app && ./gradlew connectedDebugAndroidTest --console=plain
+
+      - name: Upload instrumentation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.api-level }}-instrumentation-results
+          path: app/app/build/reports/androidTests/connected/
+          if-no-files-found: ignore

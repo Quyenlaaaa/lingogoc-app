@@ -1,30 +1,42 @@
 // ReflexView.jsx - Stage 3: 50 Survival Sentence Patterns for Instant Reflexes
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Volume2, 
   Mic, 
   MicOff, 
   CheckCircle2, 
-  Sparkles, 
   Info, 
-  ArrowRight, 
-  RotateCw, 
   Award 
 } from 'lucide-react';
 import { reflexSentences } from '../data/reflexData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import confetti from 'canvas-confetti';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { loadLearningModuleSession, saveLearningModuleSession } from '../utils/learningModuleSessionStore';
+
+function loadInitialReflexSession() {
+  const saved = loadLearningModuleSession('reflex');
+  const categories = ['Tất cả', 'Ordering', 'Requests', 'Shopping', 'Directions', 'Survival', 'Social'];
+  const activeCategory = categories.includes(saved.activeCategory) ? saved.activeCategory : 'Tất cả';
+  const categoryPatterns = reflexSentences.filter((item) => activeCategory === 'Tất cả' || item.category === activeCategory);
+  const activePattern = categoryPatterns.find((item) => String(item.id) === String(saved.activePatternId))
+    || categoryPatterns[0]
+    || reflexSentences[0];
+  const selectedExampleIndex = Math.max(0, Math.min(activePattern.examples.length - 1, Number(saved.selectedExampleIndex) || 0));
+  return { activeCategory, activePattern, selectedExampleIndex, evalResult: saved.evalResult || null };
+}
 
 export default function ReflexView({ userData, onUpdateUserData, voiceSpeed }) {
-  const [activeCategory, setActiveCategory] = useState('Tất cả');
-  const [activePattern, setActivePattern] = useState(reflexSentences[0]);
-  const [selectedExampleIndex, setSelectedExampleIndex] = useState(0);
+  const [initialSession] = useState(loadInitialReflexSession);
+  const [activeCategory, setActiveCategory] = useState(initialSession.activeCategory);
+  const [activePattern, setActivePattern] = useState(initialSession.activePattern);
+  const [selectedExampleIndex, setSelectedExampleIndex] = useState(initialSession.selectedExampleIndex);
   
   // Microphone & Speech Evaluation States
   const [isRecording, setIsRecording] = useState(false);
-  const [recognitionObj, setRecognitionObj] = useState(null);
-  const [evalResult, setEvalResult] = useState(null);
+  const recognitionRef = useRef(null);
+  const [evalResult, setEvalResult] = useState(initialSession.evalResult);
 
   const completedReflex = new Set(userData?.completedReflex || []);
 
@@ -36,27 +48,49 @@ export default function ReflexView({ userData, onUpdateUserData, voiceSpeed }) {
 
   const activeExample = activePattern.examples[selectedExampleIndex] || activePattern.examples[0];
 
+  useEffect(() => {
+    saveLearningModuleSession('reflex', {
+      activeCategory,
+      activePatternId: activePattern.id,
+      selectedExampleIndex,
+      evalResult,
+    });
+  }, [activeCategory, activePattern.id, evalResult, selectedExampleIndex]);
+
+  useEffect(() => () => {
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    try {
+      recognition?.abort();
+    } catch {
+      // Recognition may already be inactive during navigation.
+    }
+    speechHelper.stopSpeaking();
+  }, []);
+
   const handleSpeak = (text, rate = voiceSpeed) => {
     speechHelper.speak(text, { rate });
   };
 
-  const toggleCompleted = (patternId) => {
-    const updated = new Set(completedReflex);
-    let xpGain = 0;
-    if (updated.has(patternId)) {
-      updated.delete(patternId);
-    } else {
-      updated.add(patternId);
-      xpGain = 20;
+  const setPatternCompleted = (patternId, completed) => {
+    if (completed && !completedReflex.has(patternId)) {
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
     }
-
-    onUpdateUserData({
-      ...userData,
-      completedReflex: Array.from(updated),
-      xp: (userData?.xp || 0) + xpGain
+    const result = dispatchLearningEvent({
+      type: 'progress.toggled',
+      source: 'reflex',
+      payload: {
+        collection: 'completedReflex',
+        targetId: patternId,
+        completed,
+        xp: 20,
+        rewardKey: `reflex:${patternId}`,
+      },
     });
+    onUpdateUserData(result.userData);
   };
+
+  const toggleCompleted = (patternId) => setPatternCompleted(patternId, !completedReflex.has(patternId));
 
   const handleStartRecording = (targetText) => {
     if (!speechHelper.isSpeechRecognitionSupported()) {
@@ -73,9 +107,7 @@ export default function ReflexView({ userData, onUpdateUserData, voiceSpeed }) {
           const evalScore = evaluatePronunciation(targetText, result.final);
           setEvalResult(evalScore);
           setIsRecording(false);
-          if (evalScore.score >= 65) {
-            toggleCompleted(activePattern.id);
-          }
+          if (evalScore.score >= 65) setPatternCompleted(activePattern.id, true);
         }
       },
       () => setIsRecording(false),
@@ -83,14 +115,15 @@ export default function ReflexView({ userData, onUpdateUserData, voiceSpeed }) {
     );
 
     if (rec) {
-      setRecognitionObj(rec);
+      recognitionRef.current = rec;
       rec.start();
     }
   };
 
   const handleStopRecording = () => {
-    if (recognitionObj) {
-      recognitionObj.stop();
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
     }
     setIsRecording(false);
   };

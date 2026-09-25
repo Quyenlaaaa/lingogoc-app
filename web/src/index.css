@@ -382,6 +382,21 @@ a {
   color: #ffffff;
 }
 
+.speech-status-toast {
+  bottom: max(12px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.speech-status-toast button {
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .speech-status-toast {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+}
+
 .more-nav-wrap {
   position: sticky;
   right: 0;
@@ -1302,10 +1317,23 @@ a {
   flex-direction: column;
   justify-content: space-between;
   box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+
+.flashcard-front {
+  pointer-events: auto;
 }
 
 .flashcard-back {
   transform: rotateY(180deg);
+}
+
+.flashcard-scene.is-flipped .flashcard-front {
+  pointer-events: none;
+}
+
+.flashcard-scene.is-flipped .flashcard-back {
+  pointer-events: auto;
 }
 
 .card-top-tags {
@@ -4376,6 +4404,14 @@ html, body {
   cursor: pointer;
 }
 
+.speaking-error button:not(:last-child) {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
 .speaking-arena-v2 {
   overflow: hidden;
 }
@@ -4508,6 +4544,25 @@ html, body {
 }
 
 .ai-coach-card small { color: var(--text-secondary); }
+.speaking-score-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 20px 14px;
+}
+
+.speaking-score-row span {
+  display: grid;
+  gap: 2px;
+  padding: 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(99, 102, 241, .06);
+}
+
+.speaking-score-row strong { color: #818cf8; }
+.speaking-score-row small { color: var(--text-secondary); text-transform: capitalize; }
 .speaking-hints-v2 { margin-bottom: 0; }
 
 .hint-main-action {
@@ -4682,6 +4737,7 @@ html, body {
   .model-picker-row { align-items: stretch; flex-direction: column; gap: 0; }
   .refresh-model-btn { justify-content: center; }
   .speaking-composer-v2 { padding: 11px; }
+  .speaking-score-row { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-inline: 11px; }
   .composer-tool { display: none; }
 }
 
@@ -5813,4 +5869,48 @@ textarea:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.vocab-admin { display: grid; gap: 20px; padding-block: 24px; }
+.vocab-admin-header, .vocab-admin-auth, .vocab-admin-list article { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.vocab-admin-auth { flex-wrap: wrap; padding: 16px; border: 1px solid var(--border-color); border-radius: 14px; }
+.vocab-admin-auth input { min-width: min(360px, 100%); flex: 1; }
+.vocab-admin-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.vocab-admin-stats article, .vocab-admin-list, .vocab-admin-correction { padding: 16px; border: 1px solid var(--border-color); border-radius: 14px; }
+.vocab-admin-stats article { display: grid; gap: 4px; }
+.vocab-admin-stats strong { font-size: 1.75rem; }
+.vocab-admin-list, .vocab-admin-correction { display: grid; gap: 12px; }
+.vocab-admin-pagination { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.vocab-admin-list article { padding-block: 10px; border-bottom: 1px solid var(--border-color); }
+.vocab-admin-list article div { display: grid; gap: 2px; }
+.vocab-admin-correction textarea { width: 100%; resize: vertical; font-family: ui-monospace, monospace; }
+.vocab-admin-error { color: var(--danger-color, #ef4444); }
+.diagnostic-history-list { display: grid; gap: 8px; }
+.diagnostic-history-list > div { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; }
+
+@media (max-width: 640px) {
+  .vocab-admin-header, .vocab-admin-auth, .vocab-admin-list article { align-items: stretch; flex-direction: column; }
+  .vocab-admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vocab-admin-auth input { min-width: 0; width: 100%; }
+}
+.network-status {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: #7c2d12;
+  color: #fff7ed;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.network-status.is-limited {
+  background: #854d0e;
+  color: #fefce8;
 }

@@ -1,15 +1,11 @@
 // ProgressView.jsx - Learning Progress Dashboard & Gamification Badges
 import React from 'react';
+import { resetUserData } from '../utils/storage';
 import { 
-  Trophy, 
   Flame, 
   Sparkles, 
   BookOpen, 
-  Layers, 
-  Repeat, 
   Mic, 
-  Award, 
-  CheckCircle, 
   Lock, 
   RotateCcw 
 } from 'lucide-react';
@@ -84,17 +80,7 @@ export default function ProgressView({ userData, onUpdateUserData }) {
 
   const handleResetProgress = () => {
     if (window.confirm('Bạn có chắc chắn muốn thiết lập lại toàn bộ tiến độ học tập để bắt đầu lại từ đầu?')) {
-      const resetData = {
-        xp: 0,
-        streak: 1,
-        lastActiveDate: new Date().toISOString().split('T')[0],
-        masteredWords: [],
-        bookmarkedWords: [],
-        completedIpa: [],
-        completedReflex: [],
-        completedScenarios: [],
-        settings: userData?.settings || {}
-      };
+      const resetData = resetUserData(userData?.settings);
       onUpdateUserData(resetData);
     }
   };

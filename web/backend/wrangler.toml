@@ -7,6 +7,9 @@ compatibility_date = "2026-09-01"
 AI_BASE_URL = "https://api.xkiro.com/v1"
 AI_FREE_MODEL = "mistralai/mistral-large-2512"
 AI_PAID_MODEL = "x-ai/grok-build-0.1"
+# Update these rates whenever the paid provider changes its per-million-token price.
+AI_PAID_INPUT_USD_PER_MILLION = "0"
+AI_PAID_OUTPUT_USD_PER_MILLION = "0"
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 GROQ_FREE_MODEL = "qwen/qwen3.8-27b"
 WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it"
@@ -16,12 +19,20 @@ OPENROUTER_FREE_MODEL = "deepseek/deepseek-v4-flash-0731:free"
 OPENROUTER_SITE_URL = "https://quyenlaaaa.github.io/lingogoc-app/"
 OPENROUTER_APP_NAME = "LingoGoc"
 ALLOWED_ORIGINS = "http://localhost:5173,https://quyenlaaaa.github.io"
+RATE_LIMIT_READ_PER_MINUTE = "120"
+RATE_LIMIT_AI_PER_MINUTE = "30"
+RATE_LIMIT_ADMIN_PER_MINUTE = "20"
+RATE_LIMIT_AUDIO_PER_MINUTE = "240"
 
 [triggers]
 crons = ["0 * * * *"]
 
 [ai]
 binding = "AI"
+
+[[analytics_engine_datasets]]
+binding = "METRICS"
+dataset = "lingogoc_worker_metrics"
 
 [[kv_namespaces]]
 binding = "VOCAB_CACHE"

@@ -19,6 +19,7 @@ import {
   Shuffle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
@@ -28,11 +29,8 @@ import { fetchVocabularyBatch, toMeaningResultMap } from '../utils/vocabularyBat
 import {
   buildClozePrompt,
   buildQuizOptions,
-  getTrustedExamples,
-  getDisplayIpa,
-  isLowQualityExample,
-  isLowQualityMeaning,
 } from '../utils/vocabularyQuality';
+import { getVocabularyPresentation } from '../utils/vocabularyPresentation';
 import WordDetailModal from './WordDetailModal';
 import WordScrambleGame from './WordScrambleGame';
 
@@ -75,7 +73,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const [currentPage, setCurrentPage] = useState(1);
   const [pageInput, setPageInput] = useState('1');
   const [listAiData, setListAiData] = useState({});
-  const [flashcardAiData, setFlashcardAiData] = useState(null);
+  const [flashcardAiState, setFlashcardAiState] = useState({ word: '', data: null });
   const [translatedMeanings, setTranslatedMeanings] = useState({});
   const [isLoadingFlashcardExamples, setIsLoadingFlashcardExamples] = useState(false);
   const viewMountedRef = useRef(true);
@@ -87,6 +85,8 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const [quizSelectedAnswer, setQuizSelectedAnswer] = useState(null);
   const [quizIsAnswered, setQuizIsAnswered] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const quizSessionIdRef = useRef(crypto.randomUUID());
+  const quizQuestionSequenceRef = useRef(0);
 
   // Microphone Testing States
   const [isRecording, setIsRecording] = useState(false);
@@ -97,12 +97,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const masteredSet = useMemo(() => new Set(userData?.masteredWords || []), [userData]);
   const bookmarkedSet = useMemo(() => new Set(userData?.bookmarkedWords || []), [userData]);
 
-  const getDisplayMeaning = (item, enrichment = null) => {
-    if (!item) return '';
+  const getWordPresentation = (item, enrichment) => {
+    if (!item) return null;
     const translated = translatedMeanings[getMeaningCacheKey(item)] || getCachedVietnameseMeaning(item);
-    if (enrichment?.primaryMeaningVi) return enrichment.primaryMeaningVi;
-    if (translated?.meaningVi) return translated.meaningVi;
-    return isLowQualityMeaning(item.meaning) ? 'Đang bổ sung nghĩa tiếng Việt…' : item.meaning;
+    return getVocabularyPresentation(item, { enrichment, meaning: translated });
   };
 
   // Filter 3000 vocabulary words
@@ -171,17 +169,19 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     };
   }, []);
 
-  // Reset pagination / card index when filters change
-  useEffect(() => {
+  const resetFilteredNavigation = () => {
     setCurrentPage(1);
     setPageInput('1');
     setCardIndex(0);
     setIsFlipped(false);
-  }, [searchQuery, selectedTopic, selectedLevel, selectedStatus]);
+  };
 
   // Active Flashcard Word
   const currentCard = filteredWords[cardIndex] || filteredWords[0] || null;
   const currentEnrichment = currentCard ? getCachedWordEnrichment(currentCard.word) : null;
+  const flashcardAiData = currentCard && flashcardAiState.word === currentCard.word
+    ? flashcardAiState.data
+    : null;
   const meaningCandidates = useMemo(() => {
     if (studyMode === 'list') return visibleListWords;
     if (studyMode === 'flashcard' && currentCard) return [currentCard];
@@ -215,7 +215,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           });
         } else if (studyMode === 'flashcard' && currentCard) {
           const result = results[currentCard.word.toLowerCase()];
-          if (result?.enrichment) setFlashcardAiData(result.enrichment);
+          if (result?.enrichment) {
+            setFlashcardAiState({ word: currentCard.word, data: result.enrichment });
+          }
         }
       })
       .catch((error) => {
@@ -224,24 +226,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     return () => controller.abort();
   }, [currentCard, meaningCandidates, studyMode]);
 
-  useEffect(() => {
-    if (studyMode !== 'flashcard' || !currentCard) return undefined;
-    setFlashcardAiData(getCachedWordEnrichment(currentCard.word));
-    setIsLoadingFlashcardExamples(false);
-    return undefined;
-  }, [currentCard, studyMode]);
-
   const activeEnrichment = flashcardAiData || currentEnrichment;
-  const currentExamples = currentCard
-    ? [
-        ...(activeEnrichment?.contextExamples || []).map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' })),
-        ...getTrustedExamples(currentCard).map((example) => ({ ...example, context: example.context || 'Bộ dữ liệu' })),
-      ]
-        .filter((example, index, examples) => !isLowQualityExample(example.en) && examples.findIndex(
-          (candidate) => candidate.en.toLowerCase() === example.en.toLowerCase(),
-        ) === index)
-        .slice(0, 2)
-    : [];
+  const currentPresentation = getWordPresentation(currentCard, activeEnrichment);
+  const currentExamples = currentPresentation?.examples.slice(0, 2) || [];
 
   const retryFlashcardExamples = async (event) => {
     event.stopPropagation();
@@ -250,21 +237,24 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     try {
       const result = await enrichWordWithLLM(
         currentCard.word,
-        currentCard.meaning,
+        currentPresentation.meaning,
         currentCard.topic,
         [],
         undefined,
         { manualRetry: true, keepAlive: true, maxAttempts: 1 },
       );
-      if (viewMountedRef.current) setFlashcardAiData(result);
+      if (viewMountedRef.current) setFlashcardAiState({ word: currentCard.word, data: result });
     } catch (error) {
       if (error?.name !== 'AbortError') {
         console.warn('Could not retry vocabulary examples:', error);
         if (viewMountedRef.current) {
-          setFlashcardAiData({
-            isAiGenerated: false,
-            contextExamples: [],
-            unavailableReason: error?.message || 'Không thể kết nối API AI.',
+          setFlashcardAiState({
+            word: currentCard.word,
+            data: {
+              isAiGenerated: false,
+              contextExamples: [],
+              unavailableReason: error?.message || 'Không thể kết nối API AI.',
+            },
           });
         }
       }
@@ -281,7 +271,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     try {
       const result = await enrichWordWithLLM(
         item.word,
-        item.meaning,
+        getWordPresentation(item).meaning,
         item.topic,
         [],
         undefined,
@@ -320,20 +310,15 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     const availableEnrichment = enrichment || getCachedWordEnrichment(item.word);
     setDetailWord({
       ...item,
-      meaning: getDisplayMeaning(item, availableEnrichment),
       _aiEnrichment: availableEnrichment || null,
+      _meaningResult: translatedMeanings[getMeaningCacheKey(item)] || getCachedVietnameseMeaning(item),
     });
   };
 
   // Toggle Mastered Status
   const handleToggleMastered = (wordId) => {
-    const updated = new Set(masteredSet);
-    let xpGain = 0;
-    if (updated.has(wordId)) {
-      updated.delete(wordId);
-    } else {
-      updated.add(wordId);
-      xpGain = 15;
+    const completing = !masteredSet.has(wordId);
+    if (completing) {
       // Trigger confetti celebration
       confetti({
         particleCount: 50,
@@ -341,12 +326,18 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         origin: { y: 0.8 }
       });
     }
-
-    onUpdateUserData({
-      ...userData,
-      masteredWords: Array.from(updated),
-      xp: (userData?.xp || 0) + xpGain
+    const result = dispatchLearningEvent({
+      type: 'progress.toggled',
+      source: 'vocabulary',
+      payload: {
+        collection: 'masteredWords',
+        targetId: wordId,
+        completed: completing,
+        xp: 15,
+        rewardKey: `vocabulary:${wordId}`,
+      },
     });
+    onUpdateUserData(result.userData);
   };
 
   // Toggle Bookmark
@@ -370,11 +361,14 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
   // Generate Quiz Question
   const generateQuiz = () => {
-    const translatedVocabulary = vocabList.map((word) => ({ ...word, meaning: getDisplayMeaning(word) }));
+    const translatedVocabulary = vocabList.map((word) => {
+      const presentation = getWordPresentation(word);
+      return { ...word, meaning: presentation.meaning, _presentation: presentation };
+    });
     const translatedById = new Map(translatedVocabulary.map((word) => [word.id, word]));
     const quizPool = filteredWords
       .map((word) => translatedById.get(word.id) || word)
-      .filter((word) => !isLowQualityMeaning(word.meaning));
+      .filter((word) => word._presentation?.meaningSource !== 'pending');
     if (quizPool.length < 4) return;
     const correctWord = quizPool[Math.floor(Math.random() * quizPool.length)];
     const clozePrompt = buildClozePrompt(correctWord);
@@ -387,6 +381,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     if (options.length < 4) return;
 
     setQuizQuestion({
+      id: `${quizSessionIdRef.current}:${++quizQuestionSequenceRef.current}:${correctWord.id}`,
       target: correctWord,
       options,
       type,
@@ -400,19 +395,21 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
     }
   };
 
-  useEffect(() => {
-    if (studyMode === 'quiz' && !quizQuestion) {
-      generateQuiz();
-    }
-  }, [studyMode]);
-
   // Handle Quiz Answer
   const handleAnswerQuiz = (option) => {
     if (quizIsAnswered) return;
     setQuizSelectedAnswer(option.id);
     setQuizIsAnswered(true);
+    const isCorrect = option.id === quizQuestion.target.id;
+    const reviewResult = dispatchLearningEvent({
+      id: `vocabulary-quiz:${quizQuestion.id}`,
+      type: 'word.reviewed',
+      source: 'vocabulary-quiz',
+      payload: { wordId: quizQuestion.target.id, quality: isCorrect ? 3 : 1, xp: 0 },
+    });
+    onUpdateUserData(reviewResult.userData);
 
-    if (option.id === quizQuestion.target.id) {
+    if (isCorrect) {
       setQuizScore(prev => prev + 1);
       handleToggleMastered(quizQuestion.target.id);
       confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
@@ -521,10 +518,10 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
               className="vocab-search-input"
               placeholder="Tìm kiếm theo từ tiếng Anh hoặc nghĩa tiếng Việt..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); resetFilteredNavigation(); }}
             />
             {searchQuery && (
-              <button className="clear-search-btn" onClick={() => setSearchQuery('')}>
+              <button className="clear-search-btn" onClick={() => { setSearchQuery(''); resetFilteredNavigation(); }}>
                 <X size={16} />
               </button>
             )}
@@ -534,7 +531,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           <select 
             className="filter-select"
             value={selectedLevel}
-            onChange={(e) => setSelectedLevel(e.target.value)}
+            onChange={(e) => { setSelectedLevel(e.target.value); resetFilteredNavigation(); }}
           >
             {levels.map((lvl) => (
               <option key={lvl} value={lvl}>{lvl}</option>
@@ -545,7 +542,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           <select 
             className="filter-select"
             value={selectedTopic}
-            onChange={(e) => setSelectedTopic(e.target.value)}
+            onChange={(e) => { setSelectedTopic(e.target.value); resetFilteredNavigation(); }}
           >
             {topics.map((top) => (
               <option key={top} value={top}>{top}</option>
@@ -556,7 +553,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           <select 
             className="filter-select"
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={(e) => { setSelectedStatus(e.target.value); resetFilteredNavigation(); }}
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="mastered">✅ Đã thuộc ({masteredSet.size})</option>
@@ -595,7 +592,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                 <div className="card-center-word">
                   <h3 className="card-word-text">{currentCard.word}</h3>
-                  <div className="card-ipa-text">{getDisplayIpa(currentCard.ipa, currentCard.word)}</div>
+                  <div className="card-ipa-text">{currentPresentation.ipa}</div>
                 </div>
 
                 <div className="card-instruction-hint">
@@ -651,14 +648,14 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                 <div className="card-meaning-block">
                   <div className="meaning-label">Nghĩa tiếng Việt:</div>
-                  <div className="meaning-highlight">{getDisplayMeaning(currentCard, activeEnrichment)}</div>
+                  <div className="meaning-highlight">{currentPresentation.meaning}</div>
                   {(activeEnrichment?.primaryMeaningVi || translatedMeanings[getMeaningCacheKey(currentCard)]) && (
                     <div className="meaning-verified-badge">Nghĩa tiếng Việt đã được chuẩn hóa</div>
                   )}
                   {activeEnrichment?.persistedOnServer
                     ? <div className="example-saved-badge">Đã lưu trên máy chủ · không mất khi xóa dữ liệu trình duyệt</div>
                     : activeEnrichment?.savedAt && <div className="example-saved-badge">Đã lưu trên thiết bị · mở lại không tốn lượt AI</div>}
-                  {!activeEnrichment && isLowQualityMeaning(currentCard.meaning) && (
+                  {currentPresentation.meaningSource === 'pending' && (
                     <button className="meaning-review-link" onClick={(event) => { event.stopPropagation(); openWordDetail(currentCard, activeEnrichment); }}>
                       Nghĩa này chưa đủ tin cậy · Mở phần đối chiếu
                     </button>
@@ -666,7 +663,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 </div>
 
                 <div className="card-example-box" onClick={(e) => e.stopPropagation()}>
-                  {activeEnrichment?.contextExamples?.length === 5 && (
+                  {currentPresentation.hasCompleteContexts && (
                     <div className="example-saved-badge">Đang xem 2 câu tóm tắt · đủ 5 ngữ cảnh trong phần chi tiết</div>
                   )}
                   {currentExamples.length > 0 ? currentExamples.map((example) => (
@@ -778,18 +775,9 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 const isBookmarked = bookmarkedSet.has(w.id);
                 const cachedAiData = getCachedWordEnrichment(w.word);
                 const aiState = listAiData[w.word.toLowerCase()];
-                const displayMeaning = getDisplayMeaning(w, aiState || cachedAiData);
-                const aiExamples = (aiState?.contextExamples
-                  || cachedAiData?.contextExamples
-                  || [])
-                  .filter((example) => !isLowQualityExample(example.en))
-                  .map((example) => ({ ...example, context: example.context || 'AI đa ngữ cảnh' }));
-                const availableExamples = [...aiExamples, ...getTrustedExamples(w)]
-                  .filter((example, index, examples) => examples.findIndex(
-                    (candidate) => candidate.en.toLowerCase() === example.en.toLowerCase(),
-                  ) === index)
-                  .slice(0, 5);
-                const hasFiveContexts = aiExamples.length === 5;
+                const presentation = getWordPresentation(w, aiState || cachedAiData);
+                const availableExamples = presentation.examples;
+                const hasFiveContexts = presentation.hasCompleteContexts;
                 const contextLabels = [...new Set(availableExamples
                   .map((example) => example.context || 'Thực tế'))]
                   .slice(0, 3);
@@ -813,8 +801,8 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
 
                     <div className="item-word-body">
                       <div className="item-word-name">{w.word}</div>
-                      <div className="item-ipa-text">{getDisplayIpa(w.ipa, w.word)}</div>
-                      <div className="item-meaning-text">{displayMeaning}</div>
+                      <div className="item-ipa-text">{presentation.ipa}</div>
+                      <div className="item-meaning-text">{presentation.meaning}</div>
                       <div className="item-example-box">
                         <div className="item-example-summary">
                           <span className="item-example-summary-label">Ví dụ đa ngữ cảnh</span>
@@ -961,19 +949,19 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
               ) : quizQuestion.type === 'vi-to-en' ? (
                 <div className="en-quiz-prompt">
                   <p className="quiz-direction">Từ tiếng Anh nào phù hợp nhất với nghĩa:</p>
-                  <h3 className="meaning-quiz-heading">{getDisplayMeaning(quizQuestion.target)}</h3>
+                  <h3 className="meaning-quiz-heading">{getWordPresentation(quizQuestion.target).meaning}</h3>
                   <div className="target-ipa">Loại từ: {quizQuestion.target.pos || quizQuestion.target.type || '—'}</div>
                 </div>
               ) : quizQuestion.type === 'cloze' ? (
                 <div className="en-quiz-prompt">
                   <p className="quiz-direction">Chọn từ phù hợp nhất với ngữ cảnh:</p>
                   <h3 className="cloze-quiz-heading">{quizQuestion.clozePrompt}</h3>
-                  <div className="target-ipa">{getDisplayMeaning(quizQuestion.target)}</div>
+                  <div className="target-ipa">{getWordPresentation(quizQuestion.target).meaning}</div>
                 </div>
               ) : (
                 <div className="en-quiz-prompt">
                   <h3 className="target-word-heading">{quizQuestion.target.word}</h3>
-                  <div className="target-ipa">{getDisplayIpa(quizQuestion.target.ipa, quizQuestion.target.word)} ({quizQuestion.target.pos})</div>
+                  <div className="target-ipa">{getWordPresentation(quizQuestion.target).ipa} ({quizQuestion.target.pos})</div>
                   <button 
                     className="listen-sound-btn" 
                     onClick={() => handleSpeak(quizQuestion.target.word)}
@@ -1006,7 +994,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                   >
                     <span className="opt-letter">{['A', 'B', 'C', 'D'][idx]}</span>
                     <span className="opt-text">
-                      {quizQuestion.type === 'en-to-vi' ? getDisplayMeaning(option) : option.word}
+                      {quizQuestion.type === 'en-to-vi' ? getWordPresentation(option).meaning : option.word}
                     </span>
                     {quizIsAnswered && isCorrect && <Check size={18} className="opt-status-icon" />}
                     {quizIsAnswered && isSelected && !isCorrect && <X size={18} className="opt-status-icon" />}
@@ -1018,7 +1006,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
             {quizIsAnswered && (
               <div className="quiz-answer-explanation" role="status">
                 <strong>{quizSelectedAnswer === quizQuestion.target.id ? 'Chính xác.' : 'Chưa đúng.'}</strong>
-                <span><b>{quizQuestion.target.word}</b> — {getDisplayMeaning(quizQuestion.target)}</span>
+                <span><b>{quizQuestion.target.word}</b> — {getWordPresentation(quizQuestion.target).meaning}</span>
                 <button onClick={() => openWordDetail(quizQuestion.target)}>Xem cách dùng và ví dụ</button>
               </div>
             )}

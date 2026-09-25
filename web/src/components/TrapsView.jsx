@@ -1,26 +1,39 @@
 // TrapsView.jsx - Sổ Tay Bẫy Lỗi Sai & 50 Cặp Từ/Cặp Âm Dễ Nhầm Lẫn
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   AlertTriangle, 
   Volume2, 
-  Lightbulb, 
   CheckCircle2, 
   XCircle, 
-  Sparkles, 
-  ArrowRight, 
-  HelpCircle,
-  BookOpen
+  HelpCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { trapItems, trapCategories } from '../data/trapsData';
 import { speakText } from '../utils/speechHelper';
-import { addXP } from '../utils/storage';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { loadLearningModuleSession, saveLearningModuleSession } from '../utils/learningModuleSessionStore';
 
-export default function TrapsView({ userData, onUpdateUserData }) {
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
-  const [activeTrapId, setActiveTrapId] = useState(trapItems[0].id);
-  const [quizAnswers, setQuizAnswers] = useState({}); // { [trapId]: selectedOptionIndex }
-  const [showExplanations, setShowExplanations] = useState({}); // { [trapId]: boolean }
+function loadInitialTrapsSession() {
+  const saved = loadLearningModuleSession('traps');
+  const selectedCategory = trapCategories.includes(saved.selectedCategory) ? saved.selectedCategory : 'Tất cả';
+  const categoryItems = trapItems.filter((item) => selectedCategory === 'Tất cả' || item.category === selectedCategory);
+  const activeTrapId = categoryItems.find((item) => String(item.id) === String(saved.activeTrapId))?.id
+    || categoryItems[0]?.id
+    || trapItems[0].id;
+  return {
+    selectedCategory,
+    activeTrapId,
+    quizAnswers: saved.quizAnswers && typeof saved.quizAnswers === 'object' ? saved.quizAnswers : {},
+    showExplanations: saved.showExplanations && typeof saved.showExplanations === 'object' ? saved.showExplanations : {},
+  };
+}
+
+export default function TrapsView({ onUpdateUserData }) {
+  const [initialSession] = useState(loadInitialTrapsSession);
+  const [selectedCategory, setSelectedCategory] = useState(initialSession.selectedCategory);
+  const [activeTrapId, setActiveTrapId] = useState(initialSession.activeTrapId);
+  const [quizAnswers, setQuizAnswers] = useState(initialSession.quizAnswers);
+  const [showExplanations, setShowExplanations] = useState(initialSession.showExplanations);
 
   const filteredTraps = trapItems.filter(item => {
     if (selectedCategory === 'Tất cả') return true;
@@ -29,6 +42,21 @@ export default function TrapsView({ userData, onUpdateUserData }) {
 
   const activeTrap = trapItems.find(t => t.id === activeTrapId) || trapItems[0];
 
+  useEffect(() => {
+    saveLearningModuleSession('traps', {
+      selectedCategory,
+      activeTrapId,
+      quizAnswers,
+      showExplanations,
+    });
+  }, [activeTrapId, quizAnswers, selectedCategory, showExplanations]);
+
+  const selectCategory = (category) => {
+    setSelectedCategory(category);
+    const first = trapItems.find((item) => category === 'Tất cả' || item.category === category);
+    if (first) setActiveTrapId(first.id);
+  };
+
   const handleSelectQuizOption = (trapId, optIndex, isCorrect) => {
     if (showExplanations[trapId]) return;
 
@@ -36,10 +64,20 @@ export default function TrapsView({ userData, onUpdateUserData }) {
     setShowExplanations(prev => ({ ...prev, [trapId]: true }));
 
     if (isCorrect) {
-      addXP(15);
+      const result = dispatchLearningEvent({
+        type: 'progress.completed',
+        source: 'traps',
+        payload: {
+          collection: 'completedTraps',
+          targetId: trapId,
+          xp: 15,
+          rewardKey: `traps:${trapId}`,
+        },
+      });
+      onUpdateUserData?.(result.userData);
       try {
         confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
-      } catch (e) {}
+      } catch {}
     }
   };
 
@@ -64,7 +102,7 @@ export default function TrapsView({ userData, onUpdateUserData }) {
           {trapCategories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => selectCategory(cat)}
               style={{
                 padding: '8px 16px',
                 borderRadius: '20px',

@@ -7,38 +7,45 @@ import {
   Pause, 
   SkipForward, 
   SkipBack, 
-  Repeat, 
   Clock, 
-  Volume2, 
-  Sparkles, 
-  Sliders, 
-  CheckCircle,
-  Moon
+  Moon,
+  Repeat2,
 } from 'lucide-react';
-import { speakText, speechHelper } from '../utils/speechHelper';
+import speechHelper from '../utils/speechHelper';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { loadLearningModuleSession, saveLearningModuleSession } from '../utils/learningModuleSessionStore';
 import AudioWave from './AudioWave';
 
-export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
-  const vocabList = vocabulary;
-  const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.topic).filter(Boolean))], [vocabList]);
-  const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabList.map((item) => item.level).filter(Boolean))], [vocabList]);
+export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [], onUpdateUserData }) {
+  const [initialSession] = useState(() => loadLearningModuleSession('audio-pod'));
+  const topics = React.useMemo(() => ['Tất cả', ...new Set(vocabulary.map((item) => item.topic).filter(Boolean))], [vocabulary]);
+  const levels = React.useMemo(() => ['Tất cả', ...new Set(vocabulary.map((item) => item.level).filter(Boolean))], [vocabulary]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedTopic, setSelectedTopic] = useState('Tất cả');
-  const [selectedLevel, setSelectedLevel] = useState('A1 (Cốt lõi)');
-  const [repeatMode, setRepeatMode] = useState(1); // 1 = 1 lần, 2 = lặp lại 2 lần mỗi từ
+  const [selectedTopic, setSelectedTopic] = useState(topics.includes(initialSession.selectedTopic) ? initialSession.selectedTopic : 'Tất cả');
+  const [selectedLevel, setSelectedLevel] = useState(levels.includes(initialSession.selectedLevel) ? initialSession.selectedLevel : levels.includes('A1') ? 'A1' : 'Tất cả');
+  const [repeatMode, setRepeatMode] = useState(['all', 'one', 'off'].includes(initialSession.repeatMode) ? initialSession.repeatMode : 'all');
   const [sleepTimerMinutes, setSleepTimerMinutes] = useState(0); // 0 = tắt
   const [sleepTimeRemaining, setSleepTimeRemaining] = useState(0);
 
   const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
-
-  const timerRef = useRef(null);
   const sleepTimerRef = useRef(null);
+  const cycleTimerRef = useRef(null);
+  const cycleTokenRef = useRef(0);
+  const restoredWordIdRef = useRef(initialSession.wordId);
+  const repeatModeRef = useRef(repeatMode);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    repeatModeRef.current = repeatMode;
+  }, [repeatMode]);
 
   // Lọc danh sách từ theo Topic & Level
   const playlist = React.useMemo(() => {
-    let list = vocabList;
+    let list = vocabulary;
     if (selectedLevel !== 'Tất cả') {
       const code = selectedLevel.split(' ')[0];
       list = list.filter(w => w.level === code);
@@ -47,71 +54,125 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
       list = list.filter(w => w.topic === selectedTopic);
     }
     return list;
-  }, [selectedTopic, selectedLevel]);
+  }, [selectedTopic, selectedLevel, vocabulary]);
 
   const currentWord = playlist[currentIndex] || playlist[0];
 
-  // Phát một từ vựng tuần tự (Anh -> Việt -> Ví dụ)
-  const playWordCycle = async (index) => {
-    if (!isPlayingRef.current || !playlist[index]) return;
+  useEffect(() => {
+    if (!playlist.length) return;
+    const restoredWordId = restoredWordIdRef.current;
+    if (restoredWordId != null) {
+      const restoredIndex = playlist.findIndex((item) => String(item.id ?? item.word) === String(restoredWordId));
+      restoredWordIdRef.current = null;
+      setCurrentIndex(restoredIndex >= 0 ? restoredIndex : 0);
+    } else if (currentIndex >= playlist.length) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, playlist]);
 
+  useEffect(() => {
+    saveLearningModuleSession('audio-pod', {
+      selectedTopic,
+      selectedLevel,
+      repeatMode,
+      wordId: currentWord?.id ?? currentWord?.word ?? null,
+    });
+  }, [currentWord?.id, currentWord?.word, repeatMode, selectedLevel, selectedTopic]);
+
+  const clearCycleTimer = () => {
+    if (cycleTimerRef.current) clearTimeout(cycleTimerRef.current);
+    cycleTimerRef.current = null;
+  };
+
+  const playWordCycle = (index, token = cycleTokenRef.current) => {
+    if (!isPlayingRef.current || !playlist[index] || token !== cycleTokenRef.current) return;
     const word = playlist[index];
+    const finishWord = () => {
+      if (!isPlayingRef.current || token !== cycleTokenRef.current) return;
+      const wordId = word.id ?? word.word;
+      const result = dispatchLearningEvent({
+        id: `audio-pod:${wordId}`,
+        type: 'progress.completed',
+        source: 'audio-pod',
+        payload: { collection: 'completedAudioWords', targetId: wordId, xp: 2, rewardKey: `audio-pod:${wordId}` },
+      });
+      onUpdateUserData?.(result.userData);
 
-    // 1. Đọc tiếng Anh
-    speakText(word.word, voiceSpeed);
-
-    // Chờ đọc xong từ tiếng Anh + delay
-    setTimeout(() => {
-      if (!isPlayingRef.current) return;
-
-      // 2. Chờ 1.5s rồi đọc câu ví dụ tiếng Anh
-      if (word.example) {
-        speakText(word.example, voiceSpeed);
-      }
-
-      // 3. Chờ tiếp và nhảy sang từ kế tiếp sau 4 giây
-      setTimeout(() => {
-        if (!isPlayingRef.current) return;
-
-        if (index < playlist.length - 1) {
-          setCurrentIndex(index + 1);
-          playWordCycle(index + 1);
-        } else {
-          // Lặp lại từ đầu
-          setCurrentIndex(0);
-          playWordCycle(0);
+      let nextIndex = index + 1;
+      if (repeatModeRef.current === 'one') nextIndex = index;
+      else if (nextIndex >= playlist.length) {
+        if (repeatModeRef.current === 'off') {
+          isPlayingRef.current = false;
+          setIsPlaying(false);
+          return;
         }
-      }, 4000);
-    }, 2000);
+        nextIndex = 0;
+      }
+      setCurrentIndex(nextIndex);
+      clearCycleTimer();
+      cycleTimerRef.current = setTimeout(() => playWordCycle(nextIndex, token), 700);
+    };
+    const speakExample = () => {
+      if (!isPlayingRef.current || token !== cycleTokenRef.current) return;
+      if (word.example) speechHelper.speak(word.example, { rate: voiceSpeed, onEnd: finishWord, onError: finishWord });
+      else finishWord();
+    };
+    speechHelper.speak(word.word, { rate: voiceSpeed, onEnd: speakExample, onError: speakExample });
   };
 
   const handleTogglePlay = () => {
     if (isPlaying) {
       setIsPlaying(false);
+      isPlayingRef.current = false;
+      cycleTokenRef.current += 1;
+      clearCycleTimer();
       speechHelper.stopSpeaking();
     } else {
+      if (!playlist.length) return;
       setIsPlaying(true);
       isPlayingRef.current = true;
-      playWordCycle(currentIndex);
+      cycleTokenRef.current += 1;
+      playWordCycle(currentIndex, cycleTokenRef.current);
     }
   };
 
   const handleNext = () => {
+    if (!playlist.length) return;
+    cycleTokenRef.current += 1;
+    clearCycleTimer();
     speechHelper.stopSpeaking();
     const nextIdx = (currentIndex + 1) % playlist.length;
     setCurrentIndex(nextIdx);
     if (isPlaying) {
-      setTimeout(() => playWordCycle(nextIdx), 300);
+      cycleTimerRef.current = setTimeout(() => playWordCycle(nextIdx, cycleTokenRef.current), 300);
     }
   };
 
   const handlePrev = () => {
+    if (!playlist.length) return;
+    cycleTokenRef.current += 1;
+    clearCycleTimer();
     speechHelper.stopSpeaking();
     const prevIdx = (currentIndex - 1 + playlist.length) % playlist.length;
     setCurrentIndex(prevIdx);
     if (isPlaying) {
-      setTimeout(() => playWordCycle(prevIdx), 300);
+      cycleTimerRef.current = setTimeout(() => playWordCycle(prevIdx, cycleTokenRef.current), 300);
     }
+  };
+
+  const changePlaylistFilter = (setter, value) => {
+    cycleTokenRef.current += 1;
+    clearCycleTimer();
+    speechHelper.stopSpeaking();
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+    setter(value);
+    setCurrentIndex(0);
+    restoredWordIdRef.current = null;
+  };
+
+  const cycleRepeatMode = () => {
+    setRepeatMode((current) => current === 'all' ? 'one' : current === 'one' ? 'off' : 'all');
   };
 
   // Sleep Timer logic
@@ -127,6 +188,9 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
           if (prev <= 1) {
             clearInterval(sleepTimerRef.current);
             setIsPlaying(false);
+            isPlayingRef.current = false;
+            cycleTokenRef.current += 1;
+            clearCycleTimer();
             speechHelper.stopSpeaking();
             return 0;
           }
@@ -139,6 +203,9 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isPlayingRef.current = false;
+      cycleTokenRef.current += 1;
+      clearCycleTimer();
       speechHelper.stopSpeaking();
       if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
     };
@@ -164,7 +231,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '16px' }}>
           <select 
             value={selectedLevel} 
-            onChange={(e) => { setSelectedLevel(e.target.value); setCurrentIndex(0); }}
+            onChange={(e) => changePlaylistFilter(setSelectedLevel, e.target.value)}
             className="filter-select"
             style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-soft)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
           >
@@ -173,7 +240,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
 
           <select 
             value={selectedTopic} 
-            onChange={(e) => { setSelectedTopic(e.target.value); setCurrentIndex(0); }}
+            onChange={(e) => changePlaylistFilter(setSelectedTopic, e.target.value)}
             className="filter-select"
             style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-soft)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
           >
@@ -256,11 +323,13 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
             )}
           </div>
         )}
+        {!currentWord && <div className="module-empty-state" role="status">Không có từ phù hợp với bộ lọc hiện tại. Hãy chọn cấp độ hoặc chủ đề khác.</div>}
 
         {/* Audio Player Controls */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', marginBottom: '32px' }}>
           <button
             onClick={handlePrev}
+            disabled={!playlist.length}
             style={{
               width: '48px',
               height: '48px',
@@ -280,6 +349,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
           {/* Big Play/Pause Button */}
           <button
             onClick={handleTogglePlay}
+            disabled={!playlist.length}
             style={{
               width: '76px',
               height: '76px',
@@ -300,6 +370,7 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
 
           <button
             onClick={handleNext}
+            disabled={!playlist.length}
             style={{
               width: '48px',
               height: '48px',
@@ -319,6 +390,15 @@ export default function AudioPodView({ voiceSpeed = 0.85, vocabulary = [] }) {
 
         {/* Sleep Timer Preset Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            onClick={cycleRepeatMode}
+            className="btn btn-outline"
+            aria-label={`Chế độ lặp: ${repeatMode}`}
+            title="Đổi chế độ lặp toàn bộ, một từ hoặc không lặp"
+            style={{ padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+          >
+            <Repeat2 size={15} /> {repeatMode === 'all' ? 'Lặp tất cả' : repeatMode === 'one' ? 'Lặp một từ' : 'Không lặp'}
+          </button>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginRight: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Clock size={16} /> Hẹn giờ tắt:
           </span>

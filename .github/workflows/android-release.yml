@@ -1,0 +1,86 @@
+name: Android Signed Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: Semantic version, for example 1.0.0
+        required: true
+        default: 1.0.0
+        type: string
+      version_code:
+        description: Monotonically increasing Play version code
+        required: true
+        default: "1"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  signed-release:
+    environment: production
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_BASE_URL: https://lingogoc-api.lingogoc-api.workers.dev
+      VITE_SPEAKING_AUTO_LISTEN: "true"
+      LINGOGOC_VERSION_NAME: ${{ inputs.version_name }}
+      LINGOGOC_VERSION_CODE: ${{ inputs.version_code }}
+      LINGOGOC_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      LINGOGOC_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      LINGOGOC_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+        working-directory: web
+
+      - name: Validate release configuration
+        working-directory: web
+        run: npm run test:android-release
+
+      - name: Materialize signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          test -n "$LINGOGOC_KEYSTORE_PASSWORD"
+          test -n "$LINGOGOC_KEY_ALIAS"
+          test -n "$LINGOGOC_KEY_PASSWORD"
+          KEYSTORE_PATH="$RUNNER_TEMP/lingogoc-release.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          echo "LINGOGOC_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Build signed AAB and APK
+        working-directory: app
+        run: ./gradlew bundleRelease assembleRelease --console=plain
+
+      - name: Create checksums
+        working-directory: app
+        run: sha256sum app/build/outputs/bundle/release/app-release.aab app/build/outputs/apk/release/app-release.apk > app/build/outputs/release-sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lingogoc-android-${{ inputs.version_name }}-${{ inputs.version_code }}
+          path: |
+            app/app/build/outputs/bundle/release/app-release.aab
+            app/app/build/outputs/apk/release/app-release.apk
+            app/app/build/outputs/release-sha256.txt
+            app/RELEASE_NOTES.md
+            app/PRIVACY.md
+          if-no-files-found: error
+          retention-days: 30

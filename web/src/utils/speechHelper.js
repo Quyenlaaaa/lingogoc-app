@@ -43,8 +43,19 @@ export class SpeechHelper {
     this.nativeSpeechSequence = 0;
     this.nativeRecognitionCallbacks = new Map();
     this.nativeRecognitionSequence = 0;
+    this.recognitionSequence = 0;
+    this.recognitionTimer = null;
     this.audioRequestId = 0;
     this.keepAliveTimer = null;
+    this.playbackTimer = null;
+    this.playbackSequence = 0;
+    this.activePlaybackId = null;
+    this.lastPlaybackRequest = null;
+    this.stateListeners = new Set();
+    this.state = {
+      playback: { status: 'idle', requestId: null, source: null, text: '', error: null, retryable: false },
+      recognition: { status: 'idle', requestId: null, error: null, retryable: false },
+    };
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     this.mobileDevice = typeof navigator !== 'undefined' && (
       /iPhone|iPad|iPod|Android|Mobile|webOS/i.test(userAgent) ||
@@ -65,12 +76,22 @@ export class SpeechHelper {
         this.nativeSpeechCallbacks.delete(String(requestId));
         if (this.activeNativeSpeechId === String(requestId)) this.activeNativeSpeechId = null;
         if (status === 'done') callbacks.onEnd?.({ type: 'end', native: true });
+        else if (status === 'cancelled') {
+          this.clearPlaybackTimeout();
+          this.updatePlayback(callbacks._playbackId, {
+            status: 'cancelled', error: 'audio-interrupted', retryable: true,
+          });
+          callbacks.onCancel?.({ type: 'cancel', native: true });
+        }
         else callbacks.onError?.({ error: 'native-speech-error', native: true });
       };
       window.__lingogocNativeRecognitionEvent = (requestId, status, transcript = '', error = '') => {
         const callbacks = this.nativeRecognitionCallbacks.get(String(requestId));
         if (!callbacks) return;
         if (status === 'partial' || status === 'final') {
+          this.updateState('recognition', {
+            status: 'listening', requestId: String(requestId), error: null, retryable: false,
+          });
           callbacks.onResult?.({
             final: status === 'final' ? String(transcript).trim() : '',
             interim: status === 'partial' ? String(transcript).trim() : '',
@@ -78,14 +99,120 @@ export class SpeechHelper {
           });
           return;
         }
-        if (status === 'error') callbacks.onError?.(error || 'recognition-error');
+        if (status === 'error') {
+          this.clearRecognitionTimeout();
+          this.updateState('recognition', {
+            status: 'error', requestId: String(requestId), error: error || 'recognition-error', retryable: true,
+          });
+          callbacks.onError?.(error || 'recognition-error');
+        }
         if (status === 'end') {
+          this.clearRecognitionTimeout();
           this.nativeRecognitionCallbacks.delete(String(requestId));
           this.isListening = false;
+          if (this.state.recognition.status !== 'error') {
+            this.updateState('recognition', {
+              status: 'completed', requestId: String(requestId), error: null, retryable: false,
+            });
+          }
           callbacks.onEnd?.();
         }
       };
+      const stopForPageLifecycle = () => {
+        this.stopSpeaking('page-hidden');
+        this.recognition?.abort?.();
+      };
+      window.addEventListener?.('pagehide', stopForPageLifecycle);
+      if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stopForPageLifecycle();
+        });
+      }
     }
+  }
+
+  getState() {
+    return {
+      playback: { ...this.state.playback },
+      recognition: { ...this.state.recognition },
+    };
+  }
+
+  subscribe(listener) {
+    if (typeof listener !== 'function') return () => {};
+    this.stateListeners.add(listener);
+    listener(this.getState());
+    return () => this.stateListeners.delete(listener);
+  }
+
+  updateState(channel, patch) {
+    this.state[channel] = { ...this.state[channel], ...patch };
+    const snapshot = this.getState();
+    this.stateListeners.forEach((listener) => {
+      try {
+        listener(snapshot);
+      } catch {
+        // A UI observer must never interrupt speech playback or recognition.
+      }
+    });
+  }
+
+  updatePlayback(requestId, patch) {
+    if (requestId !== this.activePlaybackId) return;
+    this.updateState('playback', patch);
+  }
+
+  clearPlaybackTimeout() {
+    if (!this.playbackTimer) return;
+    clearTimeout(this.playbackTimer);
+    this.playbackTimer = null;
+  }
+
+  clearRecognitionTimeout() {
+    if (!this.recognitionTimer) return;
+    clearTimeout(this.recognitionTimer);
+    this.recognitionTimer = null;
+  }
+
+  armRecognitionTimeout(requestId, abort, timeoutMs = 60000) {
+    this.clearRecognitionTimeout();
+    this.recognitionTimer = setTimeout(() => {
+      this.recognitionTimer = null;
+      if (this.state.recognition.requestId !== requestId || this.state.recognition.status !== 'listening') return;
+      try {
+        abort?.();
+      } catch {
+        // The state below still exposes a retry action when an engine hangs.
+      }
+      this.isListening = false;
+      this.updateState('recognition', {
+        status: 'error', requestId, error: 'recognition-timeout', retryable: true,
+      });
+    }, timeoutMs);
+  }
+
+  armPlaybackTimeout(requestId, onTimeout, timeoutMs = 15000) {
+    this.clearPlaybackTimeout();
+    this.playbackTimer = setTimeout(() => {
+      this.playbackTimer = null;
+      if (requestId !== this.activePlaybackId || this.state.playback.status !== 'loading') return;
+      onTimeout?.();
+    }, timeoutMs);
+  }
+
+  retryLastSpeech() {
+    if (this.lastPlaybackRequest?.type === 'speech' && this.lastPlaybackRequest.text) {
+      return this.speak(this.lastPlaybackRequest.text, { ...this.lastPlaybackRequest.options });
+    }
+    if (this.lastPlaybackRequest?.type === 'audio' && this.lastPlaybackRequest.audioUrl) {
+      this.playAudioUrl(
+        this.lastPlaybackRequest.audioUrl,
+        this.lastPlaybackRequest.playbackRate,
+        { ...this.lastPlaybackRequest.options },
+      );
+      return true;
+    }
+    return false;
   }
 
   initVoices() {
@@ -158,16 +285,99 @@ export class SpeechHelper {
     return this.audio;
   }
 
+  preloadAudioUrl(audioUrl) {
+    const audio = this.getAudio();
+    if (!audio || !audioUrl || audio.src === audioUrl) return;
+    audio.src = audioUrl;
+    try {
+      audio.load();
+    } catch {
+      // Preloading is optional; playAudioUrl reports actual playback failures.
+    }
+  }
+
+  playAudioUrl(audioUrl, playbackRate = 1, options = {}) {
+    const audio = this.getAudio();
+    if (!audio || !audioUrl) return Promise.resolve(false);
+
+    this.stopSpeaking('replaced');
+    this.lastPlaybackRequest = { type: 'audio', audioUrl, playbackRate, options: { ...options } };
+    const playbackId = ++this.playbackSequence;
+    const requestId = ++this.audioRequestId;
+    this.activePlaybackId = playbackId;
+    this.activeAudio = audio;
+    this.updateState('playback', {
+      status: 'loading', requestId: playbackId, source: 'external-audio', text: '', error: null, retryable: false,
+    });
+
+    const fail = (error) => {
+      if (this.activePlaybackId !== playbackId || this.audioRequestId !== requestId) return false;
+      this.clearPlaybackTimeout();
+      this.activeAudio = null;
+      this.updatePlayback(playbackId, {
+        status: 'error', error: error?.message || error?.error || 'audio-playback-error', retryable: true,
+      });
+      options.onError?.(error);
+      return false;
+    };
+
+    audio.onplay = (event) => {
+      if (this.activePlaybackId !== playbackId || this.audioRequestId !== requestId) return;
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'playing' });
+      options.onStart?.(event);
+    };
+    audio.onended = (event) => {
+      if (this.activePlaybackId !== playbackId || this.audioRequestId !== requestId) return;
+      this.clearPlaybackTimeout();
+      this.activeAudio = null;
+      this.updatePlayback(playbackId, { status: 'completed', retryable: false });
+      this.activePlaybackId = null;
+      options.onEnd?.(event);
+    };
+    audio.onerror = fail;
+
+    try {
+      audio.pause();
+      if (audio.src !== audioUrl) {
+        audio.src = audioUrl;
+        audio.load();
+      }
+      audio.currentTime = 0;
+      audio.playbackRate = Math.min(2, Math.max(0.5, playbackRate || 1));
+      audio.defaultPlaybackRate = audio.playbackRate;
+      const playResult = audio.play();
+      this.armPlaybackTimeout(playbackId, () => fail({ error: 'speech-start-timeout' }));
+      return Promise.resolve(playResult).then(() => true).catch(fail);
+    } catch (error) {
+      return Promise.resolve(fail(error));
+    }
+  }
+
   speakWithNativeVoice(text, options, profile) {
     const bridge = typeof window !== 'undefined' ? window.LingoGocNative : null;
     if (!bridge || typeof bridge.speak !== 'function') return false;
 
-    this.stopSpeaking();
+    const playbackId = options._playbackId;
+    this.updatePlayback(playbackId, { status: 'loading', source: 'android-native', error: null, retryable: false });
     const requestId = `speech-${Date.now()}-${++this.nativeSpeechSequence}`;
     this.nativeSpeechCallbacks.set(requestId, {
       ...options,
+      onStart: (event) => {
+        this.clearPlaybackTimeout();
+        this.updatePlayback(playbackId, { status: 'playing' });
+        options.onStart?.(event);
+      },
+      onEnd: (event) => {
+        this.clearPlaybackTimeout();
+        this.updatePlayback(playbackId, { status: 'completed', retryable: false });
+        this.activePlaybackId = null;
+        options.onEnd?.(event);
+      },
       onError: (event) => {
         if (!this.speakWithBackendAudio(text, { ...options, voicePreset: 'auto', fallbackError: event })) {
+          this.clearPlaybackTimeout();
+          this.updatePlayback(playbackId, { status: 'error', error: 'native-speech-error', retryable: true });
           options.onError?.(event);
         }
       },
@@ -182,7 +392,22 @@ export class SpeechHelper {
         options.pitch ?? profile.pitch,
         requestId,
       );
-      if (accepted) return true;
+      if (accepted) {
+        this.armPlaybackTimeout(playbackId, () => {
+          this.nativeSpeechCallbacks.delete(requestId);
+          if (this.activeNativeSpeechId === requestId) this.activeNativeSpeechId = null;
+          try {
+            bridge.stopSpeech?.();
+          } catch {
+            // Ignore native bridge shutdown races.
+          }
+          if (!this.speakWithBackendAudio(text, { ...options, voicePreset: 'auto' })) {
+            this.updatePlayback(playbackId, { status: 'error', error: 'speech-start-timeout', retryable: true });
+            options.onError?.({ error: 'speech-start-timeout' });
+          }
+        });
+        return true;
+      }
     } catch {
       // Continue with the browser speech engine below.
     }
@@ -196,7 +421,8 @@ export class SpeechHelper {
     const audio = this.getAudio();
     if (!audio || !hasBackendApi()) return false;
 
-    this.stopSpeaking();
+    const playbackId = options._playbackId;
+    this.updatePlayback(playbackId, { status: 'loading', source: 'backend-audio', error: null, retryable: false });
     const requestId = ++this.audioRequestId;
     this.activeAudio = audio;
     let fallbackStarted = false;
@@ -208,6 +434,7 @@ export class SpeechHelper {
     const fallbackToBrowserVoice = (error) => {
       if (fallbackStarted || this.activeAudio !== audio || this.audioRequestId !== requestId) return;
       fallbackStarted = true;
+      this.clearPlaybackTimeout();
       clearAudioCallbacks();
       this.activeAudio = null;
       try {
@@ -219,12 +446,18 @@ export class SpeechHelper {
     };
 
     audio.onplay = (event) => {
-      if (this.activeAudio === audio && this.audioRequestId === requestId) options.onStart?.(event);
+      if (this.activeAudio !== audio || this.audioRequestId !== requestId) return;
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'playing' });
+      options.onStart?.(event);
     };
     audio.onended = (event) => {
       if (this.activeAudio !== audio || this.audioRequestId !== requestId) return;
       clearAudioCallbacks();
       this.activeAudio = null;
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'completed', retryable: false });
+      this.activePlaybackId = null;
       options.onEnd?.(event);
     };
     audio.onerror = (event) => fallbackToBrowserVoice(event);
@@ -241,6 +474,7 @@ export class SpeechHelper {
       // user-activation token while the browser downloads the audio stream.
       const playResult = audio.play();
       Promise.resolve(playResult).catch(fallbackToBrowserVoice);
+      this.armPlaybackTimeout(playbackId, () => fallbackToBrowserVoice({ error: 'speech-start-timeout' }));
       return true;
     } catch (error) {
       fallbackToBrowserVoice(error);
@@ -269,30 +503,44 @@ export class SpeechHelper {
   speak(text, options = {}) {
     const cleanText = String(text || '').trim();
     if (!cleanText) {
+      this.updateState('playback', {
+        status: 'error', requestId: null, source: null, text: '', error: 'empty-speech-text', retryable: false,
+      });
       options.onError?.({ error: 'speech-synthesis-not-supported' });
       return false;
     }
 
+    this.stopSpeaking('replaced');
+    const playbackId = ++this.playbackSequence;
+    const publicOptions = { ...options };
+    delete publicOptions._playbackId;
+    this.lastPlaybackRequest = { type: 'speech', text: cleanText, options: publicOptions };
+    this.activePlaybackId = playbackId;
+    this.updateState('playback', {
+      status: 'loading', requestId: playbackId, source: null, text: cleanText, error: null, retryable: false,
+    });
+    const trackedOptions = { ...options, _playbackId: playbackId };
     const preset = normalizeVoicePreset(options.voicePreset ?? this.voicePreset);
     const profile = VOICE_PROFILES[preset];
 
     // The backend stream is the most reliable option on mobile, but it exposes
     // only one voice. Named presets therefore use the device voice engine.
-    if (!options.browserOnly && preset === 'auto' && this.speakWithBackendAudio(cleanText, options)) {
+    if (!options.browserOnly && preset === 'auto' && this.speakWithBackendAudio(cleanText, trackedOptions)) {
       return true;
     }
 
-    if (!options.browserOnly && preset !== 'auto' && this.speakWithNativeVoice(cleanText, options, profile)) {
+    if (!options.browserOnly && preset !== 'auto' && this.speakWithNativeVoice(cleanText, trackedOptions, profile)) {
       return true;
     }
 
     if (!this.synth || typeof SpeechSynthesisUtterance === 'undefined') {
-      if (!options.browserOnly && this.speakWithBackendAudio(cleanText, options)) return true;
+      if (!options.browserOnly && this.speakWithBackendAudio(cleanText, trackedOptions)) return true;
+      this.updatePlayback(playbackId, { status: 'error', error: 'speech-synthesis-not-supported', retryable: true });
       options.onError?.(options.fallbackError || { error: 'speech-synthesis-not-supported' });
       return false;
     }
 
-    this.stopSpeaking();
+    this.updatePlayback(playbackId, { status: 'loading', source: 'browser-synthesis', error: null, retryable: false });
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = options.lang || 'en-US';
@@ -306,6 +554,8 @@ export class SpeechHelper {
 
     utterance.onstart = (event) => {
       if (this.activeUtterance !== utterance) return;
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'playing' });
       this.startKeepAlive(utterance);
       options.onStart?.(event);
     };
@@ -314,6 +564,9 @@ export class SpeechHelper {
       if (this.activeUtterance !== utterance) return;
       this.activeUtterance = null;
       this.clearKeepAlive();
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'completed', retryable: false });
+      this.activePlaybackId = null;
       options.onEnd?.(event);
     };
 
@@ -321,11 +574,13 @@ export class SpeechHelper {
       if (this.activeUtterance !== utterance) return;
       this.activeUtterance = null;
       this.clearKeepAlive();
+      this.clearPlaybackTimeout();
       if (!options.browserOnly && preset !== 'auto' && this.speakWithBackendAudio(cleanText, {
-        ...options,
+        ...trackedOptions,
         voicePreset: 'auto',
         fallbackError: event,
       })) return;
+      this.updatePlayback(playbackId, { status: 'error', error: event?.error || 'speech-synthesis-error', retryable: true });
       options.onError?.(event);
     };
 
@@ -333,17 +588,33 @@ export class SpeechHelper {
     try {
       if (this.synth.paused) this.synth.resume();
       this.synth.speak(utterance);
+      this.armPlaybackTimeout(playbackId, () => {
+        if (this.activeUtterance !== utterance) return;
+        this.activeUtterance = null;
+        this.clearKeepAlive();
+        try {
+          this.synth.cancel();
+        } catch {
+          // Ignore engines that throw while cancelling a timed-out utterance.
+        }
+        this.updatePlayback(playbackId, { status: 'error', error: 'speech-start-timeout', retryable: true });
+        options.onError?.({ error: 'speech-start-timeout' });
+      });
       return true;
     } catch (error) {
       this.activeUtterance = null;
       this.clearKeepAlive();
+      this.clearPlaybackTimeout();
+      this.updatePlayback(playbackId, { status: 'error', error: error?.message || 'speech-synthesis-error', retryable: true });
       options.onError?.(error);
       return false;
     }
   }
 
-  stopSpeaking() {
+  stopSpeaking(reason = 'cancelled') {
     this.clearKeepAlive();
+    this.clearPlaybackTimeout();
+    const stoppedPlaybackId = this.activePlaybackId;
     if (this.activeNativeSpeechId) {
       this.nativeSpeechCallbacks.delete(this.activeNativeSpeechId);
       this.activeNativeSpeechId = null;
@@ -369,12 +640,17 @@ export class SpeechHelper {
     }
     const shouldCancel = Boolean(this.activeUtterance || this.synth?.speaking || this.synth?.pending);
     this.activeUtterance = null;
-    if (!this.synth || !shouldCancel) return;
-    try {
-      this.synth.cancel();
-    } catch {
-      // Ignore engines that throw while already idle.
+    if (this.synth && shouldCancel) {
+      try {
+        this.synth.cancel();
+      } catch {
+        // Ignore engines that throw while already idle.
+      }
     }
+    if (stoppedPlaybackId === this.activePlaybackId && ['loading', 'playing'].includes(this.state.playback.status)) {
+      this.updatePlayback(stoppedPlaybackId, { status: 'cancelled', error: reason, retryable: reason !== 'replaced' });
+    }
+    this.activePlaybackId = null;
   }
 
   // Speech to Text (Microphone)
@@ -383,22 +659,50 @@ export class SpeechHelper {
     if (nativeBridge && typeof nativeBridge.startListening === 'function') {
       let requestId = null;
       const helper = this;
-      return {
+      const recognition = {
         lang: 'en-US',
         start() {
           requestId = `recognition-${Date.now()}-${++helper.nativeRecognitionSequence}`;
-          helper.nativeRecognitionCallbacks.set(requestId, { onResult, onError, onEnd });
-          nativeBridge.startListening(requestId, this.lang || 'en-US');
-          helper.isListening = true;
+          helper.nativeRecognitionCallbacks.set(requestId, {
+            onResult,
+            onError,
+            onEnd: () => {
+              requestId = null;
+              if (helper.recognition === recognition) helper.recognition = null;
+              onEnd?.();
+            },
+          });
+          try {
+            nativeBridge.startListening(requestId, this.lang || 'en-US');
+            helper.isListening = true;
+            helper.updateState('recognition', {
+              status: 'listening', requestId, error: null, retryable: false,
+            });
+            helper.armRecognitionTimeout(requestId, () => nativeBridge.stopListening?.(requestId));
+          } catch (error) {
+            helper.nativeRecognitionCallbacks.delete(requestId);
+            helper.isListening = false;
+            helper.updateState('recognition', {
+              status: 'error', requestId, error: error?.message || 'recognition-start-error', retryable: true,
+            });
+            onError?.(error?.message || 'recognition-start-error');
+          }
         },
         abort() {
           if (!requestId) return;
+          helper.clearRecognitionTimeout();
           nativeBridge.stopListening?.(requestId);
           helper.nativeRecognitionCallbacks.delete(requestId);
           helper.isListening = false;
+          helper.updateState('recognition', {
+            status: 'cancelled', requestId, error: 'cancelled', retryable: true,
+          });
           requestId = null;
+          if (helper.recognition === recognition) helper.recognition = null;
         },
       };
+      this.recognition = recognition;
+      return recognition;
     }
 
     const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -431,14 +735,56 @@ export class SpeechHelper {
 
     recognition.onerror = (event) => {
       console.warn('Speech recognition error:', event.error);
+      this.clearRecognitionTimeout();
+      this.updateState('recognition', {
+        status: 'error', requestId: recognition._lingogocRequestId, error: event.error || 'recognition-error', retryable: true,
+      });
       onError?.(event.error);
     };
 
     recognition.onend = () => {
+      this.clearRecognitionTimeout();
       this.isListening = false;
+      if (this.recognition === recognition) this.recognition = null;
+      if (this.state.recognition.status !== 'error') {
+        this.updateState('recognition', {
+          status: 'completed', requestId: recognition._lingogocRequestId, error: null, retryable: false,
+        });
+      }
       onEnd?.();
     };
 
+    const nativeStart = recognition.start.bind(recognition);
+    const nativeAbort = recognition.abort?.bind(recognition);
+    recognition.start = () => {
+      const requestId = `recognition-web-${++this.recognitionSequence}`;
+      recognition._lingogocRequestId = requestId;
+      try {
+        nativeStart();
+        this.isListening = true;
+        this.updateState('recognition', {
+          status: 'listening', requestId, error: null, retryable: false,
+        });
+        this.armRecognitionTimeout(requestId, nativeAbort);
+      } catch (error) {
+        this.isListening = false;
+        this.updateState('recognition', {
+          status: 'error', requestId, error: error?.message || 'recognition-start-error', retryable: true,
+        });
+        throw error;
+      }
+    };
+    recognition.abort = () => {
+      const requestId = recognition._lingogocRequestId;
+      this.clearRecognitionTimeout();
+      nativeAbort?.();
+      this.isListening = false;
+      this.updateState('recognition', {
+        status: 'cancelled', requestId, error: 'cancelled', retryable: true,
+      });
+    };
+
+    this.recognition = recognition;
     return recognition;
   }
 

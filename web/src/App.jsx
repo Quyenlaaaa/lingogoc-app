@@ -1,5 +1,5 @@
 // App.jsx - Main Application Coordinator for LingoGoc AI
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import Navbar from './components/Navbar';
 import RoadmapView from './components/RoadmapView';
 import IpaView from './components/IpaView';
@@ -10,45 +10,49 @@ import ProgressView from './components/ProgressView';
 import DiagnosticTestView from './components/DiagnosticTestView';
 import SmartReviewView from './components/SmartReviewView';
 import BattleView from './components/BattleView';
-import LeaderboardView from './components/LeaderboardView';
 import AudioPodView from './components/AudioPodView';
 import CertificateView from './components/CertificateView';
 import DictationView from './components/DictationView';
 import TrapsView from './components/TrapsView';
-import VipUpgradeModal from './components/VipUpgradeModal';
 import SettingsModal from './components/SettingsModal';
+import SpeechStatus from './components/SpeechStatus';
 import ItCareerView from './components/ItCareerView';
 import { loadUserData, saveUserData } from './utils/storage';
 import { getSrsStats } from './utils/srsEngine';
-import { loadBundledSystemVocabulary, refreshSystemVocabulary } from './utils/systemVocabularyService';
+import { loadBestAvailableSystemVocabulary, refreshSystemVocabulary } from './utils/systemVocabularyService';
 import speechHelper from './utils/speechHelper';
+import { loadOrCreateGuestIdentity } from './utils/guestIdentity';
+import NetworkStatus from './components/NetworkStatus';
+
+const VocabularyAdminView = lazy(() => import('./components/VocabularyAdminView'));
 
 export default function App() {
-  const [userData, setUserData] = useState(() => loadUserData());
-  const [activeTab, setActiveTab] = useState('roadmap');
-  const [voiceSpeed, setVoiceSpeed] = useState(0.85);
-  const [theme, setTheme] = useState('dark');
-  const [dueSrsCount, setDueSrsCount] = useState(0);
+  const [userData, setUserData] = useState(() => {
+    loadOrCreateGuestIdentity();
+    return loadUserData();
+  });
+  const [activeTab, setActiveTab] = useState(() => (
+    new URLSearchParams(window.location.search).get('admin') === '1' ? 'vocab-admin' : 'roadmap'
+  ));
+  const [voiceSpeed, setVoiceSpeed] = useState(() => userData?.settings?.voiceSpeed || 0.85);
+  const [theme, setTheme] = useState(() => userData?.settings?.theme || 'dark');
   const [vocabulary, setVocabulary] = useState([]);
+  const dueSrsCount = useMemo(
+    () => (vocabulary.length ? getSrsStats(vocabulary).dueCount || 0 : 0),
+    [vocabulary],
+  );
 
   // Modals
-  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // The learning catalog is fully managed by the application. Learners always
   // receive the same curated system vocabulary on every device.
   useEffect(() => {
-    if (userData?.settings) {
-      if (userData.settings.theme) setTheme(userData.settings.theme);
-      if (userData.settings.voiceSpeed) setVoiceSpeed(userData.settings.voiceSpeed);
-      speechHelper.setVoicePreset(userData.settings.voicePreset || 'auto');
-    }
-
     let active = true;
-    loadBundledSystemVocabulary().then((words) => {
+    loadBestAvailableSystemVocabulary().then(({ words, contentHash }) => {
       if (!active) return;
       setVocabulary(words);
-      refreshSystemVocabulary(words).then((updatedWords) => {
+      refreshSystemVocabulary(words, 4000, contentHash).then((updatedWords) => {
         if (active && updatedWords) setVocabulary(updatedWords);
       });
     });
@@ -56,10 +60,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!vocabulary.length) return;
-    const stats = getSrsStats(vocabulary);
-    setDueSrsCount(stats.dueCount || 0);
-  }, [vocabulary]);
+    speechHelper.setVoicePreset(userData?.settings?.voicePreset || 'auto');
+  }, [userData?.settings?.voicePreset]);
 
   // Update theme class on body
   useEffect(() => {
@@ -71,8 +73,6 @@ export default function App() {
     speechHelper.setVoicePreset(newData?.settings?.voicePreset || 'auto');
     setUserData(newData);
     saveUserData(newData);
-    const stats = getSrsStats(vocabulary);
-    setDueSrsCount(stats.dueCount || 0);
   };
 
   // Toggle Voice Speed between 0.75x (slow for beginners) and 1.0x (normal)
@@ -125,6 +125,7 @@ export default function App() {
 
   return (
     <div className={`app-root ${theme}-theme`}>
+      <NetworkStatus />
       {/* Top Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -135,13 +136,17 @@ export default function App() {
         theme={theme}
         onToggleTheme={handleToggleTheme}
         dueSrsCount={dueSrsCount}
-        onOpenVipModal={() => setIsVipModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
       />
 
       {/* Main View Screen Container */}
       <main className="app-main-content">
         <div className="content-max-width">
+          {activeTab === 'vocab-admin' && (
+            <Suspense fallback={<p>Đang tải công cụ quản trị…</p>}>
+              <VocabularyAdminView />
+            </Suspense>
+          )}
           {activeTab === 'roadmap' && (
             <RoadmapView 
               setActiveTab={setActiveTab} 
@@ -153,10 +158,7 @@ export default function App() {
           {activeTab === 'diagnostic' && (
             <DiagnosticTestView
               onSelectStage={handleSelectStage}
-              onCompleteTest={(res) => {
-                const stats = getSrsStats(vocabulary);
-                setDueSrsCount(stats.dueCount);
-              }}
+              onCompleteTest={() => setUserData(loadUserData())}
             />
           )}
 
@@ -179,7 +181,9 @@ export default function App() {
 
           {activeTab === 'srs' && (
             <SmartReviewView
+              key={vocabulary.length}
               onBackToVocab={() => setActiveTab('vocab')}
+              onUpdateUserData={handleUpdateUserData}
               vocabulary={vocabulary}
             />
           )}
@@ -188,15 +192,7 @@ export default function App() {
             <BattleView
               userData={userData}
               onUpdateUserData={handleUpdateUserData}
-              onGoToLeaderboard={() => setActiveTab('leaderboard')}
               vocabulary={vocabulary}
-            />
-          )}
-
-          {activeTab === 'leaderboard' && (
-            <LeaderboardView
-              userData={userData}
-              onGoToBattle={() => setActiveTab('battle')}
             />
           )}
 
@@ -204,6 +200,7 @@ export default function App() {
             <AudioPodView
               voiceSpeed={voiceSpeed}
               vocabulary={vocabulary}
+              onUpdateUserData={handleUpdateUserData}
             />
           )}
 
@@ -273,22 +270,14 @@ export default function App() {
         </div>
       </footer>
 
-      {/* VIP Upgrade Modal with VietQR */}
-      <VipUpgradeModal
-        isOpen={isVipModalOpen}
-        onClose={() => setIsVipModalOpen(false)}
-        userData={userData}
-        onUpdateUserData={handleUpdateUserData}
-      />
-
       {/* User Settings & Data Backup Modal */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         userData={userData}
         onUpdateUserData={handleUpdateUserData}
-        onOpenVipModal={() => setIsVipModalOpen(true)}
       />
+      <SpeechStatus />
     </div>
   );
 }

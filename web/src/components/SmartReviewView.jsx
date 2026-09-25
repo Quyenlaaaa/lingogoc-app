@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
-  Sparkles, CheckCircle, RotateCw, Volume2, Mic, MicOff, 
-  ArrowRight, Calendar, Brain, Award, ChevronRight, Zap
+  RotateCw, Volume2, Mic, MicOff, ArrowRight, Brain, Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { getDueWords, recordWordReview, getSrsStats } from '../utils/srsEngine';
+import { getDueWords, getSrsGradeOptions, getSrsStats } from '../utils/srsEngine';
 import { speakText, startSpeechRecognition } from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
-import { addXP } from '../utils/storage';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { getVocabularyPresentation } from '../utils/vocabularyPresentation';
 
-export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
-  const [dueList, setDueList] = useState([]);
+export default function SmartReviewView({ onBackToVocab, onUpdateUserData, vocabulary = [] }) {
+  const sessionId = useRef(crypto.randomUUID());
+  const [dueList, setDueList] = useState(() => getDueWords(vocabulary, 15));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewedCount, setReviewedCount] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [srsStats, setSrsStats] = useState({ dueCount: 0, learningCount: 0, matureCount: 0, totalTracked: 0 });
+  const [isCompleted, setIsCompleted] = useState(() => getDueWords(vocabulary, 15).length === 0);
+  const [srsStats, setSrsStats] = useState(() => getSrsStats(vocabulary));
 
   // Speaking state
   const [isRecording, setIsRecording] = useState(false);
@@ -34,11 +35,9 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
     setSrsStats(getSrsStats(vocabulary));
   };
 
-  useEffect(() => {
-    refreshCards();
-  }, []);
-
   const currentWord = dueList[currentIndex];
+  const presentation = currentWord ? getVocabularyPresentation(currentWord) : null;
+  const gradeOptions = getSrsGradeOptions(currentWord?.srsRecord);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -82,9 +81,13 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
   const handleGrade = (quality) => {
     if (!currentWord) return;
 
-    // Record review with SM-2 algorithm
-    recordWordReview(currentWord.id, quality);
-    addXP(10); // 10 XP per review
+    const result = dispatchLearningEvent({
+      id: `smart-review:${sessionId.current}:${currentWord.id}`,
+      type: 'word.reviewed',
+      source: 'smart-review',
+      payload: { wordId: currentWord.id, quality, xp: 10 },
+    });
+    onUpdateUserData?.(result.userData);
 
     // Reset card state
     setIsFlipped(false);
@@ -103,7 +106,7 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
           spread: 80,
           origin: { y: 0.6 }
         });
-      } catch (e) {}
+      } catch {}
     }
   };
 
@@ -240,7 +243,7 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
             {currentWord.word}
           </h1>
           <div style={{ fontSize: '1.3rem', color: '#818cf8', fontFamily: 'monospace', marginBottom: '16px' }}>
-            {currentWord.ipa}
+            {presentation.ipa}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', alignItems: 'center' }}>
@@ -291,14 +294,14 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#10b981', marginBottom: '8px' }}>
-              {currentWord.meaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({currentWord.type})</span>
+              {presentation.meaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({currentWord.type})</span>
             </div>
-            {currentWord.example && (
+            {presentation.primaryExample && (
               <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                <div style={{ fontStyle: 'italic', color: 'var(--text-primary)' }}>"{currentWord.example}"</div>
-                {currentWord.exampleMeaning && (
+                <div style={{ fontStyle: 'italic', color: 'var(--text-primary)' }}>"{presentation.primaryExample.en}"</div>
+                {presentation.primaryExample.vi && (
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                    {currentWord.exampleMeaning}
+                    {presentation.primaryExample.vi}
                   </div>
                 )}
               </div>
@@ -319,90 +322,34 @@ export default function SmartReviewView({ onBackToVocab, vocabulary = [] }) {
 
       {/* 4 SM-2 Grading Buttons (Only visible after flip) */}
       {isFlipped && (
-        <div className="animate-fade-in" style={{
+        <div className="animate-fade-in srs-grade-options" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '12px'
         }}>
-          <button
-            onClick={() => handleGrade(1)}
-            style={{
-              padding: '14px 8px',
-              borderRadius: '12px',
-              border: '1px solid #ef4444',
-              background: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
-              cursor: 'pointer',
-              fontWeight: 700,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>🔴 Lại</span>
-            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>1 ngày</span>
-          </button>
-
-          <button
-            onClick={() => handleGrade(2)}
-            style={{
-              padding: '14px 8px',
-              borderRadius: '12px',
-              border: '1px solid #f59e0b',
-              background: 'rgba(245, 158, 11, 0.1)',
-              color: '#f59e0b',
-              cursor: 'pointer',
-              fontWeight: 700,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>🟡 Khó</span>
-            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>2 ngày</span>
-          </button>
-
-          <button
-            onClick={() => handleGrade(3)}
-            style={{
-              padding: '14px 8px',
-              borderRadius: '12px',
-              border: '1px solid #10b981',
-              background: 'rgba(16, 185, 129, 0.1)',
-              color: '#10b981',
-              cursor: 'pointer',
-              fontWeight: 700,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>🟢 Tốt</span>
-            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>4 ngày</span>
-          </button>
-
-          <button
-            onClick={() => handleGrade(4)}
-            style={{
-              padding: '14px 8px',
-              borderRadius: '12px',
-              border: '1px solid #38bdf8',
-              background: 'rgba(56, 189, 248, 0.1)',
-              color: '#38bdf8',
-              cursor: 'pointer',
-              fontWeight: 700,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>🔵 Dễ</span>
-            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>7 ngày+</span>
-          </button>
+          {gradeOptions.map((option) => (
+            <button
+              key={option.quality}
+              onClick={() => handleGrade(option.quality)}
+              aria-label={`${option.label}: ôn lại sau ${option.nextRecord.interval} ngày`}
+              style={{
+                padding: '14px 8px',
+                borderRadius: '12px',
+                border: `1px solid ${option.tone}`,
+                background: option.background,
+                color: option.tone,
+                cursor: 'pointer',
+                fontWeight: 700,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span style={{ fontSize: '1rem' }}>{option.label}</span>
+              <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>{option.nextRecord.interval} ngày</span>
+            </button>
+          ))}
         </div>
       )}
     </div>

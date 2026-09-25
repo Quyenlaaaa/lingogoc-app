@@ -1,72 +1,171 @@
-# LingoGoc AI backend (Cloudflare Worker)
+# LingoGoc Cloudflare Worker
 
-## Automatic vocabulary backfill
+The Worker protects provider keys, serves the system vocabulary, enriches words,
+normalizes Vietnamese meanings, proxies/cache audio and dictionary data, supports AI
+speaking, and runs background vocabulary completion.
 
-The Worker Cron Trigger runs every 15 minutes and enriches at most two missing words per run. Its checkpoint is stored in Workers KV, so processing continues without a browser or local process. Scheduled bulk work uses only free providers and can never spend the paid-model wallet. Invalid content now fails over to the next provider, while a word that still fails gets its own 30-minute/2-hour/6-hour/24-hour retry schedule and no longer blocks later words. A valid Vietnamese meaning is saved as a partial record even when five examples are not ready yet. Provider-wide quota failures pause the queue for six hours. Inspect progress with `GET /api/vocabulary/backfill/status`; `npm run backfill:vocab` remains available for manual runs.
+## Local development
 
-## Parallel free AI providers
+1. Copy `.dev.vars.example` to `.dev.vars`.
+2. Add only the provider keys needed locally.
+3. From `web`, run `npx wrangler dev --config backend/wrangler.toml`.
+4. Set frontend `VITE_API_BASE_URL=http://localhost:8787`.
 
-Interactive AI requests race all configured free providers: Groq `qwen/qwen3.8-27b`, Cloudflare Workers AI `@cf/google/gemma-4-26b-a4b-it`, xKiro `mistralai/mistral-large-2512`, and OpenRouter `deepseek/deepseek-v4-flash-0731:free`. The first valid response wins. Background vocabulary backfill calls them sequentially in that order to avoid spending several provider requests for one word. The paid xKiro model is considered only for interactive requests after the free providers report a quota/rate-limit condition.
+Contract tests use mocks and require no real key:
 
-Interactive routing starts the two preferred providers immediately and hedges the remaining providers after short delays. Every provider call has a 12-second timeout. Vocabulary records with one to four valid examples request only the missing `5 - N` contexts; validated old and new examples are merged before the record becomes complete.
+```powershell
+cd web
+node backend/test-worker.mjs
+```
 
-Public dictionary data is read through `GET /api/vocabulary/dictionary?word=...`. The Worker limits a cold upstream lookup to 3.5 seconds and edge-caches successful responses for 30 days. Vocabulary list and flashcard rendering never fan out dictionary requests for every visible card; dictionary details load lazily without blocking the server KV result.
+`.dev.vars` is ignored. Never commit secrets.
 
-Cloudflare Workers AI is attached through the `AI` binding and needs no API secret. The application limits it to 100 requests per UTC day through `WORKERS_AI_DAILY_REQUEST_LIMIT`. Groq remains disabled until its secret is installed:
+## Provider routing
+
+Supported free providers:
+
+- Groq: `qwen/qwen3.8-27b`
+- Cloudflare Workers AI: `@cf/google/gemma-4-26b-a4b-it`
+- XKIRO: `mistralai/mistral-large-2512`
+- OpenRouter: `deepseek/deepseek-v4-flash-0731:free`
+
+Interactive routing ranks providers by recent latency, consecutive failures, and
+circuit state. One provider starts immediately. A second starts after 1.5 seconds only
+when needed, or immediately when the preceding provider fails. Three consecutive final
+failures open a two-minute circuit. Quota errors retain a five-minute cooldown.
+
+Background backfill is strictly sequential and disables the paid model. Interactive
+XKIRO paid fallback (`x-ai/grok-build-0.1`) is considered only under the configured
+quota policy. Every provider call has a 12-second timeout. Operations status exposes
+counts, latency, tokens, and circuit state without prompts or keys.
+
+The optional `METRICS` Analytics Engine binding stores provider and cache data points
+across Worker isolates. Wrangler creates dataset `lingogoc_worker_metrics` on the first
+write after deployment; local tests use a mock binding. See Cloudflare's Analytics
+Engine SQL API for p50/p95 aggregation.
+
+Cloudflare Workers AI uses binding `AI` and a KV-tracked UTC daily limit. Configure
+Groq with:
 
 ```powershell
 npx wrangler secret put GROQ_API_KEY --config backend/wrangler.toml
 ```
 
-Backend này giữ API key ở phía máy chủ và cung cấp ví dụ từ vựng song ngữ đa ngữ cảnh. Cấu hình mặc định dùng chung API tương thích OpenAI của xkiro: ưu tiên model miễn phí `mistralai/mistral-large-2512`, sau đó tự chuyển sang model trả phí `x-ai/grok-build-0.1` khi model miễn phí báo hết quota hoặc rate limit kéo dài.
+## Vocabulary completion
 
-Sau lỗi quota rõ ràng, Worker tạm ngừng thăm dò model miễn phí trong 5 phút để hàng đợi nền không lặp lại một request chắc chắn thất bại trước mỗi request trả phí. Hết thời gian này, Worker tự thử model miễn phí trước trở lại.
+The hourly cron scans at most 96 catalog entries and attempts/generates at most two
+missing words per run. It does not require an open browser and never enables paid AI.
 
-Ví dụ đã sinh được lưu bền vững trong Cloudflare Workers KV qua binding `VOCAB_CACHE`. Khóa lưu được chuẩn hóa theo phiên bản prompt, model và từ vựng, vì vậy Danh sách 3000, Thẻ nhớ 3D và các thiết bị khác nhau dùng chung một bản ghi mà không gọi lại AI.
+- Cache/database is checked before AI.
+- Partial valid meanings/examples are preserved.
+- Only `5 - existingExamples` new contexts are requested.
+- Word-specific failures wait one hour.
+- The fifth failure enters manual review and stops automatic retries.
+- Provider-wide quota pauses the queue instead of hammering the provider.
 
-Kho 3.000 từ nền (từ, IPA, nghĩa và ví dụ song ngữ) cũng được lưu trong KV tại khóa `system-vocabulary:v1`. Frontend đọc khóa này qua `GET /api/vocabulary/catalog`; dữ liệu đóng gói chỉ được dùng khi backend tạm thời không khả dụng.
+Inspect state with `GET /api/vocabulary/backfill/status`.
 
-Frontend hiển thị snapshot đóng gói trước, sau đó gọi `GET /api/vocabulary/manifest` để so hash trong nền. `POST /api/vocabulary/batch` chỉ đọc tối đa 24 bản ghi nghĩa/ví dụ từ KV và không gọi model. Việc bổ sung toàn kho được thực hiện bởi pipeline quản trị `npm run backfill:vocab`, có checkpoint và giới hạn mặc định 100 từ mỗi lượt.
+## Storage
 
-Nếu provider phản hồi chậm, lỗi tạm thời hoặc trả JSON chưa đủ ví dụ, Worker sẽ tự gọi lại. Ở frontend, thao tác “Thử lại AI” tiếp tục retry với backoff cho đến khi nhận được kết quả hợp lệ. Việc chuyển tab hoặc đóng modal trong ứng dụng không hủy request; kết quả hoàn tất trong nền vẫn được lưu để hiển thị khi người dùng quay lại.
+### Current KV compatibility
 
-## Chạy thử tại máy
+KV stores the system catalog/manifest, cache entries, and backward-compatible
+checkpoint data. Edge Cache accelerates dictionary, audio, and enrichment reads.
 
-1. Sao chép `.dev.vars.example` thành `.dev.vars`.
-2. Điền `XTROUTER_API_KEY`. URL và model xkiro đã được cấu hình sẵn.
-3. Chạy `npx wrangler dev` trong thư mục `backend`.
-4. Đặt `VITE_API_BASE_URL=http://localhost:8787` trong file `.env` ở thư mục gốc.
+### D1 durable source of truth
 
-Có thể kiểm tra hợp đồng API không cần khóa thật bằng `node test-worker.mjs`.
+`migrations/0001_vocabulary_durable_store.sql` creates:
 
-`.dev.vars` chứa khóa riêng và đã được `.gitignore` loại trừ.
+- `vocabulary_enrichments`
+- `vocabulary_jobs`
+- `vocabulary_manual_review`
+- `system_state`
+
+When optional binding `VOCAB_DB` exists, reads use D1 → KV → Edge and writes commit to
+D1 before refreshing KV. A successful D1 write remains durable if KV quota is
+exhausted; the response may set `cacheWritePending`. Without D1, KV-only behavior is
+unchanged.
+
+Create an isolated staging database first:
+
+```powershell
+npx wrangler d1 create lingogoc-vocabulary-staging
+npx wrangler d1 migrations apply lingogoc-vocabulary-staging --local
+```
+
+Bind it as `VOCAB_DB` only in the intended environment. Never use production KV/D1 in
+staging.
+
+## Safe KV-to-D1 preparation
+
+```powershell
+cd web
+npm.cmd run migrate:vocab-d1
+npm.cmd run migrate:vocab-d1 -- --input=scripts/data_cache/kv-export.json
+npm.cmd run migrate:vocab-d1 -- --input=scripts/data_cache/kv-export.json --write-sql
+```
+
+- No arguments: safe no-op.
+- Input only: validate/report; no Cloudflare connection.
+- `--write-sql`: create idempotent SQL and an unapplied checkpoint under ignored
+  `scripts/data_cache`.
+
+After a staging migration, `GET /api/vocabulary/audit` performs a single read-only D1
+audit. It never invokes AI or silently runs 125 batch requests.
+
+## Dictionary and speech
+
+`GET /api/vocabulary/dictionary` has a 3.5-second upstream timeout and 30-day successful
+Edge cache. List/flashcard screens do not fan out dictionary calls; details load lazily.
+
+Word pronunciation and sentence playback share the server audio behavior. The Android
+app can use its native TTS bridge when browser speech is unreliable.
 
 ## Deploy
 
+Deploy only after explicit authorization and passing the release gate:
+
 ```powershell
-cd backend
+cd web\backend
 npx wrangler secret put XTROUTER_API_KEY
 npx wrangler deploy
-cd ..
-npm run sync:vocab-db
 ```
 
-Lệnh đồng bộ kiểm tra đúng 3.000 từ hợp lệ rồi ghi catalog thành một khóa KV duy nhất, tránh vượt hạn mức ghi hằng ngày của gói miễn phí. Có thể kiểm tra mà không ghi DB bằng `node scripts/sync-vocabulary-kv.mjs --dry-run`.
-
-Namespace KV hiện được khai báo trong `wrangler.toml`. Nếu triển khai sang một tài khoản Cloudflare khác, tạo namespace mới bằng:
+Catalog synchronization is a separate controlled action:
 
 ```powershell
-npx wrangler kv namespace create lingogoc-vocabulary-ai --binding VOCAB_CACHE
+cd web
+node scripts/sync-vocabulary-kv.mjs --dry-run
+npm.cmd run sync:vocab-db
 ```
 
-Sau đó đặt `id` được trả về vào mục `[[kv_namespaces]]` trong `wrangler.toml`.
+The sync script refuses anything other than 3,000 valid unique words. See
+`DEPLOYMENT.md` for GitHub secrets, smoke tests, staging isolation, and rollback.
 
-Sau khi deploy, đặt URL Worker vào `VITE_API_BASE_URL` rồi build/deploy lại frontend. Kiểm tra `GET /health`; `aiConfigured` phải là `true`.
+## Non-secret variables
 
-Các biến không bí mật đặt trong `wrangler.toml`:
+- `AI_BASE_URL`, `AI_FREE_MODEL`, `AI_PAID_MODEL`
+- `AI_PAID_INPUT_USD_PER_MILLION`, `AI_PAID_OUTPUT_USD_PER_MILLION` (set both
+  to the provider's current rates; zero disables cost estimation)
+- `GROQ_BASE_URL`, `GROQ_FREE_MODEL`
+- `OPENROUTER_BASE_URL`, `OPENROUTER_FREE_MODEL`
+- `OPENROUTER_SITE_URL`, `OPENROUTER_APP_NAME`
+- `WORKERS_AI_MODEL`, `WORKERS_AI_DAILY_REQUEST_LIMIT`
+- `ALLOWED_ORIGINS`
+- `RATE_LIMIT_READ_PER_MINUTE`, `RATE_LIMIT_AI_PER_MINUTE`
+- `RATE_LIMIT_ADMIN_PER_MINUTE`, `RATE_LIMIT_AUDIO_PER_MINUTE`
 
-- `AI_BASE_URL`: URL gốc API tương thích OpenAI, không gồm `/chat/completions` (mặc định `https://api.xkiro.com/v1`).
-- `AI_FREE_MODEL`: model được gọi trước cho mọi request.
-- `AI_PAID_MODEL`: model dự phòng chỉ được gọi khi model miễn phí báo hết quota/rate limit; để trống để tắt fallback trả phí.
-- `AI_MODEL`: tên biến tương thích với cấu hình cũ, chỉ được dùng khi chưa có `AI_FREE_MODEL`.
-- `ALLOWED_ORIGINS`: danh sách origin frontend, phân cách bằng dấu phẩy.
+Secrets include `XTROUTER_API_KEY`, `GROQ_API_KEY`, and `OPENROUTER_API_KEY`.
+Set `ADMIN_API_KEY` as a Worker secret before enabling the protected vocabulary
+administration API. Never expose it through frontend build variables.
+
+Protected administration endpoints currently include:
+
+- `GET /api/admin/vocabulary?limit=25&offset=0`: D1 counts and issue queues.
+- `POST /api/admin/vocabulary/retry`: queue one validated headword without calling AI
+  in the request; body `{ "word": "example" }`.
+- `POST /api/admin/vocabulary/correction`: persist a validated correction containing a
+  clear Vietnamese meaning and exactly five distinct bilingual contexts.
+
+Both require `Authorization: Bearer <ADMIN_API_KEY>`. Apply migration
+`0002_vocabulary_admin_audit.sql` before using mutations.

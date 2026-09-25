@@ -3,52 +3,84 @@ import React, { useState, useEffect } from 'react';
 import { 
   Headphones, 
   Volume2, 
-  RotateCcw, 
   CheckCircle2, 
   XCircle, 
-  Sparkles, 
   ArrowRight, 
   Lightbulb, 
   Keyboard, 
-  Layers,
-  Award
+  Layers
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { dictationLessons } from '../data/dictationData';
 import { speakText } from '../utils/speechHelper';
-import { addXP } from '../utils/storage';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { loadLearningModuleSession, saveLearningModuleSession } from '../utils/learningModuleSessionStore';
 
-export default function DictationView({ userData, onUpdateUserData }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [inputMode, setInputMode] = useState('tiles'); // 'tiles' hoặc 'type'
-  const [selectedWords, setSelectedWords] = useState([]);
-  const [availableWords, setAvailableWords] = useState([]);
-  const [typedText, setTypedText] = useState('');
-  const [isEvaluated, setIsEvaluated] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [showHint, setShowHint] = useState(false);
+function createAvailableWords(lesson) {
+  return [...lesson.words]
+    .map((word) => word.replace(/[.,?!]/g, ''))
+    .sort(() => Math.random() - 0.5)
+    .map((word, index) => ({ id: `${word}-${index}`, text: word }));
+}
+
+function restoreWordState(lesson, savedWords = []) {
+  const availableWords = createAvailableWords(lesson);
+  const selectedWords = [];
+  savedWords.forEach((savedWord) => {
+    const index = availableWords.findIndex((item) => item.text === savedWord);
+    if (index >= 0) selectedWords.push(...availableWords.splice(index, 1));
+  });
+  return { availableWords, selectedWords };
+}
+
+function loadInitialDictationSession() {
+  const saved = loadLearningModuleSession('dictation');
+  const currentIndex = Math.max(0, dictationLessons.findIndex((lesson) => String(lesson.id) === String(saved.lessonId)));
+  const wordState = restoreWordState(dictationLessons[currentIndex], Array.isArray(saved.selectedWords) ? saved.selectedWords : []);
+  return {
+    currentIndex,
+    inputMode: saved.inputMode === 'type' ? 'type' : 'tiles',
+    typedText: String(saved.typedText || ''),
+    isEvaluated: Boolean(saved.isEvaluated),
+    isCorrect: Boolean(saved.isCorrect),
+    showHint: Boolean(saved.showHint),
+    ...wordState,
+  };
+}
+
+export default function DictationView({ onUpdateUserData }) {
+  const [initialSession] = useState(loadInitialDictationSession);
+  const [currentIndex, setCurrentIndex] = useState(initialSession.currentIndex);
+  const [inputMode, setInputMode] = useState(initialSession.inputMode);
+  const [selectedWords, setSelectedWords] = useState(initialSession.selectedWords);
+  const [availableWords, setAvailableWords] = useState(initialSession.availableWords);
+  const [typedText, setTypedText] = useState(initialSession.typedText);
+  const [isEvaluated, setIsEvaluated] = useState(initialSession.isEvaluated);
+  const [isCorrect, setIsCorrect] = useState(initialSession.isCorrect);
+  const [showHint, setShowHint] = useState(initialSession.showHint);
 
   const currentLesson = dictationLessons[currentIndex];
+
+  useEffect(() => {
+    saveLearningModuleSession('dictation', {
+      lessonId: currentLesson.id,
+      inputMode,
+      selectedWords: selectedWords.map((item) => item.text),
+      typedText,
+      isEvaluated,
+      isCorrect,
+      showHint,
+    });
+  }, [currentLesson.id, inputMode, isCorrect, isEvaluated, selectedWords, showHint, typedText]);
 
   // Xáo trộn từ khi đổi câu
   useEffect(() => {
     if (!currentLesson) return;
-    const shuffled = [...currentLesson.words]
-      .map(w => w.replace(/[.,?!]/g, '')) // bỏ dấu câu khi hiển thị thẻ
-      .sort(() => Math.random() - 0.5);
-
-    setAvailableWords(shuffled.map((w, idx) => ({ id: `${w}-${idx}`, text: w })));
-    setSelectedWords([]);
-    setTypedText('');
-    setIsEvaluated(false);
-    setIsCorrect(false);
-    setShowHint(false);
-
-    // Tự động phát âm thanh khi mở câu mới
-    setTimeout(() => {
+    const timer = window.setTimeout(() => {
       speakText(currentLesson.sentence, 0.85);
     }, 400);
-  }, [currentIndex]);
+    return () => window.clearTimeout(timer);
+  }, [currentLesson]);
 
   const handlePlaySlow = () => {
     speakText(currentLesson.sentence, 0.7);
@@ -89,19 +121,32 @@ export default function DictationView({ userData, onUpdateUserData }) {
     setIsEvaluated(true);
 
     if (match) {
-      addXP(20);
+      const result = dispatchLearningEvent({
+        type: 'progress.completed',
+        source: 'dictation',
+        payload: {
+          collection: 'completedDictation',
+          targetId: currentLesson.id,
+          xp: 20,
+          rewardKey: `dictation:${currentLesson.id}`,
+        },
+      });
+      onUpdateUserData?.(result.userData);
       try {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-      } catch (e) {}
+      } catch {}
     }
   };
 
   const handleNextLesson = () => {
-    if (currentIndex < dictationLessons.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0);
-    }
+    const nextIndex = currentIndex < dictationLessons.length - 1 ? currentIndex + 1 : 0;
+    setCurrentIndex(nextIndex);
+    setAvailableWords(createAvailableWords(dictationLessons[nextIndex]));
+    setSelectedWords([]);
+    setTypedText('');
+    setIsEvaluated(false);
+    setIsCorrect(false);
+    setShowHint(false);
   };
 
   return (

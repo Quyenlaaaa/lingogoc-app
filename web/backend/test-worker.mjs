@@ -4,12 +4,14 @@ import worker from './src/worker.js';
 let cachedResponse = null;
 const dictionaryEdgeCache = new Map();
 const vocabularyEdgeCache = new Map();
+const speakingEdgeCache = new Map();
 globalThis.caches = {
   default: {
     match: async (key) => {
       const url = typeof key === 'string' ? key : key.url;
       if (url.includes('/dictionary/')) return dictionaryEdgeCache.get(url)?.clone() || null;
       if (url.includes('/vocabulary/')) return vocabularyEdgeCache.get(url)?.clone() || null;
+      if (url.includes('/speaking/')) return speakingEdgeCache.get(url)?.clone() || null;
       return null;
     },
     put: async (key, response) => {
@@ -17,10 +19,11 @@ globalThis.caches = {
       const url = typeof key === 'string' ? key : key.url;
       if (url.includes('/dictionary/')) dictionaryEdgeCache.set(url, response.clone());
       if (url.includes('/vocabulary/')) vocabularyEdgeCache.set(url, response.clone());
+      if (url.includes('/speaking/')) speakingEdgeCache.set(url, response.clone());
     },
     delete: async (key) => {
       const url = typeof key === 'string' ? key : key.url;
-      return dictionaryEdgeCache.delete(url) || vocabularyEdgeCache.delete(url);
+      return dictionaryEdgeCache.delete(url) || vocabularyEdgeCache.delete(url) || speakingEdgeCache.delete(url);
     },
   },
 };
@@ -29,6 +32,7 @@ let providerRequest = null;
 let providerCallCount = 0;
 let customProviderResponse = null;
 const serverCache = new Map();
+const analyticsPoints = [];
 globalThis.fetch = async (url, options) => {
   if (String(url).startsWith('https://translate.google.com/translate_tts')) {
     return new Response(new Uint8Array([73, 68, 51, 4]), {
@@ -55,12 +59,6 @@ globalThis.fetch = async (url, options) => {
   providerCallCount += 1;
   providerRequest = { url, options, body: JSON.parse(options.body) };
   if (customProviderResponse) return customProviderResponse(providerRequest);
-  if (providerCallCount < 3) {
-    return new Response(JSON.stringify({ error: 'temporary provider overload' }), {
-      status: 502,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
   return new Response(JSON.stringify({
   choices: [{
     message: {
@@ -81,6 +79,7 @@ globalThis.fetch = async (url, options) => {
       }),
     },
   }],
+  usage: { prompt_tokens: 120, completion_tokens: 240, total_tokens: 360 },
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 };
 
@@ -98,9 +97,156 @@ const env = {
     put: async (key, value) => { serverCache.set(key, value); },
     delete: async (key) => { serverCache.delete(key); },
   },
+  METRICS: {
+    writeDataPoint: (point) => analyticsPoints.push(point),
+  },
 };
+
+function createD1Mock() {
+  const rows = new Map();
+  const jobs = new Map();
+  const manualReviews = new Map();
+  const adminEvents = new Map();
+  const states = new Map();
+  return {
+    rows,
+    jobs,
+    manualReviews,
+    adminEvents,
+    states,
+    binding: {
+      prepare(sql) {
+        let values = [];
+        return {
+          bind(...boundValues) {
+            values = boundValues;
+            return this;
+          },
+          async first() {
+            if (/FROM system_state/i.test(sql)) return states.get(values[0]) || null;
+            if (/COUNT\(\*\) AS total_records/i.test(sql)) {
+              const records = [...rows.values()].filter((row) => row.prompt_version === values[0]);
+              const parsed = records.map((row) => ({ ...row, payload: JSON.parse(row.payload_json) }));
+              return {
+                total_records: parsed.length,
+                complete_records: parsed.filter((row) => row.status === 'complete').length,
+                five_example_records: parsed.filter((row) => row.payload.contextExamples?.length === 5).length,
+                clear_meaning_records: parsed.filter((row) => {
+                  const meaning = String(row.payload.primaryMeaningVi || '').trim();
+                  return meaning.length >= 2 && !meaning.toLowerCase().startsWith('tá»« ');
+                }).length,
+              };
+            }
+            if (/COUNT\(\*\) AS open_count/i.test(sql)) {
+              return { open_count: [...manualReviews.values()].filter((row) => !row.resolved_at).length };
+            }
+            if (/FROM vocabulary_enrichments/i.test(sql)) return rows.get(values[0]) || null;
+            if (/FROM vocabulary_jobs/i.test(sql)) return jobs.get(values[0]) || null;
+            throw new Error('Unexpected D1 SELECT');
+          },
+          async all() {
+            if (/FROM vocabulary_enrichments/i.test(sql) && /GROUP BY status/i.test(sql)) {
+              const counts = new Map();
+              for (const row of rows.values()) {
+                if (row.prompt_version !== values[0]) continue;
+                counts.set(row.status, (counts.get(row.status) || 0) + 1);
+              }
+              return { results: [...counts].map(([status, count]) => ({ status, count })) };
+            }
+            if (/FROM vocabulary_jobs/i.test(sql) && /GROUP BY status/i.test(sql)) {
+              const counts = new Map();
+              for (const row of jobs.values()) counts.set(row.status, (counts.get(row.status) || 0) + 1);
+              return { results: [...counts].map(([status, count]) => ({ status, count })) };
+            }
+            if (/FROM vocabulary_manual_review/i.test(sql)) {
+              return {
+                results: [...manualReviews.entries()]
+                  .filter(([, row]) => !row.resolved_at)
+                  .map(([word, row]) => ({ word, ...row })),
+              };
+            }
+            if (/FROM vocabulary_admin_events/i.test(sql)) {
+              return {
+                results: [...adminEvents.entries()].map(([event_id, row]) => ({ event_id, ...row })),
+              };
+            }
+            if (!/FROM vocabulary_enrichments/i.test(sql)) throw new Error('Unexpected D1 list');
+            return {
+              results: [...rows.values()]
+                .filter((row) => row.prompt_version === values[0])
+                .map((row) => {
+                  const payload = JSON.parse(row.payload_json);
+                  return {
+                    word: row.word,
+                    status: row.status,
+                    example_count: payload.contextExamples?.length || 0,
+                    meaning_vi: payload.primaryMeaningVi || '',
+                    updated_at: row.updated_at,
+                  };
+                })
+                .filter((row) => row.status !== 'complete' || row.example_count !== 5 || !row.meaning_vi),
+            };
+          },
+          async run() {
+            if (/INSERT INTO vocabulary_enrichments/i.test(sql)) {
+              rows.set(values[0], {
+                word: values[1],
+                prompt_version: values[2],
+                status: values[3],
+                payload_json: values[4],
+                provider: values[5],
+                model: values[6],
+                updated_at: values[7],
+              });
+            } else if (/INSERT INTO vocabulary_jobs/i.test(sql)) {
+              jobs.set(values[0], {
+                status: values[2],
+                attempts: values[3],
+                next_retry_at: values[4],
+                last_error: values[5],
+                last_provider_errors_json: values[6],
+                updated_at: values[7],
+              });
+            } else if (/INSERT INTO vocabulary_manual_review/i.test(sql)) {
+              manualReviews.set(values[0], {
+                reason: values[2],
+                attempts: values[3],
+                created_at: values[4],
+              });
+            } else if (/UPDATE vocabulary_manual_review/i.test(sql)) {
+              const current = manualReviews.get(values[0]);
+              if (current) manualReviews.set(values[0], { ...current, resolved_at: values[2] });
+            } else if (/INSERT INTO vocabulary_admin_events/i.test(sql)) {
+              adminEvents.set(values[0], {
+                action: values[1],
+                word: values[2],
+                payload_json: values[3],
+                created_at: values[4],
+              });
+            } else if (/INSERT INTO system_state/i.test(sql)) {
+              states.set(values[0], { payload_json: values[1], updated_at: values[2] });
+            } else {
+              throw new Error('Unexpected D1 mutation');
+            }
+            return { success: true };
+          },
+        };
+      },
+    },
+  };
+}
 const pending = [];
 const context = { waitUntil: (promise) => pending.push(promise) };
+const speakingPreflightResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/speaking/chat', {
+    method: 'OPTIONS',
+    headers: { Origin: 'http://localhost:5173' },
+  }),
+  env,
+  context,
+);
+assert.equal(speakingPreflightResponse.status, 204);
+assert.match(speakingPreflightResponse.headers.get('Access-Control-Allow-Headers'), /X-Idempotency-Key/);
 const healthResponse = await worker.fetch(
   new Request('http://localhost:8787/health', { headers: { Origin: 'http://localhost:5173' } }),
   env,
@@ -116,6 +262,47 @@ assert.equal(healthPayload.workersAiConfigured, false);
 assert.equal(healthPayload.openRouterConfigured, false);
 assert.equal(healthPayload.freeProviderStrategy, 'single-provider');
 assert.equal(healthPayload.serverStorageConfigured, true);
+assert.match(healthResponse.headers.get('X-Request-ID'), /^[a-f0-9-]{36}$/);
+assert.match(healthResponse.headers.get('Server-Timing'), /^app;dur=\d+$/);
+assert.equal(healthResponse.headers.get('X-Content-Type-Options'), 'nosniff');
+assert.equal(healthResponse.headers.get('X-Frame-Options'), 'DENY');
+assert.equal(healthResponse.headers.get('Referrer-Policy'), 'no-referrer');
+assert.match(healthResponse.headers.get('Content-Security-Policy'), /default-src 'none'/);
+assert.match(healthResponse.headers.get('Strict-Transport-Security'), /max-age=31536000/);
+
+const forbiddenOriginResponse = await worker.fetch(
+  new Request('http://localhost:8787/health', { headers: { Origin: 'https://attacker.example' } }),
+  env,
+  context,
+);
+assert.equal(forbiddenOriginResponse.status, 403);
+assert.equal(forbiddenOriginResponse.headers.get('Access-Control-Allow-Origin'), 'null');
+
+const invalidContentTypeResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: { Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ items: [{ word: 'accept' }] }),
+}), env, context);
+assert.equal(invalidContentTypeResponse.status, 415);
+assert.equal((await invalidContentTypeResponse.json()).code, 'UNSUPPORTED_MEDIA_TYPE');
+
+const limitedEnv = { ...env, RATE_LIMIT_READ_PER_MINUTE: '2' };
+const createRateLimitedRequest = () => new Request('http://localhost:8787/api/vocabulary/batch', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: 'http://localhost:5173',
+    'CF-Connecting-IP': '203.0.113.77',
+  },
+  body: JSON.stringify({ items: [{ word: 'rate-limit-check' }] }),
+});
+assert.equal((await worker.fetch(createRateLimitedRequest(), limitedEnv, context)).status, 200);
+assert.equal((await worker.fetch(createRateLimitedRequest(), limitedEnv, context)).status, 200);
+const rateLimitedResponse = await worker.fetch(createRateLimitedRequest(), limitedEnv, context);
+assert.equal(rateLimitedResponse.status, 429);
+assert.equal(rateLimitedResponse.headers.get('RateLimit-Limit'), '2');
+assert.match(rateLimitedResponse.headers.get('Retry-After'), /^\d+$/);
+assert.equal((await rateLimitedResponse.json()).code, 'RATE_LIMITED');
 
 const androidHealthResponse = await worker.fetch(
   new Request('http://localhost:8787/health', {
@@ -185,6 +372,27 @@ assert.equal(backfillStatusPayload.data.status, 'quota_wait');
 assert.equal(backfillStatusPayload.data.cursor, 17);
 assert.equal(backfillStatusPayload.data.totalWords, 3000);
 assert.equal(backfillStatusPayload.data.schedule, 'hourly (UTC)');
+const operationsResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/operations/status', {
+    headers: { Origin: 'http://localhost:5173', 'X-Request-ID': 'contract-request-123' },
+  }),
+  env,
+  context,
+);
+const operationsPayload = await operationsResponse.json();
+assert.equal(operationsResponse.status, 200);
+assert.equal(operationsResponse.headers.get('X-Request-ID'), 'contract-request-123');
+assert.equal(operationsResponse.headers.get('Cache-Control'), 'no-store');
+assert.equal(operationsPayload.data.storage.configured, true);
+assert.equal(operationsPayload.data.storage.kvConfigured, true);
+assert.equal(operationsPayload.data.storage.d1Configured, false);
+assert.equal(operationsPayload.data.storage.durableSource, 'KV');
+assert.equal(operationsPayload.data.providers.xkiro.configured, true);
+assert.equal(operationsPayload.data.providers.xkiro.health.successes, 0);
+assert.equal(operationsPayload.data.providers.xkiro.health.circuitOpen, false);
+assert.equal(operationsPayload.data.backfill.cursor, 17);
+assert.equal(operationsPayload.data.thresholds.slowRequestMs, 1500);
+assert.equal(operationsPayload.data.thresholds.providerHedgeDelayMs, 1500);
 assert.equal(providerCallCount, 0, 'paused scheduled backfill must not call the AI provider');
 serverCache.delete('system-vocabulary:v1');
 serverCache.delete('system-vocabulary:backfill:v1');
@@ -208,9 +416,23 @@ assert.equal(JSON.stringify(payload).includes(env.XTROUTER_API_KEY), false);
 assert.equal(providerRequest.url, 'https://api.xkiro.com/v1/chat/completions');
 assert.equal(providerRequest.options.headers.Authorization, `Bearer ${env.XTROUTER_API_KEY}`);
 assert.equal(providerRequest.body.model, 'mistralai/mistral-large-2512');
-assert.equal(providerCallCount, 3);
+assert.equal(providerCallCount, 1);
 assert.equal(payload.data.persistedOnServer, true);
 assert.equal(serverCache.size, 1);
+
+const providerMetricsResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/operations/status', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const providerMetricsPayload = await providerMetricsResponse.json();
+assert.equal(providerMetricsPayload.data.providers.xkiro.health.successes, 1);
+assert.equal(providerMetricsPayload.data.providers.xkiro.health.totalTokens, 360);
+assert.equal(providerMetricsPayload.data.cache.total, 1);
+assert.equal(providerMetricsPayload.data.cache.misses, 1);
+assert.equal(providerMetricsPayload.data.cache.hitRate, 0);
+assert.ok(analyticsPoints.some((point) => point.indexes[0] === 'XKIRO_FREE'));
+assert.ok(analyticsPoints.some((point) => point.indexes[0] === 'CACHE'));
 
 const batchResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/batch', {
   method: 'POST',
@@ -223,7 +445,7 @@ assert.equal(batchPayload.data.items[0].word, 'accept');
 assert.equal(batchPayload.data.items[0].enrichment.contextExamples.length, 5);
 assert.deepEqual(batchPayload.data.missing, ['not-ready']);
 assert.deepEqual(batchPayload.data.needsEnrichment, ['not-ready']);
-assert.equal(providerCallCount, 3, 'batch reads must never call the AI provider');
+assert.equal(providerCallCount, 1, 'batch reads must never call the AI provider');
 
 const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
@@ -233,7 +455,200 @@ const kvResponse = await worker.fetch(new Request('http://localhost:8787/api/voc
 const kvPayload = await kvResponse.json();
 assert.equal(kvResponse.headers.get('X-LingoGoc-Cache'), 'HIT');
 assert.equal(kvPayload.data.persistedOnServer, true);
-assert.equal(providerCallCount, 3);
+assert.equal(providerCallCount, 1);
+
+const edgePromotionD1 = createD1Mock();
+const providerCallsBeforeEdgePromotion = providerCallCount;
+const edgePromotionResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'accept', meaning: 'cháº¥p nháº­n', topic: 'CÃ´ng viá»‡c' }),
+}), {
+  ...env,
+  VOCAB_DB: edgePromotionD1.binding,
+  VOCAB_CACHE: {
+    ...env.VOCAB_CACHE,
+    get: async (key, type) => (key.startsWith('vocabulary:v') ? null : env.VOCAB_CACHE.get(key, type)),
+  },
+}, context);
+assert.equal(edgePromotionResponse.status, 200);
+assert.equal(edgePromotionResponse.headers.get('X-LingoGoc-Cache'), 'EDGE+D1');
+assert.equal(edgePromotionD1.rows.size, 1, 'legacy Edge Cache data must be promoted to D1');
+assert.equal(providerCallCount, providerCallsBeforeEdgePromotion, 'Edge-to-D1 promotion must not call AI');
+
+const d1Mock = createD1Mock();
+vocabularyEdgeCache.clear();
+const kvWriteFailEnv = {
+  ...env,
+  VOCAB_DB: d1Mock.binding,
+  VOCAB_CACHE: {
+    ...env.VOCAB_CACHE,
+    get: async (key, type) => {
+      if (key.startsWith('vocabulary:v')) return null;
+      return env.VOCAB_CACHE.get(key, type);
+    },
+    put: async (key, value) => {
+      if (key.startsWith('vocabulary:v')) throw new Error('KV_WRITE_LIMIT');
+      serverCache.set(key, value);
+    },
+  },
+};
+const providerCallsBeforeD1 = providerCallCount;
+const d1PersistResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'accept', meaning: 'cháº¥p nháº­n', topic: 'CÃ´ng viá»‡c', force: true }),
+}), kvWriteFailEnv, context);
+const d1PersistPayload = await d1PersistResponse.json();
+assert.equal(d1PersistResponse.status, 200);
+assert.equal(d1PersistPayload.data.persistedOnServer, true);
+assert.equal(d1PersistPayload.data.cacheWritePending, true);
+assert.equal(d1Mock.rows.size, 1, 'D1 must retain enrichment when the KV cache write fails');
+assert.equal(d1Mock.jobs.get('accept').status, 'complete');
+assert.equal(providerCallCount, providerCallsBeforeD1 + 1);
+
+vocabularyEdgeCache.clear();
+const providerCallsBeforeD1Read = providerCallCount;
+const d1ReadResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'accept', meaning: 'cháº¥p nháº­n', topic: 'CÃ´ng viá»‡c' }),
+}), kvWriteFailEnv, context);
+assert.equal(d1ReadResponse.status, 200);
+assert.equal(d1ReadResponse.headers.get('X-LingoGoc-Cache'), 'D1');
+assert.equal(providerCallCount, providerCallsBeforeD1Read, 'D1 hit must never call an AI provider');
+
+const d1AuditResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/audit', { headers: { Origin: 'http://localhost:5173' } }),
+  kvWriteFailEnv,
+  context,
+);
+const d1AuditPayload = await d1AuditResponse.json();
+assert.equal(d1AuditResponse.status, 200);
+assert.equal(d1AuditResponse.headers.get('Cache-Control'), 'no-store');
+assert.equal(d1AuditPayload.data.totalRecords, 1);
+assert.equal(d1AuditPayload.data.completeRecords, 1);
+assert.equal(d1AuditPayload.data.fiveExampleRecords, 1);
+assert.equal(d1AuditPayload.data.missingRecords, 2999);
+assert.equal(d1AuditPayload.data.releaseReady, false);
+
+const unauthorizedAdminResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary', { headers: { Origin: 'http://localhost:5173' } }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+assert.equal(unauthorizedAdminResponse.status, 401);
+assert.equal((await unauthorizedAdminResponse.json()).code, 'ADMIN_UNAUTHORIZED');
+const adminResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary?limit=10&offset=0', {
+    headers: { Origin: 'http://localhost:5173', Authorization: 'Bearer admin-test-key' },
+  }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+const adminPayload = await adminResponse.json();
+assert.equal(adminResponse.status, 200);
+assert.equal(adminResponse.headers.get('Cache-Control'), 'no-store');
+assert.equal(adminPayload.data.enrichmentCounts.complete, 1);
+assert.equal(adminPayload.data.jobCounts.complete, 1);
+assert.deepEqual(adminPayload.data.issues, []);
+assert.deepEqual(adminPayload.data.manualReview, []);
+assert.deepEqual(adminPayload.data.auditEvents, []);
+
+d1Mock.manualReviews.set('accept', {
+  reason: 'INSUFFICIENT_BILINGUAL_EXAMPLES',
+  attempts: 5,
+  created_at: new Date().toISOString(),
+  resolved_at: null,
+});
+const callsBeforeAdminRetry = providerCallCount;
+const adminRetryResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary/retry', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:5173',
+      Authorization: 'Bearer admin-test-key',
+    },
+    body: JSON.stringify({ word: 'accept' }),
+  }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+const adminRetryPayload = await adminRetryResponse.json();
+assert.equal(adminRetryResponse.status, 202);
+assert.equal(adminRetryPayload.data.status, 'retry_pending');
+assert.equal(adminRetryPayload.data.aiCalled, false);
+assert.equal(providerCallCount, callsBeforeAdminRetry, 'queueing an admin retry must not spend AI tokens');
+assert.equal(d1Mock.jobs.get('accept').status, 'retry_pending');
+assert.ok(d1Mock.manualReviews.get('accept').resolved_at);
+assert.equal([...d1Mock.adminEvents.values()][0].word, 'accept');
+const adminAfterRetryResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary', {
+    headers: { Origin: 'http://localhost:5173', Authorization: 'Bearer admin-test-key' },
+  }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+const adminAfterRetryPayload = await adminAfterRetryResponse.json();
+assert.equal(adminAfterRetryPayload.data.jobCounts.retry_pending, 1);
+assert.equal(adminAfterRetryPayload.data.auditEvents[0].action, 'retry_queued');
+
+const adminCorrectionExamples = [
+  { context: 'Daily life', en: 'I accept the package at the door.', vi: 'Tôi nhận gói hàng ở cửa.' },
+  { context: 'Work', en: 'We accept the revised proposal.', vi: 'Chúng tôi chấp nhận đề xuất đã sửa.' },
+  { context: 'Study', en: 'The school will accept my application.', vi: 'Trường sẽ nhận đơn của tôi.' },
+  { context: 'Conversation', en: 'Can you accept my apology?', vi: 'Bạn có thể chấp nhận lời xin lỗi của tôi không?' },
+  { context: 'Collocation', en: 'Leaders accept responsibility for mistakes.', vi: 'Lãnh đạo nhận trách nhiệm về sai sót.' },
+];
+const callsBeforeCorrection = providerCallCount;
+const invalidCorrectionResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary/correction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:5173',
+      Authorization: 'Bearer admin-test-key',
+    },
+    body: JSON.stringify({ word: 'accept', enrichment: { primaryMeaningVi: 'chấp nhận', contextExamples: [] } }),
+  }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+assert.equal(invalidCorrectionResponse.status, 400);
+const correctionResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/admin/vocabulary/correction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:5173',
+      Authorization: 'Bearer admin-test-key',
+    },
+    body: JSON.stringify({
+      word: 'accept',
+      note: 'Reviewed by operator',
+      enrichment: { primaryMeaningVi: 'chấp nhận; tiếp nhận', contextExamples: adminCorrectionExamples },
+    }),
+  }),
+  { ...kvWriteFailEnv, ADMIN_API_KEY: 'admin-test-key' },
+  context,
+);
+const correctionPayload = await correctionResponse.json();
+await Promise.all(pending.splice(0));
+assert.equal(correctionResponse.status, 200);
+assert.equal(correctionPayload.data.isAiGenerated, false);
+assert.equal(correctionPayload.data.contextExamples.length, 5);
+assert.equal(providerCallCount, callsBeforeCorrection, 'manual correction must not call AI');
+assert.equal(d1Mock.jobs.get('accept').status, 'complete');
+assert.equal([...d1Mock.adminEvents.values()].at(-1).action, 'manual_correction');
+
+const noD1AuditResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/audit', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+assert.equal(noD1AuditResponse.status, 503);
+assert.equal((await noD1AuditResponse.json()).code, 'D1_NOT_CONFIGURED');
 
 const parallelProviderUrls = [];
 customProviderResponse = async ({ url }) => {
@@ -247,7 +662,10 @@ customProviderResponse = async ({ url }) => {
     correction: '',
     encouragement: 'Great start!',
     hints: [],
-  }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }) } }] }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 };
 const parallelResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
   method: 'POST',
@@ -263,9 +681,85 @@ const parallelResponse = await worker.fetch(new Request('http://localhost:8787/a
 }, context);
 const parallelPayload = await parallelResponse.json();
 assert.equal(parallelResponse.status, 200);
-assert.equal(parallelPayload.generatedByModel, 'deepseek/deepseek-v4-flash-0731:free');
-assert.ok(parallelProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
-assert.ok(parallelProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')));
+assert.equal(parallelProviderUrls.length, 1, 'a normal fast request must call only one free provider');
+assert.equal(
+  parallelPayload.generatedByModel,
+  parallelProviderUrls[0].startsWith('https://openrouter.ai/api/v1')
+    ? 'deepseek/deepseek-v4-flash-0731:free'
+    : 'mistralai/mistral-large-2512',
+);
+
+let idempotentProviderCalls = 0;
+customProviderResponse = async () => {
+  idempotentProviderCalls += 1;
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+    replyEn: 'Your saved speaking reply is ready.',
+    replyVi: 'Câu trả lời luyện nói đã sẵn sàng.',
+    correction: 'Your sentence is correct.',
+    encouragement: 'Keep going!',
+    hints: [{ en: 'What would you recommend?', vi: 'Bạn đề xuất món nào?' }],
+    scores: { grammar: 104, vocabulary: 82.2, fluency: -4, pronunciation: 100 },
+  }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const createIdempotentSpeakingRequest = () => new Request('http://localhost:8787/api/speaking/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: 'http://localhost:5173',
+    'X-Idempotency-Key': 'speaking:test-session:turn-1',
+  },
+  body: JSON.stringify({
+    requestId: 'speaking:test-session:turn-1',
+    scenario: 'Coffee shop',
+    messages: [{ role: 'user', content: 'A coffee, please.' }],
+  }),
+});
+const [idempotentFirst, idempotentConcurrent] = await Promise.all([
+  worker.fetch(createIdempotentSpeakingRequest(), env, context),
+  worker.fetch(createIdempotentSpeakingRequest(), env, context),
+]);
+const idempotentFirstPayload = await idempotentFirst.json();
+assert.equal(idempotentFirst.status, 200);
+assert.equal(idempotentConcurrent.status, 200);
+assert.equal(idempotentProviderCalls, 1, 'concurrent speaking retries must share one provider call');
+assert.deepEqual(idempotentFirstPayload.scores, { grammar: 100, vocabulary: 82, fluency: 0 });
+assert.equal('pronunciation' in idempotentFirstPayload.scores, false, 'AI must not fabricate pronunciation');
+const idempotentCached = await worker.fetch(createIdempotentSpeakingRequest(), env, context);
+assert.equal(idempotentCached.status, 200);
+assert.equal(idempotentCached.headers.get('X-LingoGoc-Cache'), 'HIT');
+assert.equal(idempotentProviderCalls, 1, 'completed speaking retries must reuse the cached response');
+customProviderResponse = null;
+
+const adaptiveHedgeUrls = [];
+customProviderResponse = async ({ url, body }) => {
+  adaptiveHedgeUrls.push(url);
+  if (adaptiveHedgeUrls.length === 1) {
+    await new Promise((resolve) => setTimeout(resolve, 1_700));
+  }
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify({
+      replyEn: 'The adaptive fallback is ready.',
+      replyVi: 'Phương án dự phòng thích ứng đã sẵn sàng.',
+      correction: '',
+      encouragement: 'Great!',
+      hints: [],
+    }) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const adaptiveHedgeResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ scenario: 'Adaptive hedge', messages: [{ role: 'user', content: 'Hello' }] }),
+}), {
+  ...env,
+  OPENROUTER_API_KEY: 'openrouter-test-key',
+  OPENROUTER_FREE_MODEL: 'deepseek/deepseek-v4-flash-0731:free',
+  OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
+}, context);
+assert.equal(adaptiveHedgeResponse.status, 200);
+assert.equal(adaptiveHedgeUrls.length, 2, 'a slow primary must start exactly one adaptive hedge');
 customProviderResponse = null;
 
 const allProviderUrls = [];
@@ -307,12 +801,46 @@ const allProviderResponse = await worker.fetch(new Request('http://localhost:878
 }, context);
 const allProviderPayload = await allProviderResponse.json();
 assert.equal(allProviderResponse.status, 200);
-assert.equal(allProviderPayload.generatedByModel, 'qwen/qwen3.8-27b');
-assert.ok(allProviderUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
-assert.equal(allProviderUrls.some((url) => url.startsWith(env.AI_BASE_URL)), false);
-assert.equal(allProviderUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')), false);
-assert.equal(workersAiCalls, 1);
+assert.ok(allProviderPayload.generatedByModel);
+assert.equal(allProviderUrls.length + workersAiCalls, 1, 'healthy-provider routing must avoid unconditional races');
 customProviderResponse = null;
+
+let circuitProviderCalls = 0;
+const circuitEnv = {
+  ...env,
+  XTROUTER_API_KEY: '',
+  AI_API_KEY: '',
+  AI_PAID_MODEL: '',
+  AI: {
+    run: async () => {
+      circuitProviderCalls += 1;
+      return { response: '' };
+    },
+  },
+};
+for (let attempt = 0; attempt < 3; attempt += 1) {
+  const circuitFailureResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+    body: JSON.stringify({ scenario: 'Circuit test', messages: [{ role: 'user', content: 'Hello' }] }),
+  }), circuitEnv, context);
+  assert.equal(circuitFailureResponse.status, 502);
+}
+const openCircuitResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ scenario: 'Circuit test', messages: [{ role: 'user', content: 'Hello again' }] }),
+}), circuitEnv, context);
+assert.equal(openCircuitResponse.status, 503);
+assert.equal(circuitProviderCalls, 3, 'open circuit must suppress another provider call');
+const circuitStatusResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/operations/status', { headers: { Origin: 'http://localhost:5173' } }),
+  circuitEnv,
+  context,
+);
+const circuitStatusPayload = await circuitStatusResponse.json();
+assert.equal(circuitStatusPayload.data.providers.workersAi.health.circuitOpen, true);
+assert.equal(circuitStatusPayload.data.providers.workersAi.health.consecutiveFailures, 3);
 
 const exploreExamples = [
   { context: 'Đời sống', en: 'We explore the old town on foot.', vi: 'Chúng tôi khám phá khu phố cổ bằng cách đi bộ.' },
@@ -324,11 +852,10 @@ const exploreExamples = [
 const validationFailoverUrls = [];
 customProviderResponse = async ({ url, body }) => {
   validationFailoverUrls.push(url);
-  const isGroq = url.startsWith('https://api.groq.com/openai/v1');
-  const isOpenRouter = url.startsWith('https://openrouter.ai/api/v1');
+  const isFirstAttempt = validationFailoverUrls.length === 1;
   const content = JSON.stringify({
-    primaryMeaningVi: isGroq ? 'to travel around and learn about a place' : 'khám phá; tìm hiểu',
-    contextExamples: isGroq || isOpenRouter ? exploreExamples : exploreExamples.slice(0, 3),
+    primaryMeaningVi: isFirstAttempt ? 'to travel around and learn about a place' : 'khám phá; tìm hiểu',
+    contextExamples: exploreExamples,
   });
   return new Response(JSON.stringify({ model: body.model, choices: [{ message: { content } }] }), {
     status: 200,
@@ -352,10 +879,8 @@ const validationFailoverPayload = await validationFailoverResponse.json();
 assert.equal(validationFailoverResponse.status, 200);
 assert.equal(validationFailoverPayload.data.contextExamples.length, 5);
 assert.equal(validationFailoverPayload.data.primaryMeaningVi, 'khám phá; tìm hiểu');
-assert.equal(validationFailoverPayload.data.generatedByProvider, 'XKIRO_FREE');
-assert.ok(validationFailoverUrls.some((url) => url.startsWith('https://api.groq.com/openai/v1')));
-assert.ok(validationFailoverUrls.some((url) => url.startsWith(env.AI_BASE_URL)));
-assert.equal(validationFailoverUrls.some((url) => url.startsWith('https://openrouter.ai/api/v1')), false);
+assert.equal(validationFailoverUrls.length, 2, 'background routing must fail over sequentially after invalid content');
+assert.ok(validationFailoverPayload.data.generatedByProvider.endsWith('_FREE'));
 
 customProviderResponse = async ({ body }) => new Response(JSON.stringify({
   model: body.model,
@@ -449,17 +974,32 @@ customProviderResponse = async ({ body }) => {
       { context: 'Hội thoại', en: 'Do you have a backup plan?', vi: 'Bạn có phương án dự phòng không?' },
       { context: 'Cụm từ', en: 'We always keep a backup copy.', vi: 'Chúng tôi luôn giữ một bản sao dự phòng.' },
     ],
-  }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }) } }], usage: { prompt_tokens: 1000, completion_tokens: 2000, total_tokens: 3000 } }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 };
 const fallbackResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
   body: JSON.stringify({ word: 'backup', meaning: 'bản sao lưu', topic: 'Công nghệ' }),
-}), env, context);
+}), {
+  ...env,
+  AI_PAID_INPUT_USD_PER_MILLION: '1',
+  AI_PAID_OUTPUT_USD_PER_MILLION: '2',
+}, context);
 const fallbackPayload = await fallbackResponse.json();
 assert.equal(fallbackResponse.status, 200);
 assert.deepEqual(fallbackModels, [env.AI_FREE_MODEL, env.AI_PAID_MODEL]);
 assert.equal(fallbackPayload.data.generatedByModel, env.AI_PAID_MODEL);
+const paidMetricsResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/operations/status', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const paidMetricsPayload = await paidMetricsResponse.json();
+assert.equal(paidMetricsPayload.data.providers.paidFallback.health.estimatedCostUsd, 0.005);
+assert.ok(analyticsPoints.some((point) => point.indexes[0] === 'XKIRO_PAID' && point.doubles[4] === 0.005));
 customProviderResponse = null;
 
 let regenerationCalls = 0;
@@ -682,5 +1222,82 @@ assert.deepEqual(nonBlockingState.lastRunSummary, {
   retrySkipped: 0,
 });
 assert.equal(scheduledProviderCalls, 1, 'scheduled retries must reuse a valid Edge Cache result without another AI call');
+
+serverCache.set('system-vocabulary:backfill:v1', JSON.stringify({
+  ...nonBlockingState,
+  cursor: 0,
+  status: 'active',
+}));
+serverCache.set('system-vocabulary:backfill-retry:v1:stumble', JSON.stringify({
+  word: 'stumble',
+  attempts: 4,
+  status: 'retry_pending',
+  nextRetryAt: new Date(Date.now() - 1_000).toISOString(),
+}));
+await worker.scheduled(
+  { scheduledTime: Date.now() + 2 * 60 * 60 * 1000, cron: '0 * * * *' },
+  {
+    ...env,
+    XTROUTER_API_KEY: '',
+    AI_PAID_MODEL: '',
+    GROQ_API_KEY: 'groq-test-key',
+    GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  },
+  { waitUntil: (promise) => nonBlockingPending.push(promise) },
+);
+await Promise.all(nonBlockingPending.splice(0));
+const manualRetry = JSON.parse(serverCache.get('system-vocabulary:backfill-retry:v1:stumble'));
+const manualQueue = JSON.parse(serverCache.get('system-vocabulary:manual-review:v1'));
+assert.equal(manualRetry.status, 'manual_review');
+assert.equal(manualRetry.nextRetryAt, null);
+assert.equal(manualQueue.items[0].word, 'stumble');
+assert.equal(manualQueue.items[0].attempts, 5);
+
+const manualStatusResponse = await worker.fetch(
+  new Request('http://localhost:8787/api/vocabulary/backfill/status', { headers: { Origin: 'http://localhost:5173' } }),
+  env,
+  context,
+);
+const manualStatusPayload = await manualStatusResponse.json();
+assert.equal(manualStatusPayload.data.manualReview.count, 1);
+assert.equal(manualStatusPayload.data.manualReview.items[0].word, 'stumble');
+
+const d1Backfill = createD1Mock();
+d1Backfill.jobs.set('stumble', {
+  status: 'retry_pending',
+  attempts: 4,
+  next_retry_at: new Date(Date.now() - 1_000).toISOString(),
+  last_error: 'INSUFFICIENT_BILINGUAL_EXAMPLES',
+  last_provider_errors_json: '[]',
+  updated_at: new Date(Date.now() - 60_000).toISOString(),
+});
+serverCache.delete('system-vocabulary:backfill:v1');
+serverCache.delete('system-vocabulary:manual-review:v1');
+serverCache.delete('system-vocabulary:backfill-retry:v1:stumble');
+const kvUnavailableEnv = {
+  ...env,
+  VOCAB_DB: d1Backfill.binding,
+  XTROUTER_API_KEY: '',
+  AI_PAID_MODEL: '',
+  GROQ_API_KEY: 'groq-test-key',
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  VOCAB_CACHE: {
+    ...env.VOCAB_CACHE,
+    put: async () => { throw new Error('KV_WRITE_LIMIT'); },
+    delete: async () => { throw new Error('KV_WRITE_LIMIT'); },
+  },
+};
+await worker.scheduled(
+  { scheduledTime: Date.now() + 4 * 60 * 60 * 1000, cron: '0 * * * *' },
+  kvUnavailableEnv,
+  { waitUntil: (promise) => nonBlockingPending.push(promise) },
+);
+await Promise.all(nonBlockingPending.splice(0));
+const d1BackfillState = JSON.parse(d1Backfill.states.get('system-vocabulary:backfill:v1').payload_json);
+assert.equal(d1BackfillState.cursor, 2, 'D1 checkpoint must advance when KV writes fail');
+assert.equal(d1Backfill.jobs.get('stumble').status, 'manual_review');
+assert.equal(d1Backfill.jobs.get('stumble').next_retry_at, null);
+assert.equal(d1Backfill.manualReviews.get('stumble').attempts, 5);
+assert.equal(serverCache.has('system-vocabulary:backfill:v1'), false, 'test must prove state came from D1');
 customProviderResponse = null;
 console.log('Worker vocabulary contract: OK');

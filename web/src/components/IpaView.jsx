@@ -6,22 +6,20 @@ import {
   MicOff, 
   Check, 
   Sparkles, 
-  AlertCircle, 
   Info, 
   BookOpen, 
-  Award, 
-  HelpCircle 
+  Award
 } from 'lucide-react';
 import { ipaSounds, endingSoundRules } from '../data/ipaData';
 import speechHelper from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
 
 export default function IpaView({ userData, onUpdateUserData, voiceSpeed }) {
   const [activeFilter, setActiveFilter] = useState('crucial'); // 'all', 'crucial', 'vowel', 'consonant', 'rules'
   const [selectedSound, setSelectedSound] = useState(ipaSounds[0]);
   const [isRecording, setIsRecording] = useState(false);
   const [recognitionObj, setRecognitionObj] = useState(null);
-  const [spokenResult, setSpokenResult] = useState(null);
   const [evalResult, setEvalResult] = useState(null);
 
   const completedIpa = new Set(userData?.completedIpa || []);
@@ -38,19 +36,18 @@ export default function IpaView({ userData, onUpdateUserData, voiceSpeed }) {
   };
 
   const toggleSoundCompleted = (symbol) => {
-    const updated = new Set(completedIpa);
-    let xpGain = 0;
-    if (updated.has(symbol)) {
-      updated.delete(symbol);
-    } else {
-      updated.add(symbol);
-      xpGain = 20;
-    }
-    onUpdateUserData({
-      ...userData,
-      completedIpa: Array.from(updated),
-      xp: (userData?.xp || 0) + xpGain
+    const result = dispatchLearningEvent({
+      type: 'progress.toggled',
+      source: 'ipa',
+      payload: {
+        collection: 'completedIpa',
+        targetId: symbol,
+        completed: !completedIpa.has(symbol),
+        xp: 20,
+        rewardKey: `ipa:${symbol}`,
+      },
     });
+    onUpdateUserData(result.userData);
   };
 
   const handleStartRecording = (targetWord) => {
@@ -59,14 +56,12 @@ export default function IpaView({ userData, onUpdateUserData, voiceSpeed }) {
       return;
     }
 
-    setSpokenResult(null);
     setEvalResult(null);
     setIsRecording(true);
 
     const rec = speechHelper.createRecognition(
       (result) => {
         if (result.isFinal) {
-          setSpokenResult(result.final);
           const evaluation = evaluatePronunciation(targetWord, result.final);
           setEvalResult(evaluation);
           setIsRecording(false);
@@ -185,7 +180,6 @@ export default function IpaView({ userData, onUpdateUserData, voiceSpeed }) {
                     onClick={() => {
                       setSelectedSound(sound);
                       setEvalResult(null);
-                      setSpokenResult(null);
                       handlePlayAudio(sound.examples[0].word);
                     }}
                   >

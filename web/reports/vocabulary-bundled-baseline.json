@@ -1,0 +1,230 @@
+{
+  "checkedAt": "2026-09-24T03:10:08.839Z",
+  "source": "bundled-catalog",
+  "counts": {
+    "rawRecords": 3000,
+    "usableWords": 3000,
+    "uniqueWords": 3000,
+    "invalidHeadwords": 0,
+    "duplicateWords": 0,
+    "missingMeanings": 0,
+    "lowQualityMeanings": 2495,
+    "likelyEnglishMeanings": 0,
+    "missingBilingualExamples": 0,
+    "lowQualityExamples": 2832,
+    "invalidIpa": 0
+  },
+  "samples": {
+    "invalidHeadwords": [],
+    "duplicateWords": [],
+    "missingMeanings": [],
+    "lowQualityMeanings": [
+      {
+        "word": "according to",
+        "meaning": "từ 'according to' (prep)"
+      },
+      {
+        "word": "ad",
+        "meaning": "của advertisement"
+      },
+      {
+        "word": "add",
+        "meaning": "+ up,  together) cộng"
+      },
+      {
+        "word": "advertise",
+        "meaning": "từ 'advertise' (v)"
+      },
+      {
+        "word": "advertising",
+        "meaning": "từ 'advertising' (n)"
+      },
+      {
+        "word": "afterwards",
+        "meaning": "từ 'afterwards' (adv)"
+      },
+      {
+        "word": "airline",
+        "meaning": "từ 'airline' (n)"
+      },
+      {
+        "word": "airport",
+        "meaning": "từ 'airport' (n)"
+      },
+      {
+        "word": "allright",
+        "meaning": "từ 'allright' (adj/adv)"
+      },
+      {
+        "word": "amazed",
+        "meaning": "từ 'amazed' (adj)"
+      },
+      {
+        "word": "among",
+        "meaning": "từ 'among' (prep)"
+      },
+      {
+        "word": "any more",
+        "meaning": "từ 'any more' (adv)"
+      },
+      {
+        "word": "anyway",
+        "meaning": "từ 'anyway' (adv)"
+      },
+      {
+        "word": "apologize",
+        "meaning": "từ 'apologize' (v)"
+      },
+      {
+        "word": "app",
+        "meaning": "từ 'app' (n)"
+      },
+      {
+        "word": "apparently",
+        "meaning": "từ 'apparently' (adv)"
+      },
+      {
+        "word": "approximately",
+        "meaning": "từ 'approximately' (adv)"
+      },
+      {
+        "word": "arms",
+        "meaning": "từ 'arms' (n)"
+      },
+      {
+        "word": "artistic",
+        "meaning": "từ 'artistic' (adj)"
+      },
+      {
+        "word": "associated",
+        "meaning": "từ 'associated' (adj)"
+      },
+      {
+        "word": "based",
+        "meaning": "từ 'based' (adj)"
+      },
+      {
+        "word": "basketball",
+        "meaning": "từ 'basketball' (n)"
+      },
+      {
+        "word": "bathroom",
+        "meaning": "từ 'bathroom' (n)"
+      },
+      {
+        "word": "blog",
+        "meaning": "từ 'blog' (n)"
+      },
+      {
+        "word": "bored",
+        "meaning": "từ 'bored' (adj)"
+      }
+    ],
+    "likelyEnglishMeanings": [],
+    "missingBilingualExamples": [],
+    "lowQualityExamples": [
+      {
+        "word": "abandon",
+        "example": "She used the word 'abandon' in her sentence."
+      },
+      {
+        "word": "ability",
+        "example": "She used the word 'ability' in her sentence."
+      },
+      {
+        "word": "able",
+        "example": "She used the word 'able' in her sentence."
+      },
+      {
+        "word": "about",
+        "example": "She used the word 'about' in her sentence."
+      },
+      {
+        "word": "above",
+        "example": "She used the word 'above' in her sentence."
+      },
+      {
+        "word": "abroad",
+        "example": "She used the word 'abroad' in her sentence."
+      },
+      {
+        "word": "absolute",
+        "example": "She used the word 'absolute' in her sentence."
+      },
+      {
+        "word": "absolutely",
+        "example": "She used the word 'absolutely' in her sentence."
+      },
+      {
+        "word": "academic",
+        "example": "She used the word 'academic' in her sentence."
+      },
+      {
+        "word": "accept",
+        "example": "She used the word 'accept' in her sentence."
+      },
+      {
+        "word": "acceptable",
+        "example": "She used the word 'acceptable' in her sentence."
+      },
+      {
+        "word": "access",
+        "example": "She used the word 'access' in her sentence."
+      },
+      {
+        "word": "accident",
+        "example": "She used the word 'accident' in her sentence."
+      },
+      {
+        "word": "accommodation",
+        "example": "She used the word 'accommodation' in her sentence."
+      },
+      {
+        "word": "accompany",
+        "example": "She used the word 'accompany' in her sentence."
+      },
+      {
+        "word": "according to",
+        "example": "Practice speaking 'according to' clearly."
+      },
+      {
+        "word": "account",
+        "example": "She used the word 'account' in her sentence."
+      },
+      {
+        "word": "accurate",
+        "example": "She used the word 'accurate' in her sentence."
+      },
+      {
+        "word": "accuse",
+        "example": "She used the word 'accuse' in her sentence."
+      },
+      {
+        "word": "achieve",
+        "example": "She used the word 'achieve' in her sentence."
+      },
+      {
+        "word": "achievement",
+        "example": "She used the word 'achievement' in her sentence."
+      },
+      {
+        "word": "acknowledge",
+        "example": "She used the word 'acknowledge' in her sentence."
+      },
+      {
+        "word": "acquire",
+        "example": "She used the word 'acquire' in her sentence."
+      },
+      {
+        "word": "across",
+        "example": "She used the word 'across' in her sentence."
+      },
+      {
+        "word": "act",
+        "example": "She used the word 'act' in her sentence."
+      }
+    ],
+    "invalidIpa": []
+  },
+  "releaseReady": false
+}

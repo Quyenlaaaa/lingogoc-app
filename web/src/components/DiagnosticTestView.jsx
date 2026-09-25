@@ -24,17 +24,12 @@ import confetti from 'canvas-confetti';
 import { diagnosticQuestions, diagnosticSections, evaluateDiagnosticResults } from '../data/diagnosticData';
 import { speakText, startSpeechRecognition } from '../utils/speechHelper';
 import { evaluatePronunciation } from '../utils/scoreEvaluator';
+import { loadDiagnosticHistory, loadLatestDiagnosticResult, saveDiagnosticResult } from '../utils/diagnosticHistory';
 
-const RESULT_KEY = 'lingogoc_diagnostic_result';
 const OBJECTIVE_SECTIONS = ['language', 'vocabulary', 'reading', 'listening'];
 
 function loadSavedResult() {
-  try {
-    const value = JSON.parse(localStorage.getItem(RESULT_KEY) || 'null');
-    return value?.version === 2 ? value : null;
-  } catch {
-    return null;
-  }
+  return loadLatestDiagnosticResult();
 }
 
 export default function DiagnosticTestView({ onSelectStage, onCompleteTest }) {
@@ -49,6 +44,7 @@ export default function DiagnosticTestView({ onSelectStage, onCompleteTest }) {
   const [speechError, setSpeechError] = useState('');
   const [result, setResult] = useState(savedResult);
   const [showReview, setShowReview] = useState(false);
+  const [history, setHistory] = useState(loadDiagnosticHistory);
   const recognitionRef = useRef(null);
 
   const question = diagnosticQuestions[currentIndex];
@@ -114,7 +110,7 @@ export default function DiagnosticTestView({ onSelectStage, onCompleteTest }) {
     const finalResult = evaluateDiagnosticResults(answers, speakingScores);
     setResult(finalResult);
     setPhase('result');
-    localStorage.setItem(RESULT_KEY, JSON.stringify(finalResult));
+    setHistory(saveDiagnosticResult(finalResult));
     onCompleteTest?.(finalResult);
     try {
       confetti({ particleCount: 75, spread: 68, origin: { y: 0.62 } });
@@ -175,6 +171,8 @@ export default function DiagnosticTestView({ onSelectStage, onCompleteTest }) {
 
   if (phase === 'result' && result) {
     const reviewQuestions = diagnosticQuestions.filter((item) => OBJECTIVE_SECTIONS.includes(item.section));
+    const previousResult = history.length > 1 ? history.at(-2) : null;
+    const scoreDelta = previousResult ? result.overallScore - previousResult.overallScore : null;
     return (
       <main className="placement-shell placement-result-shell animate-fade-in">
         <section className="placement-result-hero">
@@ -222,6 +220,16 @@ export default function DiagnosticTestView({ onSelectStage, onCompleteTest }) {
         <section className="placement-band-card">
           <div className="report-card-title"><CheckCircle2 size={20} /><h2>Mức độ làm chủ theo bậc câu hỏi</h2></div>
           <div className="band-grid">{Object.entries(result.bandStats).map(([level, stats]) => <div key={level}><strong>{level}</strong><span>{stats.score}%</span><small>{stats.correct}/{stats.total} đúng</small></div>)}</div>
+        </section>
+
+        <section className="placement-band-card diagnostic-history-card">
+          <div className="report-card-title"><Clock3 size={20} /><h2>Lịch sử đánh giá</h2></div>
+          {previousResult && <p>So với lần trước: <strong>{scoreDelta >= 0 ? '+' : ''}{scoreDelta} điểm</strong> · {previousResult.level} → {result.level}</p>}
+          <div className="diagnostic-history-list">
+            {history.slice(-5).reverse().map((item) => (
+              <div key={item.completedAt}><time>{new Date(item.completedAt).toLocaleDateString('vi-VN')}</time><strong>{item.level}</strong><span>{item.overallScore}/100</span></div>
+            ))}
+          </div>
         </section>
 
         <div className="placement-result-actions">

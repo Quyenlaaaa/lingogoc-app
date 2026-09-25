@@ -13,6 +13,8 @@ import {
 import { ENRICHMENT_RETRY_COOLDOWN_MS, getEnrichmentRetryState } from '../src/utils/geminiService.js';
 import { vocabData } from '../src/data/vocabData.js';
 import { getCachedVietnameseMeaning } from '../src/utils/vocabularyMeaningService.js';
+import { getVocabularyPresentation } from '../src/utils/vocabularyPresentation.js';
+import { getSrsGradeOptions } from '../src/utils/srsEngine.js';
 
 const vocabulary = [
   { id: 1, word: 'accept', meaning: 'chấp nhận', pos: 'v', topic: 'Giao tiếp', level: 'A2', example: 'I accept your offer.' },
@@ -32,6 +34,30 @@ assert.equal(isInvalidBundledVocabularyWord("can't"), false);
 assert.equal(isValidIpa('/fire/', 'fire'), false);
 assert.equal(isValidIpa('/ˈfaɪə(r)/', 'fire'), true);
 assert.equal(getDisplayIpa('/explore/', 'explore'), 'IPA đang được bổ sung');
+
+const presentation = getVocabularyPresentation(
+  { word: 'accept', meaning: "từ 'accept' (v)", ipa: '/accept/', example: 'I accept your offer.', exampleVi: 'Tôi chấp nhận đề nghị của bạn.' },
+  {
+    meaning: { meaningVi: 'chấp nhận' },
+    enrichment: {
+      primaryMeaningVi: 'đồng ý nhận',
+      ipa: '/əkˈsept/',
+      contextExamples: [{ context: 'work', en: 'She accepted the job offer.', vi: 'Cô ấy đã nhận lời mời làm việc.' }],
+    },
+  },
+);
+assert.equal(presentation.meaning, 'đồng ý nhận', 'durable enrichment must be the first display source');
+assert.equal(presentation.ipa, '/əkˈsept/');
+assert.equal(presentation.examples.length, 2);
+assert.equal(presentation.primaryExample.en, 'She accepted the job offer.');
+
+const gradeOptions = getSrsGradeOptions(null, '2026-09-24');
+assert.deepEqual(gradeOptions.map((option) => option.label), ['Quên', 'Khó', 'Tốt', 'Dễ']);
+assert.deepEqual(
+  gradeOptions.map((option) => option.nextRecord.nextReview),
+  gradeOptions.map((option) => `2026-09-${String(24 + option.nextRecord.interval).padStart(2, '0')}`),
+  'review labels must show the interval actually persisted by the scheduler',
+);
 
 const sanitizedBundledVocabulary = sanitizeBundledVocabulary(vocabData);
 const sanitizedWords = sanitizedBundledVocabulary.map((item) => item.word.toLocaleLowerCase('en'));

@@ -35,6 +35,28 @@ jobs:
         working-directory: web
         run: npm ci
 
+      - name: Lint (warnings fail the release)
+        working-directory: web
+        run: npm run lint
+
+      - name: Feature and mobile speech contracts
+        working-directory: web
+        run: |
+          npm run test:features
+          npm run test:speech
+          npm run test:vocab
+          npm run test:migration
+          npm run test:learning
+          npm run test:speaking
+          npm run test:modules
+          npm run test:identity
+          npm run test:backup
+          npm run test:security
+          npm run test:offline
+          npm run test:diagnostic
+          npm run test:admin
+          node backend/test-worker.mjs
+
       - name: Build production bundle
         working-directory: web
         run: npm run build

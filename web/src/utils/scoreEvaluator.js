@@ -5,7 +5,7 @@ export function cleanText(str) {
   if (!str) return '';
   return str
     .toLowerCase()
-    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'’]/g, '')
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'’]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }

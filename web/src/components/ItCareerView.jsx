@@ -1,17 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   BookOpen, BriefcaseBusiness, Check, CheckCircle2, Code2, MessageSquareText,
   Search, Target, Volume2,
 } from 'lucide-react';
 import { itCareerCategories, itCareerVocabulary, itWorkPhrases } from '../data/itCareerData';
 import speechHelper from '../utils/speechHelper';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { loadLearningModuleSession, saveLearningModuleSession } from '../utils/learningModuleSessionStore';
 
 const ALL_CATEGORIES = 'Tất cả chủ đề';
 
+function loadInitialItCareerSession() {
+  const saved = loadLearningModuleSession('it-career');
+  return {
+    mode: ['vocabulary', 'roadmap', 'phrases'].includes(saved.mode) ? saved.mode : 'vocabulary',
+    query: String(saved.query || ''),
+    category: itCareerCategories.includes(saved.category) ? saved.category : ALL_CATEGORIES,
+  };
+}
+
 export default function ItCareerView({ userData, onUpdateUserData, voiceSpeed = 0.85 }) {
-  const [mode, setMode] = useState('vocabulary');
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState(ALL_CATEGORIES);
+  const [initialSession] = useState(loadInitialItCareerSession);
+  const [mode, setMode] = useState(initialSession.mode);
+  const [query, setQuery] = useState(initialSession.query);
+  const [category, setCategory] = useState(initialSession.category);
   const learnedSet = useMemo(() => new Set(userData?.completedItTerms || []), [userData]);
 
   const filteredTerms = useMemo(() => {
@@ -27,17 +39,23 @@ export default function ItCareerView({ userData, onUpdateUserData, voiceSpeed = 
   const learnedCount = learnedSet.size;
   const progress = Math.round((learnedCount / itCareerVocabulary.length) * 100);
 
-  const toggleLearned = (id) => {
-    const next = new Set(learnedSet);
-    const isNew = !next.has(id);
-    if (isNew) next.add(id);
-    else next.delete(id);
+  useEffect(() => {
+    saveLearningModuleSession('it-career', { mode, query, category });
+  }, [category, mode, query]);
 
-    onUpdateUserData({
-      ...userData,
-      completedItTerms: [...next],
-      xp: (userData?.xp || 0) + (isNew ? 10 : 0),
+  const toggleLearned = (id) => {
+    const result = dispatchLearningEvent({
+      type: 'progress.toggled',
+      source: 'it-career',
+      payload: {
+        collection: 'completedItTerms',
+        targetId: id,
+        completed: !learnedSet.has(id),
+        xp: 10,
+        rewardKey: `it-career:${id}`,
+      },
     });
+    onUpdateUserData(result.userData);
   };
 
   const speak = (text) => speechHelper.speak(text, { rate: voiceSpeed });
@@ -89,6 +107,7 @@ export default function ItCareerView({ userData, onUpdateUserData, voiceSpeed = 
           </div>
 
           <div className="it-result-summary">Hiển thị {filteredTerms.length} thuật ngữ</div>
+          {filteredTerms.length === 0 && <div className="module-empty-state" role="status">Không tìm thấy thuật ngữ phù hợp. Hãy xóa từ khóa hoặc chọn chủ đề khác.</div>}
           <div className="it-terms-grid">
             {filteredTerms.map((item) => {
               const learned = learnedSet.has(item.id);

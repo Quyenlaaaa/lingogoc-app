@@ -5,6 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognitionListener
@@ -36,6 +42,15 @@ class MainActivity : ComponentActivity() {
     private var pendingNativeRecognition: Pair<String, String>? = null
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var pendingBackupContent: String? = null
+    private var activityStarted = false
+    private lateinit var connectivityManager: ConnectivityManager
+    private var networkCallbackRegistered = false
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) = notifyNetworkState()
+        override fun onLost(network: Network) = notifyNetworkState()
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) = notifyNetworkState()
+    }
 
     private val microphonePermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -43,10 +58,11 @@ class MainActivity : ComponentActivity() {
         val nativeRecognition = pendingNativeRecognition
         pendingNativeRecognition = null
         if (nativeRecognition != null) {
-            if (granted) {
+            if (granted && activityStarted) {
                 nativeBridge.startListeningWithPermission(nativeRecognition.first, nativeRecognition.second)
             } else {
-                nativeBridge.notifyRecognition(nativeRecognition.first, "error", "", "not-allowed")
+                val error = if (granted) "aborted" else "not-allowed"
+                nativeBridge.notifyRecognition(nativeRecognition.first, "error", "", error)
                 nativeBridge.notifyRecognition(nativeRecognition.first, "end")
                 Toast.makeText(this, "Cần quyền micro để luyện phát âm.", Toast.LENGTH_SHORT).show()
             }
@@ -97,6 +113,7 @@ class MainActivity : ComponentActivity() {
 
         webView = WebView(this)
         setContentView(webView)
+        connectivityManager = getSystemService(ConnectivityManager::class.java)
 
         val assetLoader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
@@ -183,6 +200,11 @@ class MainActivity : ComponentActivity() {
         } else {
             webView.restoreState(savedInstanceState)
         }
+
+        runCatching {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+            networkCallbackRegistered = true
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -190,7 +212,22 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    override fun onStart() {
+        super.onStart()
+        activityStarted = true
+    }
+
+    override fun onStop() {
+        activityStarted = false
+        if (::nativeBridge.isInitialized) nativeBridge.stopForLifecycle()
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        if (networkCallbackRegistered) {
+            runCatching { connectivityManager.unregisterNetworkCallback(networkCallback) }
+            networkCallbackRegistered = false
+        }
         pendingWebPermission?.deny()
         fileChooserCallback?.onReceiveValue(null)
         nativeBridge.destroy()
@@ -215,10 +252,50 @@ class MainActivity : ComponentActivity() {
         microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
     }
 
+    private fun currentNetworkState(): String {
+        val network = connectivityManager.activeNetwork ?: return "offline"
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return "offline"
+        return when {
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) -> "online"
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) -> "limited"
+            else -> "offline"
+        }
+    }
+
+    private fun notifyNetworkState() {
+        if (!::webView.isInitialized) return
+        val state = JSONObject.quote(currentNetworkState())
+        webView.post {
+            webView.evaluateJavascript(
+                "if(window.__lingogocNativeNetworkEvent){window.__lingogocNativeNetworkEvent($state);}",
+                null,
+            )
+        }
+    }
+
     inner class NativeBridge : TextToSpeech.OnInitListener, RecognitionListener {
         private val textToSpeech = TextToSpeech(this@MainActivity, this)
+        private val audioManager = getSystemService(AudioManager::class.java)
         private var speechRecognizer: SpeechRecognizer? = null
         private var activeRecognitionId: String? = null
+        private var activeSpeechId: String? = null
+        private val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build(),
+            )
+            .setOnAudioFocusChangeListener { change ->
+                if (
+                    change == AudioManager.AUDIOFOCUS_LOSS ||
+                    change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ||
+                    change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+                ) {
+                    runOnUiThread { interruptSpeech() }
+                }
+            }
+            .build()
 
         @Volatile
         private var speechReady = false
@@ -226,10 +303,10 @@ class MainActivity : ComponentActivity() {
         init {
             textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String) = notifySpeech(utteranceId, "start")
-                override fun onDone(utteranceId: String) = notifySpeech(utteranceId, "done")
+                override fun onDone(utteranceId: String) = finishSpeech(utteranceId, "done")
                 @Deprecated("Deprecated in Java")
-                override fun onError(utteranceId: String) = notifySpeech(utteranceId, "error")
-                override fun onError(utteranceId: String, errorCode: Int) = notifySpeech(utteranceId, "error")
+                override fun onError(utteranceId: String) = finishSpeech(utteranceId, "error")
+                override fun onError(utteranceId: String, errorCode: Int) = finishSpeech(utteranceId, "error")
             })
         }
 
@@ -241,18 +318,27 @@ class MainActivity : ComponentActivity() {
         fun speak(text: String, language: String, rate: Double, pitch: Double, requestId: String): Boolean {
             if (!speechReady || text.isBlank()) return false
             runOnUiThread {
-                textToSpeech.language = Locale.forLanguageTag(language.replace('_', '-'))
+                val languageResult = textToSpeech.setLanguage(Locale.forLanguageTag(language.replace('_', '-')))
+                if (languageResult == TextToSpeech.LANG_MISSING_DATA || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    notifySpeech(requestId, "error")
+                    return@runOnUiThread
+                }
+                if (audioManager.requestAudioFocus(audioFocusRequest) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    notifySpeech(requestId, "error")
+                    return@runOnUiThread
+                }
                 textToSpeech.setSpeechRate(rate.toFloat().coerceIn(0.5f, 2f))
                 textToSpeech.setPitch(pitch.toFloat().coerceIn(0.5f, 2f))
+                activeSpeechId = requestId
                 val result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, requestId)
-                if (result == TextToSpeech.ERROR) notifySpeech(requestId, "error")
+                if (result == TextToSpeech.ERROR) finishSpeech(requestId, "error")
             }
             return true
         }
 
         @JavascriptInterface
         fun stopSpeech() {
-            runOnUiThread { textToSpeech.stop() }
+            runOnUiThread { interruptSpeech(notifyWeb = false) }
         }
 
         @JavascriptInterface
@@ -275,6 +361,9 @@ class MainActivity : ComponentActivity() {
             runOnUiThread { requestBackup(fileName, content) }
         }
 
+        @JavascriptInterface
+        fun getNetworkState(): String = currentNetworkState()
+
         private fun notifySpeech(requestId: String, status: String) {
             val safeId = JSONObject.quote(requestId)
             val safeStatus = JSONObject.quote(status)
@@ -289,6 +378,11 @@ class MainActivity : ComponentActivity() {
         fun startListeningWithPermission(requestId: String, language: String) {
             if (!SpeechRecognizer.isRecognitionAvailable(this@MainActivity)) {
                 notifyRecognition(requestId, "error", "", "service-not-allowed")
+                notifyRecognition(requestId, "end")
+                return
+            }
+            if (activeRecognitionId != null) {
+                notifyRecognition(requestId, "error", "", "recognizer-busy")
                 notifyRecognition(requestId, "end")
                 return
             }
@@ -363,10 +457,36 @@ class MainActivity : ComponentActivity() {
 
         override fun onEvent(eventType: Int, params: Bundle?) = Unit
 
-        fun destroy() {
-            speechRecognizer?.cancel()
-            speechRecognizer?.destroy()
+        private fun finishSpeech(requestId: String, status: String) {
+            if (activeSpeechId == requestId) {
+                activeSpeechId = null
+                audioManager.abandonAudioFocusRequest(audioFocusRequest)
+            }
+            notifySpeech(requestId, status)
+        }
+
+        private fun interruptSpeech(notifyWeb: Boolean = true) {
+            val requestId = activeSpeechId
+            activeSpeechId = null
             textToSpeech.stop()
+            audioManager.abandonAudioFocusRequest(audioFocusRequest)
+            if (notifyWeb && requestId != null) notifySpeech(requestId, "cancelled")
+        }
+
+        fun stopForLifecycle() {
+            interruptSpeech()
+            val requestId = activeRecognitionId
+            activeRecognitionId = null
+            speechRecognizer?.cancel()
+            if (requestId != null) {
+                notifyRecognition(requestId, "error", "", "aborted")
+                notifyRecognition(requestId, "end")
+            }
+        }
+
+        fun destroy() {
+            stopForLifecycle()
+            speechRecognizer?.destroy()
             textToSpeech.shutdown()
         }
     }

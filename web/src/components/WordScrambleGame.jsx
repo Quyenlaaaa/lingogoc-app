@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Check, Eye, Lightbulb, RotateCcw, Shuffle, Trophy, Volume2, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { isLowQualityMeaning } from '../utils/vocabularyQuality';
+import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { getVocabularyPresentation } from '../utils/vocabularyPresentation';
 
 function shuffledLetters(word) {
   const source = word.toLowerCase().split('');
@@ -22,8 +24,15 @@ function chooseWord(pool, previousId) {
   return candidates[Math.floor(Math.random() * candidates.length)] || pool[0] || null;
 }
 
-export default function WordScrambleGame({ words, userData, onUpdateUserData, onSpeak, onOpenDetail }) {
-  const pool = useMemo(() => words.filter((item) => /^[a-z]{4,14}$/i.test(item.word) && !isLowQualityMeaning(item.meaning)), [words]);
+export default function WordScrambleGame({ words, onUpdateUserData, onSpeak, onOpenDetail }) {
+  const pool = useMemo(() => words
+    .map((item) => {
+      const presentation = getVocabularyPresentation(item);
+      return { ...item, meaning: presentation.meaning, ipa: presentation.ipa, _presentation: presentation };
+    })
+    .filter((item) => /^[a-z]{4,14}$/i.test(item.word)
+      && item._presentation.meaningSource !== 'pending'
+      && !isLowQualityMeaning(item.meaning)), [words]);
   const [currentWord, setCurrentWord] = useState(() => chooseWord(pool));
   const [letters, setLetters] = useState(() => currentWord ? shuffledLetters(currentWord.word) : []);
   const [pickedIds, setPickedIds] = useState([]);
@@ -35,12 +44,14 @@ export default function WordScrambleGame({ words, userData, onUpdateUserData, on
   const [hintCount, setHintCount] = useState(0);
   const [awardedWordIds, setAwardedWordIds] = useState(() => new Set());
   const [lastReward, setLastReward] = useState(0);
+  const roundIdRef = useRef(crypto.randomUUID());
 
   const pickedLetters = pickedIds.map((id) => letters.find((item) => item.id === id)).filter(Boolean);
   const answer = pickedLetters.map((item) => item.letter).join('');
 
   const resetRound = (word = currentWord) => {
     if (!word) return;
+    roundIdRef.current = crypto.randomUUID();
     setCurrentWord(word);
     setLetters(shuffledLetters(word.word));
     setPickedIds([]);
@@ -56,19 +67,32 @@ export default function WordScrambleGame({ words, userData, onUpdateUserData, on
     if (!currentWord || pickedIds.length !== letters.length || status === 'correct') return;
     if (answer === currentWord.word.toLowerCase()) {
       const gained = Math.max(3, 10 - hintCount * 2 - mistakes * 2);
-      const xpReward = awardedWordIds.has(currentWord.id) ? 0 : gained;
       setStatus('correct');
       setScore((value) => value + gained);
       setStreak((value) => value + 1);
-      setLastReward(xpReward);
       setAwardedWordIds((ids) => new Set(ids).add(currentWord.id));
-      const mastered = new Set(userData?.masteredWords || []);
-      mastered.add(currentWord.id);
-      onUpdateUserData?.({
-        ...userData,
-        masteredWords: Array.from(mastered),
-        xp: (userData?.xp || 0) + xpReward,
+      dispatchLearningEvent({
+        id: `word-scramble-review:${roundIdRef.current}`,
+        type: 'word.reviewed',
+        source: 'word-scramble',
+        payload: {
+          wordId: currentWord.id,
+          quality: mistakes > 0 ? 1 : hintCount > 0 ? 2 : 3,
+          xp: 0,
+        },
       });
+      const result = dispatchLearningEvent({
+        type: 'progress.completed',
+        source: 'word-scramble',
+        payload: {
+          collection: 'masteredWords',
+          targetId: currentWord.id,
+          xp: awardedWordIds.has(currentWord.id) ? 0 : gained,
+          rewardKey: `word-scramble:${currentWord.id}`,
+        },
+      });
+      setLastReward(result.awardedXp);
+      onUpdateUserData?.(result.userData);
       try { confetti({ particleCount: 55, spread: 65, origin: { y: .68 } }); } catch { /* optional */ }
     } else {
       setStatus('wrong');

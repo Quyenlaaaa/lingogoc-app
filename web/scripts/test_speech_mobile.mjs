@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
 
 const spoken = [];
 const synth = {
@@ -24,24 +26,37 @@ Object.defineProperty(globalThis, 'navigator', {
   configurable: true,
   value: { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5 },
 });
-globalThis.window = { speechSynthesis: synth };
+const windowListeners = new Map();
+globalThis.window = {
+  speechSynthesis: synth,
+  addEventListener(type, listener) {
+    windowListeners.set(type, [...(windowListeners.get(type) || []), listener]);
+  },
+};
+globalThis.document = { hidden: false, addEventListener() {} };
 globalThis.SpeechSynthesisUtterance = class {
   constructor(text) { this.text = text; }
 };
 
-const { SpeechHelper } = await import(`../src/utils/speechHelper.js?test=${Date.now()}`);
+const { SpeechHelper, speechHelper } = await import('../src/utils/speechHelper.js');
 const helper = new SpeechHelper();
+const observedStates = [];
+const unsubscribe = helper.subscribe((state) => observedStates.push(state));
 
 assert.equal(helper.isMobileDevice(), true, 'iPhone must be recognized as mobile');
 assert.equal(helper.speak('hello', { rate: 0.75 }), true, 'speech must be submitted');
+assert.equal(helper.getState().playback.status, 'loading');
+assert.equal(helper.getState().playback.source, 'browser-synthesis');
 assert.equal(spoken.length, 1, 'speech must be submitted synchronously without a timeout');
 assert.equal(spoken[0].text, 'hello');
 assert.equal(spoken[0].lang, 'en-US');
 assert.equal(spoken[0].rate, 0.75);
 assert.equal(spoken[0].voice.name, 'Samantha', 'an English voice must be selected');
 spoken[0].onstart?.({ type: 'start' });
+assert.equal(helper.getState().playback.status, 'playing');
 spoken[0].onend?.({ type: 'end' });
 assert.equal(helper.activeUtterance, null, 'finished utterances must be released');
+assert.equal(helper.getState().playback.status, 'completed');
 
 helper.setVoicePreset('male_mature');
 assert.equal(helper.getVoicePreset(), 'male_mature');
@@ -58,6 +73,7 @@ assert.equal(helper.getVoicePreset(), 'auto', 'unknown presets must safely fall 
 let nativeSpeech = null;
 let nativeStarted = false;
 let nativeEnded = false;
+let nativeRecognitionStops = 0;
 window.LingoGocNative = {
   speak(...args) {
     nativeSpeech = args;
@@ -67,7 +83,7 @@ window.LingoGocNative = {
   startListening(requestId, language) {
     this.recognitionRequest = { requestId, language };
   },
-  stopListening() {},
+  stopListening() { nativeRecognitionStops += 1; },
 };
 helper.setVoicePreset('female_young');
 assert.equal(helper.speak('Native hello', {
@@ -85,6 +101,13 @@ window.__lingogocNativeSpeechEvent(nativeSpeech[4], 'done');
 assert.equal(nativeStarted, true, 'native start events must reach the caller');
 assert.equal(nativeEnded, true, 'native completion events must reach the caller');
 
+helper.speak('Interrupted native speech', { rate: 1 });
+const interruptedRequestId = nativeSpeech[4];
+window.__lingogocNativeSpeechEvent(interruptedRequestId, 'start');
+window.__lingogocNativeSpeechEvent(interruptedRequestId, 'cancelled');
+assert.equal(helper.getState().playback.status, 'cancelled', 'audio-focus loss must not start a second fallback voice');
+assert.equal(helper.getState().playback.retryable, true);
+
 let nativeRecognition = null;
 let nativeRecognitionEnded = false;
 const recognition = helper.createRecognition(
@@ -94,6 +117,7 @@ const recognition = helper.createRecognition(
 );
 recognition.start();
 assert.equal(helper.isSpeechRecognitionSupported(), true);
+assert.equal(helper.getState().recognition.status, 'listening');
 assert.equal(window.LingoGocNative.recognitionRequest.language, 'en-US');
 window.__lingogocNativeRecognitionEvent(
   window.LingoGocNative.recognitionRequest.requestId,
@@ -105,6 +129,13 @@ window.__lingogocNativeRecognitionEvent(window.LingoGocNative.recognitionRequest
 assert.equal(nativeRecognition.final, 'hello native');
 assert.equal(nativeRecognition.isFinal, true);
 assert.equal(nativeRecognitionEnded, true);
+assert.equal(helper.getState().recognition.status, 'completed');
+
+const interruptedRecognition = helper.createRecognition(() => {}, () => {}, () => {});
+interruptedRecognition.start();
+for (const listener of windowListeners.get('pagehide') || []) listener();
+assert.equal(nativeRecognitionStops, 1, 'leaving a mobile page must release native recognition');
+assert.equal(helper.getState().recognition.status, 'cancelled');
 delete window.LingoGocNative;
 
 let audioInstances = 0;
@@ -133,6 +164,7 @@ const dictionary = await import(`../src/utils/realDictionaryService.js?test=${Da
 dictionary.preloadNativeAudio('https://example.com/hello.mp3');
 assert.equal(await dictionary.playNativeAudio('https://example.com/hello.mp3'), true);
 assert.equal(audioInstances, 1, 'native pronunciation must reuse one audio element');
+assert.equal(speechHelper.getState().playback.source, 'external-audio', 'dictionary audio must use the shared speech service');
 assert.equal(await dictionary.playNativeAudio('https://example.com/hello.mp3', 0.75), true);
 assert.equal(MockAudio.lastInstance.playbackRate, 0.75, 'native audio must respect slow playback rate');
 
@@ -140,6 +172,31 @@ MockAudio.rejectNext = true;
 const originalWarn = console.warn;
 console.warn = () => {};
 assert.equal(await dictionary.playNativeAudio('https://example.com/hello.mp3'), false, 'blocked playback must be reported');
+assert.equal(speechHelper.getState().playback.status, 'error', 'blocked audio must expose a retryable error state');
+assert.equal(speechHelper.getState().playback.retryable, true);
+assert.equal(speechHelper.retryLastSpeech(), true, 'a failed shared-audio request must be retryable');
+await Promise.resolve();
 console.warn = originalWarn;
+
+async function listSourceFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map((entry) => {
+    const location = path.join(directory, entry.name);
+    return entry.isDirectory() ? listSourceFiles(location) : [location];
+  }));
+  return files.flat();
+}
+
+const sourceRoot = path.resolve('src');
+const sourceFiles = (await listSourceFiles(sourceRoot)).filter((file) => /\.(?:js|jsx)$/.test(file));
+const audioConstructors = [];
+for (const file of sourceFiles) {
+  if (file.endsWith(`${path.sep}speechHelper.js`)) continue;
+  const source = await readFile(file, 'utf8');
+  if (/new\s+Audio\s*\(/.test(source)) audioConstructors.push(path.relative(sourceRoot, file));
+}
+assert.deepEqual(audioConstructors, [], 'all audio playback must go through speechHelper');
+assert.ok(observedStates.length >= 4, 'speech state subscribers must receive lifecycle updates');
+unsubscribe();
 
 console.log('Mobile speech checks passed.');

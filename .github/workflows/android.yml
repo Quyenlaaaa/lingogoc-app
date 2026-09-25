@@ -37,6 +37,13 @@ jobs:
       - run: npm ci
         working-directory: web
 
+      - name: Verify bundled and cached offline catalog
+        working-directory: web
+        run: |
+          npm run test:offline
+          npm run test:android-bridge
+          npm run test:android-release
+
       - name: Build debug APK
         working-directory: app
         run: |

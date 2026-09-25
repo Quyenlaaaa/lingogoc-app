@@ -35,6 +35,7 @@ web/scripts/data_cache/
 
 # Android build and local machine files
 app/.gradle/
+app/.gradle-user/
 app/local.properties
 app/**/build/
 app/captures/
@@ -45,3 +46,6 @@ app/*.keystore
 private-data/
 web/public/private-data/
 *.lingogoc-private.json
+.gradle-local/
+.gradle-release/
+.android-home/

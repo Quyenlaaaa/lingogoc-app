@@ -14,7 +14,8 @@ import { fetchCambridgeWordData } from '../utils/cambridgeDictionaryService';
 import { getCachedWordEnrichment } from '../utils/geminiService';
 import { fetchVocabularyBatch } from '../utils/vocabularyBatchService';
 import { speakText } from '../utils/speechHelper';
-import { getDisplayIpa, getTrustedExamples, isLowQualityExample, isLowQualityMeaning, normalizeIpa } from '../utils/vocabularyQuality';
+import { isLowQualityExample, normalizeIpa } from '../utils/vocabularyQuality';
+import { getVocabularyPresentation } from '../utils/vocabularyPresentation';
 
 export default function WordDetailModal({ word, initialEnrichment, isOpen, onClose }) {
   const [realDictData, setRealDictData] = useState(null);
@@ -29,11 +30,6 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
     let isMounted = true;
     const controller = new AbortController();
     const readyAiData = initialEnrichment || getCachedWordEnrichment(word.word);
-    setLoading(!readyAiData);
-    setRealDictData(null);
-    setCambridgeData(null);
-    setCambridgeError('');
-    setAiEnrichData(readyAiData);
 
     const loadDetails = async () => {
       fetchRealWordData(word.word, controller.signal).then((data) => {
@@ -99,21 +95,19 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
 
   if (!isOpen || !word || typeof document === 'undefined') return null;
 
-  const storedExamples = getTrustedExamples(word);
   const dictionaryExamples = (realDictData?.examples || [])
     .filter((example) => !isLowQualityExample(example))
     .map((example) => ({ en: example, vi: '', context: 'Từ điển', source: 'dictionary' }));
   const cambridgeExamples = (cambridgeData?.examples || [])
     .filter((example) => !isLowQualityExample(example))
     .map((example) => ({ en: example, vi: '', context: 'Cambridge Dictionary API', source: 'cambridge' }));
-  const aiExamples = (aiEnrichData?.contextExamples || [])
-    .filter((example) => !isLowQualityExample(example.en))
-    .map((example) => ({ ...example, source: 'ai' }));
-  const contextExamples = [...cambridgeExamples, ...aiExamples, ...dictionaryExamples, ...storedExamples]
-    .filter((example, index, list) => list.findIndex((item) => item.en.toLowerCase() === example.en.toLowerCase()) === index)
-    .slice(0, 10);
-  const displayMeaning = aiEnrichData?.primaryMeaningVi
-    || (isLowQualityMeaning(word.meaning) ? 'Đang bổ sung nghĩa tiếng Việt…' : word.meaning);
+  const presentation = getVocabularyPresentation(word, {
+    enrichment: aiEnrichData,
+    meaning: word._meaningResult,
+    ipa: normalizeIpa(realDictData?.phonetic, word.word),
+    examples: [...cambridgeExamples, ...dictionaryExamples],
+  });
+  const contextExamples = presentation.examples;
 
   const handlePlayAudio = () => speakText(word.word, 0.85);
 
@@ -143,6 +137,7 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="Đóng chi tiết từ vựng"
           style={{
             position: 'absolute',
             top: '20px',
@@ -189,21 +184,20 @@ export default function WordDetailModal({ word, initialEnrichment, isOpen, onClo
           </h1>
 
           <div style={{ fontSize: '1.25rem', color: '#818cf8', fontFamily: 'monospace', marginBottom: '8px' }}>
-            {getDisplayIpa(
-              normalizeIpa(realDictData?.phonetic, word.word) || word.ipa,
-              word.word,
-            )}
+            {presentation.ipa}
           </div>
 
           <div className="word-detail-meaning" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#10b981', marginBottom: '6px' }}>
-            {displayMeaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({word.pos || word.type})</span>
+            {presentation.meaning} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({word.pos || word.type})</span>
           </div>
           <div className="meaning-source-note">
-            {aiEnrichData?.primaryMeaningVi
+            {presentation.meaningSource === 'enrichment'
               ? 'Nghĩa tiếng Việt đã được AI đối chiếu với dữ liệu từ điển tiếng Anh'
-              : isLowQualityMeaning(word.meaning)
+              : presentation.meaningSource === 'pending'
                 ? 'Nghĩa trong bộ dữ liệu cũ chưa đủ tin cậy — xem định nghĩa nguồn bên dưới'
-                : 'Nghĩa từ bộ dữ liệu học tập'}
+                : presentation.meaningSource === 'translation'
+                  ? 'Nghĩa tiếng Việt đã được chuẩn hóa và lưu trong bộ nhớ từ vựng'
+                  : 'Nghĩa từ bộ dữ liệu học tập'}
           </div>
 
           {/* Audio Button */}

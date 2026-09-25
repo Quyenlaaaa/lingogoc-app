@@ -1,5 +1,5 @@
 // RoadmapView.jsx - Visual 4-Stage Learning Path for Beginners
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Layers, 
   BookOpen, 
@@ -10,22 +10,12 @@ import {
   Sparkles, 
   ShieldCheck, 
   Zap, 
-  Volume2,
-  Award,
-  Brain
+  Volume2
 } from 'lucide-react';
+import { loadLatestDiagnosticResult } from '../utils/diagnosticHistory';
 
 export default function RoadmapView({ setActiveTab, userData, vocabularyCount = 0 }) {
-  const [diagnosticResult, setDiagnosticResult] = useState(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('lingogoc_diagnostic_result');
-      if (saved) {
-        setDiagnosticResult(JSON.parse(saved));
-      }
-    } catch (e) {}
-  }, []);
+  const [diagnosticResult] = useState(loadLatestDiagnosticResult);
 
   const masteredCount = userData?.masteredWords?.length || 0;
   const ipaCount = userData?.completedIpa?.length || 0;

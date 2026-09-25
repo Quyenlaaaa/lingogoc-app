@@ -17,7 +17,6 @@ import {
   Swords,
   Headphones,
   Award,
-  Crown,
   Settings,
   AlertTriangle,
   ChevronDown,
@@ -25,6 +24,7 @@ import {
   MoreHorizontal,
   X
 } from 'lucide-react';
+import { getFeatureBadge, isFeatureVisible } from '../config/features';
 
 export default function Navbar({ 
   activeTab, 
@@ -35,7 +35,6 @@ export default function Navbar({
   theme,
   onToggleTheme,
   dueSrsCount = 0,
-  onOpenVipModal,
   onOpenSettingsModal
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -49,18 +48,21 @@ export default function Navbar({
     { id: 'progress', label: 'Tiến độ', icon: UserCheck, badge: null, primary: true },
     { id: 'diagnostic', label: 'Kiểm tra đầu vào', icon: Sparkles, badge: 'Gợi ý', badgeColor: '#38bdf8' },
     { id: 'it-career', label: 'Tiếng Anh ngành IT', icon: Code2, badge: 'Mới', badgeColor: '#10b981' },
-    { id: 'battle', label: 'Đấu Trường 60s', icon: Swords, badge: 'PvP', badgeColor: '#ef4444' },
+    { id: 'battle', label: 'Thử Thách Solo 60s', icon: Swords, badge: 'Solo', badgeColor: '#ef4444' },
     { id: 'leaderboard', label: 'Xếp Hạng', icon: Trophy, badge: 'Tuần', badgeColor: '#f59e0b' },
     { id: 'dictation', label: 'Nghe Chép', icon: Headphones, badge: 'Nối Âm', badgeColor: '#818cf8' },
     { id: 'traps', label: 'Bẫy Lỗi Sai', icon: AlertTriangle, badge: 'Cặp Từ', badgeColor: '#ef4444' },
-    { id: 'certificate', label: 'Chứng Chỉ', icon: Award, badge: 'A2', badgeColor: '#10b981' },
+    { id: 'certificate', label: 'Ghi Nhận Hoàn Thành', icon: Award, badge: 'Cục bộ', badgeColor: '#10b981' },
   ];
-  const primaryTabs = tabs.filter((tab) => tab.primary);
-  const moreTabs = tabs.filter((tab) => !tab.primary);
+  const visibleTabs = tabs
+    .filter((tab) => isFeatureVisible(tab.id))
+    .map((tab) => ({ ...tab, badge: getFeatureBadge(tab.id, tab.badge) }));
+  const primaryTabs = visibleTabs.filter((tab) => tab.primary);
+  const moreTabs = visibleTabs.filter((tab) => !tab.primary);
   const isMoreActive = moreTabs.some((tab) => tab.id === activeTab);
   const mobilePrimaryIds = ['roadmap', 'vocab', 'srs', 'speaking'];
-  const mobilePrimaryTabs = tabs.filter((tab) => mobilePrimaryIds.includes(tab.id));
-  const mobileExploreTabs = tabs.filter((tab) => !mobilePrimaryIds.includes(tab.id));
+  const mobilePrimaryTabs = visibleTabs.filter((tab) => mobilePrimaryIds.includes(tab.id));
+  const mobileExploreTabs = visibleTabs.filter((tab) => !mobilePrimaryIds.includes(tab.id));
   const isMobileExploreActive = mobileExploreTabs.some((tab) => tab.id === activeTab);
 
   const selectTab = (tabId) => {
@@ -112,51 +114,6 @@ export default function Navbar({
         {/* Stats & Gamification Bar */}
         <div className="gamification-bar">
           {/* VIP Badge or Upgrade Button */}
-          {userData?.isVip ? (
-            <div
-              className="vip-status-pill"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(234, 179, 8, 0.25))',
-                border: '1px solid #f59e0b',
-                color: '#f59e0b',
-                fontWeight: 800,
-                fontSize: '0.8rem'
-              }}
-              title="Tài khoản VIP Pro trọn đời"
-            >
-              <Crown size={15} />
-              <span>VIP PRO</span>
-            </div>
-          ) : (
-            <button
-              className="vip-upgrade-btn"
-              onClick={onOpenVipModal}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '20px',
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                border: 'none',
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
-              }}
-              title="Nâng cấp lên VIP Pro mở khóa 3000 từ và AI không giới hạn"
-            >
-              <Crown size={15} />
-              <span>Nâng VIP</span>
-            </button>
-          )}
-
           <div className="stat-pill streak-pill" title="Chuỗi ngày học liên tục để tạo thói quen">
             <Flame className="pill-icon flame-icon" size={18} />
             <span className="stat-val">{userData?.streak || 1}</span>

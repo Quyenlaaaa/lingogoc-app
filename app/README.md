@@ -1,42 +1,56 @@
 # LingoGoc Android (Kotlin)
 
-Đây là phiên bản Android viết bằng Kotlin. Ứng dụng đóng gói bản frontend đã build vào APK và chạy qua `WebViewAssetLoader`, vì vậy giao diện, tiến độ cục bộ và kho từ điển đi kèm có thể mở khi không có mạng. Các tính năng AI, đồng bộ dữ liệu mới và audio từ máy chủ vẫn cần Internet.
+The Android app packages the built web frontend in the APK and serves it through
+`WebViewAssetLoader`. Bundled UI, local progress, and catalog data can open offline.
+AI, server synchronization, and server audio require a network connection.
 
-## Yêu cầu
+Each APK contains a complete fallback catalog and a generated
+`catalog-manifest.json` with its SHA-256 version. On startup the app uses the newest
+valid cached 3,000-word catalog, checks the small server manifest, and downloads the
+full catalog only when its content hash changes. Invalid or incomplete downloads are
+ignored, so first launch and learning never depend on the network. Android reports
+validated, limited, and offline connectivity to the web UI; learning events remain in
+the local offline queue until authenticated synchronization is available.
 
-- Android Studio với JDK 17.
+## Requirements
+
+- Android Studio and JDK 17.
 - Android SDK 35.
-- Node.js và npm (Gradle tự chạy `npm run build` để đóng gói frontend).
+- Node.js and npm; Gradle runs the frontend production build before packaging.
 
-## Chạy trong Android Studio
+## Run from Android Studio
 
-1. Mở thư mục `app` bằng Android Studio.
-2. Chờ Gradle Sync hoàn tất.
-3. Chọn máy Android thật hoặc emulator API 26 trở lên.
-4. Bấm **Run app**.
+1. Open the `app` directory.
+2. Wait for Gradle sync.
+3. Select a physical device or emulator running API 26 or later.
+4. Run the `app` configuration.
 
-## Tạo APK debug
+## Debug APK
 
-Từ thư mục `app`:
+From `app`:
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-APK được tạo tại `app/app/build/outputs/apk/debug/app-debug.apk`.
+Output: `app/app/build/outputs/apk/debug/app-debug.apk`.
 
-Sau khi code được đẩy lên nhánh `main`, workflow **Android Kotlin APK** cũng tự build và đăng APK debug trong mục Artifacts của GitHub Actions.
+The `Android Kotlin APK` GitHub Actions workflow also publishes a debug APK artifact
+after changes reach `main`.
 
-## Tạo bản phát hành
+## Release build
 
-Tạo keystore trong Android Studio, sau đó chọn **Build > Generate Signed Bundle / APK**. Không commit keystore hoặc mật khẩu ký ứng dụng vào Git.
+The manually dispatched `Android Signed Release` workflow accepts a semantic version
+name and increasing version code, reads signing material only from the protected
+GitHub `production` environment, and produces signed AAB/APK artifacts plus SHA-256
+checksums. Required secret names and the external Play steps are documented in
+`RELEASE_CHECKLIST.md`. Never commit keystores or passwords.
 
-## Tích hợp native
+## Native integration
 
-- Kotlin quản lý vòng đời WebView và điều hướng Back.
-- Nội dung web được phục vụ bằng origin HTTPS nội bộ an toàn.
-- Quyền microphone chỉ được xin khi chức năng luyện nói cần dùng.
-- Kotlin Text-to-Speech là phương án phát giọng cho các preset giọng trên Android.
-- Kotlin SpeechRecognizer hỗ trợ luyện nói ngay cả khi WebView không cung cấp Web Speech API.
-- Nhập bản sao JSON dùng bộ chọn tệp Android.
-- Xuất bản sao JSON dùng hộp thoại lưu tệp Android.
+- Kotlin manages WebView lifecycle and back navigation.
+- Web assets use the secure internal HTTPS origin from `WebViewAssetLoader`.
+- Microphone permission is requested only when speaking features need it.
+- Kotlin Text-to-Speech provides Android voice presets.
+- Kotlin `SpeechRecognizer` covers devices where WebView lacks Web Speech support.
+- JSON backup import uses Android's file picker; export uses the system save dialog.
