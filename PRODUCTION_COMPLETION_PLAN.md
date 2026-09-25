@@ -984,3 +984,17 @@ speech, migration preparation, Worker contract, production build, migration SQL,
   verify the 16 legacy jobs promote into D1 across scheduled runs, and re-run the D1
   audit until partial count reaches zero or genuine fifth-attempt failures enter manual
   review.
+
+### 2026-09-25 — Partial retry prioritization deployed
+
+- Pushed commit `c9de884e903b464bedb1d83eb477155f896fc690` and deployed Worker
+  version `b2879f58-422f-4158-8182-35aa44047c5c` with the D1 partial-priority queue and
+  automatic legacy KV retry promotion.
+- Production smoke passed health, 3,000-word catalog, cached D1 enrichment, and speech.
+  Operations remained healthy with D1 as the durable source. The pre-cron audit baseline
+  remains 2,781 records, 2,765 complete, 16 partial, and 219 not yet enriched.
+- GitHub Pages, Worker validation, and Android succeeded at runs `36094965677`,
+  `36094966018`, and `36094965606`, respectively.
+- Exact next task: inspect the first hourly run after this deploy, verify partial jobs
+  appear in D1 and the partial count falls, then continue hourly observation without
+  manual duplicate calls.
