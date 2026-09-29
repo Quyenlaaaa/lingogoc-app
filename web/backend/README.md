@@ -27,7 +27,7 @@ Supported free providers:
 - Groq: `qwen/qwen3.8-27b`
 - Cloudflare Workers AI: `@cf/google/gemma-4-26b-a4b-it`
 - XKIRO: `mistralai/mistral-large-2512`
-- OpenRouter: `deepseek/deepseek-v4-flash-0731:free`
+- OpenRouter: `openrouter/free` (the router selects a currently available compatible free model)
 
 Interactive routing ranks providers by recent latency, consecutive failures, and
 circuit state. One provider starts immediately. A second starts after 1.5 seconds only

@@ -12,6 +12,7 @@ import {
 import { isLowQualityMeaning } from './vocabularyQuality.js';
 
 const BATCH_CACHE_TTL_MS = 30 * 60 * 1000;
+const BATCH_FAILURE_COOLDOWN_MS = 15 * 1000;
 const batchResponseCache = new Map();
 const batchFailureCooldown = new Map();
 
@@ -20,6 +21,23 @@ function batchKey(items) {
     .map((item) => `${String(item.word).toLowerCase()}::${String(item.pos || item.type || '').toLowerCase()}`)
     .sort()
     .join('|');
+}
+
+export function invalidateVocabularyBatchCache(word = '') {
+  const normalizedWord = String(word || '').trim().toLowerCase();
+  if (!normalizedWord) {
+    batchResponseCache.clear();
+    batchFailureCooldown.clear();
+    return;
+  }
+  const includesWord = (key) => String(key).split('|')
+    .some((entry) => entry.startsWith(`${normalizedWord}::`));
+  for (const key of batchResponseCache.keys()) {
+    if (includesWord(key)) batchResponseCache.delete(key);
+  }
+  for (const key of batchFailureCooldown.keys()) {
+    if (includesWord(key)) batchFailureCooldown.delete(key);
+  }
 }
 
 export async function fetchVocabularyBatch(items, signal) {
@@ -56,7 +74,7 @@ export async function fetchVocabularyBatch(items, signal) {
     return { ...results, ...cachedBatch.results };
   }
   const failedAt = batchFailureCooldown.get(requestKey) || 0;
-  if (now - failedAt < BATCH_CACHE_TTL_MS) return results;
+  if (now - failedAt < BATCH_FAILURE_COOLDOWN_MS) return results;
 
   let response;
   try {
@@ -82,9 +100,15 @@ export async function fetchVocabularyBatch(items, signal) {
     const meaning = record.meaningVi
       ? cacheVietnameseMeaning(item, { meaningVi: record.meaningVi, source: 'server-kv' })
       : getCachedVietnameseMeaning(item);
-    const enrichment = record.enrichment
-      ? await cacheWordEnrichment(item.word, record.enrichment)
-      : results[record.word]?.enrichment || null;
+    const serverEnrichment = record.enrichment || record.partialEnrichment || null;
+    const localEnrichment = results[record.word]?.enrichment || null;
+    const enrichmentCandidate = (serverEnrichment?.contextExamples?.length || 0)
+      >= (localEnrichment?.contextExamples?.length || 0)
+      ? serverEnrichment
+      : localEnrichment;
+    const enrichment = enrichmentCandidate
+      ? await cacheWordEnrichment(item.word, enrichmentCandidate)
+      : null;
     results[record.word] = { meaning, enrichment, fromServer: true };
   }));
 
@@ -92,7 +116,9 @@ export async function fetchVocabularyBatch(items, signal) {
     results[word] = { ...(results[word] || {}), pending: true };
   });
   batchFailureCooldown.delete(requestKey);
-  batchResponseCache.set(requestKey, { savedAt: Date.now(), results: { ...results } });
+  const hasPendingResults = (payload?.data?.needsEnrichment || payload?.data?.missing || []).length > 0;
+  if (hasPendingResults) batchResponseCache.delete(requestKey);
+  else batchResponseCache.set(requestKey, { savedAt: Date.now(), results: { ...results } });
   return results;
 }
 

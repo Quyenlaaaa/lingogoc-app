@@ -16,12 +16,22 @@ const apiBase = String(process.env.LINGOGOC_API_BASE_URL || 'https://lingogoc-ap
 const batchSize = 24;
 const concurrency = 1;
 
-async function readJson(path, options = {}) {
+const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function readJson(path, options = {}, attempt = 0) {
   const response = await fetch(`${apiBase}${path}`, {
     ...options,
     headers: { Accept: 'application/json', ...(options.headers || {}) },
     signal: AbortSignal.timeout(30_000),
   });
+  if (response.status === 429 && attempt < 6) {
+    const retryAfterSeconds = Number(response.headers.get('retry-after'));
+    const retryDelay = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+      ? retryAfterSeconds * 1000
+      : Math.min(30_000, 2_000 * (2 ** attempt));
+    await sleep(retryDelay);
+    return readJson(path, options, attempt + 1);
+  }
   if (!response.ok) throw new Error(`${path} returned HTTP ${response.status}`);
   return response.json();
 }
@@ -49,7 +59,9 @@ async function auditBatchWorker() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: batch.map((item) => ({ word: item.word, pos: item.pos || item.type || '' })) }),
       });
-      for (const record of payload?.data?.items || []) records.set(record.word, record);
+      for (const record of payload?.data?.items || []) {
+        records.set(String(record.word || '').toLowerCase(), record);
+      }
     } catch (error) {
       failedBatches.push({ batchIndex, message: error.message });
     }
@@ -68,6 +80,8 @@ const counts = {
   uniqueWords: new Set(words.map((item) => String(item.word).toLowerCase())).size,
   invalidIpa: 0,
   serverRecords: records.size,
+  completeServerRecords: 0,
+  partialServerRecords: 0,
   completeFiveContexts: 0,
   incompleteExamples: 0,
   clearVietnameseMeaning: 0,
@@ -80,6 +94,7 @@ for (const word of words) {
   const record = records.get(String(word.word).toLowerCase());
   const enrichment = record?.enrichment;
   const examples = Array.isArray(enrichment?.contextExamples) ? enrichment.contextExamples : [];
+  const reportedExampleCount = Number.isInteger(record?.exampleCount) ? record.exampleCount : examples.length;
   const contexts = new Set(examples.map((item) => String(item.context || '').trim().toLowerCase()).filter(Boolean));
   const hasFiveContexts = examples.length === 5 && contexts.size === 5
     && examples.every((item) => String(item.en || '').trim() && String(item.vi || '').trim());
@@ -87,6 +102,8 @@ for (const word of words) {
   const meaningIsLowQuality = isLowQualityMeaning(resolvedMeaning);
 
   if (!record) counts.missingServerRecord += 1;
+  else if (record.status === 'complete') counts.completeServerRecords += 1;
+  else counts.partialServerRecords += 1;
   if (hasFiveContexts) counts.completeFiveContexts += 1;
   else counts.incompleteExamples += 1;
   if (meaningIsLowQuality) counts.lowQualityResolvedMeaning += 1;
@@ -96,7 +113,7 @@ for (const word of words) {
     issueSamples.push({
       word: word.word,
       meaning: resolvedMeaning,
-      exampleCount: examples.length,
+      exampleCount: reportedExampleCount,
       distinctContexts: contexts.size,
       serverStatus: record?.status || 'missing',
     });

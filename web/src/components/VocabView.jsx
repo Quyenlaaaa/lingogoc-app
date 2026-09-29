@@ -25,7 +25,11 @@ import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import { enrichWordWithLLM, getCachedWordEnrichment } from '../utils/geminiService';
 import { hasBackendApi } from '../utils/backendApi';
 import { getCachedVietnameseMeaning, getMeaningCacheKey } from '../utils/vocabularyMeaningService';
-import { fetchVocabularyBatch, toMeaningResultMap } from '../utils/vocabularyBatchService';
+import {
+  fetchVocabularyBatch,
+  invalidateVocabularyBatchCache,
+  toMeaningResultMap,
+} from '../utils/vocabularyBatchService';
 import {
   buildClozePrompt,
   buildQuizOptions,
@@ -221,7 +225,11 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 manualRetryVersionRef.current.get(item.word.toLowerCase()),
               )) return;
               const result = results[item.word.toLowerCase()];
-              if (result?.enrichment) next[item.word.toLowerCase()] = result.enrichment;
+              if (result?.enrichment) {
+                next[item.word.toLowerCase()] = result.pending
+                  ? { ...result.enrichment, unavailableReason: 'SYSTEM_ENRICHMENT_PENDING' }
+                  : result.enrichment;
+              }
               else if (result?.pending) next[item.word.toLowerCase()] = { unavailableReason: 'SYSTEM_ENRICHMENT_PENDING' };
             });
             return next;
@@ -232,7 +240,12 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
             batchStartedAt,
             manualRetryVersionRef.current.get(currentCard.word.toLowerCase()),
           )) {
-            setFlashcardAiState({ word: currentCard.word, data: result.enrichment });
+            setFlashcardAiState({
+              word: currentCard.word,
+              data: result.pending
+                ? { ...result.enrichment, unavailableReason: 'SYSTEM_ENRICHMENT_PENDING' }
+                : result.enrichment,
+            });
           }
         }
       })
@@ -253,6 +266,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
       currentCard.word.toLowerCase(),
       ++enrichmentRequestSequenceRef.current,
     );
+    invalidateVocabularyBatchCache(currentCard.word);
     setIsLoadingFlashcardExamples(true);
     try {
       const result = await enrichWordWithLLM(
@@ -261,8 +275,14 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
         currentCard.topic,
         [],
         undefined,
-        { manualRetry: true, keepAlive: true, maxAttempts: 1 },
+        {
+          manualRetry: true,
+          keepAlive: true,
+          maxAttempts: 1,
+          pos: currentCard.pos || currentCard.type || '',
+        },
       );
+      invalidateVocabularyBatchCache(currentCard.word);
       manualRetryVersionRef.current.set(
         currentCard.word.toLowerCase(),
         ++enrichmentRequestSequenceRef.current,
@@ -296,7 +316,15 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
   const retryListExamples = async (item) => {
     const key = item.word.toLowerCase();
     manualRetryVersionRef.current.set(key, ++enrichmentRequestSequenceRef.current);
-    setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: 0 } }));
+    invalidateVocabularyBatchCache(item.word);
+    setListAiData((current) => ({
+      ...current,
+      [key]: {
+        ...(current[key] || getCachedWordEnrichment(item.word) || {}),
+        isLoading: true,
+        retryAttempt: 0,
+      },
+    }));
     try {
       const result = await enrichWordWithLLM(
         item.word,
@@ -308,13 +336,18 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
           manualRetry: true,
           keepAlive: true,
           maxAttempts: 1,
+          pos: item.pos || item.type || '',
           onRetry: ({ attempt }) => {
             if (viewMountedRef.current) {
-              setListAiData((current) => ({ ...current, [key]: { isLoading: true, retryAttempt: attempt } }));
+              setListAiData((current) => ({
+                ...current,
+                [key]: { ...(current[key] || {}), isLoading: true, retryAttempt: attempt },
+              }));
             }
           },
         },
       );
+      invalidateVocabularyBatchCache(item.word);
       manualRetryVersionRef.current.set(key, ++enrichmentRequestSequenceRef.current);
       if (viewMountedRef.current) {
         setListAiData((current) => ({ ...current, [key]: result }));
@@ -808,6 +841,12 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                 const aiState = listAiData[w.word.toLowerCase()];
                 const presentation = getWordPresentation(w, aiState || cachedAiData);
                 const availableExamples = presentation.examples;
+                const enrichedExampleCount = Math.min(
+                  5,
+                  Array.isArray((aiState || cachedAiData)?.contextExamples)
+                    ? (aiState || cachedAiData).contextExamples.length
+                    : 0,
+                );
                 const hasFiveContexts = presentation.hasCompleteContexts;
                 const contextLabels = [...new Set(availableExamples
                   .map((example) => example.context || 'Thực tế'))]
@@ -847,17 +886,19 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                             </>
                           ) : (
                             <div className="item-example-loading">
-                            {availableExamples.length
-                              ? `${availableExamples.length}/5 ví dụ tạm có · hệ thống đang bổ sung phần còn thiếu.`
-                              : aiState?.unavailableReason === 'SYSTEM_ENRICHMENT_PENDING'
-                              ? '0/5 ví dụ · hệ thống đang tự động bổ sung.'
-                              : aiState?.unavailableReason
-                              ? getVocabularyEnrichmentMessage(aiState)
-                              : aiState?.isLoading || hasBackendApi()
-                                ? aiState?.retryAttempt
-                                  ? `AI phản hồi chậm · đang tự thử lại lần ${aiState.retryAttempt}…`
-                                  : 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
-                                : 'Chưa có ví dụ đã kiểm chứng.'}
+                            <span className="item-example-status">
+                              {enrichedExampleCount
+                                ? `${enrichedExampleCount}/5 ví dụ tạm có · hệ thống đang bổ sung phần còn thiếu.`
+                                : aiState?.unavailableReason === 'SYSTEM_ENRICHMENT_PENDING'
+                                ? '0/5 ví dụ · hệ thống đang tự động bổ sung.'
+                                : aiState?.unavailableReason
+                                ? getVocabularyEnrichmentMessage(aiState)
+                                : aiState?.isLoading || hasBackendApi()
+                                  ? aiState?.retryAttempt
+                                    ? `AI phản hồi chậm · đang tự thử lại lần ${aiState.retryAttempt}…`
+                                    : 'Đang tạo ví dụ song ngữ theo nhiều ngữ cảnh…'
+                                  : 'Chưa có ví dụ đã kiểm chứng.'}
+                            </span>
                             {aiState?.unavailableReason && (
                               <>
                                 {aiState.unavailableRequestId && (
@@ -872,7 +913,7 @@ export default function VocabView({ userData, onUpdateUserData, voiceSpeed, voca
                           )}
                         </div>
                         <button type="button" className="item-more-examples" onClick={() => openWordDetail(w, aiState || cachedAiData)}>
-                          {hasFiveContexts ? 'Xem đủ 5 ví dụ' : `Còn thiếu ${5 - Math.min(5, availableExamples.length)} ví dụ`}
+                          {hasFiveContexts ? 'Xem đủ 5 ví dụ' : `Còn thiếu ${5 - enrichedExampleCount} ví dụ`}
                         </button>
                       </div>
                     </div>

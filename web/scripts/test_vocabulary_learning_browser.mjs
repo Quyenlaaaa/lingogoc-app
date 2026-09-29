@@ -37,6 +37,7 @@ try {
   let vocabularyBatchRequests = 0;
   let vocabularyEnrichmentRequests = 0;
   const vocabularyBatchBodies = [];
+  const vocabularyEnrichmentBodies = [];
   await page.route('https://lingogoc-api.lingogoc-api.workers.dev/**', (route) => {
     if (new URL(route.request().url()).pathname === '/api/vocabulary/batch') {
       vocabularyBatchRequests += 1;
@@ -46,15 +47,32 @@ try {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ data: {
-          items: [],
-          missing: body.items.map(({ word }) => word.toLowerCase()),
+          items: body.items.map(({ word }) => ({
+            word: word.toLowerCase(),
+            meaningVi: `nghĩa tiếng Việt của ${word}`,
+            enrichment: null,
+            partialEnrichment: {
+              primaryMeaningVi: `nghĩa tiếng Việt của ${word}`,
+              contextExamples: Array.from({ length: 3 }, (_, index) => ({
+                context: `partial-context-${index + 1}`,
+                en: `A saved partial example for ${word} in situation ${index + 1}.`,
+                vi: `Ví dụ đã lưu cho ${word} trong tình huống ${index + 1}.`,
+              })),
+              persistedOnServer: true,
+            },
+            status: 'partial',
+            exampleCount: 3,
+          })),
+          missing: [],
           needsEnrichment: body.items.map(({ word }) => word.toLowerCase()),
         } }),
       });
     }
     if (new URL(route.request().url()).pathname === '/api/vocabulary/enrich') {
       vocabularyEnrichmentRequests += 1;
-      const { word } = route.request().postDataJSON();
+      const enrichmentBody = route.request().postDataJSON();
+      vocabularyEnrichmentBodies.push(enrichmentBody);
+      const { word } = enrichmentBody;
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -129,9 +147,12 @@ try {
     'the batch request must contain only the unresolved word',
   );
   const unresolvedCard = page.locator('.vocab-item-card').filter({ has: page.getByText(unresolvedWord, { exact: true }) });
+  await unresolvedCard.getByText('3/5 ví dụ tạm có · hệ thống đang bổ sung phần còn thiếu.', { exact: true }).waitFor();
+  await unresolvedCard.getByRole('button', { name: 'Còn thiếu 2 ví dụ' }).waitFor();
   await unresolvedCard.getByRole('button', { name: 'Thử lại AI' }).click();
   await unresolvedCard.getByText('5/5 ngữ cảnh đã sẵn sàng', { exact: true }).waitFor();
   assert.equal(vocabularyEnrichmentRequests, 1, 'manual retry must make one bounded enrichment request');
+  assert.ok(vocabularyEnrichmentBodies[0].pos, 'manual retry must send the word part of speech');
   assert.equal(vocabularyBatchRequests, 1, 'manual retry success must render directly without another batch read');
   await page.getByRole('button', { name: /Thẻ Nhớ 3D/ }).click();
   const search = page.locator('.vocab-search-input');

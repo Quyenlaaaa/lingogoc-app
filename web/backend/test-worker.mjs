@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
-import worker, { sentenceUsesVocabularyWord } from './src/worker.js';
+import worker, { isUsefulVietnameseMeaning, sentenceUsesVocabularyWord } from './src/worker.js';
 
 assert.equal(sentenceUsesVocabularyWord('The manager denied the accusation.', 'deny'), true);
 assert.equal(sentenceUsesVocabularyWord('She denies every false claim.', 'deny'), true);
 assert.equal(sentenceUsesVocabularyWord('He is denying responsibility.', 'deny'), true);
 assert.equal(sentenceUsesVocabularyWord('The evidence was found yesterday.', 'find'), true);
 assert.equal(sentenceUsesVocabularyWord('Their identity remained private.', 'deny'), false);
+assert.equal(isUsefulVietnameseMeaning('cao su', 'rubber'), true);
+assert.equal(isUsefulVietnameseMeaning('con trai', 'son'), true);
+assert.equal(isUsefulVietnameseMeaning('a male child', 'son'), false);
 
 let cachedResponse = null;
 const dictionaryEdgeCache = new Map();
@@ -155,21 +158,37 @@ function createD1Mock() {
             throw new Error('Unexpected D1 SELECT');
           },
           async all() {
-            if (/LEFT JOIN vocabulary_jobs AS jobs/i.test(sql) && /enrichments\.status = 'partial'/i.test(sql)) {
+            if (/WITH candidates AS/i.test(sql) && /enrichments\.status = 'partial'/i.test(sql)) {
               stats.priorityReads += 1;
               const now = Date.parse(values[1]);
               const limit = Number(values[2]) || 96;
+              const partialRows = [...rows.values()]
+                .filter((row) => row.prompt_version === values[0] && row.status === 'partial')
+                .filter((row) => {
+                  const job = jobs.get(row.word);
+                  if (!job) return true;
+                  if (!['pending', 'retry_pending'].includes(job.status)) return false;
+                  return !job.next_retry_at || Date.parse(job.next_retry_at) <= now;
+                });
+              const enrichmentWords = new Set(
+                [...rows.values()]
+                  .filter((row) => row.prompt_version === values[0])
+                  .map((row) => row.word),
+              );
+              const missingRows = [...jobs.entries()]
+                .filter(([word, job]) => !enrichmentWords.has(word)
+                  && ['pending', 'retry_pending'].includes(job.status)
+                  && (!job.next_retry_at || Date.parse(job.next_retry_at) <= now))
+                .map(([word, job]) => ({
+                  word,
+                  attempts: job.attempts,
+                  updated_at: job.updated_at,
+                }));
               return {
-                results: [...rows.values()]
-                  .filter((row) => row.prompt_version === values[0] && row.status === 'partial')
-                  .filter((row) => {
-                    const job = jobs.get(row.word);
-                    if (!job) return true;
-                    if (!['pending', 'retry_pending'].includes(job.status)) return false;
-                    return !job.next_retry_at || Date.parse(job.next_retry_at) <= now;
-                  })
+                results: [...partialRows, ...missingRows]
                   .sort((left, right) => {
-                    const attemptDifference = (jobs.get(left.word)?.attempts || 0) - (jobs.get(right.word)?.attempts || 0);
+                    const attemptDifference = (jobs.get(left.word)?.attempts || left.attempts || 0)
+                      - (jobs.get(right.word)?.attempts || right.attempts || 0);
                     return attemptDifference || String(left.updated_at).localeCompare(String(right.updated_at));
                   })
                   .slice(0, limit)
@@ -749,7 +768,7 @@ const parallelResponse = await worker.fetch(new Request('http://localhost:8787/a
 }), {
   ...env,
   OPENROUTER_API_KEY: 'openrouter-test-key',
-  OPENROUTER_FREE_MODEL: 'deepseek/deepseek-v4-flash-0731:free',
+  OPENROUTER_FREE_MODEL: 'openrouter/free',
   OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
   OPENROUTER_SITE_URL: 'https://example.com',
   OPENROUTER_APP_NAME: 'LingoGoc Test',
@@ -760,7 +779,7 @@ assert.equal(parallelProviderUrls.length, 1, 'a normal fast request must call on
 assert.equal(
   parallelPayload.generatedByModel,
   parallelProviderUrls[0].startsWith('https://openrouter.ai/api/v1')
-    ? 'deepseek/deepseek-v4-flash-0731:free'
+    ? 'openrouter/free'
     : 'mistralai/mistral-large-2512',
 );
 
@@ -830,7 +849,7 @@ const adaptiveHedgeResponse = await worker.fetch(new Request('http://localhost:8
 }), {
   ...env,
   OPENROUTER_API_KEY: 'openrouter-test-key',
-  OPENROUTER_FREE_MODEL: 'deepseek/deepseek-v4-flash-0731:free',
+  OPENROUTER_FREE_MODEL: 'openrouter/free',
   OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
 }, context);
 assert.equal(adaptiveHedgeResponse.status, 200);
@@ -986,6 +1005,8 @@ const partialBatchResponse = await worker.fetch(new Request('http://localhost:87
 const partialBatchPayload = await partialBatchResponse.json();
 assert.equal(partialBatchPayload.data.items[0].meaningVi, 'khảo sát; xem xét');
 assert.equal(partialBatchPayload.data.items[0].status, 'partial');
+assert.equal(partialBatchPayload.data.items[0].partialEnrichment.contextExamples.length, 1,
+  'batch reads must return already-saved partial examples instead of hiding them');
 assert.deepEqual(partialBatchPayload.data.needsEnrichment, ['survey']);
 const cooldownResponse = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
   method: 'POST',
@@ -1037,6 +1058,82 @@ const refreshedSurveyBatchResponse = await worker.fetch(new Request('http://loca
 const refreshedSurveyBatchPayload = await refreshedSurveyBatchResponse.json();
 assert.equal(refreshedSurveyBatchPayload.data.items[0].enrichment.contextExamples.length, 5);
 assert.deepEqual(refreshedSurveyBatchPayload.data.needsEnrichment, [], 'a completed retry must be visible immediately without stale partial batch cache');
+
+const sonRetryD1 = createD1Mock();
+sonRetryD1.jobs.set('son', {
+  status: 'manual_review',
+  attempts: 5,
+  next_retry_at: null,
+  last_error: 'INVALID_VIETNAMESE_MEANING',
+  last_provider_errors_json: '[]',
+  updated_at: new Date(Date.now() - 60_000).toISOString(),
+});
+sonRetryD1.manualReviews.set('son', {
+  reason: 'INVALID_VIETNAMESE_MEANING',
+  attempts: 5,
+  created_at: new Date(Date.now() - 60_000).toISOString(),
+});
+const sonExamples = [
+  { context: 'Gia đình', en: 'Their son starts school next week.', vi: 'Con trai của họ bắt đầu đi học vào tuần tới.' },
+  { context: 'Hội thoại', en: 'How old is your son now?', vi: 'Con trai bạn bây giờ bao nhiêu tuổi?' },
+  { context: 'Công việc', en: 'Her son works at a hospital.', vi: 'Con trai cô ấy làm việc tại bệnh viện.' },
+  { context: 'Du lịch', en: 'He took his son to the coast.', vi: 'Anh ấy đưa con trai đến bờ biển.' },
+  { context: 'Cụm từ', en: 'The proud father hugged his son.', vi: 'Người cha tự hào ôm con trai mình.' },
+];
+let sonProviderAttempt = 0;
+let lastSonInput = null;
+customProviderResponse = async ({ body }) => {
+  sonProviderAttempt += 1;
+  lastSonInput = JSON.parse(body.messages.at(-1).content);
+  const content = sonProviderAttempt === 1
+    ? {
+      primaryMeaningVi: 'a male child',
+      contextExamples: sonExamples.slice(0, 1),
+    }
+    : {
+      primaryMeaningVi: 'con trai',
+      contextExamples: sonExamples.slice(1),
+    };
+  return new Response(JSON.stringify({
+    model: body.model,
+    choices: [{ message: { content: JSON.stringify(content) } }],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+const sonRetryEnv = {
+  ...env,
+  VOCAB_DB: sonRetryD1.binding,
+  AI_PAID_MODEL: '',
+};
+const failedSonRetry = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'son', pos: 'n', meaning: "từ 'son' (n)", topic: 'Gia đình', force: true }),
+}), sonRetryEnv, context);
+const failedSonPayload = await failedSonRetry.json();
+assert.equal(failedSonRetry.status, 502);
+assert.equal(failedSonPayload.code, 'INVALID_VIETNAMESE_MEANING');
+assert.equal(sonRetryD1.jobs.get('son').status, 'manual_review',
+  'a failed forced retry must not move a manual-review word back to retry_pending');
+assert.equal(sonRetryD1.jobs.get('son').next_retry_at, null);
+const storedSonPartial = [...sonRetryD1.rows.values()].find((row) => row.word === 'son');
+assert.equal(JSON.parse(storedSonPartial.payload_json).contextExamples.length, 1,
+  'valid examples must survive even when the provider meaning is invalid');
+
+const completedSonRetry = await worker.fetch(new Request('http://localhost:8787/api/vocabulary/enrich', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ word: 'son', pos: 'n', meaning: "từ 'son' (n)", topic: 'Gia đình', force: true }),
+}), sonRetryEnv, context);
+const completedSonPayload = await completedSonRetry.json();
+await Promise.all(pending.splice(0));
+assert.equal(completedSonRetry.status, 200);
+assert.equal(completedSonPayload.data.primaryMeaningVi, 'con trai');
+assert.equal(completedSonPayload.data.contextExamples.length, 5);
+assert.equal(lastSonInput.pos, 'n', 'the requested part of speech must reach the AI prompt');
+assert.equal(lastSonInput.missingExampleCount, 4, 'retry must request only the missing examples');
+assert.equal(sonRetryD1.jobs.get('son').status, 'complete');
+assert.ok(sonRetryD1.manualReviews.get('son').resolved_at,
+  'a successful retry must close the stale manual-review item');
 customProviderResponse = null;
 
 const fallbackModels = [];
@@ -1369,10 +1466,18 @@ priorityD1.rows.set(priorityCacheKey, {
   model: env.AI_FREE_MODEL,
   updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
 });
+priorityD1.jobs.set('stumble', {
+  status: 'retry_pending',
+  attempts: 1,
+  next_retry_at: new Date(Date.now() - 60_000).toISOString(),
+  last_error: 'INSUFFICIENT_BILINGUAL_EXAMPLES',
+  last_provider_errors_json: '[]',
+  updated_at: new Date(Date.now() - 60_000).toISOString(),
+});
 serverCache.set('system-vocabulary:backfill:v1', JSON.stringify({
   ...nonBlockingState,
   cursor: 1500,
-  status: 'active',
+  status: 'complete',
 }));
 serverCache.set('system-vocabulary:backfill-retry:v1:explore', JSON.stringify({
   word: 'explore',
@@ -1390,7 +1495,7 @@ customProviderResponse = async ({ body }) => {
   return new Response(JSON.stringify({
     model: body.model,
     choices: [{ message: { content: JSON.stringify({
-      primaryMeaningVi: input.word === 'explore' ? 'khÃ¡m phÃ¡' : 'Ä‘ang chá»',
+      primaryMeaningVi: input.word === 'explore' ? 'khÃ¡m phÃ¡' : 'vấp ngã',
       contextExamples: Array.from({ length: 5 }, (_, index) => ({
         context: `context ${index + 1}`,
         en: `${input.word} appears in example ${index + 1}.`,
@@ -1414,8 +1519,11 @@ await worker.scheduled(
 await Promise.all(nonBlockingPending.splice(0));
 assert.equal(priorityD1.stats.priorityReads, 1, 'scheduled work must query D1 partial records once');
 assert.equal(priorityProviderWords.includes('explore'), false, 'a prioritized partial must still honor its cooldown');
+assert.equal(priorityProviderWords.includes('stumble'), true,
+  'an eligible retry job with no enrichment row must be prioritized by the hourly run');
 assert.equal(priorityD1.jobs.get('explore').attempts, 1, 'legacy KV retry attempts must be promoted into D1');
 assert.equal(priorityD1.jobs.get('explore').status, 'retry_pending');
+assert.equal(priorityD1.jobs.get('stumble').status, 'complete');
 serverCache.delete('system-vocabulary:backfill-retry:v1:explore');
 customProviderResponse = async ({ body }) => {
   const input = JSON.parse(body.messages.at(-1).content);
@@ -1433,6 +1541,10 @@ customProviderResponse = async ({ body }) => {
 };
 
 const d1Backfill = createD1Mock();
+vocabularyEdgeCache.clear();
+for (const key of [...serverCache.keys()]) {
+  if (key.startsWith('vocabulary:v')) serverCache.delete(key);
+}
 d1Backfill.jobs.set('stumble', {
   status: 'retry_pending',
   attempts: 4,
@@ -1465,7 +1577,11 @@ await worker.scheduled(
 await Promise.all(nonBlockingPending.splice(0));
 const d1BackfillState = JSON.parse(d1Backfill.states.get('system-vocabulary:backfill:v1').payload_json);
 assert.ok(d1BackfillState.lastRunAt, 'D1 checkpoint must record scheduled work when KV writes fail');
-assert.equal(d1Backfill.jobs.get('stumble').status, 'manual_review');
+assert.equal(
+  d1Backfill.jobs.get('stumble').status,
+  'manual_review',
+  JSON.stringify({ state: d1BackfillState, job: d1Backfill.jobs.get('stumble'), manualReview: d1Backfill.manualReviews.get('stumble') }),
+);
 assert.equal(d1Backfill.jobs.get('stumble').next_retry_at, null);
 assert.equal(d1Backfill.manualReviews.get('stumble').attempts, 5);
 assert.equal(serverCache.has('system-vocabulary:backfill:v1'), false, 'test must prove state came from D1');

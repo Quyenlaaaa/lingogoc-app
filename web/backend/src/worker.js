@@ -272,13 +272,23 @@ function extractJson(text) {
   }
 }
 
+const VALID_UNACCENTED_VIETNAMESE_MEANINGS = new Set([
+  'cao su',
+  'con trai',
+]);
+
 function isUsefulVietnameseMeaning(value, word = '') {
   const meaning = cleanText(value, 240);
   if (!meaning || meaning.length < 2) return false;
   if (/^từ(?: vựng)?\s*['"]/i.test(meaning) || /chưa có nghĩa/i.test(meaning)) return false;
   if (word && meaning.toLocaleLowerCase('en') === word.toLocaleLowerCase('en')) return false;
+  const normalizedMeaning = meaning.toLocaleLowerCase('vi').replace(/[.,;:!?]+$/g, '').trim();
   const hasVietnameseSignal = /[ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i.test(meaning)
-    || /\b(?:là|và|hoặc|của|cho|với|một|người|việc|sự|để|không|trong|trên|dùng|làm|có|được)\b/i.test(meaning);
+    || /\b(?:là|và|hoặc|của|cho|với|một|người|việc|sự|để|không|trong|trên|dùng|làm|có|được)\b/i.test(meaning)
+    // A few everyday Vietnamese definitions contain no diacritics at all.
+    // Keep this deliberately narrow so an English definition cannot pass the
+    // language check merely because it contains a short ambiguous token.
+    || VALID_UNACCENTED_VIETNAMESE_MEANINGS.has(normalizedMeaning);
   return hasVietnameseSignal;
 }
 
@@ -539,7 +549,7 @@ async function callChatModel(env, messages, temperature = 0.45, validateCompleti
   const groqModel = cleanText(env.GROQ_FREE_MODEL || 'qwen/qwen3.8-27b', 160);
   const groqBaseUrl = String(env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/+$/, '');
   const openRouterApiKey = cleanText(env.OPENROUTER_API_KEY, 500);
-  const openRouterModel = cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160);
+  const openRouterModel = cleanText(env.OPENROUTER_FREE_MODEL || 'openrouter/free', 160);
   const openRouterBaseUrl = String(env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/+$/, '');
   const now = Date.now();
   const providers = [];
@@ -689,10 +699,33 @@ async function callChatModel(env, messages, temperature = 0.45, validateCompleti
         }
       }
     }
-    throw paidError || new Error('AI_PROVIDER_UNKNOWN');
+    const allErrors = [...freeErrors, paidError].filter(Boolean);
+    const validationCodes = new Set([
+      'INVALID_VIETNAMESE_MEANING',
+      'INSUFFICIENT_BILINGUAL_EXAMPLES',
+      'INVALID_AI_JSON',
+    ]);
+    const finalError = allErrors.find((error) => validationCodes.has(String(error?.message || '').split(':')[0]))
+      || paidError
+      || freeErrors[0]
+      || new Error('AI_PROVIDER_UNKNOWN');
+    finalError.allProvidersQuota = allErrors.length > 0 && allErrors.every((error) => error?.quota);
+    finalError.providerErrors = allErrors.map((error) => ({
+      provider: error?.provider || 'unknown',
+      code: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+      quota: Boolean(error?.quota),
+    }));
+    throw finalError;
   }
   if (!providers.length) throw new Error('AI_NOT_CONFIGURED');
-  const finalError = freeErrors[0] || new Error('AI_PROVIDER_UNKNOWN');
+  const validationCodes = new Set([
+    'INVALID_VIETNAMESE_MEANING',
+    'INSUFFICIENT_BILINGUAL_EXAMPLES',
+    'INVALID_AI_JSON',
+  ]);
+  const finalError = freeErrors.find((error) => validationCodes.has(String(error?.message || '').split(':')[0]))
+    || freeErrors[0]
+    || new Error('AI_PROVIDER_UNKNOWN');
   finalError.allProvidersQuota = freeErrors.length > 0 && freeErrors.every((error) => error?.quota);
   finalError.providerErrors = freeErrors.map((error) => ({
     provider: error?.provider || 'unknown',
@@ -835,6 +868,7 @@ async function enrichVocabulary(request, env, origin, context) {
 
   const input = {
     word,
+    pos: cleanText(body?.pos || body?.type, 40),
     meaning: cleanText(body?.meaning, 300),
     topic: cleanText(body?.topic, 100),
     dictionaryDefinitions: Array.isArray(body?.dictionaryDefinitions)
@@ -971,6 +1005,7 @@ When existingExamples is empty, create exactly 5 natural examples in genuinely d
 When existingExamples is supplied, preserve those examples and return exactly missingExampleCount NEW examples. Their contexts and sentences must differ from every existing example. Do not repeat existing examples.
 Every English sentence must use the target word naturally. Every Vietnamese translation must faithfully translate that sentence and sound natural to Vietnamese speakers.
 The primaryMeaningVi field must be a concise Vietnamese definition, never an English definition or a placeholder such as "từ 'word'".
+Use the supplied pos field to choose the requested part of speech and meaning. Do not answer with a different homonym or word class.
 Use the supplied English dictionary definitions to disambiguate meaning. Do not invent rare senses.
 Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","meaningVi":"...","usage":"..."}],"contextExamples":[{"context":"...","en":"...","vi":"..."}],"collocations":[{"phrase":"...","meaning":"..."}],"mnemonicTip":"...","wordFamily":"..."}`;
   const partialScore = (value) => (value?.primaryMeaningVi ? 10 : 0) + (value?.contextExamples?.length || 0);
@@ -989,7 +1024,8 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
       { role: 'user', content: JSON.stringify(generationInput) },
     ], 0.45, validateVocabularyCompletion);
   } catch (error) {
-    if ((env.VOCAB_DB || env.VOCAB_CACHE) && bestPartial?.primaryMeaningVi) {
+    if ((env.VOCAB_DB || env.VOCAB_CACHE)
+      && (bestPartial?.primaryMeaningVi || bestPartial?.contextExamples?.length)) {
       try {
         await writeDurableEnrichment(env, cacheIdentity.serverKey, word, {
           ...bestPartial,
@@ -1007,15 +1043,25 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
         const previousRetry = await readVocabularyJob(env, word);
         const attempts = (Number(previousRetry?.attempts) || 0) + 1;
         const now = Date.now();
+        const requiresManualReview = previousRetry?.status === 'manual_review'
+          || attempts >= BACKFILL_MAX_RETRY_ATTEMPTS;
+        const lastTriedAt = new Date(now).toISOString();
         await writeVocabularyJob(env, {
           word,
           attempts,
-          status: 'retry_pending',
+          status: requiresManualReview ? 'manual_review' : 'retry_pending',
           lastError: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
           lastProviderErrors: error?.providerErrors || [],
-          lastTriedAt: new Date(now).toISOString(),
-          nextRetryAt: new Date(now + retryDelayMs(attempts)).toISOString(),
+          lastTriedAt,
+          nextRetryAt: requiresManualReview ? null : new Date(now + retryDelayMs(attempts)).toISOString(),
         });
+        if (requiresManualReview) {
+          await updateManualReviewQueue(env, input, {
+            code: cleanText(String(error?.message || 'UNKNOWN_ERROR').split(':')[0], 120),
+            attempts,
+            lastTriedAt,
+          });
+        }
       } catch {
         // A failed retry marker must not replace the useful provider error.
       }
@@ -1046,6 +1092,12 @@ Schema: {"primaryMeaningVi":"...","meaningNote":"...","senses":[{"pos":"...","me
           await completeVocabularyJob(env, word);
         } catch {
           // The completed value is durable; stale retry metadata is harmless.
+        }
+        try {
+          await resolveVocabularyManualReview(env, word, 'Completed by vocabulary enrichment', new Date().toISOString());
+        } catch {
+          // The complete enrichment remains authoritative; queue cleanup can
+          // safely be retried by administration without another AI call.
         }
       }
     } catch (error) {
@@ -1195,10 +1247,11 @@ async function getVocabularyBatch(request, env, origin) {
       ? null
       : await env.VOCAB_CACHE?.get(meaningCacheKey(env, item), 'json');
     const meaningVi = cleanText(enrichment?.primaryMeaningVi || partial?.primaryMeaningVi || storedMeaning?.meaningVi, 240);
-    return (enrichment || meaningVi) ? {
+    return (enrichment || partial || meaningVi) ? {
       word: item.word,
       meaningVi,
       enrichment,
+      partialEnrichment: enrichment ? null : partial,
       status: enrichment ? 'complete' : 'partial',
       exampleCount: enrichment?.contextExamples?.length || partial?.contextExamples?.length || 0,
     } : null;
@@ -1424,6 +1477,7 @@ async function updateManualReviewQueue(env, item, error = null) {
   const stored = await env.VOCAB_CACHE?.get(VOCABULARY_MANUAL_REVIEW_KEY, 'json');
   const items = Array.isArray(stored?.items) ? stored.items : [];
   const word = cleanText(item?.word, 80).toLowerCase();
+  const hadMatchingItem = items.some((entry) => entry.word === word);
   const remaining = items.filter((entry) => entry.word !== word);
   if (error) {
     remaining.push({
@@ -1461,7 +1515,7 @@ async function updateManualReviewQueue(env, item, error = null) {
       firstError = writeError;
     }
   }
-  if (env.VOCAB_CACHE) {
+  if (env.VOCAB_CACHE && (error || hadMatchingItem)) {
     try {
       await env.VOCAB_CACHE.put(VOCABULARY_MANUAL_REVIEW_KEY, JSON.stringify({
         updatedAt: new Date().toISOString(),
@@ -1484,21 +1538,39 @@ async function listPrioritizedPartialWords(env, now, limit = BACKFILL_SCAN_LIMIT
   if (!env.VOCAB_DB) return [];
   try {
     const rows = await env.VOCAB_DB.prepare(`
-      SELECT enrichments.word
-      FROM vocabulary_enrichments AS enrichments
-      LEFT JOIN vocabulary_jobs AS jobs
-        ON jobs.word = enrichments.word
-        AND jobs.prompt_version = enrichments.prompt_version
-      WHERE enrichments.prompt_version = ?1
-        AND enrichments.status = 'partial'
-        AND (
-          jobs.word IS NULL
-          OR (
-            jobs.status IN ('pending', 'retry_pending')
-            AND (jobs.next_retry_at IS NULL OR jobs.next_retry_at <= ?2)
+      WITH candidates AS (
+        SELECT
+          enrichments.word AS word,
+          COALESCE(jobs.attempts, 0) AS attempts,
+          enrichments.updated_at AS updated_at
+        FROM vocabulary_enrichments AS enrichments
+        LEFT JOIN vocabulary_jobs AS jobs
+          ON jobs.word = enrichments.word
+          AND jobs.prompt_version = enrichments.prompt_version
+        WHERE enrichments.prompt_version = ?1
+          AND enrichments.status = 'partial'
+          AND (
+            jobs.word IS NULL
+            OR (
+              jobs.status IN ('pending', 'retry_pending')
+              AND (jobs.next_retry_at IS NULL OR jobs.next_retry_at <= ?2)
+            )
           )
-        )
-      ORDER BY COALESCE(jobs.attempts, 0) ASC, enrichments.updated_at ASC
+        UNION ALL
+        SELECT jobs.word AS word, jobs.attempts AS attempts, jobs.updated_at AS updated_at
+        FROM vocabulary_jobs AS jobs
+        LEFT JOIN vocabulary_enrichments AS enrichments
+          ON enrichments.word = jobs.word
+          AND enrichments.prompt_version = jobs.prompt_version
+        WHERE jobs.prompt_version = ?1
+          AND enrichments.word IS NULL
+          AND jobs.status IN ('pending', 'retry_pending')
+          AND (jobs.next_retry_at IS NULL OR jobs.next_retry_at <= ?2)
+      )
+      SELECT word
+      FROM candidates
+      GROUP BY word
+      ORDER BY MIN(attempts) ASC, MIN(updated_at) ASC
       LIMIT ?3
     `).bind(
       VOCABULARY_PROMPT_VERSION,
@@ -1527,7 +1599,9 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
     ? { ...newBackfillState(catalog.contentHash), ...storedState }
     : newBackfillState(catalog.contentHash);
   const now = Number(scheduledTime) || Date.now();
-  if (state.status === 'complete') return state;
+  const prioritizedWords = await listPrioritizedPartialWords(env, now);
+  if (state.status === 'complete' && !prioritizedWords.length) return state;
+  if (state.status === 'complete') state.status = 'active';
   if (state.status === 'quota_wait' && state.nextRunAt && Date.parse(state.nextRunAt) > now) return state;
   if (state.status === 'running' && Date.parse(state.lastRunAt) + 30 * 60 * 1000 > now) return state;
 
@@ -1541,7 +1615,7 @@ async function runScheduledVocabularyBackfill(env, context, scheduledTime = Date
   let failed = 0;
   let retrySkipped = 0;
   const catalogByWord = new Map(catalog.words.map((item) => [cleanText(item?.word, 80).toLowerCase(), item]));
-  const priorityItems = (await listPrioritizedPartialWords(env, now))
+  const priorityItems = prioritizedWords
     .map((word) => catalogByWord.get(word))
     .filter(Boolean);
   let priorityIndex = 0;
@@ -1855,11 +1929,13 @@ async function writeVocabularyAdminEvent(env, action, word, payload, createdAt =
 }
 
 async function resolveVocabularyManualReview(env, word, note, resolvedAt) {
-  await env.VOCAB_DB.prepare(`
-    UPDATE vocabulary_manual_review
-    SET resolved_at = ?3, resolution_note = ?4
-    WHERE word = ?1 AND prompt_version = ?2 AND resolved_at IS NULL
-  `).bind(word, VOCABULARY_PROMPT_VERSION, resolvedAt, cleanText(note, 500)).run();
+  if (env.VOCAB_DB) {
+    await env.VOCAB_DB.prepare(`
+      UPDATE vocabulary_manual_review
+      SET resolved_at = ?3, resolution_note = ?4
+      WHERE word = ?1 AND prompt_version = ?2 AND resolved_at IS NULL
+    `).bind(word, VOCABULARY_PROMPT_VERSION, resolvedAt, cleanText(note, 500)).run();
+  }
   await updateManualReviewQueue(env, { word }, null);
 }
 
@@ -2363,7 +2439,7 @@ function publicError(error) {
   return ['Máy chủ AI gặp lỗi tạm thời.', 500, code, true];
 }
 
-export { sentenceUsesVocabularyWord };
+export { isUsefulVietnameseMeaning, sentenceUsesVocabularyWord };
 
 export default {
   async fetch(request, env, context) {
@@ -2415,7 +2491,7 @@ export default {
         workersAiModel: cleanText(env.WORKERS_AI_MODEL || '@cf/google/gemma-4-26b-a4b-it', 160),
         workersAiConfigured,
         workersAiDailyRequestLimit: Math.max(1, Math.min(500, Number(env.WORKERS_AI_DAILY_REQUEST_LIMIT) || DEFAULT_WORKERS_AI_DAILY_REQUEST_LIMIT)),
-        openRouterModel: cleanText(env.OPENROUTER_FREE_MODEL || 'deepseek/deepseek-v4-flash-0731:free', 160),
+        openRouterModel: cleanText(env.OPENROUTER_FREE_MODEL || 'openrouter/free', 160),
         openRouterConfigured,
         freeProviderStrategy: configuredFreeProviders > 1 ? 'health-ranked-adaptive-hedge' : 'single-provider',
         providerTimeoutMs: PROVIDER_TIMEOUT_MS,

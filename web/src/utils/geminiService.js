@@ -11,6 +11,7 @@ export const ENRICHMENT_RETRY_COOLDOWN_MS = 60 * 60 * 1000;
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const activeEnrichmentRequests = new Map();
 const REQUIRED_CONTEXT_EXAMPLES = 5;
+const ENRICHMENT_REQUEST_TIMEOUT_MS = 3 * 60 * 1000;
 
 function retryStorageKey(word) {
   return `${RETRY_STATE_PREFIX}${String(word || '').trim().toLowerCase()}`;
@@ -276,6 +277,25 @@ async function createBackendError(response) {
   return error;
 }
 
+function createEnrichmentRequestSignal(parentSignal) {
+  const controller = new AbortController();
+  const abortFromParent = () => controller.abort(
+    parentSignal?.reason || new DOMException('The request was aborted.', 'AbortError'),
+  );
+  if (parentSignal?.aborted) abortFromParent();
+  else parentSignal?.addEventListener('abort', abortFromParent, { once: true });
+  const timeout = setTimeout(() => controller.abort(
+    new DOMException('Vocabulary enrichment timed out.', 'TimeoutError'),
+  ), ENRICHMENT_REQUEST_TIMEOUT_MS);
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      clearTimeout(timeout);
+      parentSignal?.removeEventListener('abort', abortFromParent);
+    },
+  };
+}
+
 async function performWordEnrichment(
   word,
   meaning = '',
@@ -337,13 +357,15 @@ async function performWordEnrichment(
 
   while (attempt < maxAttempts) {
     attempt += 1;
+    const requestControl = createEnrichmentRequestSignal(signal);
     try {
       const response = await fetch(getBackendUrl('/api/vocabulary/enrich'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        signal,
+        signal: requestControl.signal,
         body: JSON.stringify({
           word,
+          pos: options.pos || '',
           meaning,
           topic,
           dictionaryDefinitions,
@@ -400,6 +422,8 @@ async function performWordEnrichment(
         unavailableRequestId: error?.requestId || '',
         nextRetryAt: failure.nextRetryAt,
       };
+    } finally {
+      requestControl.cleanup();
     }
   }
 }

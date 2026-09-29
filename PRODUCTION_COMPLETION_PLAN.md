@@ -399,25 +399,127 @@ durable audited order storage before any learner-facing payment surface is safe.
 
 ## Current checkpoint
 
-Active task: `P0-04 — CI/CD and production smoke tests`
+Active task: `P1-03 — Optimize AI routing speed and cost`
 
-Status: `BLOCKED`
+Status: `IN_PROGRESS`
 
 Branch: `main`
 
-Last deployed production commit: `8f1735a5d6312664a996c14807dc3e6f4f8f6933`
+Last deployed production commit: `987e027cf31b98d003285f8382eb2a25f9acb556`
 
-Last deployed production Worker version: `dbe0b521-78ce-4d8e-b643-631ba8422def`
+Last deployed production Worker version: `f91fd3c9-f855-42fd-b475-5b8873f516ea`
 
 ### Next work
 
-1. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` to the protected GitHub
-   `production` environment, then rerun the Worker deployment workflow.
-2. Provision isolated staging KV/D1 resources before enabling staging writes.
-3. Run `Android Device Matrix` and complete `app/DEVICE_TEST_MATRIX.md` on physical
-   Chrome, Cốc Cốc, and the APK.
+1. After explicit authorization, push and deploy the remaining-example/retry fix,
+   then run one controlled retry each for `euro`, `rubber`, and `son`.
+2. Re-run the cache-only 3,000-word audit and require `3000/3000` complete records;
+   inspect D1 jobs/manual review without repeatedly calling AI if a provider fails.
+3. Collect production Analytics Engine latency/error/cache/provider data and verify
+   the P1-03 KPI targets. The protected GitHub Cloudflare secrets, isolated staging,
+   and physical-device matrix remain separate recorded blockers.
 
 ## Handoff log
+
+### 2026-09-29 — Remaining-example and retry repair completed locally
+
+- The Worker now accepts the valid unaccented Vietnamese meanings `cao su` and
+  `con trai`, sends the requested part of speech to providers, preserves valid
+  examples even when a provider returns an invalid meaning, and retains aggregate
+  free/paid provider diagnostics instead of replacing them with the last failure.
+- D1 batch reads expose partial enrichment payloads. The browser persists and renders
+  the exact AI count (for example `3/5` and `Còn thiếu 2 ví dụ`), preserves partial
+  examples while retrying, invalidates stale batch/failure cache entries on manual
+  retry, and bounds a keep-alive request at three minutes so it cannot lock future
+  retries forever. Navigation can still leave the component while the request runs.
+- Failed forced retries keep words in `manual_review` once the threshold is reached;
+  successful retries mark the job complete and resolve the review row. The hourly D1
+  priority query now includes eligible jobs with no enrichment row, continues even
+  from a previously complete catalog checkpoint, and still honors cooldown/manual
+  review plus the free-only background policy.
+- Replaced the removed OpenRouter model slug with the supported `openrouter/free`
+  router. Paid fallback policy was not broadened, so unattended/background repair
+  cannot create unbounded paid usage.
+- Regression coverage proves partial batch visibility, examples-only partial
+  persistence, `son` failure/success state transitions, POS propagation, missing-row
+  hourly priority, and the 390 x 844 partial-to-5/5 retry flow. Passed `lint`,
+  `test:vocab`, `test:speech`, `test:migration`, `test:learning`, `test:diagnostic`,
+  `test:admin`, Worker contracts, production build, mobile/desktop vocabulary browser
+  checks, and `git diff --check`. The existing bundle-size warning remains.
+- Changed in this implementation slice: Worker routing/queue/batch logic and tests,
+  vocabulary client cache/loading/UI and browser coverage, OpenRouter configuration
+  and documentation, plus this checkpoint. The earlier server-audit script changes
+  remain uncommitted in the same worktree.
+- No production write, AI request, push, or deploy occurred. Production therefore
+  still has `euro` at 3/5 and `rubber`/`son` at 0/5 until an explicitly authorized
+  release. Exact next action: run the release gate if needed, commit/push `main`,
+  deploy the Worker, retry only those three words once, and re-audit all 3,000 words.
+
+### 2026-09-29 — Remaining-example and manual-retry diagnosis
+
+- Completed a cache-only 125-batch production audit of all 3,000 words without an
+  enrichment request or AI token spend. Exactly 2,997 words pass the runtime
+  five-context validator. The only incomplete words are `euro` (3/5), `rubber`
+  (0/5 and no enrichment row), and `son` (0/5 and no enrichment row).
+- D1 proves the Retry AI button reaches the backend and bypasses cooldown: current
+  job attempts are 24 for `euro` and 22 each for `rubber` and `son`. All three also
+  retain unresolved manual-review rows, while their jobs have been overwritten as
+  `retry_pending`, exposing inconsistent retry/review state.
+- Latest provider evidence: Groq and XKIRO free outputs failed content validation;
+  Cloudflare failed/timed out; the configured OpenRouter model returned HTTP 404;
+  and the paid XKIRO path returned HTTP 403 for `son`. Paid fallback currently runs
+  only for quota/cooldown failures, so invalid free responses and ordinary provider
+  errors cannot use it. The UI collapses these distinct causes into the generic
+  provider-unavailable message.
+- Root validator defect: correct unaccented Vietnamese meanings such as `cao su` and
+  `con trai` fail the current Vietnamese-signal heuristic. The missing-job scheduler
+  also prioritizes only existing partial enrichment rows, so missing `rubber` and
+  `son` are revisited by the catalog cursor instead of the hourly retry queue.
+- Additional confirmed gaps: batch reads hide `euro`'s three persisted examples;
+  failed forced retries can reopen `retry_pending` without reconciling manual review;
+  a successful normal retry does not resolve the review row; paid failures discard
+  free-provider diagnostics; incomplete client batch state may remain cached.
+- No production write, AI call, push, or deploy occurred. Exact next implementation:
+  repair the Vietnamese-meaning validator and missing-job priority query first, then
+  make retry/manual-review transitions atomic, preserve/return partial examples,
+  replace or disable the OpenRouter 404 model, retain aggregate provider diagnostics,
+  and add Worker plus mobile-browser regression coverage before deployment.
+
+### 2026-09-25 — Full 3,000-word production audit
+
+- Ran the cache-only production audit across all 125 batches; it made no enrichment
+  requests and therefore spent no AI tokens. The catalog contains 3,000 unique valid
+  headwords with no numbered placeholders such as `can1`/`can2`.
+- The effective production read path returned 2,800 records: 2,693 currently pass the
+  runtime five-context validator, 107 are returned as partial, and 200 have no server
+  record. Across the resolved catalog, 147 meanings still match the low-quality
+  heuristic. D1 independently reports 2,791 records, 2,776 rows marked complete with
+  five stored examples, 15 partial rows, and 209 missing rows; this mismatch proves
+  some rows marked complete are rejected by the stricter runtime validator and that
+  nine fallback records exist outside D1.
+- Confirmed `deny` now reads from durable storage with a clear Vietnamese meaning and
+  five valid bilingual contexts.
+- Found a stale production catalog: KV hash
+  `9b8abd1a598e10d587a1b4444b29a7b7bd1133c15100ed83ae18bd0d43df8c8a`
+  differs from the validated source hash
+  `da343445ec5eff3fbd91d88649ac7af4af143f063752a88a2be78355b294be90`.
+  Consequently, production still exposes 2,179 spelling-as-IPA placeholders even
+  though the current source has zero invalid IPA entries.
+- Updated `web/scripts/audit-server-vocabulary.mjs` to retry HTTP 429 responses,
+  normalize record keys, and report partial example counts/status totals accurately.
+  Tests passed: `npm.cmd run test:vocab`, `node --check
+  scripts/audit-server-vocabulary.mjs`, and `npm.cmd run lint`.
+- No push, deploy, AI generation, or production write was performed. Remaining risk:
+  production is not release-ready until the corrected catalog is explicitly synced
+  to KV and the 307 effective incomplete records plus 147 low-quality meanings are
+  repaired. Exact next action after production-write authorization: run
+  `npm.cmd run sync:vocab-db`, re-run the full audit, then prioritize runtime-rejected
+  D1 rows before missing words without overwriting valid existing data.
+- The local release audit confirms the source catalog has zero invalid IPA entries,
+  but its fallback content is intentionally not release-ready on its own: 2,495
+  fallback meanings and 2,832 fallback examples are low quality. Server enrichment
+  must therefore remain the display source while those fallback fields are replaced.
+  `npm.cmd run audit:vocab` completed successfully and reported these quality gaps.
 
 ### 2026-09-24 — P1-03 local completion; P1-04 started
 
