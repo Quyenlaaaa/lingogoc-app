@@ -405,24 +405,42 @@ Status: `IN_PROGRESS`
 
 Branch: `main`
 
-Last deployed production commit: `b957f654b9e300ddd70eb1d9b9e51b9efadd801c`
+Last deployed production commit: `63b09ef1de3deb073a4def608647ac1564186cc7`
 
-Last deployed production Worker version: `1f1bd787-0f0a-453f-b988-6d6783777012`
+Last deployed production Worker version: `000c833e-0e0b-44f0-90a5-bf819d06bd7b`
 
 ### Next work
 
-1. After explicit authorization, push/deploy the `euros` morphology fix and perform
-   exactly one forced retry for `euro`; its existing 3/5 contexts must be preserved.
-2. Re-run the cache-only audit and require `3000/3000`. If the corrected validator
-   still cannot complete `euro`, configure `ADMIN_API_KEY` and use the audited manual
-   correction path instead of another provider loop.
-3. Sync the validated source catalog only after explicit data-mutation authorization
+1. Sync the validated source catalog only after explicit data-mutation authorization
    to replace the 2,179 stale spelling-as-IPA values still served by production KV.
-4. Collect production Analytics Engine latency/error/cache/provider data and verify
+2. Collect production Analytics Engine latency/error/cache/provider data and verify
    the P1-03 KPI targets. The protected GitHub Cloudflare secrets, isolated staging,
    and physical-device matrix remain separate recorded blockers.
 
 ## Handoff log
+
+### 2026-09-30 — `euro` fix deployed; examples reach 3,000/3,000
+
+- Pushed commit `63b09ef1de3deb073a4def608647ac1564186cc7` and deployed
+  Worker version `000c833e-0e0b-44f0-90a5-bf819d06bd7b`. Production smoke passed
+  before any enrichment call.
+- Made exactly one forced production retry for `euro` after deployment. Groq free
+  returned two valid new contexts using the now-accepted plural `euros`; the existing
+  three contexts were preserved, the completed five-context record was stored in D1
+  and KV, and there was no cache-write pending state.
+- D1 verification shows the `euro` job is `complete`, attempts reset to zero, no next
+  retry or last error remains, and the former manual-review row is resolved with the
+  note `Completed by vocabulary enrichment`. No second AI call was made.
+- The full 125-batch cache-only audit now reports 3,000 server records, 3,000 complete
+  five-context records, zero partial/missing/incomplete records, 3,000 clear Vietnamese
+  meanings, zero low-quality resolved meanings, and zero failed batches.
+- GitHub Pages, Worker, and Android workflows succeeded at runs `36658256265`,
+  `36658256192`, and `36658256272`. Production still reports 2,179 stale
+  spelling-as-IPA catalog values, so `releaseReady` remains false for that separate
+  data-synchronization issue.
+- Exact next action: explicitly authorize the validated catalog sync, verify IPA in
+  production becomes valid without overwriting D1 meanings/examples, then re-run the
+  3,000-word audit and production smoke.
 
 ### 2026-09-30 — `euro` API validation root cause fixed locally
 
