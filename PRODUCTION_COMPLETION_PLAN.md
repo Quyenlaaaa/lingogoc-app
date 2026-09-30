@@ -405,21 +405,51 @@ Status: `IN_PROGRESS`
 
 Branch: `main`
 
-Last deployed production commit: `987e027cf31b98d003285f8382eb2a25f9acb556`
+Last deployed production commit: `b957f654b9e300ddd70eb1d9b9e51b9efadd801c`
 
-Last deployed production Worker version: `f91fd3c9-f855-42fd-b475-5b8873f516ea`
+Last deployed production Worker version: `1f1bd787-0f0a-453f-b988-6d6783777012`
 
 ### Next work
 
-1. After explicit authorization, push and deploy the remaining-example/retry fix,
-   then run one controlled retry each for `euro`, `rubber`, and `son`.
-2. Re-run the cache-only 3,000-word audit and require `3000/3000` complete records;
-   inspect D1 jobs/manual review without repeatedly calling AI if a provider fails.
+1. Configure a durable `ADMIN_API_KEY`, then use the audited manual-correction API to
+   add two reviewed bilingual contexts for `euro`; do not repeat provider calls while
+   its job remains in `manual_review`.
+2. Sync the validated source catalog only after explicit data-mutation authorization
+   to replace the 2,179 stale spelling-as-IPA values still served by production KV.
 3. Collect production Analytics Engine latency/error/cache/provider data and verify
    the P1-03 KPI targets. The protected GitHub Cloudflare secrets, isolated staging,
    and physical-device matrix remain separate recorded blockers.
 
 ## Handoff log
+
+### 2026-09-30 — Remaining-example retry release deployed
+
+- Pushed production code commit `b957f654b9e300ddd70eb1d9b9e51b9efadd801c`
+  and deployed Worker version `1f1bd787-0f0a-453f-b988-6d6783777012` with D1, KV,
+  Analytics Engine, Workers AI, and the hourly trigger active.
+- GitHub Pages, Worker, and Android Kotlin APK workflows all
+  completed successfully at runs `36540576946`, `36540576955`, and `36540576802`.
+  Production smoke passed health, the 3,000-word catalog, cached D1 enrichment, and
+  speech audio using cached word `ticket`.
+- A cache-first read after deployment found that the hourly queue had already repaired
+  `rubber` and `son` to clear Vietnamese meanings plus five persisted contexts. They
+  were not called again. `euro` correctly exposed its three persisted contexts in the
+  new partial payload and UI contract.
+- Exactly one controlled forced retry was made for `euro`. It returned request ID
+  `50c90e09-2f2b-411f-a497-0d6b7a9728a7` with
+  `INSUFFICIENT_BILINGUAL_EXAMPLES`; no loop or second AI call followed. D1 preserved
+  3/5, set the job to `manual_review` at attempt 27, and retained diagnostics from
+  Groq, Cloudflare, XKIRO, and OpenRouter.
+- The post-release 125-batch cache-only audit completed with no failed batches and no
+  enrichment calls: 3,000 server records, 2,999 complete/five-context records, one
+  partial record (`euro`), 3,000 clear Vietnamese meanings, and zero low-quality
+  resolved meanings. Production still serves 2,179 stale spelling-as-IPA catalog
+  values, so the broader vocabulary release is not yet ready.
+- Remaining authority/configuration blocker: production has no `ADMIN_API_KEY`, so
+  the audited manual-correction endpoint cannot safely complete `euro`. Do not bypass
+  it with an unaudited direct D1 mutation. Exact next action: configure that secret,
+  submit a reviewed five-context correction for `euro`, re-audit to `3000/3000`, then
+  separately authorize the validated catalog synchronization for IPA repair.
 
 ### 2026-09-29 — Remaining-example and retry repair completed locally
 
