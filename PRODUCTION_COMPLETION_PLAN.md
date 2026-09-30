@@ -411,16 +411,34 @@ Last deployed production Worker version: `1f1bd787-0f0a-453f-b988-6d6783777012`
 
 ### Next work
 
-1. Configure a durable `ADMIN_API_KEY`, then use the audited manual-correction API to
-   add two reviewed bilingual contexts for `euro`; do not repeat provider calls while
-   its job remains in `manual_review`.
-2. Sync the validated source catalog only after explicit data-mutation authorization
+1. After explicit authorization, push/deploy the `euros` morphology fix and perform
+   exactly one forced retry for `euro`; its existing 3/5 contexts must be preserved.
+2. Re-run the cache-only audit and require `3000/3000`. If the corrected validator
+   still cannot complete `euro`, configure `ADMIN_API_KEY` and use the audited manual
+   correction path instead of another provider loop.
+3. Sync the validated source catalog only after explicit data-mutation authorization
    to replace the 2,179 stale spelling-as-IPA values still served by production KV.
-3. Collect production Analytics Engine latency/error/cache/provider data and verify
+4. Collect production Analytics Engine latency/error/cache/provider data and verify
    the P1-03 KPI targets. The protected GitHub Cloudflare secrets, isolated staging,
    and physical-device matrix remain separate recorded blockers.
 
 ## Handoff log
+
+### 2026-09-30 — `euro` API validation root cause fixed locally
+
+- Traced the repeated `INSUFFICIENT_BILINGUAL_EXAMPLES` response to English morphology,
+  not provider connectivity: the validator generated the invalid plural `euroes`, so
+  natural AI sentences containing `euros` were discarded before the partial 3/5
+  record could reach five contexts.
+- Added a narrow set of common `-o` words whose plural takes `-s` (`euro`, `photo`,
+  `piano`, `radio`, `studio`, `video`, and `zoo`). The validator now accepts `euros`
+  and rejects `euroes` without weakening whole-word boundary checks.
+- Worker contracts, lint, and `git diff --check` pass. Changed files:
+  `web/backend/src/worker.js`, `web/backend/test-worker.mjs`, and this checkpoint.
+  No production API call, push, or deployment occurred in this slice.
+- Exact next action after explicit push/deploy authorization: release this Worker,
+  issue one forced retry for `euro`, verify D1 changes from 3/5 to 5/5 and resolves
+  manual review, then run the cache-only 3,000-word audit.
 
 ### 2026-09-30 — Remaining-example retry release deployed
 

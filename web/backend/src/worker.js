@@ -303,6 +303,16 @@ const IRREGULAR_VOCABULARY_FORMS = Object.freeze({
   throw: ['throws', 'threw', 'thrown', 'throwing'],
 });
 
+const O_ENDING_S_PLURALS = new Set([
+  'euro',
+  'photo',
+  'piano',
+  'radio',
+  'studio',
+  'video',
+  'zoo',
+]);
+
 function vocabularyWordForms(word) {
   const base = cleanText(word, 80).toLocaleLowerCase('en');
   const forms = new Set([base]);
@@ -313,7 +323,10 @@ function vocabularyWordForms(word) {
     forms.add(`${base.slice(0, -1)}ies`);
     forms.add(`${base.slice(0, -1)}ied`);
   } else {
-    forms.add(`${base}${/(?:s|x|z|ch|sh|o)$/.test(base) ? 'es' : 's'}`);
+    const pluralSuffix = base.endsWith('o') && O_ENDING_S_PLURALS.has(base)
+      ? 's'
+      : /(?:s|x|z|ch|sh|o)$/.test(base) ? 'es' : 's';
+    forms.add(`${base}${pluralSuffix}`);
     forms.add(base.endsWith('e') ? `${base}d` : `${base}ed`);
   }
 

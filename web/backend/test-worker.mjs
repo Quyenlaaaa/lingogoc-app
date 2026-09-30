@@ -6,6 +6,8 @@ assert.equal(sentenceUsesVocabularyWord('She denies every false claim.', 'deny')
 assert.equal(sentenceUsesVocabularyWord('He is denying responsibility.', 'deny'), true);
 assert.equal(sentenceUsesVocabularyWord('The evidence was found yesterday.', 'find'), true);
 assert.equal(sentenceUsesVocabularyWord('Their identity remained private.', 'deny'), false);
+assert.equal(sentenceUsesVocabularyWord('The meal costs twenty euros.', 'euro'), true);
+assert.equal(sentenceUsesVocabularyWord('The incorrect form euroes must be rejected.', 'euro'), false);
 assert.equal(isUsefulVietnameseMeaning('cao su', 'rubber'), true);
 assert.equal(isUsefulVietnameseMeaning('con trai', 'son'), true);
 assert.equal(isUsefulVietnameseMeaning('a male child', 'son'), false);
