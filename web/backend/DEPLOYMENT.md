@@ -122,7 +122,8 @@ staging Worker environment exist, staging deploy remains intentionally disabled.
 
 If D1 is enabled, staging and production must also use different databases bound as
 `VOCAB_DB`. Apply all migrations in order before deploying code with the binding:
-`0001_vocabulary_durable_store.sql`, then `0002_vocabulary_admin_audit.sql`.
+`0001_vocabulary_durable_store.sql`, `0002_vocabulary_admin_audit.sql`, then
+`0003_speaking_durable_sessions.sql`.
 Deploying without the binding is safe and keeps the KV-only path; adding the binding
 without applying migrations causes logged D1 errors and falls back to KV, but must
 still be treated as a failed release gate.
