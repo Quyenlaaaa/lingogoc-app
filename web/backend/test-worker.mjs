@@ -95,6 +95,94 @@ globalThis.fetch = async (url, options) => {
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 };
 
+function createSpeakingD1Mock() {
+  const sessions = new Map();
+  const turns = new Map();
+  const summaries = new Map();
+  return {
+    sessions,
+    turns,
+    summaries,
+    binding: {
+      prepare(sql) {
+        let values = [];
+        return {
+          bind(...boundValues) {
+            values = boundValues;
+            return this;
+          },
+          async run() {
+            if (/INSERT OR IGNORE INTO speaking_sessions/i.test(sql)) {
+              if (!sessions.has(values[0])) {
+                sessions.set(values[0], {
+                  session_id: values[0],
+                  resume_token_hash: values[1],
+                  scenario_id: values[2],
+                  scenario_title: values[3],
+                  cefr_level: values[4],
+                  status: 'active',
+                  last_turn_sequence: 0,
+                  created_at: values[5],
+                  updated_at: values[5],
+                });
+              }
+              return { success: true };
+            }
+            if (/INSERT OR IGNORE INTO speaking_turns/i.test(sql)) {
+              const key = `${values[0]}:${values[1]}`;
+              if (![...turns.values()].some((turn) => turn.request_id === values[2]) && !turns.has(key)) {
+                turns.set(key, {
+                  session_id: values[0], turn_sequence: values[1], request_id: values[2],
+                  user_text: values[3], reply_en: values[4], reply_vi: values[5],
+                  correction: values[6], encouragement: values[7], hints_json: values[8],
+                  scores_json: values[9], provider: values[10], model: values[11], created_at: values[12],
+                });
+              }
+              return { success: true };
+            }
+            if (/UPDATE speaking_sessions/i.test(sql)) {
+              const session = sessions.get(values[0]);
+              if (session) {
+                session.last_turn_sequence = Math.max(session.last_turn_sequence, Number(values[1]));
+                session.cefr_level = values[2];
+                session.updated_at = values[3];
+              }
+              return { success: true };
+            }
+            if (/INSERT INTO speaking_session_summaries/i.test(sql)) {
+              const existing = summaries.get(values[0]);
+              if (!existing || Number(values[1]) >= existing.through_turn_sequence) {
+                summaries.set(values[0], {
+                  session_id: values[0],
+                  through_turn_sequence: Number(values[1]),
+                  summary_json: values[2],
+                  updated_at: values[3],
+                });
+              }
+              return { success: true };
+            }
+            throw new Error(`Unexpected speaking D1 run: ${sql}`);
+          },
+          async first() {
+            if (/FROM speaking_sessions/i.test(sql)) return sessions.get(values[0]) || null;
+            throw new Error(`Unexpected speaking D1 first: ${sql}`);
+          },
+          async all() {
+            if (/FROM speaking_turns/i.test(sql)) {
+              return {
+                results: [...turns.values()]
+                  .filter((turn) => turn.session_id === values[0])
+                  .sort((left, right) => left.turn_sequence - right.turn_sequence),
+              };
+            }
+            throw new Error(`Unexpected speaking D1 all: ${sql}`);
+          },
+        };
+      },
+    },
+  };
+}
+
 const env = {
   XTROUTER_API_KEY: 'server-only-test-key',
   AI_FREE_MODEL: 'mistralai/mistral-large-2512',
@@ -450,6 +538,9 @@ assert.equal(operationsPayload.data.storage.durableSource, 'KV');
 assert.equal(operationsPayload.data.providers.xkiro.configured, true);
 assert.equal(operationsPayload.data.providers.xkiro.health.successes, 0);
 assert.equal(operationsPayload.data.providers.xkiro.health.circuitOpen, false);
+assert.equal(operationsPayload.data.speaking.realtimeEnabled, true);
+assert.equal(operationsPayload.data.speaking.analyticsConfigured, true);
+assert.equal(operationsPayload.data.speaking.rawAudioRetained, false);
 assert.equal(operationsPayload.data.backfill.cursor, 17);
 assert.equal(operationsPayload.data.thresholds.slowRequestMs, 1500);
 assert.equal(operationsPayload.data.thresholds.providerHedgeDelayMs, 1500);
@@ -786,16 +877,34 @@ assert.equal(
 );
 
 let idempotentProviderCalls = 0;
-customProviderResponse = async () => {
+const streamedSpeakingContent = JSON.stringify({
+  replyEn: 'Your saved speaking reply is ready.',
+  replyVi: 'The translated reply is ready.',
+  correction: 'Your sentence is correct.',
+  encouragement: 'Keep going!',
+  hints: [{ en: 'What would you recommend?', vi: 'What do you suggest?' }],
+  scores: { grammar: 104, vocabulary: 82.2, fluency: -4, taskCompletion: 76.4, pronunciation: 100 },
+});
+customProviderResponse = async ({ body } = {}) => {
   idempotentProviderCalls += 1;
   await new Promise((resolve) => setTimeout(resolve, 20));
+  if (body?.stream) {
+    const splitAt = streamedSpeakingContent.indexOf(' speaking reply');
+    const chunks = [streamedSpeakingContent.slice(0, splitAt), streamedSpeakingContent.slice(splitAt)];
+    const streamBody = chunks.map((content, index) => `data: ${JSON.stringify({
+      model: body.model,
+      choices: [{ delta: { content } }],
+      ...(index === chunks.length - 1 ? { usage: { prompt_tokens: 20, completion_tokens: 30, total_tokens: 50 } } : {}),
+    })}\n\n`).join('') + 'data: [DONE]\n\n';
+    return new Response(streamBody, { status: 200, headers: { 'Content-Type': 'text/event-stream' } });
+  }
   return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
     replyEn: 'Your saved speaking reply is ready.',
     replyVi: 'Câu trả lời luyện nói đã sẵn sàng.',
     correction: 'Your sentence is correct.',
     encouragement: 'Keep going!',
     hints: [{ en: 'What would you recommend?', vi: 'Bạn đề xuất món nào?' }],
-    scores: { grammar: 104, vocabulary: 82.2, fluency: -4, pronunciation: 100 },
+    scores: { grammar: 104, vocabulary: 82.2, fluency: -4, taskCompletion: 76.4, pronunciation: 100 },
   }) } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 };
 const createIdempotentSpeakingRequest = () => new Request('http://localhost:8787/api/speaking/chat', {
@@ -808,6 +917,7 @@ const createIdempotentSpeakingRequest = () => new Request('http://localhost:8787
   body: JSON.stringify({
     requestId: 'speaking:test-session:turn-1',
     scenario: 'Coffee shop',
+    level: 'C1',
     messages: [{ role: 'user', content: 'A coffee, please.' }],
   }),
 });
@@ -819,12 +929,239 @@ const idempotentFirstPayload = await idempotentFirst.json();
 assert.equal(idempotentFirst.status, 200);
 assert.equal(idempotentConcurrent.status, 200);
 assert.equal(idempotentProviderCalls, 1, 'concurrent speaking retries must share one provider call');
-assert.deepEqual(idempotentFirstPayload.scores, { grammar: 100, vocabulary: 82, fluency: 0 });
+assert.equal(idempotentFirstPayload.level, 'C1');
+assert.match(providerRequest.body.messages[0].content, /selected CEFR C1/);
+assert.match(providerRequest.body.messages[0].content, /thought-provoking follow-up question/);
+assert.deepEqual(idempotentFirstPayload.scores, { grammar: 100, vocabulary: 82, fluency: 0, taskCompletion: 76 });
 assert.equal('pronunciation' in idempotentFirstPayload.scores, false, 'AI must not fabricate pronunciation');
+assert.equal(idempotentFirstPayload.scoringVersion, 1);
+assert.equal(idempotentFirstPayload.scoreBasis, 'text');
 const idempotentCached = await worker.fetch(createIdempotentSpeakingRequest(), env, context);
 assert.equal(idempotentCached.status, 200);
 assert.equal(idempotentCached.headers.get('X-LingoGoc-Cache'), 'HIT');
 assert.equal(idempotentProviderCalls, 1, 'completed speaking retries must reuse the cached response');
+
+const scoringRubricChecks = {
+  A1: /basic words.+familiar micro-task/i,
+  A2: /everyday phrases.+routine practical task/i,
+  B1: /connected explanation.+reasons or details/i,
+  B2: /varied structures and collocations.+scenario goal/i,
+  C1: /precise flexible language.+persuasively and naturally/i,
+};
+for (const [level, rubricPattern] of Object.entries(scoringRubricChecks)) {
+  const scoringResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:5173',
+      'X-Idempotency-Key': `speaking:scoring-${level.toLowerCase()}:turn:1`,
+    },
+    body: JSON.stringify({ level, scenario: 'Level scoring', messages: [{ role: 'user', content: 'I completed the task.' }] }),
+  }), env, context);
+  const scoringPayload = await scoringResponse.json();
+  assert.equal(scoringResponse.status, 200);
+  assert.equal(scoringPayload.level, level);
+  assert.equal(scoringPayload.scoreBasis, 'text');
+  assert.equal('pronunciation' in scoringPayload.scores, false);
+  assert.match(providerRequest.body.messages[0].content, rubricPattern);
+}
+const realtimeSessionId = 'realtime-session-0001';
+const disabledRealtimeResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ sessionId: realtimeSessionId, level: 'B2' }),
+}), { ...env, SPEAKING_REALTIME_ENABLED: 'false' }, context);
+assert.equal(disabledRealtimeResponse.status, 501, 'the realtime rollout flag must preserve legacy fallback');
+const realtimeSessionResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ sessionId: realtimeSessionId, level: 'B2', lastAcknowledgedSequence: 3 }),
+}), env, context);
+const realtimeSessionPayload = await realtimeSessionResponse.json();
+assert.equal(realtimeSessionResponse.status, 200);
+assert.equal(realtimeSessionPayload.protocolVersion, 1);
+assert.equal(realtimeSessionPayload.transport, 'ndjson');
+assert.equal(realtimeSessionPayload.level, 'B2');
+assert.equal(realtimeSessionPayload.resumeFromSequence, 3);
+
+const createRealtimeTurnRequest = () => new Request('http://localhost:8787/api/speaking/realtime/turn', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: 'http://localhost:5173',
+    'X-Idempotency-Key': `speaking:${realtimeSessionId}:turn:4`,
+  },
+  body: JSON.stringify({
+    sessionId: realtimeSessionId,
+    turnSequence: 4,
+    requestId: `speaking:${realtimeSessionId}:turn:4`,
+    level: 'B2',
+    reconnectAttempt: 2,
+    scenario: 'Coffee shop',
+    messages: [{ role: 'user', content: 'Could you recommend something less sweet?' }],
+  }),
+});
+const providerCallsBeforeRealtime = idempotentProviderCalls;
+const realtimeTurnResponse = await worker.fetch(createRealtimeTurnRequest(), env, context);
+assert.equal(realtimeTurnResponse.status, 200);
+assert.match(realtimeTurnResponse.headers.get('Content-Type'), /application\/x-ndjson/);
+assert.equal(realtimeTurnResponse.headers.get('Cache-Control'), 'no-store, no-transform');
+const realtimeEvents = (await realtimeTurnResponse.text()).trim().split('\n').map((line) => JSON.parse(line));
+assert.deepEqual(realtimeEvents.map((event) => event.type), ['ack', 'delta', 'delta', 'result', 'done']);
+assert.deepEqual(realtimeEvents.map((event) => event.eventSequence), [1, 2, 3, 4, 5]);
+assert.ok(realtimeEvents.every((event) => event.requestId === `speaking:${realtimeSessionId}:turn:4`));
+assert.equal(realtimeEvents[1].text, 'Your saved');
+assert.equal(realtimeEvents[2].text, 'Your saved speaking reply is ready.');
+assert.equal(realtimeEvents[3].data.level, 'B2');
+assert.equal(idempotentProviderCalls, providerCallsBeforeRealtime + 1);
+
+const replayedRealtimeResponse = await worker.fetch(createRealtimeTurnRequest(), env, context);
+const replayedRealtimeEvents = (await replayedRealtimeResponse.text()).trim().split('\n').map((line) => JSON.parse(line));
+assert.equal(replayedRealtimeEvents[1].cache, 'HIT');
+assert.equal(idempotentProviderCalls, providerCallsBeforeRealtime + 1, 'realtime resume must reuse the cached turn result');
+
+const invalidRealtimeResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/turn', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ sessionId: realtimeSessionId, turnSequence: 5, requestId: 'mismatch' }),
+}), env, context);
+assert.equal(invalidRealtimeResponse.status, 400);
+
+const cancelledRequestController = new AbortController();
+const createCancelledRealtimeRequest = (signal) => new Request('http://localhost:8787/api/speaking/realtime/turn', {
+  method: 'POST',
+  signal,
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: 'http://localhost:5173',
+    'X-Idempotency-Key': `speaking:${realtimeSessionId}:turn:5`,
+  },
+  body: JSON.stringify({
+    sessionId: realtimeSessionId,
+    turnSequence: 5,
+    requestId: `speaking:${realtimeSessionId}:turn:5`,
+    level: 'B2',
+    scenario: 'Coffee shop',
+    messages: [{ role: 'user', content: 'Please finish safely after I leave.' }],
+  }),
+});
+const providerCallsBeforeCancel = idempotentProviderCalls;
+const cancelledRealtimeResponse = await worker.fetch(createCancelledRealtimeRequest(cancelledRequestController.signal), env, context);
+const cancelledReader = cancelledRealtimeResponse.body.getReader();
+const firstCancelledChunk = await cancelledReader.read();
+assert.match(new TextDecoder().decode(firstCancelledChunk.value), /"type":"ack"/);
+cancelledRequestController.abort();
+await cancelledReader.cancel('client navigation');
+await new Promise((resolve) => setTimeout(resolve, 60));
+const resumedAfterCancel = await worker.fetch(createCancelledRealtimeRequest(), env, context);
+const resumedAfterCancelEvents = (await resumedAfterCancel.text()).trim().split('\n').map((line) => JSON.parse(line));
+assert.equal(resumedAfterCancelEvents[1].cache, 'HIT', 'cancelled delivery must finish and cache the same request safely');
+assert.equal(idempotentProviderCalls, providerCallsBeforeCancel + 1, 'resume after cancellation must not spend tokens twice');
+
+const speakingD1 = createSpeakingD1Mock();
+const durableEnv = { ...env, VOCAB_DB: speakingD1.binding };
+const durablePending = [];
+const durableContext = { waitUntil: (promise) => durablePending.push(promise) };
+const durableSessionId = 'durable-speaking-session-0001';
+const durableResumeToken = 'resume-token-000000000000000000000000000001';
+const durableSessionResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({
+    sessionId: durableSessionId,
+    resumeToken: durableResumeToken,
+    level: 'B1',
+    scenario: { id: 'coffee-shop', titleEn: 'Coffee shop' },
+  }),
+}), durableEnv, durableContext);
+const durableSessionPayload = await durableSessionResponse.json();
+assert.equal(durableSessionResponse.status, 200);
+assert.equal(durableSessionPayload.durable, true);
+assert.equal(durableSessionPayload.syncPending, false);
+
+const createDurableTurnRequest = () => new Request('http://localhost:8787/api/speaking/realtime/turn', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: 'http://localhost:5173',
+    'X-Idempotency-Key': `speaking:${durableSessionId}:turn:1`,
+  },
+  body: JSON.stringify({
+    sessionId: durableSessionId,
+    resumeToken: durableResumeToken,
+    turnSequence: 1,
+    requestId: `speaking:${durableSessionId}:turn:1`,
+    level: 'B1',
+    scenario: { id: 'coffee-shop', titleEn: 'Coffee shop' },
+    messages: [{ role: 'user', content: 'Could I have a coffee, please?' }],
+  }),
+});
+const durableTurnResponse = await worker.fetch(createDurableTurnRequest(), durableEnv, durableContext);
+const durableEvents = (await durableTurnResponse.text()).trim().split('\n').map((line) => JSON.parse(line));
+assert.equal(durableEvents.at(-1).type, 'done');
+await Promise.all(durablePending.splice(0));
+assert.equal(speakingD1.turns.size, 1);
+assert.equal(speakingD1.summaries.get(durableSessionId).through_turn_sequence, 1);
+
+const resumeResponse = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/resume', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ sessionId: durableSessionId, resumeToken: durableResumeToken }),
+}), durableEnv, durableContext);
+const resumePayload = await resumeResponse.json();
+assert.equal(resumeResponse.status, 200);
+assert.equal(resumePayload.session.lastTurnSequence, 1);
+assert.equal(resumePayload.turns.length, 1);
+assert.equal(resumePayload.turns[0].userText, 'Could I have a coffee, please?');
+
+const replayedDurableTurn = await worker.fetch(createDurableTurnRequest(), durableEnv, durableContext);
+await replayedDurableTurn.text();
+await Promise.all(durablePending.splice(0));
+assert.equal(speakingD1.turns.size, 1, 'durable speaking retry must not create duplicate turns');
+
+const forbiddenResume = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/resume', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({ sessionId: durableSessionId, resumeToken: 'wrong-token-000000000000000000000000000000' }),
+}), durableEnv, durableContext);
+assert.equal(forbiddenResume.status, 403);
+
+const unavailableD1Env = {
+  ...env,
+  VOCAB_DB: { prepare: () => { throw new Error('D1 temporarily unavailable'); } },
+};
+const degradedSession = await worker.fetch(new Request('http://localhost:8787/api/speaking/realtime/session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173' },
+  body: JSON.stringify({
+    sessionId: 'degraded-speaking-session-001',
+    resumeToken: durableResumeToken,
+    level: 'A2',
+  }),
+}), unavailableD1Env, durableContext);
+const degradedPayload = await degradedSession.json();
+assert.equal(degradedSession.status, 200, 'D1 outage must not block speaking');
+assert.equal(degradedPayload.durable, false);
+assert.equal(degradedPayload.syncPending, true);
+const speakingAnalytics = analyticsPoints.filter((point) => point.indexes[0] === 'SPEAKING');
+const speakingMetricEvents = speakingAnalytics.map((point) => point.blobs[0]);
+for (const event of ['session_handshake', 'provider_completion', 'turn_complete', 'turn_cache_replay', 'durable_sync', 'session_resume']) {
+  assert.ok(speakingMetricEvents.includes(event), `missing Speaking metric: ${event}`);
+}
+assert.ok(speakingAnalytics.some((point) => point.blobs[0] === 'turn_complete' && point.doubles[5] === 2));
+assert.ok(speakingAnalytics.some((point) => point.blobs[0] === 'turn_cache_replay' && point.doubles[6] === 1));
+assert.ok(speakingAnalytics.some((point) => point.blobs[0] === 'durable_sync' && point.doubles[7] === 1));
+assert.ok(speakingAnalytics.some((point) => point.blobs[0] === 'turn_complete' && point.blobs[1] === 'cancelled'));
+assert.ok(speakingAnalytics.some((point) => (
+  point.blobs[0] === 'provider_completion'
+  && point.doubles[2] === 20
+  && point.doubles[3] === 30
+  && point.doubles[4] === 50
+)));
+const speakingAnalyticsText = JSON.stringify(speakingAnalytics);
+for (const sensitiveValue of [durableSessionId, durableResumeToken, 'Could I have a coffee, please?', 'Your saved speaking reply is ready.']) {
+  assert.equal(speakingAnalyticsText.includes(sensitiveValue), false, `Speaking analytics leaked: ${sensitiveValue}`);
+}
 customProviderResponse = null;
 
 const adaptiveHedgeUrls = [];

@@ -113,7 +113,7 @@ Completed locally:
 
 ### P1-03 — Optimize AI routing speed and cost
 
-Status: `IN_PROGRESS`
+Status: `BLOCKED`
 
 Scope and acceptance:
 
@@ -132,6 +132,10 @@ metrics; Analytics Engine schema and p50/p95 runbook.
 
 The production `METRICS` binding is live. Gather production traffic and query the
 Analytics Engine dataset to verify KPI targets before closing this task.
+
+The remaining acceptance work requires account-level Analytics Engine query access;
+there is no additional local implementation work that can prove the production KPI
+targets. Resume this task when that production evidence is available.
 
 ### P1-03-R1 — Cache-first vocabulary loading
 
@@ -251,6 +255,101 @@ Completed locally: versioned transcript and feedback persistence, safe pending-t
 recovery with stable idempotency keys, 45-second client timeout and manual retry,
 normalized grammar/vocabulary/fluency/pronunciation scores, Worker single-flight and
 24-hour response cache, and 390 x 844 navigation/reload/retry browser coverage.
+
+### P2-05-R1 — Realtime AI speaking with CEFR levels
+Status: `IN_PROGRESS`
+
+Objective: evolve the existing durable request/response Speaking feature into a
+continuous, low-latency conversation for learner-selected A1, A2, B1, B2, and C1
+levels without losing turns or multiplying provider calls.
+
+Delivery tasks:
+
+- `RT-00` — Completed locally. One validated CEFR policy matrix now covers reply
+  length, language, correction density, hints, speech rate, topic complexity, and
+  server-owned prompt constraints. The selected level survives reload and reaches the
+  existing idempotent Worker request.
+- `RT-01` — Completed locally. Session schema version 3 adds monotonic turn sequence,
+  deterministic request IDs, acknowledged sequence, explicit waiting/reconnecting/
+  failed/idle transport state, and safe migration of legacy messages and pending turns.
+- `RT-02` — Completed locally. The Worker and frontend negotiate protocol version 1
+  and exchange ordered NDJSON ack/delta/result/done events with heartbeat, strict
+  session/turn/request validation, idempotent replay, bounded context, and the current
+  chat route as pre-generation fallback. OpenAI-compatible HTTP providers stream SSE;
+  unsupported providers safely return a final result. Client cancellation stops
+  delivery while the same-ID generation finishes into cache, so resume cannot double
+  token spend.
+- `RT-03` — Completed locally. A tested pure reducer owns listening, transcribing,
+  thinking, streaming, speaking, interruption, reconnecting, and recoverable error.
+  `AiSpeakingView` derives recording/thinking/speaking behavior from this one source,
+  rejects stale stream events, and exposes the state for the future avatar.
+- `RT-04` — Completed locally. Partial transcript/reply rendering, bounded deduplicated
+  sentence-boundary streaming TTS, automatic listening, and race-safe barge-in are
+  implemented. Microphone, transport, and playback are orthogonal; stopping delivery
+  never launches a fallback model, and submitted same-ID work may finish into cache to
+  avoid duplicate token spend.
+- `RT-05` — Completed locally. Sessions, turns, feedback, and latest validated
+  summaries persist idempotently in D1. Raw audio is excluded; browser storage remains
+  available when durable sync is absent, and a hashed per-session resume secret guards
+  the guest read contract.
+- `RT-06` — Completed locally. Android TTS/STT have separate transient audio-focus
+  ownership, deterministic mutual interruption, foreground/background recovery, and
+  headset/Bluetooth route observation. Physical-device matrix verification remains a
+  release requirement.
+- `RT-07` — Completed locally. A1-C1 rubric-calibrated grammar, vocabulary, fluency,
+  and task-completion scores carry an explicit text-only basis. Model-supplied
+  pronunciation is discarded; transcript alignment is stored only with microphone
+  evidence and is labeled as alignment rather than acoustic pronunciation analysis.
+- `RT-08` — Completed locally. Analytics Engine records privacy-safe latency, first
+  text, reconnect, provider/token, cancellation, cache/deduplication, and durable-sync
+  outcomes. Realtime rollout has an explicit Worker flag with legacy fallback.
+- `RT-09` — Evaluate true full-duplex audio over WebSocket/Durable Objects only after
+  streamed turn-taking meets its production reliability and latency targets.
+- `RT-10` — Foundation completed locally. The Speaking UI now has a clearly disclosed
+  fictional 3D AI tutor driven only by authoritative conversation state. A 2.28 kB
+  optional shell lazy-loads a separate 487.72 kB procedural Three.js renderer only on
+  the Speaking surface and only on capable devices. Listening, thinking/streaming,
+  speaking, interruption, reconnect, and error remain visually distinct; mouth motion
+  is strictly gated by actual TTS playback state and stops with barge-in. Avatar-off,
+  reduced-motion, low-memory, sustained-low-FPS, WebGL-unavailable/context-loss, hidden-
+  document, and GPU-cleanup paths retain the transcript and every core control. The
+  renderer uses repository-owned geometry and does not imitate a real person. A future
+  licensed GLB or provider-timed visemes must pass `web/SPEAKING_AVATAR_SPEC.md`; they
+  are not required to replace the safe procedural implementation without physical-
+  device performance evidence.
+
+Acceptance:
+
+- A learner can select A1–C1 and the Worker applies the matching policy on every turn.
+- A ten-turn hands-free session continues after the initial microphone action and can
+  be interrupted without duplicate AI calls or duplicate XP.
+- Reload, navigation, temporary network loss, retry, and reconnect preserve exactly
+  one durable result for each stable request ID.
+- Partial transcript target is under 300 ms; first AI text p50/p95 is under 1.5/3 s;
+  first audio p50 is under 2 s; interruption target is under 300 ms.
+- Raw audio is not retained without explicit consent; microphone state is always
+  visible; denied permission has a text-input fallback.
+- Web mobile Chrome, Coc Coc, desktop, and Android pass speech, interruption, weak-
+  network, background/foreground, and viewport tests.
+- The 3D tutor visibly distinguishes listening, thinking, and speaking; mouth movement
+  starts and stops with audible TTS, barge-in stops both audio and speaking animation,
+  and reconnect/error states never appear as if the tutor is still talking.
+- The avatar is explicitly labeled as AI, does not impersonate a real person, keeps
+  captions and all core controls keyboard/screen-reader accessible, respects
+  `prefers-reduced-motion`, and leaves every Speaking function usable when 3D/WebGL is
+  unavailable.
+- The compressed avatar payload target is at most 4 MB, it is loaded only after the
+  Speaking surface opens, and the experience targets 30 fps on supported mobile
+  devices and 60 fps on desktop without delaying microphone readiness or first AI
+  audio. Low-memory or sustained-low-frame-rate devices switch to the 2D fallback.
+
+Required tests: `npm.cmd run test:speaking`, `npm.cmd run test:speaking:browser`, new
+realtime state/stream Worker contracts, `npm.cmd run test:speech`, `node
+backend/test-worker.mjs`, `npm.cmd run lint`, `npm.cmd run build`, and Android
+`app\gradlew.bat assembleDebug` plus physical-device verification. `RT-10` additionally
+requires deterministic animation-state tests, audio/animation stop synchronization,
+WebGL failure and reduced-motion fallbacks, asset-size/lazy-load assertions, no mobile
+overflow, and performance sampling on representative low/mid/high-tier devices.
 
 ### P2-06 — Supporting learning modules
 Status: `DONE`
@@ -399,7 +498,7 @@ durable audited order storage before any learner-facing payment surface is safe.
 
 ## Current checkpoint
 
-Active task: `P1-03 — Optimize AI routing speed and cost`
+Active task: `P2-05-R1 — Realtime AI speaking with CEFR levels`
 
 Status: `IN_PROGRESS`
 
@@ -411,13 +510,312 @@ Last deployed production Worker version: `000c833e-0e0b-44f0-90a5-bf819d06bd7b`
 
 ### Next work
 
-1. Sync the validated source catalog only after explicit data-mutation authorization
-   to replace the 2,179 stale spelling-as-IPA values still served by production KV.
-2. Collect production Analytics Engine latency/error/cache/provider data and verify
-   the P1-03 KPI targets. The protected GitHub Cloudflare secrets, isolated staging,
-   and physical-device matrix remain separate recorded blockers.
+1. Keep `RT-09` deferred until production telemetry proves streamed turn-taking misses
+   its reliability or latency targets; WebSocket/Durable Objects are not justified by
+   local tests alone.
+2. Run the physical-device RT-06/RT-10 matrix on mobile Chrome, Coc Coc, and the debug
+   APK: TTS/STT, barge-in, background/foreground, Bluetooth/headset routes, reduced
+   motion, WebGL loss, low-memory fallback, and sustained frame-rate sampling.
+3. After explicit push/deploy authorization, apply migration `0003`, release the
+   feature-gated Worker/web/APK slice, collect production RT-08 latency/reliability
+   telemetry, and decide whether RT-09 is justified. Do not add a GLB or WebSocket
+   surface before that evidence.
 
 ## Handoff log
+
+### 2026-10-02 — RT-10 optional 3D tutor foundation completed locally
+
+- Added an English visual, accessibility, licensing, animation, and performance
+  contract. The shipped implementation uses original procedural geometry and makes no
+  third-party likeness or asset claim.
+- Added a persisted avatar toggle and an accessible fictional-AI label. The renderer
+  consumes the existing authoritative conversation state; it cannot independently
+  claim that the tutor is listening or speaking.
+- Split the implementation into a 2.28 kB lazy shell and a separate 487.72 kB raw /
+  122.37 kB gzip Three.js canvas chunk. Reduced-motion and reported low-memory devices
+  select the CSS fallback before importing the canvas renderer.
+- Added WebGL construction/context-loss fallback, five-second sustained-low-FPS
+  fallback, hidden-document pause, resize handling, and complete GPU resource cleanup.
+  Barge-in and TTS completion leave `speaking` immediately, which also closes the
+  mouth animation.
+- Mobile browser coverage verifies the fictional-AI disclosure, avatar toggle, state
+  transitions, TTS/animation stop synchronization, reduced-motion fallback, and no
+  horizontal overflow at 390 x 844.
+- Passed the complete required web/Worker gate, `test:speaking:browser`, production
+  build, and `git diff --check`. Android `assembleDebug` passed; the resulting debug
+  APK is 5,205,231 bytes at `app/app/build/outputs/apk/debug/app-debug.apk`. Existing
+  main/vocabulary chunk-size and Android SDK XML notices remain non-blocking.
+- No push, deploy, D1 migration, production request, or account mutation occurred.
+- Remaining release evidence requires physical mobile Chrome/Coc Coc/APK hardware and
+  a production rollout/telemetry window, both outside safe local execution. Exact next
+  action: install the debug APK and complete the RT-06/RT-10 device matrix; after
+  explicit release authorization, push/deploy, migrate D1, and observe RT-08 metrics.
+
+### 2026-10-02 — RT-08 privacy-safe Speaking telemetry completed locally
+
+- Added a dedicated `SPEAKING` Analytics Engine series covering handshake, provider
+  completion, first-text/total latency, prompt/completion/total tokens, reconnect count,
+  cache replay/deduplication, cancellation, durable sync, and resume outcomes.
+- Telemetry dimensions contain only bounded event/outcome/CEFR/provider/model values and
+  numeric measurements. Contract tests reject session IDs, resume secrets, learner text,
+  and AI reply text anywhere in Speaking analytics payloads.
+- Added `SPEAKING_REALTIME_ENABLED` to Worker configuration. Disabled realtime returns
+  the already-supported `501` contract, so the client falls back to the idempotent
+  legacy endpoint rather than failing the lesson.
+- Reconnect attempts now flow from the persisted client transport state to handshake and
+  turn telemetry. Cancellation remains same-ID/cache-safe and is separately measurable.
+- Operations status reports realtime flag, protocol version, D1/Analytics readiness, and
+  the invariant that raw audio is not retained.
+- Passed full minimum release gates, realtime 390 x 844 browser checks, Worker privacy/
+  failure contracts, production build, and `git diff --check`. Existing bundle-size and
+  CRLF notices remain.
+- No push, deploy, production query/mutation, or real provider call occurred.
+- Exact next task: defer `RT-09` pending production telemetry, then begin the `RT-10`
+  accessible optional avatar rendering contract and fallback shell.
+
+### 2026-10-02 — RT-07 evidence-safe CEFR scoring completed locally
+
+- Added explicit A1-C1 scoring rubrics to every Speaking prompt. The validated response
+  now carries grammar, vocabulary, fluency, and task-completion scores plus
+  `scoringVersion: 1` and `scoreBasis: text`.
+- Worker normalization constructs the allowed score object itself, so a provider's
+  unsolicited `pronunciation` field is always discarded before cache, D1, or UI use.
+- Local completion accepts a speech-alignment score only with the explicit
+  `speech-recognition-transcript-alignment` evidence tag. A bare numeric value or an AI
+  value becomes `null`; durable merges retain valid local evidence without trusting
+  server text scoring as pronunciation evidence.
+- Reworded transcript comparison feedback and UI labels so the product says “speech
+  transcript match,” not that it measured stress, phonemes, or acoustic pronunciation.
+- Worker contracts exercise all five CEFR rubrics, score clamping, task completion,
+  score metadata, model-pronunciation rejection, and stable cached retries. Session
+  tests cover evidence required/absent and idempotent durable merge.
+- Passed the complete web release gate, realtime 390 x 844 browser test,
+  `git diff --check`, and Android `assembleDebug` with the updated web bundle. Only
+  existing bundle-size and SDK-tooling notices remain.
+- No push, deploy, production mutation, or external AI request occurred.
+- Exact next task: `RT-08` privacy-safe Speaking telemetry and feature-gated rollout.
+
+### 2026-10-02 — RT-06 Android speech lifecycle completed locally
+
+- Split native TTS and STT into separate transient audio-focus requests. Starting
+  recognition interrupts speech, starting speech interrupts recognition, and external
+  focus loss returns a recoverable event instead of leaving either engine active.
+- Recognition focus is released on result, error, explicit stop, lifecycle stop, and
+  failed startup. Kotlin now catches recognizer startup failures and reports a stable
+  browser error/end pair.
+- Moved lifecycle shutdown to `onPause`, retained the idempotent `onStop` guard, and
+  added foreground/background events so browser state cannot remain falsely active when
+  the WebView loses visibility.
+- Registered an Android audio-device callback and exposed the current device/headset/
+  Bluetooth route to the browser. The callback is unregistered during bridge teardown.
+- Extended JavaScript speech state with lifecycle/audio-route environment data without
+  changing existing playback/recognition consumers or browser fallbacks.
+- Passed lint, mobile speech unit checks, Android bridge contracts, Speaking unit tests,
+  real 390 x 844 speech/Speaking browser tests, `git diff --check`, and Android
+  `assembleDebug`. The APK is 4,618,070 bytes at
+  `app/app/build/outputs/apk/debug/app-debug.apk`.
+- Android build required a project-local Gradle/Android home because the sandbox default
+  resolved to `C:\.gradle`/`C:\.android`; no repository source was changed to encode
+  those machine-specific paths. Existing SDK deprecation/XML and web bundle-size notices
+  remain non-blocking.
+- No push, deploy, production mutation, or dependency version change occurred.
+- Exact next task: `RT-07` level-calibrated evidence-safe Speaking scoring.
+
+### 2026-10-02 — RT-05 durable Speaking persistence completed locally
+
+- Added idempotent D1 tables for Speaking sessions, turns, feedback payloads, and
+  validated latest-turn summaries. The schema stores transcripts and structured
+  feedback but explicitly excludes raw audio, recordings, and blobs.
+- Added a random per-session resume secret to local schema v4. Only its SHA-256 hash is
+  stored in D1; the secret is sent in POST bodies and mismatches receive `403`.
+- Realtime handshake creates or verifies the durable session. Validated turn writes run
+  through `waitUntil`, so D1 latency or outage cannot delay/block the AI stream; retrying
+  a stable request ID cannot create a duplicate turn or summary.
+- Added `POST /api/speaking/realtime/resume` plus an idempotent browser merge keyed by
+  session and turn sequence. A result completed after navigation can clear the matching
+  local pending turn without duplicating messages or feedback.
+- Guest limitation remains explicit: the secret lives in that browser profile, so this
+  is reload/navigation recovery, not authenticated cross-device synchronization.
+- Contract tests cover durable creation, turn persistence, summary persistence, replay
+  deduplication, bad-secret rejection, and graceful D1 outage. Migration tests reject
+  accidental raw-audio columns. Mobile browser Speaking tests remain green.
+- Passed lint, vocabulary, mobile speech, migration, learning, diagnostic, admin,
+  Speaking unit, Speaking mobile browser, Worker contract, production build, and
+  `git diff --check`. Only the existing bundle-size and CRLF notices remain.
+- No push, deploy, D1 migration execution, dependency install, or production mutation
+  occurred.
+- Exact next task: `RT-06` Android native bridge audit, beginning with current WebView
+  TTS/STT lifecycle and audio-focus ownership.
+
+### 2026-09-30 — RT-04 sentence-stream TTS and orthogonal state completed
+
+- Split conversation state into microphone, transport, and playback domains with one
+  derived visible status. Streaming can continue while TTS reads a completed sentence;
+  when playback pauses between sentences the UI correctly returns to streaming rather
+  than falsely reporting idle.
+- Added a pure bounded sentence queue that consumes cumulative AI text, detects
+  sentence boundaries, flushes an unpunctuated final tail, limits queued entries, and
+  never requeues text already consumed by an earlier delta.
+- AI audio now begins when the first complete streamed sentence arrives. Final
+  validated `replyEn` flushes only the remaining tail, so the final response is not
+  replayed after its streamed sentences.
+- Barge-in, scenario changes, navigation, provider errors, and explicit stops clear the
+  queue and invalidate all old TTS callbacks. Microphone and recognition cannot overlap
+  playback; submitted generation remains same-ID and cacheable rather than spawning an
+  unsafe fallback request.
+- Unit tests cover orthogonal streaming/playback transitions, stale recognition end,
+  incremental sentence extraction, final-tail flush, and replay deduplication. The real
+  390 x 844 browser test records backend-audio text and proves a streamed final sentence
+  is played exactly once while prior barge-in/reload/retry checks remain green.
+- Passed lint, Speaking unit/state tests, mobile speech, realtime mobile browser,
+  Worker contracts, production build, and `git diff --check`. No push, deploy,
+  production request, dependency install, or production data mutation occurred.
+- Exact next task: `RT-05` D1 migration and idempotent session/turn persistence, keeping
+  raw audio out of storage and local sessions functional when durable sync is absent.
+
+### 2026-09-30 — RT-03 completed; RT-04 race-safe TTS barge-in implemented
+
+- Removed the component's independent recording, thinking, and speaking state flags.
+  All UI decisions now derive from the tested conversation reducer, preventing
+  contradictory combinations such as listening and speaking at the same time.
+- Added guarded `LISTEN_STOP`: a late recognition `onend` callback can return a live
+  listening state to idle, but cannot overwrite a newer thinking/streaming AI turn.
+- Added a monotonically increasing playback generation ID. Replacing/stopping speech
+  invalidates every earlier TTS callback, so a stale `onEnd` cannot restart hands-free
+  listening after the learner interrupts or changes scenario.
+- The microphone control remains enabled during AI playback. Pressing it stops TTS
+  first, then enters listening; unsupported recognition reports a recoverable error
+  after audio has still been stopped. Thinking/generation remains an explicit stop
+  operation using the same stable turn ID.
+- Expanded the real 390 x 844 browser test with a controlled long-running audio object:
+  replay enters authoritative `speaking`, tapping the barge-in action calls audio
+  `pause` immediately, and UI leaves `speaking`. Reducer tests cover late callback
+  ordering, while existing navigation/reload/retry/delta checks continue to pass.
+- Passed lint, Speaking state/session tests, mobile speech tests, production build,
+  realtime mobile browser coverage, and `git diff --check`. No push, deploy, production
+  request, dependency install, or production data mutation occurred.
+- RT-04 remains active because early sentence-level streaming TTS is not implemented.
+  Exact next task: design the orthogonal transport/playback state and bounded sentence
+  queue before speaking partial output, so generation, TTS, and microphone never race.
+
+### 2026-09-30 — RT-02 provider token streaming and cancellation completed
+
+- Added streaming calls for the OpenAI-compatible Groq, XKIRO, and OpenRouter
+  providers. The parser consumes SSE incrementally, retains usage/model metadata, and
+  accepts a valid non-stream JSON response when a provider ignores `stream: true`.
+- The streaming router calls one health-ranked free provider at a time. It may move to
+  another provider only before any learner-visible text is emitted; after a delta it
+  fails the same turn instead of silently multiplying token spend.
+- Incremental JSON is converted into safe cumulative `replyEn` delta events. The
+  client renders those deltas inside the active AI bubble with an accessible reduced-
+  motion cursor, while final structured feedback still comes only from validated JSON.
+- Client navigation/cancellation closes delivery but deliberately does not launch a
+  fallback model. The in-flight same-ID job finishes and stores its final cache entry;
+  a reconnect/retry replays that result without a second provider call.
+- Extended Worker contracts with a real two-chunk provider SSE stream, ordered delta
+  assertions, final normalization, cached replay, invalid turn rejection, and cancel-
+  after-ack followed by same-ID resume. Mobile browser mocks now exercise cumulative
+  deltas through the production parser.
+- RT-03 integration now drives the visible status and partial bubble from its pure
+  state reducer. Legacy booleans still control several buttons/waveform paths and are
+  the next consolidation target before avatar work.
+- Passed Worker contracts, lint, Speaking persistence/state tests, production build,
+  and the 390 x 844 realtime Speaking browser test. No push, deploy, production AI
+  request, dependency install, or production data mutation occurred.
+- Exact next task: finish `RT-03` UI state consolidation, then implement `RT-04`
+  microphone barge-in and TTS/recognition mutual exclusion.
+
+### 2026-09-30 — RT-01 completed; RT-02 safe realtime transport connected
+
+- Upgraded local Speaking sessions from schema 2 to 3. Every user/AI message,
+  feedback record, and pending turn now carries a monotonic turn sequence. New request
+  IDs are deterministic (`speaking:<session>:turn:<sequence>`), while legacy explicit
+  IDs remain readable and retryable.
+- Added normalized transport state with active request/turn, last acknowledged
+  sequence, reconnect count, and waiting/reconnecting/failed/idle phases. Retry and
+  background completion retain the active session rule and cannot allocate a second
+  sequence or steal focus from a newer session.
+- Legacy schema-1/2 transcripts migrate by reconstructing user/AI turn pairs and
+  matching saved pending messages; existing data defaults safely to A2 without loss.
+- Added protocol-version-1 Worker endpoints for session negotiation and NDJSON turns.
+  The stream emits ordered ack/result/done events plus heartbeat, validates that the
+  session, sequence, and deterministic idempotency key agree, disables buffering and
+  caching of the stream, and reuses the existing single-flight/final-response cache.
+- Connected the browser client to the realtime transport. It falls back to the legacy
+  chat endpoint only when realtime is unsupported before generation starts; errors
+  after turn submission require a safe same-ID retry, preventing hidden duplicate
+  provider calls.
+- Began RT-03 with a pure ordered-event conversation reducer. Stale or wrong-request
+  stream events cannot roll UI state backward; microphone partials, turn submission,
+  NDJSON ack/result/error, TTS start/end, interruption, and recognition failures now
+  feed one visible `data-speaking-state` source that the future 3D avatar can consume.
+- Worker contracts prove ordered events, invalid-turn rejection, and cached replay
+  without another model call. The 390 x 844 browser test now exercises realtime
+  handshake/NDJSON, deterministic turn IDs, reload acknowledgement state, navigation,
+  and same-ID manual retry.
+- Passed `npm.cmd run test:speaking`, `npm.cmd run test:speech`, `npm.cmd run lint`,
+  `node backend/test-worker.mjs`, `npm.cmd run build`, `npm.cmd run
+  test:speaking:browser`, and `git diff --check`. The bundle-size and line-ending
+  notices remain non-blocking.
+- No push, deploy, production request, or data mutation occurred. Remaining RT-02
+  work: provider token-delta parsing and active cancellation. Exact next files are
+  `web/backend/src/worker.js`, `web/src/utils/speakingAiService.js`, and a new pure
+  conversation-state reducer used by `AiSpeakingView`.
+
+### 2026-09-30 — RT-10 conversational 3D avatar UI/UX added to the plan
+
+- Added a dedicated `RT-10` workstream to make the existing Speaking surface feel like
+  a direct conversation through a fictional, clearly disclosed 3D AI tutor rather
+  than a real-person impersonation.
+- Planned state-driven gaze, posture, expression, gesture, and lip movement for idle,
+  listening, thinking, speaking, interruption, reconnecting, and error. Lip motion
+  must follow actual TTS output; amplitude-based motion is the safe first delivery,
+  with timed visemes reserved for providers that supply reliable timing.
+- Added accessibility and resilience requirements: captions and controls remain
+  usable, reduced motion and animation-off are supported, WebGL/context loss falls
+  back to 2D, and barge-in stops audio and the speaking animation together.
+- Added mobile performance budgets: lazy loading, at most 4 MB compressed avatar
+  payload, 30 fps mobile/60 fps desktop targets, no delay to microphone readiness or
+  first audio, and automatic fallback on weak devices.
+- Sequenced implementation after the authoritative realtime state machine so visual
+  animation cannot drift from listening/speaking/network truth. No code, dependency,
+  asset, push, deploy, or production change was made for this plan-only update.
+- Exact next task remains `RT-01`: implement monotonic turn sequencing and reconnect
+  state migration; avatar asset specification can then proceed without blocking the
+  transport work.
+
+### 2026-09-30 — Realtime Speaking plan saved; RT-00 CEFR foundation completed
+
+- Added `P2-05-R1` to this execution checkpoint with stable `RT-00` through `RT-09`
+  delivery slices, acceptance criteria, latency targets, privacy constraints, fallback
+  order, and required web/Worker/Android verification. No second execution plan was
+  created, preserving this file as the repository's single source of truth.
+- Marked P1-03 blocked on account-level Analytics Engine production query evidence;
+  its local implementation is exhausted. The separate production IPA data mutation
+  remains unauthorized and was not performed.
+- Implemented one shared client CEFR matrix for A1, A2, B1, B2, and C1. Each policy
+  defines learner-facing guidance, speech-rate adjustment, response complexity,
+  Vietnamese support, and correction density.
+- Upgraded Speaking local sessions to schema version 2 with a normalized level and
+  safe A2 migration for existing sessions. Level selection restarts only the active
+  scenario, persists across reload, and remains attached to pending/retried turns.
+- The existing idempotent chat request now sends the selected level. The Worker
+  validates it against a server-owned allowlist, applies only the corresponding prompt
+  policy, returns the effective level, and still excludes fabricated pronunciation.
+- Added a five-level mobile-safe selector to the existing Speaking screen and adjusted
+  device TTS rate by level without adding a new learner screen.
+- Passed `npm.cmd run test:speaking`, `npm.cmd run test:speech`, `npm.cmd run lint`,
+  `node backend/test-worker.mjs`, `npm.cmd run build`, `npm.cmd run
+  test:speaking:browser`, and `git diff --check`. The existing bundle-size notice and
+  line-ending notices remain non-blocking.
+- Changed files: this checkpoint, `web/src/utils/speakingLevels.js`, Speaking service,
+  session store, view and CSS, Speaking unit/browser tests, and Worker code/contracts.
+  No push, deploy, production write, AI provider request, or secret change occurred.
+- Remaining risk: prompt policy is not yet a streaming contract, sessions remain
+  device-local, and physical Chrome/Coc Coc/APK microphone and audio evidence remains
+  blocked on devices. Exact next task: implement `RT-01` monotonic turn sequencing and
+  reconnect state migration, starting with `web/src/utils/speakingSessionStore.js` and
+  its persistence tests.
 
 ### 2026-09-30 — `euro` fix deployed; examples reach 3,000/3,000
 

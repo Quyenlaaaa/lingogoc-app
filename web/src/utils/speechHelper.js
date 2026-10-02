@@ -55,6 +55,7 @@ export class SpeechHelper {
     this.state = {
       playback: { status: 'idle', requestId: null, source: null, text: '', error: null, retryable: false },
       recognition: { status: 'idle', requestId: null, error: null, retryable: false },
+      environment: { lifecycle: 'foreground', audioRoute: 'device' },
     };
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     this.mobileDevice = typeof navigator !== 'undefined' && (
@@ -122,6 +123,21 @@ export class SpeechHelper {
         this.stopSpeaking('page-hidden');
         this.recognition?.abort?.();
       };
+      window.__lingogocNativeLifecycleEvent = (lifecycle) => {
+        const normalized = lifecycle === 'background' ? 'background' : 'foreground';
+        this.updateState('environment', { lifecycle: normalized });
+        if (normalized === 'background') stopForPageLifecycle();
+      };
+      window.__lingogocNativeAudioRouteEvent = (audioRoute) => {
+        const normalized = ['bluetooth', 'headset'].includes(audioRoute) ? audioRoute : 'device';
+        this.updateState('environment', { audioRoute: normalized });
+      };
+      try {
+        const audioRoute = window.LingoGocNative?.getAudioRoute?.();
+        if (audioRoute) window.__lingogocNativeAudioRouteEvent(audioRoute);
+      } catch {
+        // Audio-route observation is optional and must not block speech.
+      }
       window.addEventListener?.('pagehide', stopForPageLifecycle);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', () => {
@@ -135,6 +151,7 @@ export class SpeechHelper {
     return {
       playback: { ...this.state.playback },
       recognition: { ...this.state.recognition },
+      environment: { ...this.state.environment },
     };
   }
 

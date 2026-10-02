@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   AlertCircle,
   Bot,
@@ -23,11 +23,23 @@ import { evaluatePronunciation } from '../utils/scoreEvaluator';
 import AudioWave from './AudioWave';
 import {
   loadSpeakingConfig,
+  requestDurableSpeakingSession,
   requestSpeakingReply,
   saveSpeakingConfig,
 } from '../utils/speakingAiService';
 import { hasBackendApi } from '../utils/backendApi';
 import { dispatchLearningEvent } from '../utils/learningEventEngine';
+import { getSpeakingLevel, normalizeSpeakingLevel, SPEAKING_LEVEL_OPTIONS } from '../utils/speakingLevels';
+import {
+  INITIAL_SPEAKING_CONVERSATION_STATE,
+  SPEAKING_STATUS_LABELS,
+  speakingConversationReducer,
+} from '../utils/speakingConversationState';
+import {
+  createSpeakingSentenceQueue,
+  shiftSpeakingSentenceQueue,
+  updateSpeakingSentenceQueue,
+} from '../utils/speakingSentenceQueue';
 import {
   beginSpeakingTurn,
   completeSpeakingTurn,
@@ -35,11 +47,15 @@ import {
   failSpeakingTurn,
   loadActiveSpeakingSession,
   loadCurrentSpeakingSession,
+  mergeDurableSpeakingSession,
   retrySpeakingTurn,
 } from '../utils/speakingSessionStore';
 
+const SpeakingAvatar = lazy(() => import('./speaking/SpeakingAvatar'));
+
 function initialSpeakingSession() {
-  return loadCurrentSpeakingSession() || loadActiveSpeakingSession(aiScenarios[0]);
+  const config = loadSpeakingConfig();
+  return loadCurrentSpeakingSession() || loadActiveSpeakingSession(aiScenarios[0], { level: config.level });
 }
 
 function messageTime(message) {
@@ -49,18 +65,31 @@ function messageTime(message) {
     : '';
 }
 
+const SPEAKING_SCORE_LABELS = Object.freeze({
+  grammar: 'Ngữ pháp',
+  vocabulary: 'Từ vựng',
+  fluency: 'Trôi chảy',
+  taskCompletion: 'Hoàn thành',
+  pronunciation: 'Khớp lời nói',
+});
+
 export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
   const [session, setSession] = useState(initialSpeakingSession);
   const [input, setInput] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [streamingReply, setStreamingReply] = useState('');
   const [showTranslation, setShowTranslation] = useState(true);
   const [showHints, setShowHints] = useState(true);
   const [pronunciation, setPronunciation] = useState(null);
   const [error, setError] = useState('');
   const [config, setConfig] = useState(loadSpeakingConfig);
+  const [conversationState, dispatchConversation] = useReducer(
+    speakingConversationReducer,
+    INITIAL_SPEAKING_CONVERSATION_STATE,
+  );
+  const isRecording = ['listening', 'transcribing'].includes(conversationState.microphone);
+  const isThinking = ['thinking', 'streaming', 'reconnecting'].includes(conversationState.transport);
+  const isSpeaking = conversationState.playback === 'speaking';
 
   const recognitionRef = useRef(null);
   const requestControllerRef = useRef(null);
@@ -70,9 +99,14 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
   const isMountedRef = useRef(true);
   const activeSessionIdRef = useRef(session.id);
   const resumedRequestRef = useRef(null);
+  const speechRunRef = useRef(0);
+  const sentenceQueueRef = useRef(createSpeakingSentenceQueue());
+  const queuedSpeechPlayingRef = useRef(false);
+  const playNextQueuedSentenceRef = useRef(null);
 
   const connected = hasBackendApi();
   const scenario = useMemo(() => aiScenarios.find((item) => item.id === session.scenarioId) || aiScenarios[0], [session.scenarioId]);
+  const levelPolicy = useMemo(() => getSpeakingLevel(session.level), [session.level]);
   const messages = session.messages;
   const latestFeedback = session.feedback.at(-1) || null;
   const correction = latestFeedback?.correction || '';
@@ -80,21 +114,25 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
   const hints = latestFeedback?.hints?.length ? latestFeedback.hints : scenario.starterHints || [];
 
   const stopAudio = useCallback((updateState = true) => {
+    speechRunRef.current += 1;
+    sentenceQueueRef.current = createSpeakingSentenceQueue();
+    queuedSpeechPlayingRef.current = false;
     if (autoListenTimerRef.current) {
       clearTimeout(autoListenTimerRef.current);
       autoListenTimerRef.current = null;
     }
     speechHelper.stopSpeaking();
-    if (updateState && isMountedRef.current) setIsSpeaking(false);
+    if (updateState && isMountedRef.current) dispatchConversation({ type: 'INTERRUPT' });
   }, []);
 
   const speak = useCallback(async (text, options = {}) => {
     if (!text) return;
     stopAudio();
-    setIsSpeaking(true);
+    const speechRun = ++speechRunRef.current;
+    dispatchConversation({ type: 'SPEECH_START' });
     const finishSpeech = () => {
-      if (!isMountedRef.current) return;
-      setIsSpeaking(false);
+      if (!isMountedRef.current || speechRun !== speechRunRef.current) return;
+      dispatchConversation({ type: 'SPEECH_END', autoListen: options.resumeListening && config.autoListen });
       if (options.resumeListening && config.autoListen) {
         autoListenTimerRef.current = setTimeout(() => startMicRef.current?.(), 450);
       }
@@ -102,13 +140,44 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
 
     if (!isMountedRef.current) return;
     speechHelper.speak(text, {
-      rate: voiceSpeed,
+      rate: Math.max(0.65, Math.min(1.2, voiceSpeed * levelPolicy.speechRate)),
       onEnd: finishSpeech,
       onError: finishSpeech,
     });
-  }, [config.autoListen, stopAudio, voiceSpeed]);
+  }, [config.autoListen, levelPolicy.speechRate, stopAudio, voiceSpeed]);
 
-  const startScenario = useCallback((nextScenario) => {
+  const playNextQueuedSentence = useCallback(() => {
+    if (!isMountedRef.current || queuedSpeechPlayingRef.current) return;
+    const shifted = shiftSpeakingSentenceQueue(sentenceQueueRef.current);
+    sentenceQueueRef.current = shifted.state;
+    if (!shifted.sentence) {
+      dispatchConversation({ type: 'SPEECH_END' });
+      if (sentenceQueueRef.current.final && config.autoListen) {
+        autoListenTimerRef.current = setTimeout(() => startMicRef.current?.(), 450);
+      }
+      return;
+    }
+
+    queuedSpeechPlayingRef.current = true;
+    const speechRun = ++speechRunRef.current;
+    dispatchConversation({ type: 'SPEECH_START' });
+    const finishSentence = () => {
+      if (!isMountedRef.current || speechRun !== speechRunRef.current) return;
+      queuedSpeechPlayingRef.current = false;
+      playNextQueuedSentenceRef.current?.();
+    };
+    speechHelper.speak(shifted.sentence, {
+      rate: Math.max(0.65, Math.min(1.2, voiceSpeed * levelPolicy.speechRate)),
+      onEnd: finishSentence,
+      onError: finishSentence,
+    });
+  }, [config.autoListen, levelPolicy.speechRate, voiceSpeed]);
+
+  useEffect(() => {
+    playNextQueuedSentenceRef.current = playNextQueuedSentence;
+  }, [playNextQueuedSentence]);
+
+  const startScenario = useCallback((nextScenario, nextLevel = config.level) => {
     requestControllerRef.current?.abort();
     const recognition = recognitionRef.current;
     recognitionRef.current = null;
@@ -120,14 +189,16 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
       }
     }
     stopAudio();
-    const nextSession = createSpeakingSession(nextScenario);
+    const nextSession = createSpeakingSession(nextScenario, { level: nextLevel });
     activeSessionIdRef.current = nextSession.id;
     setSession(nextSession);
     setPronunciation(null);
     setInput('');
     setInterimTranscript('');
+    setStreamingReply('');
     setError('');
-  }, [stopAudio]);
+    dispatchConversation({ type: 'RESET' });
+  }, [config.level, stopAudio]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -150,8 +221,24 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
   }, [stopAudio]);
 
   useEffect(() => {
+    if (!connected || !session.resumeToken) return undefined;
+    const controller = new AbortController();
+    requestDurableSpeakingSession({
+      sessionId: session.id,
+      resumeToken: session.resumeToken,
+      signal: controller.signal,
+    }).then((durable) => {
+      if (!durable || !isMountedRef.current || activeSessionIdRef.current !== session.id) return;
+      setSession((current) => (current.id === session.id ? mergeDurableSpeakingSession(current, durable) : current));
+    }).catch((resumeError) => {
+      if (resumeError.name !== 'AbortError') console.warn('Speaking session resume failed', resumeError);
+    });
+    return () => controller.abort();
+  }, [connected, session.id, session.resumeToken]);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isThinking, interimTranscript]);
+  }, [messages, isThinking, interimTranscript, streamingReply]);
 
   const toggleHandsFree = () => {
     const saved = saveSpeakingConfig({ ...config, autoListen: !config.autoListen });
@@ -159,24 +246,65 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
     if (config.autoListen) stopMic();
   };
 
+  const toggleAvatar = () => {
+    const saved = saveSpeakingConfig({ ...config, avatarEnabled: !config.avatarEnabled });
+    setConfig(saved);
+  };
+
+  const changeLevel = (value) => {
+    const level = normalizeSpeakingLevel(value);
+    if (level === session.level) return;
+    const saved = saveSpeakingConfig({ ...config, level });
+    setConfig(saved);
+    startScenario(scenario, level);
+  };
+
   const activeHints = hints.slice(0, 3);
 
-  const executePendingTurn = useCallback(async (pendingSession, pronunciationScore = null) => {
+  const executePendingTurn = useCallback(async (pendingSession, pronunciationEvidence = null) => {
     if (!pendingSession.pendingTurn || !connected) return;
     const pendingScenario = aiScenarios.find((item) => item.id === pendingSession.scenarioId) || aiScenarios[0];
     const requestId = pendingSession.pendingTurn.requestId;
     const controller = new AbortController();
     requestControllerRef.current = controller;
-    if (isMountedRef.current) setIsThinking(true);
+    setStreamingReply('');
+    sentenceQueueRef.current = createSpeakingSentenceQueue(requestId);
+    queuedSpeechPlayingRef.current = false;
+    dispatchConversation({
+      type: 'TURN_SUBMIT',
+      requestId,
+      turnSequence: pendingSession.pendingTurn.turnSequence,
+      reconnecting: pendingSession.transport.state === 'reconnecting',
+    });
 
     try {
       const result = await requestSpeakingReply({
         requestId,
+        sessionId: pendingSession.id,
+        resumeToken: pendingSession.resumeToken,
+        turnSequence: pendingSession.pendingTurn.turnSequence,
+        lastAcknowledgedSequence: pendingSession.transport.lastAcknowledgedSequence,
+        reconnectAttempt: pendingSession.transport.reconnectAttempts,
         scenario: pendingScenario,
+        level: pendingSession.level,
         messages: pendingSession.messages,
         signal: controller.signal,
+        onEvent: (event) => {
+          if (event.type === 'delta' && typeof event.text === 'string') {
+            setStreamingReply(event.text);
+            sentenceQueueRef.current = updateSpeakingSentenceQueue(sentenceQueueRef.current, event.text);
+            playNextQueuedSentenceRef.current?.();
+          }
+          dispatchConversation({ type: 'STREAM_EVENT', event });
+        },
       });
-      const completed = completeSpeakingTurn(pendingSession, requestId, result, pronunciationScore);
+      const completed = completeSpeakingTurn(
+        pendingSession,
+        requestId,
+        result,
+        pronunciationEvidence?.score ?? null,
+        pronunciationEvidence?.evidence ?? null,
+      );
       const learningResult = dispatchLearningEvent({
         id: requestId,
         type: 'xp.awarded',
@@ -187,12 +315,18 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
       if (isMountedRef.current && activeSessionIdRef.current === pendingSession.id) {
         setSession(completed);
         setError('');
-        speak(result.replyEn, { resumeListening: true });
+        setStreamingReply('');
+        sentenceQueueRef.current = updateSpeakingSentenceQueue(sentenceQueueRef.current, result.replyEn, { final: true });
+        playNextQueuedSentenceRef.current?.();
       }
     } catch (requestError) {
+      stopAudio(false);
       const message = requestError.name === 'AbortError'
         ? 'Lượt nói đã tạm dừng. Bạn có thể thử lại mà không tạo lượt mới.'
         : requestError.message || 'Không thể kết nối với AI.';
+      dispatchConversation(requestError.name === 'AbortError'
+        ? { type: 'INTERRUPT' }
+        : { type: 'FAIL', error: message });
       const failed = failSpeakingTurn(pendingSession, requestId, message);
       if (isMountedRef.current && activeSessionIdRef.current === pendingSession.id) {
         setSession(failed);
@@ -201,10 +335,9 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
     } finally {
       if (requestControllerRef.current === controller) {
         requestControllerRef.current = null;
-        if (isMountedRef.current) setIsThinking(false);
       }
     }
-  }, [connected, onUpdateUserData, speak]);
+  }, [connected, onUpdateUserData, stopAudio]);
 
   const sendTurn = useCallback(async (rawText, targetHint = null) => {
     const text = String(rawText || input).trim();
@@ -217,13 +350,13 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
     stopAudio();
     setInput('');
     setInterimTranscript('');
+    setStreamingReply('');
     setError('');
     const pronunciationResult = targetHint ? evaluatePronunciation(targetHint.en, text) : null;
     setPronunciation(pronunciationResult);
-    const requestId = `speaking:${session.id}:${crypto.randomUUID()}`;
-    const pendingSession = beginSpeakingTurn(session, { requestId, text });
+    const pendingSession = beginSpeakingTurn(session, { text });
     setSession(pendingSession);
-    await executePendingTurn(pendingSession, pronunciationResult?.score ?? null);
+    await executePendingTurn(pendingSession, pronunciationResult);
   }, [connected, executePendingTurn, input, isThinking, session, stopAudio]);
 
   const retryPending = useCallback(() => {
@@ -243,44 +376,52 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
   }, [executePendingTurn, session]);
 
   const stopThinking = () => {
+    dispatchConversation({ type: 'INTERRUPT' });
     requestControllerRef.current?.abort();
   };
 
   const startMic = (targetHint = null) => {
     if (isRecording) return;
+    if (isSpeaking) stopAudio();
     if (!speechHelper.isSpeechRecognitionSupported()) {
-      setError('Trình duyệt chưa hỗ trợ nhận giọng nói. Hãy dùng Chrome/Edge hoặc nhập câu ở ô bên dưới.');
+      const message = 'Trình duyệt chưa hỗ trợ nhận giọng nói. Hãy dùng Chrome/Edge hoặc nhập câu ở ô bên dưới.';
+      setError(message);
+      dispatchConversation({ type: 'FAIL', error: message });
       return;
     }
     setError('');
+    dispatchConversation({ type: 'LISTEN_START' });
     setInterimTranscript('Đang nghe...');
-    setIsRecording(true);
     const recognition = speechHelper.createRecognition(
       (result) => {
-        if (result.interim) setInterimTranscript(result.interim);
+        if (result.interim) {
+          setInterimTranscript(result.interim);
+          dispatchConversation({ type: 'TRANSCRIPT_PARTIAL' });
+        }
         if (result.isFinal) {
-          setIsRecording(false);
           setInterimTranscript(result.final);
           sendTurn(result.final, targetHint);
         }
       },
       (recognitionError) => {
-        setIsRecording(false);
         setInterimTranscript('');
-        setError(recognitionError === 'not-allowed'
+        const message = recognitionError === 'not-allowed'
           ? 'Bạn chưa cấp quyền microphone cho trình duyệt.'
-          : 'Không nhận được giọng nói. Hãy thử lại và nói gần microphone hơn.');
+          : 'Không nhận được giọng nói. Hãy thử lại và nói gần microphone hơn.';
+        setError(message);
+        dispatchConversation({ type: 'FAIL', error: message });
       },
-      () => setIsRecording(false),
+      () => dispatchConversation({ type: 'LISTEN_STOP' }),
     );
     recognitionRef.current = recognition;
     try {
       recognition?.start();
     } catch {
       recognitionRef.current = null;
-      setIsRecording(false);
       setInterimTranscript('');
-      setError('Microphone đang bận. Hãy chờ một chút rồi thử lại.');
+      const message = 'Microphone đang bận. Hãy chờ một chút rồi thử lại.';
+      setError(message);
+      dispatchConversation({ type: 'FAIL', error: message });
     }
   };
 
@@ -294,8 +435,8 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
         // Recognition may already have ended.
       }
     }
-    setIsRecording(false);
     setInterimTranscript('');
+    dispatchConversation({ type: 'LISTEN_STOP' });
   };
 
   useEffect(() => {
@@ -334,26 +475,52 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
         ))}
       </div>
 
+      <section className="speaking-level-picker" aria-labelledby="speaking-level-title">
+        <div className="speaking-level-copy">
+          <strong id="speaking-level-title">Trình độ hội thoại</strong>
+          <span>{levelPolicy.description}</span>
+        </div>
+        <div className="speaking-level-options" role="radiogroup" aria-label="Chọn trình độ luyện nói">
+          {SPEAKING_LEVEL_OPTIONS.map((level) => (
+            <button
+              key={level.id}
+              type="button"
+              role="radio"
+              aria-checked={session.level === level.id}
+              className={session.level === level.id ? 'active' : ''}
+              onClick={() => changeLevel(level.id)}
+              title={`${level.label} - ${level.title}`}
+            >
+              <strong>{level.label}</strong>
+              <small>{level.title}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {error && <div className="speaking-error" role="alert"><AlertCircle size={18} /><span>{error}</span>{session.pendingTurn?.status === 'failed' && <button onClick={retryPending}>Thử lại</button>}<button onClick={() => setError('')} title="Đóng"><X size={16} /></button></div>}
 
       <section className="speaking-chat-arena speaking-arena-v2">
         <header className="chat-arena-header">
           <div className="arena-partner-info">
             <span className="partner-avatar">{scenario.avatar}</span>
-            <div><div className="partner-name-row"><strong>{scenario.partnerName}</strong><span className="live-status-dot" /><span className="status-text">{isThinking ? 'Đang suy nghĩ...' : isSpeaking ? 'Đang nói...' : isRecording ? 'Đang nghe...' : 'Sẵn sàng'}</span></div><div className="partner-desc">{scenario.description}</div></div>
+            <div><div className="partner-name-row"><strong>{scenario.partnerName}</strong><span className="live-status-dot" /><span className="status-text" data-speaking-state={conversationState.status}>{SPEAKING_STATUS_LABELS[conversationState.status]}</span></div><div className="partner-desc">{scenario.description}</div></div>
           </div>
           <div className="speaking-header-actions">
             <button className={`hands-free-toggle ${config.autoListen ? 'active' : ''}`} onClick={toggleHandsFree} title="AI nói xong sẽ tự bật micro"><Radio size={16} /><span>{config.autoListen ? 'Rảnh tay: Bật' : 'Rảnh tay: Tắt'}</span></button>
+            <button className={`icon-toggle ${config.avatarEnabled ? 'active' : ''}`} onClick={toggleAvatar} title={config.avatarEnabled ? 'Tắt hoạt ảnh gia sư AI' : 'Bật hoạt ảnh gia sư AI'} aria-pressed={config.avatarEnabled}><Bot size={17} /></button>
             <button className={`icon-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation((value) => !value)} title="Bật/tắt bản dịch">{showTranslation ? <Eye size={17} /> : <EyeOff size={17} />}</button>
-            <button className="reset-chat-btn" onClick={() => startScenario(scenario)}><RotateCcw size={16} /><span>Bắt đầu lại</span></button>
+            <button className="reset-chat-btn" onClick={() => startScenario(scenario, session.level)}><RotateCcw size={16} /><span>Bắt đầu lại</span></button>
           </div>
         </header>
 
         <div className="speaking-stage-v2">
           <AudioWave isActive={isSpeaking || isRecording || isThinking} />
-          <div className={`speaking-orb ${isRecording ? 'recording' : ''} ${isThinking ? 'thinking' : ''}`}>
-            {isThinking ? <LoaderCircle size={34} className="animate-spin" /> : isRecording ? <Mic size={34} /> : <Bot size={34} />}
-          </div>
+          {config.avatarEnabled ? (
+            <Suspense fallback={<div className="speaking-avatar-loading" aria-label="Đang tải gia sư AI"><LoaderCircle size={28} className="animate-spin" /></div>}>
+              <SpeakingAvatar state={conversationState.status} partnerName={scenario.partnerName} />
+            </Suspense>
+          ) : <div className={`speaking-orb ${isRecording ? 'recording' : ''} ${isThinking ? 'thinking' : ''}`}>{isThinking ? <LoaderCircle size={34} className="animate-spin" /> : isRecording ? <Mic size={34} /> : <Bot size={34} />}</div>}
           <span>{interimTranscript || (isRecording ? 'Hãy nói bằng tiếng Anh...' : config.autoListen ? 'Chạm micro một lần để bắt đầu hội thoại rảnh tay' : 'Chạm micro để bắt đầu nói')}</span>
         </div>
 
@@ -372,12 +539,12 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
               </article>
             );
           })}
-          {isThinking && <div className="chat-bubble-wrapper from-ai"><div className="bubble-avatar">{scenario.avatar}</div><div className="bubble-content speaking-thinking"><LoaderCircle size={17} className="animate-spin" /> AI đang tạo câu trả lời...</div></div>}
+          {isThinking && <div className="chat-bubble-wrapper from-ai"><div className="bubble-avatar">{scenario.avatar}</div><div className={`bubble-content speaking-thinking ${streamingReply ? 'has-stream-text' : ''}`}>{streamingReply ? <><span className="streaming-reply-text">{streamingReply}</span><span className="streaming-cursor" aria-hidden="true" /></> : <><LoaderCircle size={17} className="animate-spin" /> AI đang tạo câu trả lời...</>}</div></div>}
           <div ref={chatEndRef} />
         </div>
 
         {(correction || encouragement) && <div className="ai-coach-card"><Sparkles size={20} /><div><strong>Phản hồi từ gia sư AI</strong>{correction && <p>{correction}</p>}{encouragement && <small>{encouragement}</small>}</div></div>}
-        {latestFeedback?.scores && <div className="speaking-score-row" aria-label="Điểm luyện nói">{['grammar', 'vocabulary', 'fluency', 'pronunciation'].map((key) => latestFeedback.scores[key] == null ? null : <span key={key}><strong>{latestFeedback.scores[key]}</strong><small>{key}</small></span>)}</div>}
+        {latestFeedback?.scores && <div className="speaking-score-row" aria-label="Điểm luyện nói">{Object.entries(SPEAKING_SCORE_LABELS).map(([key, label]) => latestFeedback.scores[key] == null ? null : <span key={key}><strong>{latestFeedback.scores[key]}</strong><small>{label}</small></span>)}</div>}
         {pronunciation && <div className="eval-feedback-card"><div className="eval-score-gauge"><span className="score-num">{pronunciation.score}%</span><span className="score-label">Độ khớp câu</span></div><div className="eval-text-details"><div className="eval-title">So với câu gợi ý bạn vừa luyện</div><div className="eval-msg">{pronunciation.feedback}</div></div></div>}
 
         {showHints && activeHints.length > 0 && <div className="smart-hints-drawer speaking-hints-v2">
@@ -387,7 +554,7 @@ export default function AiSpeakingView({ onUpdateUserData, voiceSpeed = 0.9 }) {
 
         <footer className="speaking-composer-v2">
           {!showHints && <button className="composer-tool" onClick={() => setShowHints(true)} title="Hiện gợi ý"><Lightbulb size={19} /></button>}
-          <button className={`push-to-talk ${isRecording ? 'recording' : ''}`} onClick={isRecording ? stopMic : () => startMic()} disabled={isThinking} title={isRecording ? 'Dừng thu' : 'Bắt đầu nói'}>{isRecording ? <MicOff size={24} /> : <Mic size={24} />}</button>
+          <button className={`push-to-talk ${isRecording ? 'recording' : ''}`} onClick={isRecording ? stopMic : () => startMic()} disabled={isThinking} title={isRecording ? 'Dừng thu' : isSpeaking ? 'Ngắt lời AI và bắt đầu nói' : 'Bắt đầu nói'}>{isRecording ? <MicOff size={24} /> : <Mic size={24} />}</button>
           <input value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) sendTurn(); }} placeholder="Hoặc nhập câu tiếng Anh..." disabled={isThinking} />
           {isThinking ? <button className="send-speaking-btn stop" onClick={stopThinking} title="Dừng tạo câu trả lời"><Square size={18} /></button> : <button className="send-speaking-btn" onClick={() => sendTurn()} disabled={!input.trim()} title="Gửi"><Send size={19} /></button>}
         </footer>

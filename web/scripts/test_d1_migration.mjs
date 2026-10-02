@@ -8,10 +8,17 @@ import { fileURLToPath } from 'node:url';
 const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
 const migrationScript = path.join(scriptsDirectory, 'prepare-d1-vocabulary-migration.mjs');
 const adminMigration = path.join(scriptsDirectory, '..', 'backend', 'migrations', '0002_vocabulary_admin_audit.sql');
+const speakingMigration = path.join(scriptsDirectory, '..', 'backend', 'migrations', '0003_speaking_durable_sessions.sql');
 
 const adminMigrationSql = await readFile(adminMigration, 'utf8');
 assert.match(adminMigrationSql, /CREATE TABLE IF NOT EXISTS vocabulary_admin_events/);
 assert.match(adminMigrationSql, /CREATE INDEX IF NOT EXISTS idx_vocabulary_admin_events_word/);
+const speakingMigrationSql = await readFile(speakingMigration, 'utf8');
+assert.match(speakingMigrationSql, /CREATE TABLE IF NOT EXISTS speaking_sessions/);
+assert.match(speakingMigrationSql, /CREATE TABLE IF NOT EXISTS speaking_turns/);
+assert.match(speakingMigrationSql, /UNIQUE\s*\(request_id\)|request_id TEXT NOT NULL UNIQUE/);
+assert.match(speakingMigrationSql, /CREATE TABLE IF NOT EXISTS speaking_session_summaries/);
+assert.doesNotMatch(speakingMigrationSql, /audio|recording|blob/i, 'Speaking persistence must not store raw audio');
 
 const safeDefault = spawnSync(process.execPath, [migrationScript], { encoding: 'utf8' });
 assert.equal(safeDefault.status, 0);

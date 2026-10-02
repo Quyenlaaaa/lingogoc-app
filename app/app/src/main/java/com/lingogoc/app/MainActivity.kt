@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioAttributes
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.ConnectivityManager
@@ -13,6 +15,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -217,6 +221,18 @@ class MainActivity : ComponentActivity() {
         activityStarted = true
     }
 
+    override fun onResume() {
+        super.onResume()
+        activityStarted = true
+        if (::nativeBridge.isInitialized) nativeBridge.onForeground()
+    }
+
+    override fun onPause() {
+        activityStarted = false
+        if (::nativeBridge.isInitialized) nativeBridge.stopForLifecycle()
+        super.onPause()
+    }
+
     override fun onStop() {
         activityStarted = false
         if (::nativeBridge.isInitialized) nativeBridge.stopForLifecycle()
@@ -279,7 +295,8 @@ class MainActivity : ComponentActivity() {
         private var speechRecognizer: SpeechRecognizer? = null
         private var activeRecognitionId: String? = null
         private var activeSpeechId: String? = null
-        private val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+        private val mainHandler = Handler(Looper.getMainLooper())
+        private val speechFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
@@ -296,11 +313,29 @@ class MainActivity : ComponentActivity() {
                 }
             }
             .build()
+        private val recognitionFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build(),
+            )
+            .setOnAudioFocusChangeListener { change ->
+                if (change == AudioManager.AUDIOFOCUS_LOSS || change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                    runOnUiThread { interruptRecognition("audio-interrupted") }
+                }
+            }
+            .build()
+        private val audioDeviceCallback = object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>) = notifyAudioRoute()
+            override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) = notifyAudioRoute()
+        }
 
         @Volatile
         private var speechReady = false
 
         init {
+            audioManager.registerAudioDeviceCallback(audioDeviceCallback, mainHandler)
             textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String) = notifySpeech(utteranceId, "start")
                 override fun onDone(utteranceId: String) = finishSpeech(utteranceId, "done")
@@ -318,12 +353,13 @@ class MainActivity : ComponentActivity() {
         fun speak(text: String, language: String, rate: Double, pitch: Double, requestId: String): Boolean {
             if (!speechReady || text.isBlank()) return false
             runOnUiThread {
+                interruptRecognition("audio-interrupted")
                 val languageResult = textToSpeech.setLanguage(Locale.forLanguageTag(language.replace('_', '-')))
                 if (languageResult == TextToSpeech.LANG_MISSING_DATA || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
                     notifySpeech(requestId, "error")
                     return@runOnUiThread
                 }
-                if (audioManager.requestAudioFocus(audioFocusRequest) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                if (audioManager.requestAudioFocus(speechFocusRequest) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                     notifySpeech(requestId, "error")
                     return@runOnUiThread
                 }
@@ -352,6 +388,7 @@ class MainActivity : ComponentActivity() {
                 if (activeRecognitionId != requestId) return@runOnUiThread
                 speechRecognizer?.cancel()
                 activeRecognitionId = null
+                audioManager.abandonAudioFocusRequest(recognitionFocusRequest)
                 notifyRecognition(requestId, "end")
             }
         }
@@ -363,6 +400,9 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface
         fun getNetworkState(): String = currentNetworkState()
+
+        @JavascriptInterface
+        fun getAudioRoute(): String = currentAudioRoute()
 
         private fun notifySpeech(requestId: String, status: String) {
             val safeId = JSONObject.quote(requestId)
@@ -386,6 +426,12 @@ class MainActivity : ComponentActivity() {
                 notifyRecognition(requestId, "end")
                 return
             }
+            interruptSpeech()
+            if (audioManager.requestAudioFocus(recognitionFocusRequest) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                notifyRecognition(requestId, "error", "", "audio-focus-denied")
+                notifyRecognition(requestId, "end")
+                return
+            }
             if (speechRecognizer == null) {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this@MainActivity).also {
                     it.setRecognitionListener(this)
@@ -398,7 +444,14 @@ class MainActivity : ComponentActivity() {
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             }
-            speechRecognizer?.startListening(intent)
+            try {
+                speechRecognizer?.startListening(intent)
+            } catch (_: RuntimeException) {
+                activeRecognitionId = null
+                audioManager.abandonAudioFocusRequest(recognitionFocusRequest)
+                notifyRecognition(requestId, "error", "", "recognition-start-error")
+                notifyRecognition(requestId, "end")
+            }
         }
 
         fun notifyRecognition(
@@ -431,6 +484,7 @@ class MainActivity : ComponentActivity() {
         override fun onError(error: Int) {
             val requestId = activeRecognitionId ?: return
             activeRecognitionId = null
+            audioManager.abandonAudioFocusRequest(recognitionFocusRequest)
             val code = when (error) {
                 SpeechRecognizer.ERROR_AUDIO -> "audio-capture"
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "not-allowed"
@@ -446,6 +500,7 @@ class MainActivity : ComponentActivity() {
         override fun onResults(results: Bundle?) {
             val requestId = activeRecognitionId ?: return
             activeRecognitionId = null
+            audioManager.abandonAudioFocusRequest(recognitionFocusRequest)
             notifyRecognition(requestId, "final", recognitionText(results))
             notifyRecognition(requestId, "end")
         }
@@ -460,7 +515,7 @@ class MainActivity : ComponentActivity() {
         private fun finishSpeech(requestId: String, status: String) {
             if (activeSpeechId == requestId) {
                 activeSpeechId = null
-                audioManager.abandonAudioFocusRequest(audioFocusRequest)
+                audioManager.abandonAudioFocusRequest(speechFocusRequest)
             }
             notifySpeech(requestId, status)
         }
@@ -469,23 +524,71 @@ class MainActivity : ComponentActivity() {
             val requestId = activeSpeechId
             activeSpeechId = null
             textToSpeech.stop()
-            audioManager.abandonAudioFocusRequest(audioFocusRequest)
+            audioManager.abandonAudioFocusRequest(speechFocusRequest)
             if (notifyWeb && requestId != null) notifySpeech(requestId, "cancelled")
         }
 
-        fun stopForLifecycle() {
-            interruptSpeech()
-            val requestId = activeRecognitionId
+        private fun interruptRecognition(error: String) {
+            val requestId = activeRecognitionId ?: return
             activeRecognitionId = null
             speechRecognizer?.cancel()
-            if (requestId != null) {
-                notifyRecognition(requestId, "error", "", "aborted")
-                notifyRecognition(requestId, "end")
+            audioManager.abandonAudioFocusRequest(recognitionFocusRequest)
+            notifyRecognition(requestId, "error", "", error)
+            notifyRecognition(requestId, "end")
+        }
+
+        private fun currentAudioRoute(): String {
+            val outputs = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            val type = outputs.firstOrNull { device ->
+                device.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+                    device.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO
+            }?.type ?: outputs.firstOrNull { device ->
+                device.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                    device.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                    device.type == AudioDeviceInfo.TYPE_USB_HEADSET
+            }?.type
+            return when (type) {
+                AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> "bluetooth"
+                AudioDeviceInfo.TYPE_WIRED_HEADPHONES, AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                AudioDeviceInfo.TYPE_USB_HEADSET -> "headset"
+                else -> "device"
             }
+        }
+
+        private fun notifyAudioRoute() {
+            val route = JSONObject.quote(currentAudioRoute())
+            webView.post {
+                webView.evaluateJavascript(
+                    "if(window.__lingogocNativeAudioRouteEvent){window.__lingogocNativeAudioRouteEvent($route);}",
+                    null,
+                )
+            }
+        }
+
+        private fun notifyLifecycle(state: String) {
+            val safeState = JSONObject.quote(state)
+            webView.post {
+                webView.evaluateJavascript(
+                    "if(window.__lingogocNativeLifecycleEvent){window.__lingogocNativeLifecycleEvent($safeState);}",
+                    null,
+                )
+            }
+        }
+
+        fun onForeground() {
+            notifyLifecycle("foreground")
+            notifyAudioRoute()
+        }
+
+        fun stopForLifecycle() {
+            notifyLifecycle("background")
+            interruptSpeech()
+            interruptRecognition("aborted")
         }
 
         fun destroy() {
             stopForLifecycle()
+            audioManager.unregisterAudioDeviceCallback(audioDeviceCallback)
             speechRecognizer?.destroy()
             textToSpeech.shutdown()
         }

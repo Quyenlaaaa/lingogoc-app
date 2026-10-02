@@ -19,6 +19,8 @@ const PROVIDER_CIRCUIT_BREAKER_MS = 2 * 60 * 1000;
 const DICTIONARY_TIMEOUT_MS = 3_500;
 const DICTIONARY_CACHE_SECONDS = 30 * 24 * 60 * 60;
 const SPEAKING_CACHE_SECONDS = 24 * 60 * 60;
+const SPEAKING_REALTIME_PROTOCOL_VERSION = 1;
+const SPEAKING_REALTIME_HEARTBEAT_MS = 10_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const MAX_RATE_LIMIT_BUCKETS = 5_000;
 let freeModelCooldownUntil = 0;
@@ -89,6 +91,29 @@ function recordProviderResult(
       Number(usage?.completion_tokens) || 0,
       Number(usage?.total_tokens) || 0,
       Math.max(0, Number(estimatedCostUsd) || 0),
+    ],
+  });
+}
+
+function recordSpeakingMetric(env, event, details = {}) {
+  env.METRICS?.writeDataPoint?.({
+    indexes: ['SPEAKING'],
+    blobs: [
+      cleanText(event, 80),
+      cleanText(details.outcome || 'ok', 40),
+      normalizeSpeakingLevel(details.level),
+      cleanText(details.provider, 80),
+      cleanText(details.model, 120),
+    ],
+    doubles: [
+      Math.max(0, Number(details.durationMs) || 0),
+      Math.max(0, Number(details.firstTextMs) || 0),
+      Math.max(0, Number(details.promptTokens) || 0),
+      Math.max(0, Number(details.completionTokens) || 0),
+      Math.max(0, Number(details.totalTokens) || 0),
+      Math.max(0, Number(details.reconnectAttempt) || 0),
+      details.cacheHit ? 1 : 0,
+      details.durable ? 1 : 0,
     ],
   });
 }
@@ -167,7 +192,7 @@ function rateLimitPolicy(request, env, path) {
   let category = 'read';
   let defaultLimit = 120;
   let configuredLimit = env.RATE_LIMIT_READ_PER_MINUTE;
-  if (request.method === 'POST' && ['/api/vocabulary/enrich', '/api/vocabulary/meanings', '/api/speaking/chat'].includes(path)) {
+  if (request.method === 'POST' && ['/api/vocabulary/enrich', '/api/vocabulary/meanings', '/api/speaking/chat', '/api/speaking/realtime/turn'].includes(path)) {
     category = 'ai';
     defaultLimit = 30;
     configuredLimit = env.RATE_LIMIT_AI_PER_MINUTE;
@@ -500,6 +525,148 @@ async function callProviderModel({
     if (attempt < attemptLimit - 1) await new Promise((resolve) => setTimeout(resolve, 500));
   }
   throw lastError;
+}
+
+async function callProviderStreamingModel({
+  apiKey,
+  baseUrl,
+  model,
+  messages,
+  temperature,
+  extraHeaders = {},
+  extraBody = {},
+  provider,
+  onContent,
+}) {
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+      ...extraHeaders,
+    },
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+    body: JSON.stringify({ model, temperature, messages, stream: true, stream_options: { include_usage: true }, ...extraBody }),
+  });
+  if (!response.ok) {
+    const detail = cleanText(await response.text(), 500);
+    throw Object.assign(new Error(`AI_PROVIDER_${response.status}${detail ? `: ${detail}` : ''}`), {
+      provider,
+      status: response.status,
+      quota: isQuotaError(response.status, detail),
+    });
+  }
+  if (!String(response.headers.get('Content-Type') || '').includes('text/event-stream')) {
+    const payload = await response.json();
+    const content = payload?.choices?.[0]?.message?.content || '';
+    if (!content) throw Object.assign(new Error(`${provider}_INVALID_RESPONSE`), { provider, quota: false });
+    onContent?.(content);
+    return { content, model: payload?.model || model, provider, usage: payload?.usage || null };
+  }
+  if (!response.body) throw Object.assign(new Error(`${provider}_STREAM_UNAVAILABLE`), { provider, quota: false });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let content = '';
+  let usage = null;
+  let responseModel = model;
+  const consumeLine = (line) => {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('data:')) return;
+    const data = trimmed.slice(5).trim();
+    if (!data || data === '[DONE]') return;
+    const payload = JSON.parse(data);
+    responseModel = payload?.model || responseModel;
+    usage = payload?.usage || usage;
+    const delta = payload?.choices?.[0]?.delta?.content;
+    if (typeof delta === 'string' && delta) {
+      content += delta;
+      onContent?.(content);
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || '';
+    lines.forEach(consumeLine);
+    if (done) break;
+  }
+  consumeLine(buffer);
+  if (!content) throw Object.assign(new Error(`${provider}_INVALID_STREAM`), { provider, quota: false });
+  return { content, model: responseModel, provider, usage };
+}
+
+function partialSpeakingReply(content) {
+  const match = String(content || '').match(/"replyEn"\s*:\s*"((?:\\.|[^"\\])*)/);
+  if (!match?.[1]) return '';
+  const escaped = match[1].replace(/\\$/g, '');
+  try {
+    return cleanText(JSON.parse(`"${escaped}"`), 1000);
+  } catch {
+    return cleanText(escaped.replace(/\\n/g, ' ').replace(/\\"/g, '"'), 1000);
+  }
+}
+
+async function callSpeakingStreamingModel(env, messages, temperature, onPartialReply) {
+  const now = Date.now();
+  const candidates = [];
+  const add = (candidate) => {
+    if (candidate.apiKey && candidate.model && getProviderHealth(candidate.provider).circuitOpenUntil <= now) candidates.push(candidate);
+  };
+  add({
+    apiKey: cleanText(env.GROQ_API_KEY, 500),
+    baseUrl: String(env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/+$/, ''),
+    model: cleanText(env.GROQ_FREE_MODEL || 'qwen/qwen3.8-27b', 160),
+    provider: 'GROQ_FREE',
+    extraBody: { response_format: { type: 'json_object' } },
+  });
+  add({
+    apiKey: cleanText(env.XTROUTER_API_KEY || env.AI_API_KEY, 500),
+    baseUrl: String(env.AI_BASE_URL || 'https://api.xkiro.com/v1').replace(/\/+$/, ''),
+    model: getFreeModel(env),
+    provider: 'XKIRO_FREE',
+  });
+  add({
+    apiKey: cleanText(env.OPENROUTER_API_KEY, 500),
+    baseUrl: String(env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/+$/, ''),
+    model: cleanText(env.OPENROUTER_FREE_MODEL || 'openrouter/free', 160),
+    provider: 'OPENROUTER_FREE',
+    extraBody: { response_format: { type: 'json_object' } },
+    extraHeaders: {
+      ...(env.OPENROUTER_SITE_URL ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL } : {}),
+      ...(env.OPENROUTER_APP_NAME ? { 'X-Title': env.OPENROUTER_APP_NAME } : {}),
+    },
+  });
+  candidates.sort((left, right) => providerScore(left) - providerScore(right));
+
+  for (const candidate of candidates) {
+    const startedAt = Date.now();
+    let emitted = false;
+    try {
+      const completion = await callProviderStreamingModel({
+        ...candidate,
+        messages,
+        temperature,
+        onContent: (content) => {
+          const reply = partialSpeakingReply(content);
+          if (reply) {
+            emitted = true;
+            onPartialReply?.(reply);
+          }
+        },
+      });
+      recordProviderResult(candidate.provider, startedAt, true, completion.usage, env.METRICS, completion.model);
+      return completion;
+    } catch (error) {
+      recordProviderResult(candidate.provider, startedAt, false, null, env.METRICS, candidate.model);
+      if (emitted) throw error;
+    }
+  }
+  return callChatModel(env, messages, temperature);
 }
 
 async function claimWorkersAiDailyBudget(env) {
@@ -2267,7 +2434,28 @@ function normalizeSpeakingScore(value) {
   return Number.isFinite(score) ? Math.max(0, Math.min(100, Math.round(score))) : null;
 }
 
-function normalizeSpeakingReply(data, model) {
+const SPEAKING_LEVEL_POLICIES = Object.freeze({
+  A1: 'Use very common words and one simple sentence of 5-10 words. Speak slowly in a supportive tone. Use present simple where possible. Ask one direct, familiar question. Give Vietnamese hints and a Vietnamese translation. Correct at most one essential error.',
+  A2: 'Use common everyday vocabulary and 1-2 short sentences totaling 8-18 words. Ask one clear follow-up question. Give a Vietnamese translation and bilingual hints. Correct at most two useful errors.',
+  B1: 'Use natural intermediate English in 1-3 sentences totaling 15-35 words. Encourage reasons, details, and personal experience. Use Vietnamese only for the translation and difficult hints. Prioritize the two corrections that most improve clarity.',
+  B2: 'Use fluent upper-intermediate English in 2-3 sentences totaling 25-50 words. Introduce useful collocations, invite comparison or justification, and offer a natural reformulation. Keep Vietnamese translation concise and use hints only when valuable.',
+  C1: 'Use natural advanced English in 2-4 sentences totaling 35-70 words. Explore nuance, register, implications, and abstract or professional ideas. Ask a thought-provoking follow-up question. Keep Vietnamese support minimal and focus corrections on precision and style.',
+});
+
+const SPEAKING_SCORING_RUBRICS = Object.freeze({
+  A1: 'Score against A1 goals: intelligible basic words, simple memorized grammar, and completing one familiar micro-task.',
+  A2: 'Score against A2 goals: connected everyday phrases, basic tense control, and completing a routine practical task.',
+  B1: 'Score against B1 goals: connected explanation, adequate range, and completing the task with relevant reasons or details.',
+  B2: 'Score against B2 goals: clear detailed interaction, varied structures and collocations, and fully addressing the scenario goal.',
+  C1: 'Score against C1 goals: precise flexible language, coherent nuance and register, and completing the task persuasively and naturally.',
+});
+
+function normalizeSpeakingLevel(value) {
+  const level = cleanText(value, 2).toUpperCase();
+  return SPEAKING_LEVEL_POLICIES[level] ? level : 'A2';
+}
+
+function normalizeSpeakingReply(data, model, level) {
   const replyEn = cleanText(data?.replyEn || data?.reply_en, 1000);
   if (!replyEn) throw new Error('INVALID_AI_JSON');
   return {
@@ -2283,12 +2471,16 @@ function normalizeSpeakingReply(data, model) {
       grammar: normalizeSpeakingScore(data?.scores?.grammar),
       vocabulary: normalizeSpeakingScore(data?.scores?.vocabulary),
       fluency: normalizeSpeakingScore(data?.scores?.fluency),
+      taskCompletion: normalizeSpeakingScore(data?.scores?.taskCompletion ?? data?.scores?.task_completion),
     },
+    level,
+    scoringVersion: 1,
+    scoreBasis: 'text',
     generatedByModel: model,
   };
 }
 
-async function speakingChat(request, env, origin) {
+async function speakingChat(request, env, origin, onPartialReply = null) {
   const body = await readJson(request);
   const suppliedRequestId = cleanText(request.headers.get('X-Idempotency-Key') || body?.requestId, 160);
   const requestId = suppliedRequestId && /^[a-zA-Z0-9._:-]+$/.test(suppliedRequestId)
@@ -2298,6 +2490,11 @@ async function speakingChat(request, env, origin) {
   const cacheKey = new Request(`https://lingogoc-cache.invalid/speaking/${encodeURIComponent(requestId)}`);
   const cached = await cache.match(cacheKey);
   if (cached) {
+    recordSpeakingMetric(env, 'turn_cache_replay', {
+      level: body?.level,
+      outcome: 'success',
+      cacheHit: true,
+    });
     return json(await cached.json(), 200, origin, {
       'Cache-Control': `private, max-age=${SPEAKING_CACHE_SECONDS}`,
       'X-LingoGoc-Cache': 'HIT',
@@ -2309,17 +2506,48 @@ async function speakingChat(request, env, origin) {
       : body?.scenario?.titleEn || body?.scenario?.title || body?.scenario?.id,
     120,
   ) || 'Daily conversation';
+  const level = normalizeSpeakingLevel(body?.level);
   const history = Array.isArray(body?.messages) ? body.messages.slice(-12) : [];
   const messages = history.map((item) => ({
     role: item?.role === 'assistant' ? 'assistant' : 'user',
     content: cleanText(item?.content, 1000),
   })).filter((item) => item.content);
-  const system = `You are a friendly English speaking coach. Scenario: ${scenario}. Reply at CEFR A2-B1 level. Return only JSON with keys replyEn, replyVi, correction, encouragement, hints (up to 3 objects with en and vi), and scores with grammar, vocabulary, and fluency integers from 0 to 100. Do not include a pronunciation score. Keep the conversation moving with one short question.`;
+  const system = `You are a friendly English speaking coach. Scenario: ${scenario}. The learner selected CEFR ${level}. ${SPEAKING_LEVEL_POLICIES[level]} ${SPEAKING_SCORING_RUBRICS[level]} Return only JSON with keys replyEn, replyVi, correction, encouragement, hints (up to 3 objects with en and vi), and scores with grammar, vocabulary, fluency, and taskCompletion integers from 0 to 100. Score only the learner's latest message against the selected CEFR rubric. Do not include a pronunciation score. Keep the conversation moving and never claim to have evaluated pronunciation from text.`;
   let work = activeSpeakingRequests.get(requestId);
   if (!work) {
     work = (async () => {
-      const completion = await callChatModel(env, [{ role: 'system', content: system }, ...messages], 0.6);
-      return normalizeSpeakingReply(extractJson(completion.content), completion.model);
+      const promptMessages = [{ role: 'system', content: system }, ...messages];
+      const startedAt = Date.now();
+      let firstTextAt = 0;
+      try {
+        const completion = onPartialReply
+          ? await callSpeakingStreamingModel(env, promptMessages, 0.6, (text) => {
+            if (!firstTextAt) firstTextAt = Date.now();
+            onPartialReply(text);
+          })
+          : await callChatModel(env, promptMessages, 0.6);
+        recordSpeakingMetric(env, 'provider_completion', {
+          level,
+          outcome: 'success',
+          provider: completion.provider,
+          model: completion.model,
+          durationMs: Date.now() - startedAt,
+          firstTextMs: firstTextAt ? firstTextAt - startedAt : Date.now() - startedAt,
+          promptTokens: completion.usage?.prompt_tokens,
+          completionTokens: completion.usage?.completion_tokens,
+          totalTokens: completion.usage?.total_tokens,
+        });
+        return normalizeSpeakingReply(extractJson(completion.content), completion.model, level);
+      } catch (error) {
+        recordSpeakingMetric(env, 'provider_completion', {
+          level,
+          outcome: 'failure',
+          provider: error?.provider,
+          durationMs: Date.now() - startedAt,
+          firstTextMs: firstTextAt ? firstTextAt - startedAt : 0,
+        });
+        throw error;
+      }
     })();
     activeSpeakingRequests.set(requestId, work);
   }
@@ -2336,6 +2564,372 @@ async function speakingChat(request, env, origin) {
   } finally {
     if (activeSpeakingRequests.get(requestId) === work) activeSpeakingRequests.delete(requestId);
   }
+}
+
+function validSpeakingSessionId(value) {
+  const sessionId = cleanText(value, 120);
+  return /^[a-zA-Z0-9][a-zA-Z0-9._:-]{7,119}$/.test(sessionId) ? sessionId : '';
+}
+
+function speakingRealtimeEnabled(env) {
+  return String(env.SPEAKING_REALTIME_ENABLED ?? 'true').toLowerCase() !== 'false';
+}
+
+function validSpeakingResumeToken(value) {
+  const token = cleanText(value, 160);
+  return /^[a-zA-Z0-9._:-]{32,160}$/.test(token) ? token : '';
+}
+
+async function speakingResumeTokenHash(token) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function speakingScenario(body) {
+  const value = body?.scenario;
+  return {
+    id: cleanText(value?.id || (typeof value === 'string' ? value : ''), 120) || 'default',
+    title: cleanText(value?.titleEn || value?.title || (typeof value === 'string' ? value : ''), 240),
+  };
+}
+
+async function ensureDurableSpeakingSession(env, body, sessionId, level, resumeToken) {
+  if (!env.VOCAB_DB || !resumeToken) return { durable: false, syncPending: Boolean(env.VOCAB_DB) };
+  const tokenHash = await speakingResumeTokenHash(resumeToken);
+  const scenario = speakingScenario(body);
+  const now = new Date().toISOString();
+  try {
+    await env.VOCAB_DB.prepare(`
+      INSERT OR IGNORE INTO speaking_sessions (
+        session_id, resume_token_hash, scenario_id, scenario_title, cefr_level,
+        status, last_turn_sequence, created_at, updated_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, 'active', 0, ?6, ?6)
+    `).bind(sessionId, tokenHash, scenario.id, scenario.title, level, now).run();
+    const row = await env.VOCAB_DB.prepare(`
+      SELECT resume_token_hash, last_turn_sequence
+      FROM speaking_sessions
+      WHERE session_id = ?1
+      LIMIT 1
+    `).bind(sessionId).first();
+    if (!row || row.resume_token_hash !== tokenHash) {
+      return { durable: false, forbidden: true, syncPending: false };
+    }
+    return { durable: true, syncPending: false, lastTurnSequence: Number(row.last_turn_sequence) || 0 };
+  } catch (error) {
+    console.error(JSON.stringify({
+      event: 'speaking_session_persistence_failed',
+      sessionId,
+      code: cleanText(String(error?.message || 'D1_SPEAKING_SESSION_FAILED').split(':')[0], 120),
+    }));
+    return { durable: false, syncPending: true };
+  }
+}
+
+async function persistSpeakingTurn(env, body, sessionId, turnSequence, requestId, level, payload) {
+  if (!env.VOCAB_DB) return false;
+  const resumeToken = validSpeakingResumeToken(body?.resumeToken);
+  if (!resumeToken) return false;
+  const session = await ensureDurableSpeakingSession(env, body, sessionId, level, resumeToken);
+  if (!session.durable) return false;
+  const userText = [...(Array.isArray(body?.messages) ? body.messages : [])]
+    .reverse()
+    .find((message) => message?.role !== 'assistant')?.content;
+  const now = new Date().toISOString();
+  try {
+    await env.VOCAB_DB.prepare(`
+      INSERT OR IGNORE INTO speaking_turns (
+        session_id, turn_sequence, request_id, user_text, reply_en, reply_vi,
+        correction, encouragement, hints_json, scores_json, provider, model, created_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+    `).bind(
+      sessionId, turnSequence, requestId, cleanText(userText, 1000),
+      cleanText(payload?.replyEn, 1000), cleanText(payload?.replyVi, 1000),
+      cleanText(payload?.correction, 1000), cleanText(payload?.encouragement, 1000),
+      JSON.stringify(Array.isArray(payload?.hints) ? payload.hints.slice(0, 3) : []),
+      JSON.stringify(payload?.scores && typeof payload.scores === 'object' ? payload.scores : {}),
+      '', cleanText(payload?.generatedByModel, 160), now,
+    ).run();
+    await env.VOCAB_DB.prepare(`
+      UPDATE speaking_sessions
+      SET last_turn_sequence = MAX(last_turn_sequence, ?2), cefr_level = ?3, updated_at = ?4
+      WHERE session_id = ?1
+    `).bind(sessionId, turnSequence, level, now).run();
+    await env.VOCAB_DB.prepare(`
+      INSERT INTO speaking_session_summaries (
+        session_id, through_turn_sequence, summary_json, updated_at
+      ) VALUES (?1, ?2, ?3, ?4)
+      ON CONFLICT(session_id) DO UPDATE SET
+        through_turn_sequence = MAX(through_turn_sequence, excluded.through_turn_sequence),
+        summary_json = CASE
+          WHEN excluded.through_turn_sequence >= through_turn_sequence THEN excluded.summary_json
+          ELSE summary_json
+        END,
+        updated_at = excluded.updated_at
+    `).bind(sessionId, turnSequence, JSON.stringify({
+      latestReplyEn: cleanText(payload?.replyEn, 1000),
+      latestCorrection: cleanText(payload?.correction, 1000),
+      latestScores: payload?.scores && typeof payload.scores === 'object' ? payload.scores : {},
+    }), now).run();
+    return true;
+  } catch (error) {
+    console.error(JSON.stringify({
+      event: 'speaking_turn_persistence_failed', sessionId, turnSequence,
+      code: cleanText(String(error?.message || 'D1_SPEAKING_TURN_FAILED').split(':')[0], 120),
+    }));
+    return false;
+  }
+}
+
+async function startSpeakingRealtimeSession(request, env, origin, providedBody = null) {
+  const body = providedBody || await readJson(request);
+  const sessionId = validSpeakingSessionId(body?.sessionId);
+  if (!sessionId) return json({ error: 'Phiên luyện nói không hợp lệ.', code: 'INVALID_SPEAKING_SESSION' }, 400, origin);
+  const level = normalizeSpeakingLevel(body?.level);
+  return json({
+    protocolVersion: SPEAKING_REALTIME_PROTOCOL_VERSION,
+    sessionId,
+    level,
+    transport: 'ndjson',
+    turnEndpoint: '/api/speaking/realtime/turn',
+    fallbackEndpoint: '/api/speaking/chat',
+    heartbeatMs: SPEAKING_REALTIME_HEARTBEAT_MS,
+    resumeFromSequence: Math.max(0, Number(body?.lastAcknowledgedSequence) || 0),
+  }, 200, origin, { 'Cache-Control': 'no-store' });
+}
+
+async function startSpeakingDurableRealtimeSession(request, env, origin) {
+  const startedAt = Date.now();
+  if (!speakingRealtimeEnabled(env)) {
+    recordSpeakingMetric(env, 'session_handshake', { outcome: 'disabled', durationMs: Date.now() - startedAt });
+    return json({ error: 'Realtime speaking is disabled.', code: 'SPEAKING_REALTIME_DISABLED' }, 501, origin);
+  }
+  const body = await readJson(request);
+  if (!env.VOCAB_DB && !body?.resumeToken) return startSpeakingRealtimeSession(request, env, origin, body);
+  const sessionId = validSpeakingSessionId(body?.sessionId);
+  if (!sessionId) return json({ error: 'Invalid speaking session.', code: 'INVALID_SPEAKING_SESSION' }, 400, origin);
+  const level = normalizeSpeakingLevel(body?.level);
+  const persistence = await ensureDurableSpeakingSession(
+    env, body, sessionId, level, validSpeakingResumeToken(body?.resumeToken),
+  );
+  if (persistence.forbidden) {
+    recordSpeakingMetric(env, 'session_handshake', {
+      level, outcome: 'forbidden', durationMs: Date.now() - startedAt,
+    });
+    return json({ error: 'This speaking session cannot be resumed.', code: 'SPEAKING_SESSION_FORBIDDEN' }, 403, origin);
+  }
+  recordSpeakingMetric(env, 'session_handshake', {
+    level,
+    outcome: persistence.syncPending ? 'sync_pending' : 'success',
+    durationMs: Date.now() - startedAt,
+    durable: persistence.durable,
+    reconnectAttempt: body?.reconnectAttempt,
+  });
+  return json({
+    protocolVersion: SPEAKING_REALTIME_PROTOCOL_VERSION,
+    sessionId,
+    level,
+    transport: 'ndjson',
+    turnEndpoint: '/api/speaking/realtime/turn',
+    fallbackEndpoint: '/api/speaking/chat',
+    resumeEndpoint: '/api/speaking/realtime/resume',
+    heartbeatMs: SPEAKING_REALTIME_HEARTBEAT_MS,
+    resumeFromSequence: Math.max(
+      persistence.lastTurnSequence || 0,
+      Number(body?.lastAcknowledgedSequence) || 0,
+    ),
+    durable: persistence.durable,
+    syncPending: persistence.syncPending,
+  }, 200, origin, { 'Cache-Control': 'no-store' });
+}
+
+async function resumeSpeakingRealtimeSession(request, env, origin) {
+  const startedAt = Date.now();
+  const body = await readJson(request);
+  const sessionId = validSpeakingSessionId(body?.sessionId);
+  const resumeToken = validSpeakingResumeToken(body?.resumeToken);
+  if (!sessionId || !resumeToken) {
+    return json({ error: 'Invalid speaking resume credentials.', code: 'INVALID_SPEAKING_SESSION' }, 400, origin);
+  }
+  if (!env.VOCAB_DB) {
+    return json({ error: 'The speaking session is not stored durably.', code: 'SPEAKING_SESSION_NOT_FOUND' }, 404, origin);
+  }
+  try {
+    const session = await env.VOCAB_DB.prepare(`
+      SELECT session_id, resume_token_hash, scenario_id, scenario_title, cefr_level,
+             status, last_turn_sequence, created_at, updated_at
+      FROM speaking_sessions
+      WHERE session_id = ?1
+      LIMIT 1
+    `).bind(sessionId).first();
+    if (!session) return json({ error: 'Speaking session not found.', code: 'SPEAKING_SESSION_NOT_FOUND' }, 404, origin);
+    if (session.resume_token_hash !== await speakingResumeTokenHash(resumeToken)) {
+      return json({ error: 'This speaking session cannot be resumed.', code: 'SPEAKING_SESSION_FORBIDDEN' }, 403, origin);
+    }
+    const result = await env.VOCAB_DB.prepare(`
+      SELECT turn_sequence, request_id, user_text, reply_en, reply_vi, correction,
+             encouragement, hints_json, scores_json, model, created_at
+      FROM speaking_turns
+      WHERE session_id = ?1
+      ORDER BY turn_sequence ASC
+      LIMIT 60
+    `).bind(sessionId).all();
+    const turns = (result?.results || []).map((turn) => ({
+      turnSequence: Number(turn.turn_sequence),
+      requestId: turn.request_id,
+      userText: turn.user_text,
+      replyEn: turn.reply_en,
+      replyVi: turn.reply_vi,
+      correction: turn.correction,
+      encouragement: turn.encouragement,
+      hints: JSON.parse(turn.hints_json || '[]'),
+      scores: JSON.parse(turn.scores_json || '{}'),
+      model: turn.model,
+      createdAt: turn.created_at,
+    }));
+    recordSpeakingMetric(env, 'session_resume', {
+      level: session.cefr_level,
+      outcome: 'success',
+      durationMs: Date.now() - startedAt,
+      durable: true,
+      reconnectAttempt: body?.reconnectAttempt,
+    });
+    return json({
+      session: {
+        id: session.session_id,
+        scenarioId: session.scenario_id,
+        scenarioTitle: session.scenario_title,
+        level: session.cefr_level,
+        status: session.status,
+        lastTurnSequence: Number(session.last_turn_sequence) || 0,
+        createdAt: session.created_at,
+        updatedAt: session.updated_at,
+      },
+      turns,
+    }, 200, origin, { 'Cache-Control': 'no-store' });
+  } catch (error) {
+    recordSpeakingMetric(env, 'session_resume', {
+      outcome: 'failure', durationMs: Date.now() - startedAt,
+    });
+    console.error(JSON.stringify({
+      event: 'speaking_session_resume_failed', sessionId,
+      code: cleanText(String(error?.message || 'D1_SPEAKING_RESUME_FAILED').split(':')[0], 120),
+    }));
+    return json({ error: 'The speaking session cannot be resumed yet.', code: 'SPEAKING_SESSION_RESUME_FAILED' }, 503, origin);
+  }
+}
+
+async function streamSpeakingRealtimeTurn(request, env, origin, context) {
+  const startedAt = Date.now();
+  const body = await readJson(request);
+  const sessionId = validSpeakingSessionId(body?.sessionId);
+  const turnSequence = Number(body?.turnSequence);
+  const requestId = cleanText(request.headers.get('X-Idempotency-Key') || body?.requestId, 160);
+  const resumeToken = validSpeakingResumeToken(body?.resumeToken);
+  const expectedRequestId = sessionId && Number.isInteger(turnSequence) && turnSequence > 0
+    ? `speaking:${sessionId}:turn:${turnSequence}`
+    : '';
+  if (!sessionId || !expectedRequestId || requestId !== expectedRequestId || (env.VOCAB_DB && !resumeToken)) {
+    return json({ error: 'Lượt nói realtime không hợp lệ.', code: 'INVALID_SPEAKING_TURN' }, 400, origin);
+  }
+
+  const level = normalizeSpeakingLevel(body?.level);
+  const downstreamRequest = new Request('https://lingogoc-internal.invalid/api/speaking/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Idempotency-Key': requestId },
+    body: JSON.stringify({ ...body, level, requestId }),
+  });
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+  const encoder = new TextEncoder();
+  let eventSequence = 0;
+  let writeChain = Promise.resolve();
+  const emit = (type, payload = {}) => {
+    eventSequence += 1;
+    const event = {
+      protocolVersion: SPEAKING_REALTIME_PROTOCOL_VERSION,
+      eventSequence,
+      type,
+      sessionId,
+      turnSequence,
+      requestId,
+      createdAt: new Date().toISOString(),
+      ...payload,
+    };
+    writeChain = writeChain.then(() => writer.write(encoder.encode(`${JSON.stringify(event)}\n`)));
+    return writeChain;
+  };
+
+  const pump = (async () => {
+    let heartbeatId;
+    let firstTextAt = 0;
+    try {
+      await emit('ack', { level });
+      heartbeatId = setInterval(() => {
+        emit('heartbeat').catch(() => {});
+      }, SPEAKING_REALTIME_HEARTBEAT_MS);
+      let lastPartialReply = '';
+      const response = await speakingChat(downstreamRequest, env, origin, (text) => {
+        if (text === lastPartialReply) return;
+        lastPartialReply = text;
+        if (!firstTextAt) firstTextAt = Date.now();
+        emit('delta', { text }).catch(() => {});
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.code || payload?.error || 'SPEAKING_STREAM_FAILED');
+      context.waitUntil(persistSpeakingTurn(env, body, sessionId, turnSequence, requestId, level, payload).then((saved) => {
+        recordSpeakingMetric(env, 'durable_sync', {
+          level,
+          outcome: saved ? 'success' : 'pending',
+          durable: saved,
+        });
+      }));
+      await emit('result', {
+        level,
+        cache: response.headers.get('X-LingoGoc-Cache') || 'MISS',
+        data: payload,
+      });
+      await emit('done', { level });
+      await writeChain;
+      recordSpeakingMetric(env, 'turn_complete', {
+        level,
+        outcome: 'success',
+        durationMs: Date.now() - startedAt,
+        firstTextMs: firstTextAt ? firstTextAt - startedAt : 0,
+        reconnectAttempt: body?.reconnectAttempt,
+        cacheHit: response.headers.get('X-LingoGoc-Cache') === 'HIT',
+      });
+      await writer.close();
+    } catch (error) {
+      recordSpeakingMetric(env, 'turn_complete', {
+        level,
+        outcome: request.signal.aborted || String(error?.message || '').includes('cancel') ? 'cancelled' : 'failure',
+        durationMs: Date.now() - startedAt,
+        firstTextMs: firstTextAt ? firstTextAt - startedAt : 0,
+        reconnectAttempt: body?.reconnectAttempt,
+      });
+      const [message, status, code, retryable] = publicError(error);
+      try {
+        await emit('error', { error: message, status, code, retryable });
+        await writeChain;
+        await writer.close();
+      } catch {
+        await writer.abort(error).catch(() => {});
+      }
+    } finally {
+      if (heartbeatId) clearInterval(heartbeatId);
+    }
+  })();
+  context.waitUntil(pump);
+
+  return new Response(stream.readable, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-store, no-transform',
+      'X-Accel-Buffering': 'no',
+      ...corsHeaders(origin),
+    },
+  });
 }
 
 async function getOperationsStatus(env, origin) {
@@ -2387,6 +2981,13 @@ async function getOperationsStatus(env, origin) {
           : null,
       },
       providers: providerState,
+      speaking: {
+        realtimeEnabled: speakingRealtimeEnabled(env),
+        protocolVersion: SPEAKING_REALTIME_PROTOCOL_VERSION,
+        durableSessionsConfigured: Boolean(env.VOCAB_DB),
+        analyticsConfigured: Boolean(env.METRICS?.writeDataPoint),
+        rawAudioRetained: false,
+      },
       backfill: backfill ? {
         status: backfill.status || 'unknown',
         cursor: Number(backfill.cursor) || 0,
@@ -2564,6 +3165,15 @@ export default {
       }
       if (url.pathname === '/api/speaking/chat' && request.method === 'POST') {
         return respond(await speakingChat(request, env, origin));
+      }
+      if (url.pathname === '/api/speaking/realtime/session' && request.method === 'POST') {
+        return respond(await startSpeakingDurableRealtimeSession(request, env, origin));
+      }
+      if (url.pathname === '/api/speaking/realtime/resume' && request.method === 'POST') {
+        return respond(await resumeSpeakingRealtimeSession(request, env, origin));
+      }
+      if (url.pathname === '/api/speaking/realtime/turn' && request.method === 'POST') {
+        return respond(await streamSpeakingRealtimeTurn(request, env, origin, context));
       }
       if (url.pathname === '/api/speaking/speech' && request.method === 'POST') {
         return respond(json({ error: 'Cloud TTS chưa được cấu hình; frontend sẽ dùng giọng đọc trình duyệt.' }, 501, origin));

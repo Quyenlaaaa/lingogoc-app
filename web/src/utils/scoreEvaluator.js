@@ -112,9 +112,18 @@ export function evaluatePronunciation(targetText, spokenText) {
     status = 'poor';
   }
 
+  const alignmentFeedback = {
+    excellent: 'Hệ thống nhận diện gần như đầy đủ câu mẫu. Kết quả này đo độ khớp bản chép lời, không thay thế đánh giá âm thanh chuyên sâu.',
+    good: 'Hệ thống nhận diện phần lớn câu mẫu. Hãy nghe lại và thử thêm để cải thiện những từ còn thiếu.',
+    average: 'Bản chép lời khớp một phần câu mẫu. Hãy nói chậm, rõ và thử lại từng cụm ngắn.',
+    poor: 'Hệ thống nhận diện được rất ít nội dung của câu mẫu. Hãy kiểm tra micro, nghe mẫu rồi thử lại.',
+  }[status] || feedback;
+
   return {
     score: averageScore,
-    feedback,
+    evidence: 'speech-recognition-transcript-alignment',
+    evidenceLabel: 'Độ khớp bản chép lời từ micro',
+    feedback: alignmentFeedback,
     status,
     words: wordEvaluations,
     spokenText
