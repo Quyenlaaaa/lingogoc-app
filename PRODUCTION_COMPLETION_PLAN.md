@@ -504,9 +504,9 @@ Status: `IN_PROGRESS`
 
 Branch: `main`
 
-Last deployed production commit: `63b09ef1de3deb073a4def608647ac1564186cc7`
+Last deployed production commit: `b02fabf844ca3507bf9c7010912b4599681e478e`
 
-Last deployed production Worker version: `000c833e-0e0b-44f0-90a5-bf819d06bd7b`
+Last deployed production Worker version: `7a115d56-e768-43e4-8446-f7fd7732e334`
 
 ### Next work
 
@@ -522,6 +522,32 @@ Last deployed production Worker version: `000c833e-0e0b-44f0-90a5-bf819d06bd7b`
    surface before that evidence.
 
 ## Handoff log
+
+### 2026-10-02 — Realtime Speaking production release deployed
+
+- Re-ran the complete required web/Worker gate, the 390 x 844 Speaking browser suite,
+  Android `assembleDebug`, and `git diff --check`; all passed. Existing bundle-size,
+  CRLF, and Android SDK XML compatibility notices remain non-blocking.
+- Pushed feature commit `cfb76d96f8d3bce57ecbaa89fc791e9845535cdc` and deployment-
+  documentation commit `b02fabf844ca3507bf9c7010912b4599681e478e` to `main`.
+- Applied remote D1 migration `0003_speaking_durable_sessions.sql` successfully.
+  A read-only production query confirmed `speaking_sessions`, `speaking_turns`, and
+  `speaking_session_summaries`; it wrote zero rows.
+- Direct Worker deployment succeeded at
+  `https://lingogoc-api.lingogoc-api.workers.dev`, version
+  `7a115d56-e768-43e4-8446-f7fd7732e334`. Production operations reports healthy,
+  realtime protocol v1 enabled, D1 durable sessions and Analytics Engine configured,
+  and raw-audio retention disabled.
+- Production smoke passed health, the 3,000-word catalog, cached D1 enrichment, and
+  speech audio using cached word `ticket`. GitHub Pages also returned HTTP 200 with
+  the new deployment timestamp.
+- GitHub Pages, Worker validation, and Android workflows succeeded at runs
+  `36963349913`, `36963349935`, and `36963349899`, respectively.
+- Remaining acceptance evidence is physical Chrome/Coc Coc/APK testing for TTS/STT,
+  Bluetooth/headset routes, background/foreground recovery, reduced motion, WebGL
+  fallback, and device frame rate. Exact next task: complete the RT-06/RT-10 physical-
+  device matrix and observe RT-08 production latency/reliability before considering
+  RT-09 WebSocket/Durable Objects.
 
 ### 2026-10-02 — RT-10 optional 3D tutor foundation completed locally
 
